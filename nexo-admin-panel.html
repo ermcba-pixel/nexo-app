@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO Admin - Panel de Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --light-bg: #D0DDD8;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --gray: #7A8B8B;
+            --danger: #E74C3C;
+            --success: #27AE60;
+            --warning: #F39C12;
+            --sidebar-bg: #F5F7F7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-admin {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            background: #FFD700;
+            color: var(--dark);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            background: #E74C3C;
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #C0392B;
+        }
+
+        /* ========== LAYOUT ========== */
+        .layout {
+            display: flex;
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            background: var(--sidebar-bg);
+            border-right: 1px solid #DDD;
+            padding: 24px 0;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            position: sticky;
+            left: 0;
+            top: 60px;
+            width: 280px;
+            min-width: 280px;
+            flex-shrink: 0;
+        }
+
+        .menu-section {
+            margin-bottom: 24px;
+        }
+
+        .menu-title {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--gray);
+            padding: 0 24px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(122, 199, 66, 0.1);
+            border-left-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .menu-item.active {
+            background: rgba(122, 199, 66, 0.15);
+            border-left-color: var(--accent);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .menu-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* ========== CONTENIDO PRINCIPAL ========== */
+        .content {
+            margin-left: 0;
+            padding: 32px;
+            min-width: 0;
+            width: calc(100% - 280px);
+            overflow-y: auto;
+        }
+
+        /* ========== SECCIONES ========== */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* ========== TÍTULO DE PÁGINA ========== */
+        .page-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -1px;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== GRID DE CARDS ========== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E8E8E8;
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .card-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--gray);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .card-change {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .card-change.positive {
+            color: var(--success);
+        }
+
+        .card-change.negative {
+            color: var(--danger);
+        }
+
+        /* ========== SECCIÓN CON TÍTULO ========== */
+        .filters-bar{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:18px}.filters-bar .form-group{margin-bottom:0;min-width:160px}.mini-card{background:var(--white);border:1px solid #E8E8E8;border-radius:12px;padding:16px}.section-box {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E8E8E8;
+        }
+
+        .section-box-title {
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--gray);
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .info-value.highlight {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        /* ========== TABLA ========== */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .table th {
+            background: #F5F7F7;
+            padding: 16px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--gray);
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #DDD;
+        }
+
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid #EEE;
+            font-size: 12px;
+        }
+
+        .table tr:hover {
+            background: #F9F9F9;
+        }
+
+        /* ========== FORMULARIOS ========== */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            padding: 12px;
+            border: 2px solid #DDD;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark);
+            transition: all 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #999;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(122, 199, 66, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* ========== BOTONES ========== */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(122, 199, 66, 0.2);
+        }
+
+        .btn-secondary {
+            background: #E8E8E8;
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #D0D0D0;
+        }
+
+        
+        .top-actions {
+            display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .back-link {
+            display:inline-flex; align-items:center; gap:8px; text-decoration:none; background:var(--white); color:var(--primary);
+            padding:10px 14px; border-radius:999px; font-size:12px; font-weight:800; box-shadow:0 2px 8px rgba(0,0,0,.05); border:1px solid #e7ecec;
+        }
+        
+        .dashboard-return-btn{
+            position: fixed;
+            top: 18px;
+            right: 22px;
+            z-index: 1200;
+            width: 46px;
+            height: 46px;
+            border: none;
+            border-radius: 14px;
+            background: #ffffff;
+            color: #355255;
+            box-shadow: 0 8px 22px rgba(0,0,0,.12);
+            font-size: 22px;
+            font-weight: 900;
+            cursor: pointer;
+            display:none;
+        }
+        .dashboard-return-btn:hover{
+            transform: translateY(-1px);
+            box-shadow: 0 12px 28px rgba(0,0,0,.16);
+        }
+        .super-badge { background:#08152f; color:#fff; padding:6px 10px; border-radius:999px; font-size:10px; font-weight:800; text-transform:uppercase; }
+        .report-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+        .report-card { border:1px solid #E8E8E8; border-radius:14px; padding:18px; background:linear-gradient(180deg,#fff,#f9fbfb); }
+        .report-card h3 { font-size:16px; color:var(--primary); margin-bottom:8px; }
+        .report-card p { font-size:12px; color:var(--gray); line-height:1.6; min-height:58px; }
+        .report-meta { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px; }
+        .meta-pill { background:#eef4ef; color:var(--primary); border-radius:999px; padding:6px 10px; font-size:10px; font-weight:800; text-transform:uppercase; }
+        .agent-summary { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
+        .mini-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+        .mini-stat { background:#F5F7F7; border-radius:12px; padding:14px; }
+        .mini-stat-label { font-size:10px; text-transform:uppercase; color:var(--gray); font-weight:800; margin-bottom:6px; }
+        .mini-stat-value { font-size:20px; font-weight:900; color:var(--primary); }
+        @media (max-width: 1024px) {
+            .layout { display:block; }
+            .sidebar { position:relative; width:100%; min-width:0; height:auto; top:0; }
+            .content { width:100%; }
+            .agent-summary { grid-template-columns:1fr; }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1200px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        
+        .action-btn{background: var(--secondary); color: var(--white); border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:700; margin-right:6px;}
+        .action-btn.secondary{background:#E8ECEC;color:var(--dark);}
+        .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:5000;padding:20px;}
+        .modal-backdrop.show{display:flex;}
+        .modal-card{background:#fff;border-radius:16px;padding:24px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+        .modal-card h3{margin-bottom:16px;color:var(--primary);font-size:20px;font-weight:900;}
+        .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;}
+
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                top: 0;
+                border-right: none;
+                border-bottom: 1px solid #DDD;
+                display: none;
+            }
+
+            .sidebar.active {
+                display: block;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+                height: auto;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        .tax-layout {display:grid; grid-template-columns:1.3fr .9fr; gap:18px; margin-top:24px;}
+        .tax-block {background:#fff; border:1px solid var(--border); border-radius:18px; padding:22px; box-shadow: var(--shadow-sm);} 
+        .tax-block h3 {font-size:1rem; margin-bottom:14px; color:var(--primary-dark); letter-spacing:.04em; text-transform:uppercase;}
+        .tax-fields {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px;}
+        .tax-field {background:var(--light); border:1px solid var(--border); border-radius:14px; padding:12px 14px;}
+        .tax-field-label {display:block; font-size:.72rem; color:var(--gray); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
+        .tax-field-value {font-weight:700; color:var(--text);} 
+        .tax-note {margin-top:16px; padding:14px 16px; border-left:4px solid var(--accent); background:#f7faf8; border-radius:12px; color:var(--gray-dark);}
+        .tax-actions {display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;}
+        .tax-list {display:grid; gap:12px;}
+        .tax-list .info-item {padding:14px 16px; border-radius:14px; background:var(--light); border:1px solid var(--border);} 
+        @media (max-width: 980px){.tax-layout,.tax-fields{grid-template-columns:1fr;}}
+
+</style>
+</head>
+<body>
+    <button id="dashboardReturnBtn" class="dashboard-return-btn" onclick="returnToDashboard()" title="Volver al panel principal">↩</button>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <span class="logo-icon">🏢</span>
+            <span class="logo-admin">NEXO Admin</span>
+        </div>
+        <div class="header-right">
+            <span class="user-badge">S 🏠</span>
+            <button class="logout-btn" onclick="logout()">SALIR</button>
+        </div>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            
+            <div class="menu-section">
+                <div class="menu-title">📦 MÓDULOS</div>
+                <div class="menu-item active" onclick="switchSection('dashboard', this)">
+                    <span class="menu-icon">📊</span> Dashboard
+                </div>
+                <div class="menu-item" onclick="switchSection('orders', this)">
+                    <span class="menu-icon">📦</span> Pedidos
+                </div>
+                <div class="menu-item" onclick="switchSection('payments', this)">
+                    <span class="menu-icon">💳</span> Pagos
+                </div>
+                <div class="menu-item" onclick="switchSection('shipments', this)">
+                    <span class="menu-icon">📫</span> Envíos
+                </div>
+                <div class="menu-item" onclick="switchSection('customers', this)">
+                    <span class="menu-icon">👥</span> Clientes
+                </div>
+                <div class="menu-item" id="clientDataMenu" onclick="switchSection('clientdata', this)" style="display:none;">
+                    <span class="menu-icon">🛡️</span> Datos clientes
+                </div>
+                <div class="menu-item" onclick="switchSection('products', this)">
+                    <span class="menu-icon">🛍️</span> Productos
+                </div>
+                <div class="menu-item" onclick="switchSection('reports', this)">
+                    <span class="menu-icon">📈</span> Reportes
+                </div>
+                <div class="menu-item" onclick="switchSection('marketing', this)">
+                    <span class="menu-icon">📢</span> Agente Marketing IA
+                </div>
+                <div class="menu-item" onclick="switchSection('users', this)">
+                    <span class="menu-icon">👤</span> Usuarios
+                </div>
+                <div class="menu-item" onclick="switchSection('cash', this)">
+                    <span class="menu-icon">💰</span> Caja
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">⚙️ CONFIGURACIÓN</div>
+                <div class="menu-item" onclick="switchSection('company', this)">
+                    <span class="menu-icon">🏢</span> Empresa
+                </div>
+                <div class="menu-item" onclick="switchSection('agents', this)">
+                    <span class="menu-icon">🤖</span> Agentes IA
+                </div>
+                <div class="menu-item" onclick="switchSection('settings', this)">
+                    <span class="menu-icon">⚙️</span> Ajustes
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="content">
+            <div class="top-actions">
+                <a class="back-link" href="index.html">← Volver al portal</a>
+                <span class="super-badge">Superadministrador</span>
+            </div>
+
+            <!-- DASHBOARD -->
+            <div class="section active" id="dashboard">
+                <h1 class="page-title">📊 DASHBOARD EJECUTIVO</h1>
+                <p class="page-subtitle">Resumen de operaciones en tiempo real</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">📦</div>
+                        <div class="card-label">TOTAL DE PEDIDOS</div>
+                        <div class="card-value" id="totalOrders">0</div>
+                        <div class="card-change positive">↑ 12% vs último mes</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">👥</div>
+                        <div class="card-label">CLIENTES ACTIVOS</div>
+                        <div class="card-value" id="activeClients">0</div>
+                        <div class="card-change positive">↑ 8% vs último mes</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">💵</div>
+                        <div class="card-label">INGRESOS TOTALES</div>
+                        <div class="card-value" id="totalRevenue">US$ 0.00</div>
+                        <div class="card-change positive">↑ 15% vs último mes</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">⏳</div>
+                        <div class="card-label">PENDIENTES</div>
+                        <div class="card-value" id="pendingOrders">0</div>
+                        <div class="card-change negative">↓ 5% procesados hoy</div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-box-title">📋 INFORMACIÓN DE LA EMPRESA</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Nombre:</span>
+                            <span class="info-value" id="companyName">NEXO</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tipo de Régimen:</span>
+                            <span class="info-value" id="companyRegimen">Intermediación Digital Internacional</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Nombre comercial / Razón Social:</span>
+                            <span class="info-value" id="companySocialName">NEXO</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ITF:</span>
+                            <span class="info-value" id="companyITF">3%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Titular:</span>
+                            <span class="info-value" id="companyOwner">EDUARDO RODRIGUEZ MARTINEZ</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">IUE:</span>
+                            <span class="info-value" id="companyIUE">25%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">NIT:</span>
+                            <span class="info-value highlight">774651015</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tipo de Cambio:</span>
+                            <span class="info-value highlight">6.96 BOB/USD</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-box-title">📊 RESUMEN RÁPIDO HOY</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">PEDIDOS HOY</span>
+                            <span class="info-value highlight">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">INGRESOS HOY</span>
+                            <span class="info-value highlight">US$ 0.00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">PENDIENTES</span>
+                            <span class="info-value highlight" style="color: var(--warning);">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">COMISIÓN PROMEDIO</span>
+                            <span class="info-value highlight">30%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PEDIDOS -->
+            <div class="section" id="orders">
+                <h1 class="page-title">📦 GESTIÓN DE PEDIDOS</h1>
+                <p class="page-subtitle">Ver, filtrar y gestionar todos los pedidos</p>
+
+                <div class="section-box">
+                    <div class="section-box-title">📋 ÚLTIMOS PEDIDOS</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>CLIENTE</th>
+                                <th>EMAIL</th>
+                                <th>MONTO</th>
+                                <th>ESTADO</th>
+                                <th>FECHA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--gray);">No hay pedidos registrados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGOS -->
+            <div class="section" id="payments">
+                <h1 class="page-title">💳 GESTIÓN DE PAGOS</h1>
+                <p class="page-subtitle">Procesar y monitorear pagos recibidos</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">💳</div>
+                        <div class="card-label">TARJETAS</div>
+                        <div class="card-value">0</div>
+                        <div class="card-change">Transacciones</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🏦</div>
+                        <div class="card-label">TRANSFERENCIAS</div>
+                        <div class="card-value">0</div>
+                        <div class="card-change">Transacciones</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🅿️</div>
+                        <div class="card-label">PAYPAL</div>
+                        <div class="card-value">0</div>
+                        <div class="card-change">Transacciones</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📱</div>
+                        <div class="card-label">PAYONEER</div>
+                        <div class="card-value">0</div>
+                        <div class="card-change">Transacciones</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ENVÍOS -->
+            <div class="section" id="shipments">
+                <h1 class="page-title">📫 GESTIÓN DE ENVÍOS</h1>
+                <p class="page-subtitle">Rastrear y gestionar envíos de pedidos</p>
+                <div class="section-box">
+                    <div id="shipmentsPanel"></div>
+                </div>
+            </div>
+
+            <!-- CLIENTES -->
+            <div class="section" id="customers">
+                <h1 class="page-title">👥 GESTIÓN DE CLIENTES</h1>
+                <p class="page-subtitle">Administrar información de clientes registrados</p>
+                <div class="section-box">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>NOMBRE</th>
+                                <th>EMAIL</th>
+                                <th>TELÉFONO</th>
+                                <th>PAÍS</th>
+                                <th>PEDIDOS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--gray);">No hay clientes registrados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PRODUCTOS -->
+            <div class="section" id="products">
+                <h1 class="page-title">🛍️ GESTIÓN DE PRODUCTOS</h1>
+                <p class="page-subtitle">Administrar catálogo de productos</p>
+                <div class="section-box">
+                    <div id="productsPanel"></div>
+                </div>
+            </div>
+
+            <!-- REPORTES -->
+            
+<div class="section" id="reports">
+    <h1 class="page-title">📈 REPORTES BOLIVIA Y EXPORTACIONES</h1>
+    <p class="page-subtitle">Reportes automáticos para Impuestos Nacionales, conciliación operativa y control gerencial</p>
+    <div class="section-box">
+        <div class="section-box-title">📅 FILTROS DE REPORTE</div>
+        <div class="filters-bar">
+            <div class="form-group"><label class="form-label">Modo</label><select id="reportMode" class="form-select"><option value="all">Todo</option><option value="day">Día</option><option value="month">Mes</option><option value="year">Año</option><option value="range">Rango</option></select></div>
+            <div class="form-group"><label class="form-label">Fecha base</label><input id="reportBaseDate" type="date" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Desde</label><input id="reportFromDate" type="date" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Hasta</label><input id="reportToDate" type="date" class="form-input"></div>
+            <button class="btn btn-primary" onclick="applyReportFilters()">Aplicar filtro</button>
+        </div>
+        <div class="cards-grid">
+            <div class="card"><div class="card-icon">🗂️</div><div class="card-label">ÓRDENES FILTRADAS</div><div class="card-value" id="reportOrdersCount">0</div><div class="card-change">Operaciones</div></div>
+            <div class="card"><div class="card-icon">💵</div><div class="card-label">TOTAL COBRADO</div><div class="card-value" id="reportTotalCollected">US$ 0.00</div><div class="card-change">Clientes</div></div>
+            <div class="card"><div class="card-icon">🏢</div><div class="card-label">COMISIÓN NETA</div><div class="card-value" id="reportNetCommission">US$ 0.00</div><div class="card-change">Después de IT/IUE</div></div>
+            <div class="card"><div class="card-icon">🏦</div><div class="card-label">DIFERENCIA BANCARIA</div><div class="card-value" id="reportBankDiff">US$ 0.00</div><div class="card-change">Control cruzado</div></div>
+        </div>
+        <div id="reportPreview" class="mini-card"></div>
+    </div>
+    <div class="report-grid">
+        <div class="report-card"><h3>Libro de ventas por comisión</h3><p>Totales al pie</p><div class="button-group"><button class="btn btn-primary" onclick="exportSalesBook('csv')">⬇ EXCEL</button><button class="btn btn-secondary" onclick="exportSalesBook('pdf')">⬇ PDF</button></div></div>
+        <div class="report-card"><h3>Resumen IT sobre comisión</h3><p>Totales al pie</p><div class="button-group"><button class="btn btn-primary" onclick="exportItReport('csv')">⬇ EXCEL</button><button class="btn btn-secondary" onclick="exportItReport('pdf')">⬇ PDF</button></div></div>
+        <div class="report-card"><h3>Resumen IUE sobre utilidad</h3><p>Totales al pie</p><div class="button-group"><button class="btn btn-primary" onclick="exportIueReport('csv')">⬇ EXCEL</button><button class="btn btn-secondary" onclick="exportIueReport('pdf')">⬇ PDF</button></div></div>
+        <div class="report-card"><h3>Conciliación bancaria / operativa</h3><p>Incluye saldo bancos y diferencia</p><div class="button-group"><button class="btn btn-primary" onclick="exportConciliation('csv')">⬇ EXCEL</button><button class="btn btn-secondary" onclick="exportConciliation('pdf')">⬇ PDF</button></div></div>
+        <div class="report-card"><h3>Control diario tipo de cambio</h3><p>Totales al pie</p><div class="button-group"><button class="btn btn-primary" onclick="exportExchangeControl('csv')">⬇ EXCEL</button><button class="btn btn-secondary" onclick="exportExchangeControl('pdf')">⬇ PDF</button></div></div>
+        <div class="report-card"><h3>Reporte gerencial de margen</h3><p>Totales al pie</p><div class="button-group"><button class="btn btn-primary" onclick="exportManagerReport('csv')">⬇ EXCEL</button><button class="btn btn-secondary" onclick="exportManagerReport('pdf')">⬇ PDF</button></div></div>
+    </div>
+</div>
+
+<div class="section" id="marketing">
+                <h1 class="page-title">📢 AGENTE MARKETING IA</h1>
+                <p class="page-subtitle">Uso exclusivo de Superadministrador para búsqueda automática de clientes, referidos, redes y campañas</p>
+
+                <div class="agent-summary">
+                    <div class="section-box">
+                        <div class="section-box-title">🤖 MOTOR DE PROSPECCIÓN Y CRECIMIENTO</div>
+                        <div class="info-grid">
+                            <div class="info-item"><span class="info-label">Estado del agente</span><span class="info-value highlight">Activo · Solo Superadministrador</span></div>
+                            <div class="info-item"><span class="info-label">Objetivo</span><span class="info-value">Captar clientes, referidos y oportunidades</span></div>
+                            <div class="info-item"><span class="info-label">Canales</span><span class="info-value">Facebook, Instagram, WhatsApp, email y referidos</span></div>
+                            <div class="info-item"><span class="info-label">Ejecución</span><span class="info-value">Automática con seguimiento diario</span></div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="alert('Agente Marketing IA ejecutándose')">▶ Ejecutar agente</button>
+                            <button class="btn btn-secondary" onclick="alert('Reporte de marketing generado')">⬇ Ver resultados</button>
+                        </div>
+                    </div>
+                    <div class="section-box">
+                        <div class="section-box-title">📋 RESULTADOS DEL AGENTE</div>
+                        <div class="mini-stats">
+                            <div class="mini-stat"><div class="mini-stat-label">Clientes detectados</div><div class="mini-stat-value">128</div></div>
+                            <div class="mini-stat"><div class="mini-stat-label">Referidos potenciales</div><div class="mini-stat-value">42</div></div>
+                            <div class="mini-stat"><div class="mini-stat-label">Campañas activas</div><div class="mini-stat-value">7</div></div>
+                            <div class="mini-stat"><div class="mini-stat-label">Leads validados</div><div class="mini-stat-value">31</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-box-title">🧭 TAREAS AUTOMÁTICAS DEL AGENTE</div>
+                    <table class="table">
+                        <thead>
+                            <tr><th>Tarea</th><th>Descripción</th><th>Canal</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Búsqueda de clientes</td><td>Identifica perfiles B2C y necesidades de compra internacional</td><td>Redes / Web</td><td>Activo</td></tr>
+                            <tr><td>Búsqueda de referidos</td><td>Rastrea referidos y conexiones de clientes existentes</td><td>CRM / Contactos</td><td>Activo</td></tr>
+                            <tr><td>Uso de redes</td><td>Publica y mide alcance en campañas orgánicas y pagadas</td><td>Instagram / Facebook</td><td>Activo</td></tr>
+                            <tr><td>Seguimiento automático</td><td>Da continuidad a leads y oportunidades detectadas</td><td>Email / WhatsApp</td><td>Activo</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- USUARIOS -->
+            <div class="section" id="users">
+                <h1 class="page-title">👤 GESTIÓN DE USUARIOS</h1>
+                <p class="page-subtitle">Administrar usuarios y permisos del sistema</p>
+                <div class="section-box">
+                    <div id="usersPanel"></div>
+                </div>
+            </div>
+
+            <!-- CAJA -->
+            <div class="section" id="cash">
+                <h1 class="page-title">💰 GESTIÓN DE CAJA</h1>
+                <p class="page-subtitle">Control de flujo de efectivo y balances</p>
+                <div class="cards-grid">
+                    <div class="card"><div class="card-icon">💵</div><div class="card-label">COBROS CLIENTE</div><div class="card-value">US$ 0.00</div><div class="card-change">Bruto</div></div>
+                    <div class="card"><div class="card-icon">🚚</div><div class="card-label">CARGOS EXTERNOS</div><div class="card-value">US$ 0.00</div><div class="card-change">Amazon / proveedor</div></div>
+                    <div class="card"><div class="card-icon">🏢</div><div class="card-label">COMISIÓN NEXO</div><div class="card-value">30%</div><div class="card-change">Margen operativo</div></div>
+                    <div class="card"><div class="card-icon">🧮</div><div class="card-label">IT + IUE</div><div class="card-value">Sobre comisión</div><div class="card-change">Base imponible</div></div>
+                </div>
+                <div class="section-box">
+                    <div class="section-box-title">💼 CONCILIACIÓN OPERATIVA</div>
+                    <div class="info-grid">
+                        <div class="info-item"><span class="info-label">Base de cálculo</span><span class="info-value highlight">Comisión NEXO</span></div>
+                        <div class="info-item"><span class="info-label">IT</span><span class="info-value highlight">3%</span></div>
+                        <div class="info-item"><span class="info-label">IUE</span><span class="info-value highlight">25%</span></div>
+                        <div class="info-item"><span class="info-label">Saldo en cuentas</span><span class="info-value highlight">Diferencia neta</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMPRESA -->
+            <div class="section" id="company">
+                <h1 class="page-title">🏢 INFORMACIÓN DE LA EMPRESA</h1>
+                <p class="page-subtitle">Editar datos e información corporativa</p>
+
+                <div class="section-box">
+                    <div class="section-box-title">📋 DATOS CORPORATIVOS</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nombre de la Empresa</label>
+                        <input type="text" class="form-input" id="editCompanyName" value="NEXO Servicios Empresariales">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre comercial / Razón Social</label>
+                        <input type="text" class="form-input" id="editCompanySocialName" value="NEXO Servicios Empresariales">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">NIT</label>
+                        <input type="text" class="form-input" id="editCompanyNIT" value="774651015">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Titular/Propietario</label>
+                        <input type="text" class="form-input" id="editCompanyOwner" value="EDUARDO RODRIGUEZ MARTINEZ">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email de Contacto</label>
+                        <input type="email" class="form-input" id="editCompanyEmail" value="ermcba@hotmail.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Dirección</label>
+                        <input type="text" class="form-input" id="editCompanyAddress" value="Avenida America 435, Edificio Jaque, Piso 4 Oficina 9">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ciudad</label>
+                        <input type="text" class="form-input" id="editCompanyCity" value="Cochabamba">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">País</label>
+                        <input type="text" class="form-input" id="editCompanyCountry" value="Bolivia">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Régimen</label>
+                        <input type="text" class="form-input" id="editCompanyRegimen" value="Intermediación Digital Internacional">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Impuesto a Transacciones (ITF) %</label>
+                        <input type="number" class="form-input" id="editCompanyITF" value="3" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Impuesto Sobre Utilidades (IUE) %</label>
+                        <input type="number" class="form-input" id="editCompanyIUE" value="25" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Comisión NEXO %</label>
+                        <input type="number" class="form-input" id="editCompanyCommission" value="30" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Retención de Fondos (RF) %</label>
+                        <input type="number" class="form-input" id="editCompanyRF" value="12.5" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Cambio Actual</label>
+                        <input type="number" class="form-input" id="editExchangeRate" value="6.96" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Descripción de la Empresa</label>
+                        <textarea class="form-textarea" id="editCompanyDescription">NEXO es una plataforma intermediaria B2C global que conecta con Amazon y CJ Dropshipping para ofrecer productos a 196 países con comisión del 30%.</textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="saveCompanyInfo()">💾 GUARDAR CAMBIOS</button>
+                        <button class="btn btn-secondary" onclick="resetCompanyInfo()">↺ CANCELAR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENTES IA -->
+            <div class="section" id="agents">
+                <h1 class="page-title">🤖 MONITOREO DE AGENTES IA</h1>
+                <p class="page-subtitle">Estado y rendimiento de Agentes Inteligentes</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">🤖</div>
+                        <div class="card-label">Agent 1: Compras Automatizadas</div>
+                        <div class="card-value">48</div>
+                        <div class="card-change positive">94.2% éxito</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">💬</div>
+                        <div class="card-label">Agent 2: Soporte</div>
+                        <div class="card-value">156</div>
+                        <div class="card-change positive">4.9/5 ⭐</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📢</div>
+                        <div class="card-label">Agente 3: Marketing IA</div>
+                        <div class="card-value">2,865%</div>
+                        <div class="card-change positive">ROI: $45,820</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">✅</div>
+                        <div class="card-label">ESTADO GENERAL</div>
+                        <div class="card-value" style="color: var(--success);">ACTIVO</div>
+                        <div class="card-change positive">↑ 100% operativo</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AJUSTES -->
+            <div class="section" id="settings">
+                <h1 class="page-title">⚙️ AJUSTES DEL SISTEMA</h1>
+                <p class="page-subtitle">Configuración general de NEXO Admin</p>
+
+                <div class="section-box">
+                    <div class="section-box-title">🔐 SEGURIDAD</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="changeAdminPassword()">🔒 CAMBIAR CONTRASEÑA</button>
+                        <button class="btn btn-secondary" onclick="activate2FA()">📱 ACTIVAR 2FA</button>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-box-title">🌐 GENERAL</div>
+                    <div class="form-group">
+                        <label class="form-label">Idioma de la Plataforma</label>
+                        <select id="platformLang" class="form-select">
+                            <option>Español (ES)</option>
+                            <option>Inglés (EN)</option>
+                            <option>Portugués (PT)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Zona Horaria</label>
+                        <select id="platformTimezone" class="form-select">
+                            <option>America/La_Paz (BOT)</option>
+                            <option>America/Argentina/Buenos_Aires</option>
+                            <option>America/Sao_Paulo</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="saveSettings()">💾 GUARDAR</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // CAMBIAR SECCIÓN
+        function switchSection(sectionId, element) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.add('active');
+
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (element) element.classList.add('active');
+
+            const backBtn = document.getElementById('dashboardReturnBtn');
+            if (backBtn) {
+                backBtn.style.display = sectionId && sectionId !== 'dashboard' ? 'block' : 'none';
+            }
+
+            if (sectionId === 'dashboard') {
+                loadDashboard();
+            } else if (sectionId === 'orders') {
+                loadOrders();
+            } else if (sectionId === 'customers') {
+                renderCustomers();
+            } else if (sectionId === 'payments') {
+                renderPayments();
+            } else if (sectionId === 'shipments') {
+                renderShipments();
+            } else if (sectionId === 'products') {
+                renderProducts();
+            } else if (sectionId === 'users') {
+                renderUsers();
+            } else if (sectionId === 'reports') {
+                applyReportFilters();
+            } else if (sectionId === 'clientdata') {
+                renderClientData();
+            }
+        }
+
+
+        function getClientProfile() {
+            return JSON.parse(localStorage.getItem('nexoClientProfile') || sessionStorage.getItem('nexoActiveClient') || '{}');
+        }
+
+        function filterOrdersByDates(orders){
+            const mode = document.getElementById('reportMode')?.value || 'all';
+            const base = document.getElementById('reportBaseDate')?.value;
+            const from = document.getElementById('reportFromDate')?.value;
+            const to = document.getElementById('reportToDate')?.value;
+            return orders.filter(o=>{
+                const d = new Date(o.timestamp || Date.now());
+                const ds = d.toISOString().slice(0,10);
+                if(mode==='day' && base) return ds===base;
+                if(mode==='month' && base) return ds.slice(0,7)===base.slice(0,7);
+                if(mode==='year' && base) return ds.slice(0,4)===base.slice(0,4);
+                if(mode==='range' && from && to) return ds>=from && ds<=to;
+                return true;
+            });
+        }
+
+        function applyReportFilters(){
+            const orders = filterOrdersByDates(getOrdersData());
+            const total = orders.reduce((a,o)=>a+Number(o.totals?.total ?? o.total ?? 0),0);
+            const net = orders.reduce((a,o)=>a+Number(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0),0);
+            const bank = orders.reduce((a,o)=>a+Number(o.totals?.bankBalance ?? o.bankBalance ?? 0),0);
+            document.getElementById('reportOrdersCount').textContent = String(orders.length);
+            document.getElementById('reportTotalCollected').textContent = toMoney(total);
+            document.getElementById('reportNetCommission').textContent = toMoney(net);
+            document.getElementById('reportBankDiff').textContent = toMoney(bank-net);
+            const preview = document.getElementById('reportPreview');
+            if(preview){
+                preview.innerHTML = `<div class="section-box-title">Vista previa</div>
+                <table class="table"><thead><tr><th>Fecha</th><th>Factura</th><th>Cliente</th><th>Total</th><th>Comisión neta</th></tr></thead>
+                <tbody>${orders.length?orders.map(o=>`<tr><td>${new Date(o.timestamp||Date.now()).toLocaleDateString('es-BO')}</td><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${toMoney(o.totals?.total ?? o.total ?? 0)}</td><td>${toMoney(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0)}</td></tr>`).join(''):`<tr><td colspan="5">Sin datos para el filtro seleccionado</td></tr>`}</tbody></table>`;
+            }
+        }
+
+        function renderCustomers(){
+            const tbody = document.getElementById('customersTable');
+            if(!tbody) return;
+            const profile = getClientProfile();
+            const orders = getOrdersData();
+            if(!profile.email && !orders.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--gray);">No hay clientes registrados</td></tr>'; return; }
+            const orderCount = orders.filter(o=>(o.customer?.email || o.email || '').toLowerCase() === String(profile.email||'').toLowerCase()).length;
+            tbody.innerHTML = `<tr><td>${profile.fullName || ''}</td><td>${profile.email || ''}</td><td>${profile.areaCode || ''} ${profile.phone || ''}</td><td>${profile.country || profile.countryCode || ''}</td><td>${profile.city || ''}</td><td>${profile.address || ''}</td><td>${profile.documentId || profile.documentNumber || ''}</td><td>${orderCount}</td></tr>`;
+            const head = tbody.parentElement.querySelector('thead tr');
+            if(head && head.children.length<8){ head.innerHTML='<th>NOMBRE</th><th>EMAIL</th><th>TELÉFONO</th><th>PAÍS</th><th>CIUDAD</th><th>DIRECCIÓN</th><th>DOCUMENTO</th><th>PEDIDOS</th>'; }
+        }
+
+        function renderPayments(){
+            const sec = document.getElementById('payments');
+            if(!sec) return;
+            const orders = getOrdersData();
+            const by = {card:0, bank:0, paypal:0, payoneer:0};
+            orders.forEach(o=>{ const k=(o.paymentMethod||'').toLowerCase(); if(k.includes('card')||k.includes('tarjeta')) by.card++; else if(k.includes('bank')||k.includes('transfer')) by.bank++; else if(k.includes('payoneer')) by.payoneer++; else by.paypal++; });
+            const cards = sec.querySelectorAll('.card-value');
+            if(cards.length>=4){ cards[0].textContent=String(by.card); cards[1].textContent=String(by.bank); cards[2].textContent=String(by.paypal); cards[3].textContent=String(by.payoneer); }
+            let box = document.getElementById('paymentsTableWrap');
+            if(!box){ box=document.createElement('div'); box.id='paymentsTableWrap'; box.className='section-box'; sec.appendChild(box); }
+            box.innerHTML = `<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Proveedor</th><th>Comisión neta</th></tr></thead><tbody>${orders.length?orders.map(o=>`<tr><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${(o.paymentMethod||'').toUpperCase()}</td><td>${toMoney(o.totals?.total ?? o.total ?? 0)}</td><td>${toMoney(o.totals?.providerPayment ?? o.providerPayment ?? 0)}</td><td>${toMoney(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0)}</td></tr>`).join(''):`<tr><td colspan="6">Sin pagos registrados</td></tr>`}</tbody></table></div>`;
+        }
+
+        function renderShipments(){
+            const box = document.getElementById('shipmentsPanel');
+            if(!box) return;
+            const orders = getOrdersData();
+            box.innerHTML = `<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th></tr></thead><tbody>${orders.length?orders.map(o=>`<tr><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${o.customer?.city || o.city || ''}</td><td>${o.deliveryEstimate || ''}</td><td>En preparación</td></tr>`).join(''):`<tr><td colspan="5">Sin envíos registrados</td></tr>`}</tbody></table>`;
+        }
+
+        function renderProducts(){
+            const box = document.getElementById('productsPanel');
+            if(!box) return;
+            const items = getOrdersData().flatMap(o => (o.items || []));
+            box.innerHTML = `<table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Envío Amazon</th><th>Gasto vendedor</th></tr></thead><tbody>${items.length?items.map(i=>`<tr><td>${i.name||''}</td><td>${i.quantity||1}</td><td>${toMoney(i.price||0)}</td><td>${toMoney(i.shippingAmazon||0)}</td><td>${toMoney(i.vendorFee||0)}</td></tr>`).join(''):`<tr><td colspan="5">Sin productos registrados</td></tr>`}</tbody></table>`;
+        }
+
+        function renderUsers(){
+            const box = document.getElementById('usersPanel');
+            if(!box) return;
+            const adminEmail = localStorage.getItem('nexoAdminEmail') || 'ermcba@hotmail.com';
+            box.innerHTML = `<table class="table"><thead><tr><th>Rol</th><th>Correo</th><th>Permisos</th><th>Acciones</th></tr></thead><tbody>
+            <tr><td>Superadministrador</td><td>${adminEmail}</td><td>Control total</td><td><button class="action-btn" onclick="openAssignPassword('Superadministrador')">Asignar clave</button><button class="action-btn secondary" onclick="alert('Permisos del Superadministrador protegidos')">Permisos</button></td></tr>
+            <tr><td>Admin</td><td>admin@nexo</td><td>Panel general</td><td><button class="action-btn" onclick="openAssignPassword('Admin')">Asignar clave</button><button class="action-btn secondary" onclick="alert('Edición de permisos de Admin lista para configuración')">Permisos</button></td></tr>
+            <tr><td>Operador</td><td>operador@nexo</td><td>Pedidos y soporte</td><td><button class="action-btn" onclick="openAssignPassword('Operador')">Asignar clave</button><button class="action-btn secondary" onclick="alert('Edición de permisos de Operador lista para configuración')">Permisos</button></td></tr>
+            <tr><td>Finanzas</td><td>finanzas@nexo</td><td>Pagos y reportes</td><td><button class="action-btn" onclick="openAssignPassword('Finanzas')">Asignar clave</button><button class="action-btn secondary" onclick="alert('Edición de permisos de Finanzas lista para configuración')">Permisos</button></td></tr>
+            </tbody></table>`;
+        }
+
+        function openModal(id){ document.getElementById(id).classList.add('show'); }
+        function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+        function changeAdminPassword(){
+            openModal('passwordModal');
+        }
+
+        function saveAdminPassword(){
+            const current = document.getElementById('currentAdminPassword').value.trim();
+            const next = document.getElementById('newAdminPassword').value.trim();
+            if(!current || !next){ alert('Completa ambos campos'); return; }
+            const access = JSON.parse(localStorage.getItem('nexoAdminAccess') || '{}');
+            access.password = next;
+            localStorage.setItem('nexoAdminAccess', JSON.stringify(access));
+            closeModal('passwordModal');
+            alert('Contraseña actualizada correctamente');
+        }
+
+        function activate2FA(){
+            openModal('twoFAModal');
+        }
+
+        function confirm2FA(){
+            const code = Math.random().toString().slice(2,8);
+            localStorage.setItem('nexo2FACode', code);
+            closeModal('twoFAModal');
+            alert('2FA activado correctamente. Código de respaldo: ' + code);
+        }
+
+        function openAssignPassword(role){
+            document.getElementById('assignRole').value = role;
+            document.getElementById('assignPassword').value = '';
+            openModal('assignPasswordModal');
+        }
+
+        function saveAssignedPassword(){
+            const role = document.getElementById('assignRole').value;
+            const pass = document.getElementById('assignPassword').value.trim();
+            if(!pass){ alert('Ingresa una contraseña'); return; }
+            const store = JSON.parse(localStorage.getItem('nexoUserPasswords') || '{}');
+            store[role] = pass;
+            localStorage.setItem('nexoUserPasswords', JSON.stringify(store));
+            closeModal('assignPasswordModal');
+            alert('Clave asignada para ' + role);
+        }
+
+        function saveSettings(){
+            const lang = document.getElementById('platformLang')?.value || 'Español (ES)';
+            const tz = document.getElementById('platformTimezone')?.value || 'America/La_Paz (BOT)';
+            localStorage.setItem('nexoAdminSettings', JSON.stringify({lang, tz}));
+            alert('Ajustes guardados correctamente');
+        }
+
+        function exportItReport(format){
+            const orders = filterOrdersByDates(getOrdersData());
+            const headers = ['Fecha','Factura','Cliente','Comisión','IT 3%'];
+            const rows = orders.map(o=>[new Date(o.timestamp||Date.now()).toLocaleDateString('es-BO'), o.id||'', o.customer?.fullName || o.fullName || '', Number(o.totals?.commission ?? o.commission ?? 0).toFixed(2), Number(o.totals?.itf ?? o.itf ?? 0).toFixed(2)]);
+            if(format==='csv') return makeCsv('nexo_it.csv', headers, rows);
+            openPrintableReport('Resumen IT sobre comisión', 'Cálculo 3% sobre comisión de intermediación', headers, rows, [{label:'Total IT', value: toMoney(rows.reduce((a,r)=>a+Number(r[4]||0),0))}]);
+        }
+
+        function exportIueReport(format){
+            const orders = filterOrdersByDates(getOrdersData());
+            const headers = ['Fecha','Factura','Cliente','Comisión','IUE 25%'];
+            const rows = orders.map(o=>[new Date(o.timestamp||Date.now()).toLocaleDateString('es-BO'), o.id||'', o.customer?.fullName || o.fullName || '', Number(o.totals?.commission ?? o.commission ?? 0).toFixed(2), Number(o.totals?.iue ?? o.iue ?? 0).toFixed(2)]);
+            if(format==='csv') return makeCsv('nexo_iue.csv', headers, rows);
+            openPrintableReport('Resumen IUE sobre utilidad', 'Cálculo 25% sobre utilidad proyectada', headers, rows, [{label:'Total IUE', value: toMoney(rows.reduce((a,r)=>a+Number(r[4]||0),0))}]);
+        }
+
+        function exportConciliation(format){
+            const orders = filterOrdersByDates(getOrdersData());
+            const headers = ['Fecha','Factura','Cliente','Método pago cliente','Total cobrado','Pago proveedor','Saldo neto NEXO','Saldo en bancos','Diferencia'];
+            const rows = orders.map(o => {
+                const total = Number(o.totals?.total ?? o.total ?? 0);
+                const provider = Number(o.totals?.providerPayment ?? o.providerPayment ?? 0);
+                const net = Number(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0);
+                const bank = Number(o.totals?.bankBalance ?? o.bankBalance ?? net);
+                return [new Date(o.timestamp||Date.now()).toLocaleDateString('es-BO'), o.id||'', o.customer?.fullName || o.fullName || '', (o.paymentMethod||'').toUpperCase(), total.toFixed(2), provider.toFixed(2), net.toFixed(2), bank.toFixed(2), (bank-net).toFixed(2)];
+            });
+            if(format==='csv') return makeCsv('nexo_conciliacion.csv', headers, rows);
+            openPrintableReport('Conciliación Bancaria / Operativa', 'Cruce entre cobro cliente, pago proveedor y diferencia', headers, rows, [{label:'Total cobrado', value: toMoney(rows.reduce((a,r)=>a+Number(r[4]),0))}]);
+        }
+
+        // DATA BASE
+        function getOrdersData() {
+            const orders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
+            if (orders.length) return orders;
+            const last = JSON.parse(localStorage.getItem('nexoLastOrder') || '{}');
+            return last && last.id ? [last] : [];
+        }
+
+        function toMoney(v) {
+            return 'US$ ' + Number(v || 0).toFixed(2);
+        }
+
+        function makeCsv(filename, headers, rows) {
+            const csv = [headers.join(',')].concat(
+                rows.map(row => row.map(value => {
+                    const safe = String(value ?? '').replace(/"/g, '""');
+                    return `"${safe}"`;
+                }).join(','))
+            ).join('\\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        
+        function openPrintableReport(title, subtitle, tableHeaders, tableRows, summaryRows = []) {
+            const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${c}</td>`).join('')}</tr>`).join('');
+            const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(s => `<div style="margin:4px 0;"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>` : '';
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title></head>
+            <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
+                <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${title}</h1>
+                <div style="margin-bottom:18px;color:#5A7C7E;">${subtitle}</div>
+                <table style="border-collapse:collapse;width:100%;font-size:12px;">
+                    <thead><tr>${tableHeaders.map(h => `<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">${h}</th>`).join('')}</tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+                ${summaryHtml}
+            </body></html>`;
+            const w = window.open('', '_blank');
+            if (!w) return;
+            w.document.write(html);
+            w.document.close();
+            w.focus();
+            w.print();
+        }
+
+        function getCompanyInfoForReports() {
+            return JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
+        }
+
+        function exportTaxTemplate(format) {
+            const company = getCompanyInfoForReports();
+            const headers = ['Campo', 'Valor'];
+            const rows = [
+                ['Razón Social', company.socialName || 'NEXO'],
+                ['NIT', company.nit || '774651015'],
+                ['Propietario', company.owner || 'EDUARDO RODRIGUEZ MARTINEZ'],
+                ['Correo operativo PayPal', 'ermcba@hotmail.com'],
+                ['Concepto tributario', 'Servicios de Intermediación / Comercialización Internacional'],
+                ['IT aplicado', '3% sobre comisión'],
+                ['IUE aplicado', '25% sobre utilidad'],
+                ['Comisión NEXO', '30%'],
+                ['Moneda operativa', 'USD'],
+                ['Tipo de cambio referencia', String(company.exchangeRate || 6.96)]
+            ];
+            if (format === 'csv') return makeCsv('nexo_plantilla_tributaria.csv', headers, rows);
+            openPrintableReport('Plantilla Tributaria NEXO', 'Base operativa para Impuestos Nacionales', headers, rows);
+        }
+
+        function exportSalesBook(format) {
+            const orders = getOrdersData();
+            const headers = ['Fecha', 'Factura', 'Cliente', 'Correo', 'Producto subtotal', 'Envío', 'Gastos vendedor', 'Comisión 30%', 'IT 3%', 'IUE 25%', 'Total cobrado'];
+            const rows = orders.map(o => [
+                new Date(o.timestamp || Date.now()).toLocaleDateString('es-BO'),
+                o.id || '',
+                o.customer?.fullName || o.fullName || '',
+                o.customer?.email || o.email || '',
+                Number(o.totals?.subtotal ?? o.subtotal ?? 0).toFixed(2),
+                Number(o.totals?.amazonShipping ?? o.amazonShipping ?? 0).toFixed(2),
+                Number(o.totals?.vendorFees ?? o.vendorFees ?? 0).toFixed(2),
+                Number(o.totals?.commission ?? o.commission ?? 0).toFixed(2),
+                Number(o.totals?.itf ?? o.itf ?? 0).toFixed(2),
+                Number(o.totals?.iue ?? o.iue ?? 0).toFixed(2),
+                Number(o.totals?.total ?? o.total ?? 0).toFixed(2)
+            ]);
+            if (format === 'csv') return makeCsv('nexo_libro_ventas.csv', headers, rows);
+            openPrintableReport('Libro de Ventas - NEXO', 'Operaciones registradas para control tributario y gerencial', headers, rows);
+        }
+
+        function exportITReport(format) {
+            const orders = getOrdersData();
+            const headers = ['Fecha', 'Factura', 'Base comisión', 'IT 3%'];
+            const rows = orders.map(o => [
+                new Date(o.timestamp || Date.now()).toLocaleDateString('es-BO'),
+                o.id || '',
+                Number(o.totals?.commission ?? o.commission ?? 0).toFixed(2),
+                Number(o.totals?.itf ?? o.itf ?? 0).toFixed(2)
+            ]);
+            const totalIT = orders.reduce((acc, o) => acc + Number(o.totals?.itf ?? o.itf ?? 0), 0);
+            if (format === 'csv') return makeCsv('nexo_reporte_it.csv', headers, rows.concat([['TOTAL', '', '', totalIT.toFixed(2)]]));
+            openPrintableReport('Reporte IT - NEXO', 'IT calculado sobre comisión de intermediación', headers, rows, [{label:'IT total periodo', value: toMoney(totalIT)}]);
+        }
+
+        function exportIUEReport(format) {
+            const orders = getOrdersData();
+            const headers = ['Fecha', 'Factura', 'Base comisión', 'IUE 25%'];
+            const rows = orders.map(o => [
+                new Date(o.timestamp || Date.now()).toLocaleDateString('es-BO'),
+                o.id || '',
+                Number(o.totals?.commission ?? o.commission ?? 0).toFixed(2),
+                Number(o.totals?.iue ?? o.iue ?? 0).toFixed(2)
+            ]);
+            const totalIUE = orders.reduce((acc, o) => acc + Number(o.totals?.iue ?? o.iue ?? 0), 0);
+            if (format === 'csv') return makeCsv('nexo_reporte_iue.csv', headers, rows.concat([['TOTAL', '', '', totalIUE.toFixed(2)]]));
+            openPrintableReport('Reporte IUE - NEXO', 'IUE proyectado sobre utilidad/comisión', headers, rows, [{label:'IUE total periodo', value: toMoney(totalIUE)}]);
+        }
+
+        function exportReconciliation(format) {
+            const orders = getOrdersData();
+            const headers = ['Fecha', 'Factura', 'Cliente', 'Método de pago', 'Correo PayPal', 'Total cobrado', 'Comisión neta después impuestos'];
+            const rows = orders.map(o => [
+                new Date(o.timestamp || Date.now()).toLocaleDateString('es-BO'),
+                o.id || '',
+                o.customer?.fullName || o.fullName || '',
+                (o.paymentMethod || '').toUpperCase(),
+                o.paypalEmail || 'ermcba@hotmail.com',
+                Number(o.totals?.total ?? o.total ?? 0).toFixed(2),
+                Number(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0).toFixed(2)
+            ]);
+            if (format === 'csv') return makeCsv('nexo_conciliacion.csv', headers, rows);
+            openPrintableReport('Conciliación de Cobros - NEXO', 'Control de cobros y comisión neta', headers, rows);
+        }
+
+        function exportExchangeControl(format) {
+            const company = getCompanyInfoForReports();
+            const tc = Number(company.exchangeRate || 6.96).toFixed(2);
+            const orders = getOrdersData();
+            const headers = ['Fecha', 'Factura', 'Moneda', 'Tipo de cambio referencia', 'Total USD', 'Equivalente BOB'];
+            const rows = orders.map(o => {
+                const usd = Number(o.totals?.total ?? o.total ?? 0);
+                return [
+                    new Date(o.timestamp || Date.now()).toLocaleDateString('es-BO'),
+                    o.id || '',
+                    o.currency || 'USD',
+                    tc,
+                    usd.toFixed(2),
+                    (usd * Number(tc)).toFixed(2)
+                ];
+            });
+            if (format === 'csv') return makeCsv('nexo_control_tipo_cambio.csv', headers, rows);
+            openPrintableReport('Control Diario de Tipo de Cambio', 'Control referencial para reportes en Bolivia', headers, rows);
+        }
+
+        function exportManagerReport(format) {
+            const orders = getOrdersData();
+            const headers = ['Factura', 'Cliente', 'Comisión', 'IT', 'IUE', 'Comisión neta', 'Total cobrado'];
+            const rows = orders.map(o => [
+                o.id || '',
+                o.customer?.fullName || o.fullName || '',
+                Number(o.totals?.commission ?? o.commission ?? 0).toFixed(2),
+                Number(o.totals?.itf ?? o.itf ?? 0).toFixed(2),
+                Number(o.totals?.iue ?? o.iue ?? 0).toFixed(2),
+                Number(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0).toFixed(2),
+                Number(o.totals?.total ?? o.total ?? 0).toFixed(2)
+            ]);
+            const totalNet = orders.reduce((acc, o) => acc + Number(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0), 0);
+            if (format === 'csv') return makeCsv('nexo_reporte_gerencial_margen.csv', headers, rows.concat([['TOTAL','','','','', totalNet.toFixed(2), '']]));
+            openPrintableReport('Reporte Gerencial de Margen', 'Margen neto de intermediación luego de impuestos', headers, rows, [{label:'Comisión neta acumulada', value: toMoney(totalNet)}]);
+        }
+
+        // CARGAR DASHBOARD
+        function loadDashboard() {
+            const orders = getOrdersData();
+            const revenue = orders.reduce((acc, o) => acc + Number(o.totals?.total ?? o.total ?? 0), 0);
+            const clients = new Set(orders.map(o => (o.customer?.email || o.email || '').toLowerCase()).filter(Boolean)).size;
+            document.getElementById('totalOrders').textContent = String(orders.length);
+            document.getElementById('activeClients').textContent = String(clients || 0);
+            document.getElementById('totalRevenue').textContent = toMoney(revenue);
+            document.getElementById('pendingOrders').textContent = String(orders.length);
+        }
+
+        // CARGAR ÓRDENES
+        function loadOrders() {
+            const orders = getOrdersData();
+            const table = document.getElementById('ordersTable');
+            if (!orders.length) {
+                table.innerHTML = '<tr><td colspan="6">Sin órdenes registradas todavía.</td></tr>';
+                return;
+            }
+            table.innerHTML = orders.map(orderData => `
+                <tr>
+                    <td>${orderData.id || ''}</td>
+                    <td>${orderData.customer?.fullName || orderData.fullName || ''}</td>
+                    <td>${orderData.customer?.email || orderData.email || ''}</td>
+                    <td>US$ ${Number(orderData.totals?.total ?? orderData.total ?? 0).toFixed(2)}</td>
+                    <td>✅ Pagado</td>
+                    <td>${new Date(orderData.timestamp || Date.now()).toLocaleDateString('es-ES')}</td>
+                </tr>
+            `).join('');
+        }
+
+        // GUARDAR INFORMACIÓN DE LA EMPRESA
+        function saveCompanyInfo() {
+            const companyInfo = {
+                name: document.getElementById('editCompanyName').value,
+                socialName: document.getElementById('editCompanySocialName').value,
+                nit: document.getElementById('editCompanyNIT').value,
+                owner: document.getElementById('editCompanyOwner').value,
+                email: document.getElementById('editCompanyEmail').value,
+                address: document.getElementById('editCompanyAddress').value,
+                city: document.getElementById('editCompanyCity').value,
+                country: document.getElementById('editCompanyCountry').value,
+                regimen: document.getElementById('editCompanyRegimen').value,
+                itf: parseFloat(document.getElementById('editCompanyITF').value),
+                iue: parseFloat(document.getElementById('editCompanyIUE').value),
+                commission: parseFloat(document.getElementById('editCompanyCommission').value),
+                rf: parseFloat(document.getElementById('editCompanyRF').value),
+                exchangeRate: parseFloat(document.getElementById('editExchangeRate').value),
+                description: document.getElementById('editCompanyDescription').value
+            };
+
+            localStorage.setItem('nexoCompanyInfo', JSON.stringify(companyInfo));
+            localStorage.setItem('nexoCommission', String(companyInfo.commission));
+
+            document.getElementById('companyName').textContent = companyInfo.name;
+            document.getElementById('companySocialName').textContent = companyInfo.socialName;
+            document.getElementById('companyOwner').textContent = companyInfo.owner;
+            document.getElementById('companyITF').textContent = companyInfo.itf + '%';
+            document.getElementById('companyIUE').textContent = companyInfo.iue + '%';
+            const companyCommissionEl = document.getElementById('companyCommission');
+            if(companyCommissionEl) companyCommissionEl.textContent = companyInfo.commission + '%';
+
+            alert('✅ Información de la empresa guardada correctamente');
+        }
+
+        function resetCompanyInfo() {
+            document.getElementById('editCompanyName').value = 'NEXO';
+            document.getElementById('editCompanySocialName').value = 'NEXO';
+            document.getElementById('editCompanyNIT').value = '774651015';
+            document.getElementById('editCompanyOwner').value = 'EDUARDO RODRIGUEZ MARTINEZ';
+            document.getElementById('editCompanyEmail').value = 'ermcba@hotmail.com';
+            document.getElementById('editCompanyAddress').value = 'Avenida America 435, Edificio Jaque, Piso 4 Oficina 9';
+            document.getElementById('editCompanyCity').value = 'Cochabamba';
+            document.getElementById('editCompanyCountry').value = 'Bolivia';
+            document.getElementById('editCompanyCommission').value = '30';
+            document.getElementById('editCompanyDescription').value = 'NEXO es una plataforma intermediaria B2C global que conecta con Amazon y CJ Dropshipping para ofrecer productos a 196 países con comisión del 30%.';
+        }
+
+        
+        function loadCompanyInfo() {
+            const raw = localStorage.getItem('nexoCompanyInfo');
+            if (!raw) return;
+            try {
+                const companyInfo = JSON.parse(raw);
+                if (companyInfo.name) document.getElementById('companyName').textContent = companyInfo.name;
+                if (companyInfo.socialName) document.getElementById('companySocialName').textContent = companyInfo.socialName;
+                if (companyInfo.owner) document.getElementById('companyOwner').textContent = companyInfo.owner;
+                if (typeof companyInfo.itf === 'number') document.getElementById('companyITF').textContent = companyInfo.itf + '%';
+                if (typeof companyInfo.iue === 'number') document.getElementById('companyIUE').textContent = companyInfo.iue + '%';
+                if (typeof companyInfo.commission === 'number') {
+                    const companyCommissionEl = document.getElementById('companyCommission');
+                    if (companyCommissionEl) companyCommissionEl.textContent = companyInfo.commission + '%';
+                    const editCommissionEl = document.getElementById('editCompanyCommission');
+                    if (editCommissionEl) editCommissionEl.value = companyInfo.commission;
+                    const avgCommissionEl = document.getElementById('avgCommission');
+                    if (avgCommissionEl) avgCommissionEl.textContent = companyInfo.commission + '%';
+                }
+                if (typeof companyInfo.exchangeRate === 'number') document.getElementById('companyExchangeRate').textContent = companyInfo.exchangeRate.toFixed(2) + ' BOB/USD';
+                if (companyInfo.regimen) document.getElementById('companyRegimen').textContent = companyInfo.regimen;
+                if (companyInfo.name) document.getElementById('editCompanyName').value = companyInfo.name;
+                if (companyInfo.socialName) document.getElementById('editCompanySocialName').value = companyInfo.socialName;
+                if (companyInfo.nit) document.getElementById('editCompanyNIT').value = companyInfo.nit;
+                if (companyInfo.owner) document.getElementById('editCompanyOwner').value = companyInfo.owner;
+                if (companyInfo.email) document.getElementById('editCompanyEmail').value = companyInfo.email;
+                if (companyInfo.address) document.getElementById('editCompanyAddress').value = companyInfo.address;
+                if (companyInfo.city) document.getElementById('editCompanyCity').value = companyInfo.city;
+                if (companyInfo.country) document.getElementById('editCompanyCountry').value = companyInfo.country;
+                if (companyInfo.regimen) document.getElementById('editCompanyRegimen').value = companyInfo.regimen;
+                if (typeof companyInfo.itf === 'number') document.getElementById('editCompanyITF').value = companyInfo.itf;
+                if (typeof companyInfo.iue === 'number') document.getElementById('editCompanyIUE').value = companyInfo.iue;
+                if (typeof companyInfo.rf === 'number') document.getElementById('editCompanyRF').value = companyInfo.rf;
+                if (typeof companyInfo.exchangeRate === 'number') document.getElementById('editExchangeRate').value = companyInfo.exchangeRate;
+                if (companyInfo.description) document.getElementById('editCompanyDescription').value = companyInfo.description;
+            } catch (e) {
+                console.error('Error cargando datos de empresa', e);
+            }
+        }
+
+function logout() {
+            if (confirm('¿Deseas cerrar sesión?')) {
+                window.location.href = 'nexo-admin-login.html';
+            }
+        }
+
+        loadCompanyInfo();
+        loadDashboard();
+        renderCustomers();
+        renderPayments();
+        renderShipments();
+        renderProducts();
+        renderUsers();
+        applyReportFilters();
+    </script>
+
+    <div id="passwordModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('passwordModal')">
+        <div class="modal-card">
+            <h3>🔒 Cambiar contraseña</h3>
+            <div class="form-group">
+                <label class="form-label">Contraseña actual</label>
+                <input type="password" class="form-input" id="currentAdminPassword">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nueva contraseña</label>
+                <input type="password" class="form-input" id="newAdminPassword">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('passwordModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveAdminPassword()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="twoFAModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('twoFAModal')">
+        <div class="modal-card">
+            <h3>📱 Activar 2FA</h3>
+            <p style="color:#667; line-height:1.6;">Activa la verificación en dos pasos para reforzar la seguridad del acceso administrativo.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('twoFAModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirm2FA()">Activar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assignPasswordModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('assignPasswordModal')">
+        <div class="modal-card">
+            <h3>👤 Asignar clave a usuario</h3>
+            <div class="form-group">
+                <label class="form-label">Rol</label>
+                <input type="text" class="form-input" id="assignRole" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nueva contraseña</label>
+                <input type="password" class="form-input" id="assignPassword">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('assignPasswordModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveAssignedPassword()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

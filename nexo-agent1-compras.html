@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO Agent 1 - Compra Automática IA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --success: #27AE60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .agent-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+        }
+
+        .agent-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 40px;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .agent-header h1 {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .agent-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 8px 0 0 0;
+        }
+
+        .agent-status {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #27AE60;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .agent-content {
+            padding: 40px;
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .agent-panel {
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            border: 2px solid rgba(74, 107, 109, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .agent-panel-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .agent-panel-title emoji {
+            font-size: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(122, 199, 66, 0.2);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 107, 109, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .data-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: var(--white);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .data-item-label {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 13px;
+        }
+
+        .data-item-value {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(74, 107, 109, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #27AE60;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left-color: #2196F3;
+        }
+
+        .purchases-list {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .purchase-item {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .purchase-item:last-child {
+            border-bottom: none;
+        }
+
+        .purchase-item:hover {
+            background: #f9f9f9;
+        }
+
+        .purchase-info {
+            flex: 1;
+        }
+
+        .purchase-product {
+            font-weight: 900;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .purchase-date {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .purchase-amount {
+            font-weight: 900;
+            color: var(--accent);
+            font-size: 16px;
+            text-align: right;
+        }
+
+        .agent-footer {
+            padding: 20px 40px;
+            background: #f5f5f5;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .agent-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .agent-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+            }
+
+            .agent-header h1 {
+                font-size: 28px;
+            }
+
+            .agent-content {
+                padding: 25px;
+            }
+
+            .agent-panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="agent-container">
+        <div class="agent-header">
+            <div>
+                <h1>🤖 Agente 1: Compra Automática IA</h1>
+                <p>Procesamiento automático de compras en Amazon y CJ Dropshipping</p>
+            </div>
+            <div class="agent-status">
+                <div class="status-dot"></div>
+                ACTIVO
+            </div>
+        </div>
+
+        <div class="agent-content">
+            <div class="agent-grid">
+                <!-- PANEL IZQUIERDO: CONFIGURACIÓN -->
+                <div class="agent-panel">
+                    <div class="agent-panel-title">
+                        <emoji>⚙️</emoji>
+                        Configurar Compra
+                    </div>
+
+                    <form id="purchaseForm">
+                        <div class="form-group">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-select" id="supplier">
+                                <option value="">Selecciona proveedor...</option>
+                                <option value="">Amazon Global</option>
+                                <option value="">CJ Dropshipping</option>
+                                <option value="">Ambos (Mejor Precio)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre del Producto</label>
+                            <input type="text" class="form-input" id="productName" placeholder="ej: Audífonos Bluetooth">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" class="form-input" id="quantity" placeholder="1" min="1" value="">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Presupuesto Máximo (USD)</label>
+                            <input type="number" class="form-input" id="budget" placeholder="100" min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Prioridad</label>
+                            <select class="form-select" id="priority">
+                                <option value="">Normal (5-7 días)</option>
+                                <option value="">Expresada (2-3 días)</option>
+                                <option value="">Urgente (1 día)</option>
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn-primary" onclick="procesarCompra()" id="submitBtn">
+                            🚀 Procesar Compra Automática
+                        </button>
+                    </form>
+
+                    <div id="alertContainer"></div>
+                </div>
+
+                <!-- PANEL DERECHO: ANÁLISIS -->
+                <div class="agent-panel">
+                    <div class="agent-panel-title">
+                        <emoji>📊</emoji>
+                        Análisis de Compra
+                    </div>
+
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <span class="data-item-label">Estado Búsqueda</span>
+                            <span class="data-item-value" id="searchStatus">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-item-label">Mejores Ofertas</span>
+                            <span class="data-item-value" id="offersCount">0</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-item-label">Precio Mínimo</span>
+                            <span class="data-item-value" id="minPrice">$0.00</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-item-label">Precio Promedio</span>
+                            <span class="data-item-value" id="avgPrice">$0.00</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-item-label">Ahorro Estimado</span>
+                            <span class="data-item-value" id="savings">$0.00</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-item-label">Califación Proveedor</span>
+                            <span class="data-item-value" id="rating">4.8⭐</span>
+                        </div>
+                    </div>
+
+                    <div id="processingContainer" style="display:none; text-align:center; margin-top:20px;">
+                        <div class="spinner" style="margin: 0 auto;"></div>
+                        <p style="margin-top:15px; color:#666; font-size:13px;">Procesando búsqueda en proveedores...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTÓRICO DE COMPRAS -->
+            <div style="margin-top: 30px;">
+                <h2 style="font-size:22px; font-weight:900; color:var(--dark); margin-bottom:20px; letter-spacing:-0.5px;">
+                    📦 Últimas Compras Automáticas
+                </h2>
+
+                <div id="purchasesList" class="purchases-list">
+                    <div style="padding:20px; text-align:center; color:#999;">
+                        No hay compras aún. Procesa la primera compra automática.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="agent-footer">
+            🤖 Agent 1 - Compra Automática IA | Integración Amazon & CJ Dropshipping | Búsqueda inteligente de mejores precios
+        </div>
+    </div>
+
+    <script>
+        let purchases = JSON.parse(localStorage.getItem('agentPurchases')) || [];
+
+        function procesarCompra() {
+            const supplier = document.getElementById('supplier').value;
+            const productName = document.getElementById('productName').value;
+            const quantity = document.getElementById('quantity').value;
+            const budget = parseFloat(document.getElementById('budget').value);
+            const priority = document.getElementById('priority').value;
+
+            if (!supplier || !productName || !budget) {
+                showAlert('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            document.getElementById('processingContainer').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+
+            // Simulación de búsqueda en proveedores
+            setTimeout(() => {
+                const priceAmazon = (Math.random() * budget * 0.8) + (budget * 0.1);
+                const priceCJ = (Math.random() * budget * 0.85) + (budget * 0.05);
+                
+                const minPrice = Math.min(priceAmazon, priceCJ);
+                const avgPrice = (priceAmazon + priceCJ) / 2;
+                const savings = budget - minPrice;
+
+                document.getElementById('searchStatus').textContent = 'Completado ✓';
+                document.getElementById('offersCount').textContent = '2';
+                document.getElementById('minPrice').textContent = '$' + minPrice.toFixed(2);
+                document.getElementById('avgPrice').textContent = '$' + avgPrice.toFixed(2);
+                document.getElementById('savings').textContent = '$' + savings.toFixed(2);
+                document.getElementById('rating').textContent = (4.5 + Math.random()).toFixed(1) + '⭐';
+
+                // Agregar a histórico
+                const purchase = {
+                    id: Date.now(),
+                    product: productName,
+                    supplier: supplier,
+                    quantity: quantity,
+                    price: minPrice,
+                    priority: priority,
+                    date: new Date().toLocaleString('es-ES'),
+                    status: 'Procesada'
+                };
+
+                purchases.unshift(purchase);
+                localStorage.setItem('agentPurchases', JSON.stringify(purchases));
+
+                renderPurchases();
+                showAlert('✅ Compra procesada automáticamente', 'success');
+
+                document.getElementById('processingContainer').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('purchaseForm').reset();
+            }, 2500);
+        }
+
+        function renderPurchases() {
+            const container = document.getElementById('purchasesList');
+            
+            if (purchases.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">No hay compras aún.</div>';
+                return;
+            }
+
+            container.innerHTML = purchases.map(p => `
+                <div class="purchase-item">
+                    <div class="purchase-info">
+                        <div class="purchase-product">📦 ${p.product} (x${p.quantity})</div>
+                        <div class="purchase-date">${p.date} • ${p.supplier.toUpperCase()} • Prioridad: ${p.priority}</div>
+                    </div>
+                    <div class="purchase-amount">$${parseFloat(p.price).toFixed(2)}</div>
+                </div>
+            `).join('');
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertClass = type === 'error' ? 'alert alert-danger' : 'alert alert-success';
+            const alertDiv = document.createElement('div');
+            alertDiv.className = alertClass;
+            alertDiv.innerHTML = `<span>${message}</span>`;
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', renderPurchases);
+    </script>
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+</body>
+</html>

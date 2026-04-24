@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO - Checkout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --light-bg: #D0DDD8;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --gray: #7A8B8B;
+            --danger: #E74C3C;
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: var(--white);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 14px;
+            padding: 4px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .logo-subtext {
+            font-size: 8px;
+            opacity: 0.8;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: var(--white);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* ========== CONTENEDOR PRINCIPAL ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 40px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 32px;
+        }
+
+        /* ========== CARRITO ARRIBA ========== */
+        .cart-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            grid-column: 1 / -1;
+            order: -1;
+        }
+
+        .cart-header {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .cart-item {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .cart-item-icon {
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .cart-item-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+
+        .cart-item-price {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .cart-item-shipping {
+            font-size: 10px;
+            color: var(--gray);
+            font-weight: 600;
+            border-top: 1px solid var(--light-bg);
+            padding-top: 8px;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .cart-item-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: var(--tertiary);
+            color: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .cart-item-btn:hover {
+            background: var(--secondary);
+        }
+
+        .cart-item-qty {
+            min-width: 30px;
+            height: 30px;
+            background: var(--light);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 12px;
+        }
+
+        .cart-item-delete {
+            background: var(--danger);
+            border: none;
+            color: var(--white);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .cart-item-delete:hover {
+            opacity: 0.8;
+        }
+
+        /* ========== FORMULARIO ========== */
+        .form-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .form-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+        }
+
+        .form-input,
+        .form-select {
+            padding: 14px 16px;
+            border: 2px solid var(--light-bg);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--white);
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(122, 199, 66, 0.2);
+        }
+
+        /* ========== TELÉFONO CON CÓDIGO DE ÁREA ========== */
+        .phone-group {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 8px;
+        }
+
+        .phone-code {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .phone-code .form-input {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .phone-number {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* ========== RESUMEN LATERAL ========== */
+        .summary-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .summary-row.total {
+            border-bottom: none;
+            border-top: 2px solid var(--accent);
+            padding-top: 16px;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .summary-row.section-header {
+            background: rgba(122, 199, 66, 0.1);
+            padding: 12px 12px;
+            margin: 0 -12px 12px;
+            border-bottom: 2px solid var(--accent);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            text-align: right;
+            font-weight: 900;
+        }
+
+        .summary-row.tax {
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .summary-row.fee {
+            font-size: 12px;
+            color: var(--dark);
+            font-weight: 700;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .summary-row.shipping {
+            font-size: 11px;
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        /* ========== MÉTODOS DE PAGO ========== */
+        .payment-methods {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .payment-btn {
+            padding: 12px;
+            border: 2px solid var(--light-bg);
+            background: var(--white);
+            color: var(--dark);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .payment-btn:hover {
+            border-color: var(--accent);
+            background: rgba(122, 199, 66, 0.05);
+        }
+
+        .payment-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: var(--dark);
+        }
+
+        /* ========== BOTÓN COMPRAR ========== */
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: var(--dark);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(122, 199, 66, 0.2);
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(122, 199, 66, 0.3);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: var(--primary);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 24px;
+            font-size: 11px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            grid-column: 1 / -1;
+            margin-top: 32px;
+        }
+
+        .footer strong {
+            color: var(--white);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-section {
+                position: static;
+                order: 2;
+            }
+
+            .cart-section {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .cart-items {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .phone-group {
+                grid-template-columns: 80px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-text">neXo</div>
+                <div class="logo-subtext">PAY</div>
+            </div>
+            <div class="header-content">
+                <div class="header-title" id="chkTitle">Checkout NEXO</div>
+                <div class="header-subtitle" id="chkSubtitle">Compra Segura • 256-bit SSL • 196 Países</div>
+            </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='nexo-tienda-publica.html'"><span id="backStore">← <span id="confirmBackText">Volver</span> a Tienda</span></button>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container">
+
+        <!-- CARRITO (ARRIBA) -->
+        <div class="cart-section">
+            <div class="cart-header" id="cartHeader">🛒 Tu Carrito</div>
+            <div class="cart-items" id="cartItems">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+
+        <!-- FORMULARIO (IZQUIERDA) -->
+        <div class="form-section">
+            
+            <!-- DATOS PERSONALES -->
+            <div class="form-title" id="personalTitle">👤 Datos Personales</div>
+            <div class="form-group">
+                <label class="form-label" id="lblFullName">Nombre Completo</label>
+                <input type="text" class="form-input" id="fullName" placeholder="Juan Pérez" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblEmail">Email</label>
+                <input type="email" class="form-input" id="email" placeholder="juan@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblPhone">Teléfono</label>
+                <div class="phone-group">
+                    <div class="phone-code">
+                        <label class="form-label" id="lblCode">Código</label>
+                        <input type="text" class="form-input" id="phoneCode" placeholder="" readonly>
+                    </div>
+                    <div class="phone-number">
+                        <label class="form-label" id="lblNumber">Número</label>
+                        <input type="text" class="form-input" id="phoneNumber" placeholder="75432100" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIRECCIÓN DE ENVÍO -->
+            <div class="form-title" style="margin-top: 24px;" id="shippingTitle">📍 Dirección de Envío</div>
+            <div class="form-group">
+                <label class="form-label" id="lblCountry">País</label>
+                <select class="form-select" id="countrySelect" onchange="updatePhoneCode()" required>
+                    <option value="">Selecciona un país...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblRegion">Región/Estado</label>
+                <input type="text" class="form-input" id="region" placeholder="La Paz, Santa Cruz, etc." required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblCity">Ciudad</label>
+                <input type="text" class="form-input" id="city" placeholder="La Paz" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblAddress">Dirección Completa</label>
+                <input type="text" class="form-input" id="address" placeholder="Calle, número, apartamento..." required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblZip">Código Postal</label>
+                <input type="text" class="form-input" id="zipCode" placeholder="CP 1234" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblDelivery">Preferencia de envío</label>
+                <select class="form-select" id="shippingPriority" onchange="refreshDeliveryEstimate()">
+                    <option value="">Envío estándar</option>
+                    <option value="">Envío prioritario</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblArrival">Entrega estimada</label>
+                <div id="deliveryEstimateBox" style="background:#fff7ef;border:1px solid #ffd39e;border-radius:10px;padding:12px 14px;color:#a85d00;font-size:12px;font-weight:700;line-height:1.5;">Llega en 12 días</div>
+            </div>
+
+            <!-- MÉTODO DE PAGO -->
+            <div class="form-title" style="margin-top: 24px;" id="paymentTitle">💳 Método de Pago</div>
+            <div class="payment-methods" id="paymentMethods">
+                <!-- Se genera dinámicamente -->
+            </div>
+
+            <!-- DETALLES DE PAGO (según método) -->
+            <div id="paymentDetails"></div>
+
+        </div>
+
+        <!-- RESUMEN (DERECHA) -->
+        <div class="summary-section">
+            <div class="summary-title" id="summaryTitle">📊 Resumen de Costo</div>
+            
+            <!-- SECCIÓN 1: PRECIO DEL PRODUCTO -->
+            <div class="summary-row section-header"><span id="prodSection">📦 Precio del Producto</span></div>
+            <div class="summary-row">
+                <span><span id="sumSubtotalLbl">Subtotal (Producto):</span></span>
+                <span class="summary-value" id="subtotal">$0.00</span>
+            </div>
+            <div class="summary-row shipping">
+                <span><span id="sumShipLbl">Gastos de Envío (Amazon/Marketplace):</span></span>
+                <span class="summary-value" id="amazonShipping">$0.00</span>
+            </div>
+            <div class="summary-row shipping">
+                <span><span id="sumVendorLbl">Gastos de la Empresa Vendedora:</span></span>
+                <span class="summary-value" id="vendorFees">$0.00</span>
+            </div>
+
+            <!-- SECCIÓN 2: COMISIÓN DE INTERMEDIACIÓN -->
+            <div class="summary-row section-header" style="margin-top: 16px;"><span id="comSection">🏢 Comisión de Intermediación</span></div>
+            <div class="summary-row fee">
+                <span><span id="sumCommissionLbl">Comisión NEXO:</span></span>
+                <span class="summary-value" id="commission">$0.00</span>
+            </div>
+
+            <!-- SECCIÓN 3: IMPUESTOS SOBRE COMISIÓN -->
+            <div class="summary-row section-header"><span id="taxSection">💰 </span></div>
+            <div class="summary-row tax">
+                <span><span id="sumItLbl"></span></span>
+                <span class="summary-value" id="itf">$0.00</span>
+            </div>
+            <div class="summary-row tax">
+                <span><span id="sumIueLbl"></span></span>
+                <span class="summary-value" id="iue">$0.00</span>
+            </div>
+            <div class="summary-row shipping" id="deliverySummaryRow">
+                <span><span id="sumDeliveryLbl">Entrega estimada:</span></span>
+                <span class="summary-value" id="deliverySummary">Llega en 12 días</span>
+            </div>
+
+            <!-- TOTAL FINAL -->
+            <div class="summary-row total" style="margin-top: 16px;">
+                <span><span id="sumTotalLbl">💵 TOTAL A PAGAR:</span></span>
+                <span class="summary-value" id="total">$0.00</span>
+            </div>
+
+            <button class="checkout-btn" onclick="openConfirmationModal()"><span id="completeBtnText">🔒 Completar Compra</span></button>
+        </div>
+
+    </div>
+
+
+    <div id="confirmationModal" style="display:none;position:fixed;inset:0;background:rgba(33,47,48,.66);z-index:5000;padding:18px;overflow:auto;">
+        <div style="max-width:660px;margin:40px auto;background:#fff;border-radius:26px;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.24);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px;">
+                <div><div style="font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#5b7c7f;"><span id="confirmMiniTitle">Confirmación de compra</span></div><h3 style="font-size:32px;color:#2d3e3f;margin-top:8px;"><span id="confirmTitle">Revisa y confirma el pedido</span></h3></div>
+                <button onclick="closeConfirmationModal()" style="border:0;background:#eef4f3;width:40px;height:40px;border-radius:50%;font-size:24px;cursor:pointer;">×</button>
+            </div>
+            <div id="confirmationSummary" style="background:#f6fbfa;border:1px solid #d8e5e2;border-radius:18px;padding:18px;color:#526668;line-height:1.8;margin-bottom:18px;"></div>
+            <div class="form-group"><label class="form-label" id="lblNote">Observación del cliente</label><textarea class="form-input" id="customerNote" rows="3" style="resize:vertical;padding-top:14px" placeholder="Ej.: entregar en horario de oficina, referencia de dirección, etc."></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <button class="checkout-btn" style="margin-top:6px;background:#dfe9e5;color:#395153;box-shadow:none" onclick="closeConfirmationModal()"><span id="confirmBackText">Volver</span></button>
+                <button class="checkout-btn" style="margin-top:6px" onclick="submitPurchase()"><span id="confirmBuyText">Confirmar compra</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span><strong>NEXO</strong> © 2024 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | <strong>NIT: </strong> | <strong>🔐 256-bit SSL</strong></span>
+    </div>
+
+    <script>
+        
+const checkoutI18n={
+ es:{chkTitle:'Checkout NEXO',chkSubtitle:'Compra Segura • 256-bit SSL • 196 Países',backStore:'← Volver a Tienda',cartHeader:'🛒 Tu Carrito',personalTitle:'👤 Datos Personales',lblFullName:'Nombre Completo',lblEmail:'Email',lblPhone:'Teléfono',lblCode:'Código',lblNumber:'Número',shippingTitle:'📍 Dirección de Envío',lblCountry:'País',lblRegion:'Región/Estado',lblCity:'Ciudad',lblAddress:'Dirección Completa',lblZip:'Código Postal',lblDelivery:'Preferencia de envío',lblArrival:'Entrega estimada',paymentTitle:'💳 Método de Pago',summaryTitle:'📊 Resumen de Costo',prodSection:'📦 Precio del Producto',sumSubtotalLbl:'Subtotal (Producto):',sumShipLbl:'Gastos de Envío (Amazon/Marketplace):',sumVendorLbl:'Gastos de la Empresa Vendedora:',comSection:'🏢 Comisión de Intermediación',sumCommissionLbl:'Comisión NEXO:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL A PAGAR:',completeBtnText:'🔒 Completar Compra',confirmMiniTitle:'Confirmación de compra',confirmTitle:'Revisa y confirma el pedido',lblNote:'Observación del cliente',confirmBackText:'Volver',confirmBuyText:'Confirmar compra',footerCheckout:'Checkout Seguro Internacional',phCountry:'Selecciona un país...', phRegion:'La Paz, Santa Cruz, etc.', phCity:'La Paz', phAddress:'Calle, número, apartamento...', phZip:'CP 1234', phNote:'Ej.: entregar en horario de oficina, referencia de dirección, etc.', itemWord:'artículos', confirmClient:'Cliente', confirmEmail:'Email', confirmPhone:'Teléfono', confirmDestination:'Destino', confirmAddress:'Dirección', confirmPayment:'Método de pago', confirmSubtotal:'Subtotal producto', confirmShip:'Gastos Amazon/Marketplace', confirmVendor:'Gastos empresa vendedora', confirmCommission:'Comisión NEXO',  confirmTotal:'Total a pagar',deliveryStandard:'Envío estándar',deliveryPriority:'Envío prioritario',deliveryEta:'Entrega estimada',deliveryOrange:'Detalle de envío externo'},
+ en:{chkTitle:'NEXO Checkout',chkSubtitle:'Secure Purchase • 256-bit SSL • 196 Countries',backStore:'← Back to Store',cartHeader:'🛒 Your Cart',personalTitle:'👤 Personal Information',lblFullName:'Full Name',lblEmail:'Email',lblPhone:'Phone',lblCode:'Code',lblNumber:'Number',shippingTitle:'📍 Shipping Address',lblCountry:'Country',lblRegion:'Region/State',lblCity:'City',lblAddress:'Full Address',lblZip:'Postal Code',lblDelivery:'Shipping preference',lblArrival:'Estimated delivery',paymentTitle:'💳 Payment Method',summaryTitle:'📊 Cost Summary',prodSection:'📦 Product Price',sumSubtotalLbl:'Subtotal (Product):',sumShipLbl:'Shipping Costs (Amazon/Marketplace):',sumVendorLbl:'Seller Company Charges:',comSection:'🏢 Intermediation Commission',sumCommissionLbl:'NEXO Commission:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL TO PAY:',completeBtnText:'🔒 Complete Purchase',confirmMiniTitle:'Purchase confirmation',confirmTitle:'Review and confirm the order',lblNote:'Customer note',confirmBackText:'Back',confirmBuyText:'Confirm purchase',footerCheckout:'Secure International Checkout',phCountry:'Select a country...', phRegion:'State / region', phCity:'City', phAddress:'Street, number, apartment...', phZip:'ZIP 1234', phNote:'Ex.: office hours delivery, address reference, etc.', itemWord:'items', confirmClient:'Client', confirmEmail:'Email', confirmPhone:'Phone', confirmDestination:'Destination', confirmAddress:'Address', confirmPayment:'Payment method', confirmSubtotal:'Product subtotal', confirmShip:'Amazon/Marketplace charges', confirmVendor:'Seller company charges', confirmCommission:'NEXO commission',  confirmTotal:'Total to pay',deliveryStandard:'Standard shipping',deliveryPriority:'Priority shipping',deliveryEta:'Estimated delivery',deliveryOrange:'External shipping detail'},
+ pt:{chkTitle:'Checkout NEXO',chkSubtitle:'Compra Segura • SSL 256-bit • 196 Países',backStore:'← Voltar à Loja',cartHeader:'🛒 Seu Carrinho',personalTitle:'👤 Dados Pessoais',lblFullName:'Nome Completo',lblEmail:'E-mail',lblPhone:'Telefone',lblCode:'Código',lblNumber:'Número',shippingTitle:'📍 Endereço de Entrega',lblCountry:'País',lblRegion:'Região/Estado',lblCity:'Cidade',lblAddress:'Endereço Completo',lblZip:'CEP',paymentTitle:'💳 Método de Pagamento',summaryTitle:'📊 Resumo de Custos',prodSection:'📦 Preço do Produto',sumSubtotalLbl:'Subtotal (Produto):',sumShipLbl:'Custos de Envio (Amazon/Marketplace):',sumVendorLbl:'Custos da Empresa Vendedora:',comSection:'🏢 Comissão de Intermediação',sumCommissionLbl:'Comissão NEXO:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL A PAGAR:',completeBtnText:'🔒 Finalizar Compra',confirmMiniTitle:'Confirmação da compra',confirmTitle:'Revise e confirme o pedido',lblNote:'Observação do cliente',confirmBackText:'Voltar',confirmBuyText:'Confirmar compra',footerCheckout:'Checkout Internacional Seguro',phCountry:'Selecione um país...', phRegion:'Região / estado', phCity:'Cidade', phAddress:'Rua, número, apartamento...', phZip:'CEP 1234', phNote:'Ex.: entrega em horário comercial, referência de endereço, etc.', itemWord:'itens', confirmClient:'Cliente', confirmEmail:'E-mail', confirmPhone:'Telefone', confirmDestination:'Destino', confirmAddress:'Endereço', confirmPayment:'Método de pagamento', confirmSubtotal:'Subtotal do produto', confirmShip:'Custos Amazon/Marketplace', confirmVendor:'Custos da empresa vendedora', confirmCommission:'Comissão NEXO',  confirmTotal:'Total a pagar',deliveryStandard:'Envío estándar',deliveryPriority:'Envío prioritario',deliveryEta:'Entrega estimada',deliveryOrange:'Detalle de envío externo'},
+ it:{chkTitle:'Checkout NEXO',chkSubtitle:'Acquisto Sicuro • SSL 256-bit • 196 Paesi',backStore:'← Torna al Negozio',cartHeader:'🛒 Il tuo Carrello',personalTitle:'👤 Dati Personali',lblFullName:'Nome Completo',lblEmail:'Email',lblPhone:'Telefono',lblCode:'Codice',lblNumber:'Numero',shippingTitle:'📍 Indirizzo di Spedizione',lblCountry:'Paese',lblRegion:'Regione/Stato',lblCity:'Città',lblAddress:'Indirizzo Completo',lblZip:'CAP',lblDelivery:'Preferenza di spedizione',lblArrival:'Consegna stimata',paymentTitle:'💳 Metodo di Pagamento',summaryTitle:'📊 Riepilogo Costi',prodSection:'📦 Prezzo del Prodotto',sumSubtotalLbl:'Subtotale (Prodotto):',sumShipLbl:'Costi di Spedizione (Amazon/Marketplace):',sumVendorLbl:'Costi dell’Azienda Venditrice:',comSection:'🏢 Commissione di Intermediazione',sumCommissionLbl:'Commissione NEXO:',taxSection:'💰 Tasse (sulla Commissione)',sumItLbl:'IT (3% sulla commissione):',sumIueLbl:'IUE (25% sulla commissione):',sumTotalLbl:'💵 TOTALE DA PAGARE:',completeBtnText:'🔒 Completa Acquisto',confirmMiniTitle:'Conferma acquisto',confirmTitle:'Controlla e conferma l’ordine',lblNote:'Nota del cliente',confirmBackText:'Indietro',confirmBuyText:'Conferma acquisto',footerCheckout:'Checkout Internazionale Sicuro',phCountry:'Seleziona un paese...', phRegion:'Regione / stato', phCity:'Città', phAddress:'Via, numero, appartamento...', phZip:'CAP 1234', phNote:'Es.: consegna in orario d’ufficio, riferimento indirizzo, ecc.', itemWord:'articoli', confirmClient:'Cliente', confirmEmail:'Email', confirmPhone:'Telefono', confirmDestination:'Destinazione', confirmAddress:'Indirizzo', confirmPayment:'Metodo di pagamento', confirmSubtotal:'Subtotale prodotto', confirmShip:'Costi Amazon/Marketplace', confirmVendor:'Costi dell’azienda venditrice', confirmCommission:'Commissione NEXO',   confirmTotal:'Totale da pagare',deliveryStandard:'Spedizione standard',deliveryPriority:'Spedizione prioritaria',deliveryEta:'Consegna stimata',deliveryOrange:'Dettaglio spedizione esterna'},
+ fr:{chkTitle:'Checkout NEXO',chkSubtitle:'Achat Sécurisé • SSL 256-bit • 196 Pays',backStore:'← Retour à la Boutique',cartHeader:'🛒 Votre Panier',personalTitle:'👤 Informations Personnelles',lblFullName:'Nom Complet',lblEmail:'E-mail',lblPhone:'Téléphone',lblCode:'Code',lblNumber:'Numéro',shippingTitle:'📍 Adresse de Livraison',lblCountry:'Pays',lblRegion:'Région/État',lblCity:'Ville',lblAddress:'Adresse Complète',lblZip:'Code Postal',paymentTitle:'💳 Mode de Paiement',summaryTitle:'📊 Résumé des Coûts',prodSection:'📦 Prix du Produit',sumSubtotalLbl:'Sous-total (Produit) :',sumShipLbl:'Frais de Livraison (Amazon/Marketplace) :',sumVendorLbl:'Frais de l’Entreprise Vendeuse :',comSection:'🏢 Commission d’Intermédiation',sumCommissionLbl:'Commission NEXO :',taxSection:'💰 Taxes (sur la commission)',sumItLbl:'IT (3% sur commission) :',sumIueLbl:'IUE (25% sur commission) :',sumTotalLbl:'💵 TOTAL À PAYER :',completeBtnText:'🔒 Finaliser l’Achat',confirmMiniTitle:'Confirmation d’achat',confirmTitle:'Vérifiez et confirmez la commande',lblNote:'Note du client',confirmBackText:'Retour',confirmBuyText:'Confirmer l’achat',footerCheckout:'Checkout International Sécurisé',phCountry:'Sélectionnez un pays...', phRegion:'Région / état', phCity:'Ville', phAddress:'Rue, numéro, appartement...', phZip:'CP 1234', phNote:'Ex. : livraison pendant les heures de bureau, repère d’adresse, etc.', itemWord:'articles', confirmClient:'Client', confirmEmail:'E-mail', confirmPhone:'Téléphone', confirmDestination:'Destination', confirmAddress:'Adresse', confirmPayment:'Mode de paiement', confirmSubtotal:'Sous-total produit', confirmShip:'Frais Amazon/Marketplace', confirmVendor:'Frais de l’entreprise vendeuse', confirmCommission:'Commission NEXO',   confirmTotal:'Total à payer'}
+};
+let currentLang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+function ctt(){ return checkoutI18n[currentLang] || checkoutI18n.es; }
+
+function applyCheckoutLanguage(){
+ currentLang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; document.documentElement.lang=currentLang; const t=ctt();
+ ['chkTitle','chkSubtitle','backStore','cartHeader','personalTitle','lblFullName','lblEmail','lblPhone','lblCode','lblNumber','shippingTitle','lblCountry','lblRegion','lblCity','lblAddress','lblZip','lblDelivery','lblArrival','paymentTitle','summaryTitle','prodSection','sumSubtotalLbl','sumShipLbl','sumVendorLbl','comSection','sumCommissionLbl','taxSection','sumItLbl','sumIueLbl','sumDeliveryLbl','sumTotalLbl','completeBtnText','confirmMiniTitle','confirmTitle','lblNote','confirmBackText','confirmBuyText','footerCheckout'].forEach(id=>{ const el=document.getElementById(id); if(el && t[id]) el.textContent=t[id]; });
+ const region=document.getElementById('region'); if(region) region.placeholder=t.phRegion;
+ const city=document.getElementById('city'); if(city) city.placeholder=t.phCity;
+ const address=document.getElementById('address'); if(address) address.placeholder=t.phAddress;
+ const zip=document.getElementById('zipCode'); if(zip) zip.placeholder=t.phZip;
+ const note=document.getElementById('customerNote'); if(note) note.placeholder=t.phNote;
+ const first=document.querySelector('#countrySelect option[value=""]'); if(first) first.textContent=t.phCountry;
+ const shipSel=document.getElementById('shippingPriority'); if(shipSel && shipSel.options.length>=2){ shipSel.options[0].textContent=t.deliveryStandard; shipSel.options[1].textContent=t.deliveryPriority; }
+ document.querySelectorAll('.payment-method, .payment-btn').forEach(btn=>{
+   const raw=(btn.dataset.method||btn.getAttribute('data-method')||btn.textContent||'').toLowerCase();
+   if(raw.includes('tarjeta')||raw.includes('card')||raw.includes('credito')) btn.innerHTML='💳 '+({es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'}[currentLang]||'Credit/Debit Card');
+   else if(raw.includes('transfer')||raw.includes('bancaria')||raw.includes('bancário')||raw.includes('virement')) btn.innerHTML='🏦 '+({es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}[currentLang]||'Bank Transfer');
+   else if(raw.includes('payoneer')) btn.innerHTML='💼 Payoneer';
+   else if(raw.includes('paypal')) btn.innerHTML='🅿️ PayPal';
+ });
+}
+
+
+        // DATOS DE 196 PAÍSES CON CÓDIGOS DE ÁREA
+        const countriesPhoneData = [
+            { code: 'BO', name: 'Bolivia', area: '' },
+            { code: 'AR', name: 'Argentina', area: '+54' },
+            { code: 'BR', name: 'Brasil', area: '+55' },
+            { code: 'CL', name: 'Chile', area: '+56' },
+            { code: 'CO', name: 'Colombia', area: '+57' },
+            { code: 'EC', name: 'Ecuador', area: '+593' },
+            { code: 'PE', name: 'Perú', area: '+51' },
+            { code: 'PY', name: 'Paraguay', area: '+595' },
+            { code: 'UY', name: 'Uruguay', area: '+598' },
+            { code: 'VE', name: 'Venezuela', area: '+58' },
+            { code: 'MX', name: 'México', area: '+52' },
+            { code: 'US', name: 'Estados Unidos', area: '+1' },
+            { code: 'CA', name: 'Canadá', area: '+1' },
+            { code: 'CR', name: 'Costa Rica', area: '+506' },
+            { code: 'CU', name: 'Cuba', area: '+53' },
+            { code: 'GT', name: 'Guatemala', area: '+502' },
+            { code: 'HN', name: 'Honduras', area: '+504' },
+            { code: 'PA', name: 'Panamá', area: '+507' },
+            { code: 'SV', name: 'El Salvador', area: '+503' },
+            { code: 'NI', name: 'Nicaragua', area: '+505' },
+            { code: 'DO', name: 'República Dominicana', area: '+1' },
+            { code: 'ES', name: 'España', area: '+34' },
+            { code: 'PT', name: 'Portugal', area: '+351' },
+            { code: 'IT', name: 'Italia', area: '+39' },
+            { code: 'FR', name: 'Francia', area: '+33' },
+            { code: 'DE', name: 'Alemania', area: '+49' },
+            { code: 'GB', name: 'Reino Unido', area: '+44' },
+            { code: 'IE', name: 'Irlanda', area: '+353' },
+            { code: 'CH', name: 'Suiza', area: '+41' },
+            { code: 'SE', name: 'Suecia', area: '+46' },
+            { code: 'NL', name: 'Países Bajos', area: '+31' },
+            { code: 'AT', name: 'Austria', area: '+43' },
+            { code: 'BE', name: 'Bélgica', area: '+32' },
+            { code: 'BG', name: 'Bulgaria', area: '+359' },
+            { code: 'HR', name: 'Croacia', area: '+385' },
+            { code: 'CY', name: 'Chipre', area: '+357' },
+            { code: 'CZ', name: 'República Checa', area: '+420' },
+            { code: 'DK', name: 'Dinamarca', area: '+45' },
+            { code: 'EE', name: 'Estonia', area: '+372' },
+            { code: 'FI', name: 'Finlandia', area: '+358' },
+            { code: 'GR', name: 'Grecia', area: '+30' },
+            { code: 'HU', name: 'Hungría', area: '+36' },
+            { code: 'LV', name: 'Letonia', area: '+371' },
+            { code: 'LT', name: 'Lituania', area: '+370' },
+            { code: 'LU', name: 'Luxemburgo', area: '+352' },
+            { code: 'MT', name: 'Malta', area: '+356' },
+            { code: 'PL', name: 'Polonia', area: '+48' },
+            { code: 'RO', name: 'Rumania', area: '+40' },
+            { code: 'RU', name: 'Rusia', area: '+7' },
+            { code: 'SK', name: 'Eslovaquia', area: '+421' },
+            { code: 'SI', name: 'Eslovenia', area: '+386' },
+            { code: 'UA', name: 'Ucrania', area: '+380' },
+            { code: 'TR', name: 'Turquía', area: '+90' },
+            { code: 'GE', name: 'Georgia', area: '+995' },
+            { code: 'IL', name: 'Israel', area: '+972' },
+            { code: 'JO', name: 'Jordania', area: '+962' },
+            { code: 'LB', name: 'Líbano', area: '+961' },
+            { code: 'SA', name: 'Arabia Saudita', area: '+966' },
+            { code: 'AE', name: 'Emiratos Árabes', area: '+971' },
+            { code: 'QA', name: 'Qatar', area: '+974' },
+            { code: 'KW', name: 'Kuwait', area: '+965' },
+            { code: 'BH', name: 'Baréin', area: '+973' },
+            { code: 'OM', name: 'Omán', area: '+968' },
+            { code: 'YE', name: 'Yemen', area: '+967' },
+            { code: 'EG', name: 'Egipto', area: '+20' },
+            { code: 'LY', name: 'Libia', area: '+218' },
+            { code: 'TN', name: 'Túnez', area: '+216' },
+            { code: 'DZ', name: 'Argelia', area: '+213' },
+            { code: 'MA', name: 'Marruecos', area: '+212' },
+            { code: 'ZA', name: 'Sudáfrica', area: '+27' },
+            { code: 'KE', name: 'Kenia', area: '+254' },
+            { code: 'NG', name: 'Nigeria', area: '+234' },
+            { code: 'GH', name: 'Ghana', area: '+233' },
+            { code: 'IN', name: 'India', area: '+91' },
+            { code: 'PK', name: 'Pakistán', area: '+92' },
+            { code: 'BD', name: 'Bangladesh', area: '+880' },
+            { code: 'LK', name: 'Sri Lanka', area: '+94' },
+            { code: 'NP', name: 'Nepal', area: '+977' },
+            { code: 'TH', name: 'Tailandia', area: '+66' },
+            { code: 'VN', name: 'Vietnam', area: '+84' },
+            { code: 'PH', name: 'Filipinas', area: '+63' },
+            { code: 'ID', name: 'Indonesia', area: '+62' },
+            { code: 'MY', name: 'Malasia', area: '+60' },
+            { code: 'SG', name: 'Singapur', area: '+65' },
+            { code: 'JP', name: 'Japón', area: '+81' },
+            { code: 'KR', name: 'Corea del Sur', area: '+82' },
+            { code: 'KP', name: 'Corea del Norte', area: '+850' },
+            { code: 'CN', name: 'China', area: '+86' },
+            { code: 'TW', name: 'Taiwán', area: '+886' },
+            { code: 'HK', name: 'Hong Kong', area: '+852' },
+            { code: 'MO', name: 'Macao', area: '+853' },
+            { code: 'MM', name: 'Myanmar', area: '+95' },
+            { code: 'KH', name: 'Camboya', area: '+855' },
+            { code: 'LA', name: 'Laos', area: '+856' },
+            { code: 'AU', name: 'Australia', area: '+61' },
+            { code: 'NZ', name: 'Nueva Zelanda', area: '+64' },
+            { code: 'FJ', name: 'Fiyi', area: '+679' },
+            { code: 'SB', name: 'Islas Salomón', area: '+677' },
+            { code: 'VU', name: 'Vanuatu', area: '+678' },
+            { code: 'WS', name: 'Samoa', area: '+685' },
+            { code: 'TO', name: 'Tonga', area: '+676' },
+            { code: 'PG', name: 'Papúa Nueva Guinea', area: '+675' },
+            { code: 'KI', name: 'Kiribati', area: '+686' },
+            { code: 'MH', name: 'Islas Marshall', area: '+692' },
+            { code: 'FM', name: 'Micronesia', area: '+691' },
+            { code: 'PW', name: 'Palaos', area: '+680' },
+            { code: 'NR', name: 'Nauru', area: '+674' },
+            { code: 'TL', name: 'Timor Oriental', area: '+670' },
+            { code: 'BN', name: 'Brunéi', area: '+673' },
+            { code: 'HT', name: 'Haití', area: '+509' },
+            { code: 'JM', name: 'Jamaica', area: '+1' },
+            { code: 'TT', name: 'Trinidad y Tobago', area: '+1' },
+            { code: 'BS', name: 'Bahamas', area: '+1' },
+            { code: 'BB', name: 'Barbados', area: '+1' },
+            { code: 'AG', name: 'Antigua y Barbuda', area: '+1' },
+            { code: 'GD', name: 'Granada', area: '+1' },
+            { code: 'VC', name: 'San Vicente y las Granadinas', area: '+1' },
+            { code: 'LC', name: 'Santa Lucía', area: '+1' },
+            { code: 'DM', name: 'Dominica', area: '+1' },
+            { code: 'KN', name: 'San Cristóbal y Nieves', area: '+1' },
+            { code: 'BZ', name: 'Belice', area: '+501' },
+            { code: 'MG', name: 'Madagascar', area: '+261' },
+            { code: 'MU', name: 'Mauricio', area: '+230' },
+            { code: 'SC', name: 'Seychelles', area: '+248' },
+            { code: 'MW', name: 'Malaui', area: '+265' },
+            { code: 'ZM', name: 'Zambia', area: '+260' },
+            { code: 'ZW', name: 'Zimbabue', area: '+263' },
+            { code: 'BW', name: 'Botsuana', area: '+267' },
+            { code: 'NA', name: 'Namibia', area: '+264' },
+            { code: 'AO', name: 'Angola', area: '+244' },
+            { code: 'GW', name: 'Guinea-Bisáu', area: '+245' },
+            { code: 'GN', name: 'Guinea', area: '+224' },
+            { code: 'SN', name: 'Senegal', area: '+221' },
+            { code: 'GM', name: 'Gambia', area: '+220' },
+            { code: 'CV', name: 'Cabo Verde', area: '+238' },
+            { code: 'MR', name: 'Mauritania', area: '+222' },
+            { code: 'CM', name: 'Camerún', area: '+237' },
+            { code: 'CF', name: 'República Centroafricana', area: '+236' },
+            { code: 'CD', name: 'República Democrática del Congo', area: '+243' },
+            { code: 'CG', name: 'República del Congo', area: '+242' },
+            { code: 'GA', name: 'Gabón', area: '+241' },
+            { code: 'GQ', name: 'Guinea Ecuatorial', area: '+240' },
+            { code: 'ST', name: 'Santo Tomé y Príncipe', area: '+239' },
+            { code: 'SL', name: 'Sierra Leona', area: '+232' },
+            { code: 'LR', name: 'Liberia', area: '+231' },
+            { code: 'CI', name: 'Costa de Marfil', area: '+225' },
+            { code: 'ML', name: 'Mali', area: '+223' },
+            { code: 'BJ', name: 'Benín', area: '+229' },
+            { code: 'BF', name: 'Burkina Faso', area: '+226' },
+            { code: 'TG', name: 'Togo', area: '+228' },
+            { code: 'NE', name: 'Níger', area: '+227' },
+            { code: 'ER', name: 'Eritrea', area: '+291' },
+            { code: 'ET', name: 'Etiopía', area: '+251' },
+            { code: 'DJ', name: 'Yibuti', area: '+253' },
+            { code: 'SO', name: 'Somalia', area: '+252' },
+            { code: 'UG', name: 'Uganda', area: '+256' },
+            { code: 'TZ', name: 'Tanzania', area: '+255' },
+            { code: 'RW', name: 'Ruanda', area: '+250' },
+            { code: 'BI', name: 'Burundi', area: '+257' },
+            { code: 'AZ', name: 'Azerbaiyán', area: '+994' },
+            { code: 'KZ', name: 'Kazajistán', area: '+7' },
+            { code: 'UZ', name: 'Uzbekistán', area: '+998' },
+            { code: 'TM', name: 'Turkmenistán', area: '+993' },
+            { code: 'KG', name: 'Kirguistán', area: '+996' },
+            { code: 'TJ', name: 'Tayikistán', area: '+992' },
+            { code: 'AF', name: 'Afganistán', area: '+93' },
+            { code: 'IR', name: 'Irán', area: '+98' },
+            { code: 'IQ', name: 'Irak', area: '+964' },
+            { code: 'SY', name: 'Siria', area: '+963' },
+            { code: 'AM', name: 'Armenia', area: '+374' },
+            { code: 'AW', name: 'Aruba', area: '+297' },
+            { code: 'CW', name: 'Curazao', area: '+599' },
+            { code: 'SX', name: 'Sint Maarten', area: '+1' },
+            { code: 'BM', name: 'Bermudas', area: '+1' },
+            { code: 'KY', name: 'Islas Caimán', area: '+1' },
+            { code: 'TC', name: 'Islas Turcas y Caicos', area: '+1' },
+            { code: 'VG', name: 'Islas Vírgenes Británicas', area: '+1' },
+            { code: 'AI', name: 'Anguila', area: '+1' },
+            { code: 'MS', name: 'Montserrat', area: '+1' },
+            { code: 'BL', name: 'San Bartolomé', area: '+590' },
+            { code: 'MF', name: 'Saint Martín', area: '+590' },
+            { code: 'GF', name: 'Guayana Francesa', area: '+594' },
+            { code: 'SR', name: 'Surinam', area: '+597' },
+            { code: 'GY', name: 'Guyana', area: '+592' },
+            { code: 'PR', name: 'Puerto Rico', area: '+1' },
+            { code: 'VI', name: 'Islas Vírgenes Estadounidenses', area: '+1' },
+            { code: 'AS', name: 'Samoa Americana', area: '+1' },
+            { code: 'GU', name: 'Guam', area: '+1' },
+            { code: 'MP', name: 'Islas Marianas del Norte', area: '+1' },
+            { code: 'IS', name: 'Islandia', area: '+354' },
+            { code: 'NO', name: 'Noruega', area: '+47' },
+            { code: 'RS', name: 'Serbia', area: '+381' },
+            { code: 'ME', name: 'Montenegro', area: '+382' },
+            { code: 'BA', name: 'Bosnia y Herzegovina', area: '+387' },
+            { code: 'MK', name: 'Macedonia del Norte', area: '+389' },
+            { code: 'AL', name: 'Albania', area: '+355' },
+            { code: 'XK', name: 'Kosovo', area: '+383' },
+            { code: 'AD', name: 'Andorra', area: '+376' },
+            { code: 'MC', name: 'Mónaco', area: '+377' },
+            { code: 'LI', name: 'Liechtenstein', area: '+423' },
+            { code: 'SM', name: 'San Marino', area: '+378' },
+            { code: 'VA', name: 'Ciudad del Vaticano', area: '+39' },
+            { code: 'BY', name: 'Bielorrusia', area: '+375' },
+            { code: 'MD', name: 'Moldavia', area: '+373' },
+        ];
+
+        // MÉTODOS DE PAGO (SIN CRIPTOMONEDAS)
+        const paymentMethods = [
+            { id: 'card', name: '💳 Tarjeta de Crédito/Débito', icon: '💳' },
+            { id: 'bank', name: '🏦 Transferencia Bancaria', icon: '🏦' },
+            { id: 'paypal', name: '🅿️ PayPal', icon: '🅿️' },
+            { id: 'payoneer', name: '📱 Payoneer', icon: '📱' }
+        ];
+
+        let selectedPayment = null;
+        let orderData = null;
+
+        // INICIALIZAR
+        function init() {
+            renderCountrySelect();
+            renderPaymentMethods();
+            loadCart();
+            calculateTotals();
+        }
+
+        // RENDERIZAR SELECT DE PAÍSES
+        function renderCountrySelect() {
+            const select = document.getElementById('countrySelect');
+            select.innerHTML = '<option value=""></option>';
+            
+            countriesPhoneData.slice().sort((a, b) => a.name.localeCompare(b.name, 'es')).forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = `${country.name} (${country.area})`;
+                select.appendChild(option);
+            });
+        }
+
+        // ACTUALIZAR CÓDIGO DE ÁREA
+        function updatePhoneCode() {
+            const countryCode = document.getElementById('countrySelect').value;
+            const country = countriesPhoneData.find(c => c.code === countryCode);
+            if (country) {
+                document.getElementById('phoneCode').value = country.area;
+            } else {
+                document.getElementById('phoneCode').value = '';
+            }
+        }
+
+        // RENDERIZAR MÉTODOS DE PAGO
+        function renderPaymentMethods() {
+            const container = document.getElementById('paymentMethods');
+            container.innerHTML = paymentMethods.map(method => `
+                <button class="payment-btn" data-method="${method.id}" onclick="selectPayment('${method.id}', this)">
+                    ${method.icon} ${method.name}
+                </button>
+            `).join('');
+        }
+
+        // SELECCIONAR MÉTODO DE PAGO
+        
+function selectPayment(methodId, btnEl=null) {
+    selectedPayment = methodId;
+    document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
+    if(btnEl) btnEl.classList.add('active');
+    else {
+      const found=[...document.querySelectorAll('.payment-btn')].find(b => (b.dataset.method||'')===methodId || (b.getAttribute('onclick')||'').includes(`'${methodId}'`));
+      if(found) found.classList.add('active');
+    }
+    const details = document.getElementById('paymentDetails');
+
+            if (methodId === 'card') {
+                details.innerHTML = `
+                    <div class="form-group">
+                        <label class="form-label">Número de Tarjeta</label>
+                        <input type="text" class="form-input" placeholder="1234 5678 8765 4567" id="cardNumber" inputmode="numeric" maxlength="19">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">MM/AA</label>
+                            <input type="text" class="form-input" placeholder="11/32" id="cardExpiry" inputmode="numeric" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
+                        </div>
+                    </div>
+                `;
+                attachCardFormatters();
+            } else if (methodId === 'bank') {
+                details.innerHTML = `
+                    <div class="form-group"><label class="form-label">Número de Cuenta</label><input type="text" class="form-input" placeholder="000123456789" id="bankAccount"></div>
+                    <div class="form-group"><label class="form-label">Código SWIFT/BIC</label><input type="text" class="form-input" placeholder="ABCDEFGH" id="bankSwift"></div>
+                `;
+            } else if (methodId === 'paypal') {
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Serás redirigido a PayPal para completar el pago de forma segura.</p>`;
+            } else if (methodId === 'payoneer') {
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Serás redirigido a Payoneer para completar el pago de forma segura.</p>`;
+            }
+        }
+
+        // CARGAR CARRITO
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            const container = document.getElementById('cartItems');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #7A8B8B;">El carrito está vacío</p>';
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-icon">${item.icon}</div>
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                    <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
+                    <div class="cart-item-shipping">🏪 Vendedor: $${(item.vendorFee || 0).toFixed(2)}</div>
+                    <div class="cart-item-controls">
+                        <button class="cart-item-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                        <div class="cart-item-qty">${item.quantity}</div>
+                        <button class="cart-item-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <button class="cart-item-delete" onclick="removeFromCart(${item.id})">🗑️ Eliminar</button>
+                </div>
+            `).join('');
+        }
+
+        // ACTUALIZAR CANTIDAD
+        function updateQuantity(productId, change) {
+            let cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            const item = cart.find(p => p.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity < 1) item.quantity = 1;
+                localStorage.setItem('nexoCart', JSON.stringify(cart));
+                loadCart();
+                calculateTotals();
+            }
+        }
+
+        // ELIMINAR DEL CARRITO
+        function removeFromCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('nexoCart', JSON.stringify(cart));
+            loadCart();
+            calculateTotals();
+        }
+
+        // CALCULAR TOTALES
+        function calculateTotals() {
+            const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            const priority = document.getElementById('shippingPriority')?.value || 'standard';
+            const shippingFactor = priority === 'priority' ? 1.15 : 1;
+            const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            const amazonShipping = cart.reduce((total, item) => total + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
+            const vendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
+            const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
+            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
+            const commission = subtotal * commissionRate;
+            const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
+            const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
+            const itf = commission * itfRate;
+            const iue = commission * iueRate;
+            const total = subtotal + amazonShipping + vendorFees + commission;
+
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('amazonShipping').textContent = `$${amazonShipping.toFixed(2)}`;
+            document.getElementById('vendorFees').textContent = `$${vendorFees.toFixed(2)}`;
+            document.getElementById('commission').textContent = `$${commission.toFixed(2)}`;
+            if(document.getElementById('itf')) document.getElementById('itf').textContent = '$0.00';
+            if(document.getElementById('iue')) document.getElementById('iue').textContent = '$0.00';
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            refreshDeliveryEstimate();
+        }
+
+        // ABRIR MODAL DE CONFIRMACIÓN
+        
+function openConfirmationModal() {
+            prefillClientData();
+            const fullName = document.getElementById('fullName').value.trim() || 'Cliente NEXO';
+            const email = document.getElementById('email').value.trim() || '';
+            const country = document.getElementById('countrySelect');
+            const shippingPriority = document.getElementById('shippingPriority').value;
+            const region = document.getElementById('region').value.trim() || '';
+            const city = document.getElementById('city').value.trim() || '';
+            const address = document.getElementById('address').value.trim() || 'Dirección registrada';
+            const zipCode = document.getElementById('zipCode').value.trim() || '0000';
+            const phoneCode = document.getElementById('phoneCode').value.trim() || '';
+            const phoneNumber = document.getElementById('phoneNumber').value.trim() || '70000000';
+            if (!selectedPayment) selectedPayment = 'paypal';
+            if(country && !country.value) country.value='';
+            const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shippingFactor = shippingPriority === 'priority' ? 1.15 : 1;
+            const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
+            const vendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
+            const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
+            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
+            const commission = subtotal * commissionRate;
+            const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
+            const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
+            const itf = commission * itfRate;
+            const iue = commission * iueRate;
+            const total = subtotal + amazonShipping + vendorFees + commission;
+            const deliveryInfo = getDeliveryInfo(shippingPriority);
+            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal, amazonShipping, vendorFees, commission, itf, iue, total };
+            
+const t = ctt();
+            const paymentMap = {
+              paypal:{es:'PayPal',en:'PayPal',pt:'PayPal',it:'PayPal',fr:'PayPal'},
+              payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'},
+              tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
+              transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}
+            };
+            const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
+            document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br><strong style="color:#f39c12;">${t.confirmShip}:</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span><br><strong style="color:#f39c12;">${t.confirmVendor}:</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span><br><strong style="color:#f39c12;">${t.deliveryOrange}:</strong> <span style="color:#f39c12;">${deliveryInfo.label} · ${deliveryInfo.text.replace(/^.*?: /,'')}</span><br><strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
+
+            applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
+        }
+        function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
+        function submitPurchase(){
+            if(!orderData) return;
+            orderData.note = document.getElementById('customerNote').value.trim();
+            orderData.timestamp = new Date().toISOString();
+            orderData.id = orderData.id || ('NEXO-' + Date.now());
+            orderData.paypalEmail = '';
+            orderData.currency = 'USD';
+            orderData.company = 'NEXO';
+            orderData.commissionRate = 0.30;
+            orderData.taxRates = { it: 0.03, iue: 0.25 };
+            orderData.netCommissionAfterTaxes = +(orderData.commission - orderData.itf - orderData.iue).toFixed(2);
+            orderData.customer = {
+                fullName: orderData.fullName,
+                email: orderData.email,
+                phone: `${document.getElementById('phoneCode').value.trim()} ${document.getElementById('phoneNumber').value.trim()}`.trim(),
+                countryCode: document.getElementById('countrySelect').value,
+                country: orderData.country,
+                areaCode: document.getElementById('phoneCode').value.trim(),
+                region: document.getElementById('region').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                zipCode: document.getElementById('zipCode').value.trim(),
+                documentId: (JSON.parse(localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
+            };
+            orderData.totals = {
+                subtotal: +orderData.subtotal.toFixed(2),
+                amazonShipping: +orderData.amazonShipping.toFixed(2),
+                vendorFees: +orderData.vendorFees.toFixed(2),
+                commission: +orderData.commission.toFixed(2),
+                itf: +orderData.itf.toFixed(2),
+                iue: +orderData.iue.toFixed(2),
+                total: +orderData.total.toFixed(2),
+                netCommissionAfterTaxes: +orderData.netCommissionAfterTaxes.toFixed(2)
+            };
+            orderData.reporting = {
+                periodo: new Date(orderData.timestamp).toISOString().slice(0,7),
+                nitEmpresa: '',
+                razonSocial: 'NEXO',
+                concepto: 'Servicios de Intermediación / Comercialización Internacional',
+                baseFiscal: +orderData.commission.toFixed(2),
+                itFiscal: +orderData.itf.toFixed(2),
+                iueFiscal: +orderData.iue.toFixed(2)
+            };
+
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            const orders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
+            orders.push(orderData);
+            localStorage.setItem('nexoOrders', JSON.stringify(orders));
+
+            const prof = JSON.parse(localStorage.getItem('nexoClientProfile') || '{}');
+            const updated = {
+                ...prof,
+                fullName: orderData.fullName,
+                email: orderData.email,
+                countryCode: document.getElementById('countrySelect').value,
+                country: orderData.country,
+                areaCode: document.getElementById('phoneCode').value,
+                phone: document.getElementById('phoneNumber').value.trim(),
+                region: document.getElementById('region').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                zipCode: document.getElementById('zipCode').value.trim()
+            };
+            localStorage.removeItem('nexoCart');
+            window.location.href = 'nexo-confirmacion.html';
+        }
+        function attachCardFormatters(){
+            const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
+            if(num){ num.addEventListener('input', ()=>{ let v=num.value.replace(/\D/g,'').slice(0,16); num.value=v.replace(/(.{4})/g,'$1 ').trim(); }); }
+            if(exp){ exp.addEventListener('input', ()=>{ let v=exp.value.replace(/\D/g,'').slice(0,4); if(v.length>=3) v=v.slice(0,2)+'/'+v.slice(2); exp.value=v; }); }
+            if(cvv){ cvv.addEventListener('input', ()=>{ cvv.value=cvv.value.replace(/\D/g,'').slice(0,4); }); }
+        }
+
+
+        function getDeliveryInfo(priority){
+            const t = ctt();
+            const now = new Date();
+            const days = priority === 'priority' ? 9 : 12;
+            const eta = new Date(now.getTime() + days*24*60*60*1000);
+            const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+            const monthsEn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const monthSet = currentLang === 'en' ? monthsEn : months;
+            const etaText = `${eta.getDate()} ${monthSet[eta.getMonth()]} ${eta.getFullYear()}`;
+            return {
+                label: priority === 'priority' ? t.deliveryPriority : t.deliveryStandard,
+                days,
+                text: `${t.deliveryEta}: ${etaText}`
+            };
+        }
+
+        function refreshDeliveryEstimate(){
+            const priority = document.getElementById('shippingPriority')?.value || 'standard';
+            const info = getDeliveryInfo(priority);
+            const box = document.getElementById('deliveryEstimateBox');
+            const row = document.getElementById('deliverySummary');
+            const shipLbl = document.getElementById('sumShipLbl');
+            if(box){ box.innerHTML = `${info.text}<br><span style="font-size:11px;">${info.label}</span>`; }
+            if(row){ row.textContent = `${info.label} · ${info.text.replace(/^.*?: /,'')}`; }
+            if(shipLbl){ shipLbl.textContent = priority === 'priority' ? `${ctt().sumShipLbl} - ${info.label}` : ctt().sumShipLbl; }
+        }
+
+        
+function prefillClientData(){
+    let profile = null;
+    try{
+      profile = JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || 'null');
+    }catch(e){ profile = null; }
+    if(!profile) return;
+
+    const setVal = (id, value) => {
+      const el = document.getElementById(id);
+      if(el) el.value = value || '';
+    };
+
+    setVal('fullName', profile.fullName || profile.name || '');
+    setVal('email', profile.email || '');
+    setVal('phoneCode', profile.areaCode || '');
+    setVal('phoneNumber', profile.phone || '');
+    setVal('region', profile.region || '');
+    setVal('city', profile.city || '');
+    setVal('address', profile.address || '');
+    setVal('zipCode', profile.zipCode || profile.postalCode || '0000');
+
+    const sel = document.getElementById('countrySelect');
+    if(sel){
+      const pCountry = (profile.countryCode || profile.country || '').toString().toLowerCase();
+      const opt = [...sel.options].find(o => o.value.toLowerCase() === pCountry || o.textContent.toLowerCase().includes(pCountry));
+      if(opt) sel.value = opt.value;
+    }
+    updatePhoneCode();
+    if(profile.areaCode) setVal('phoneCode', profile.areaCode);
+}
+
+
+        // INICIAR
+        init();
+        prefillClientData();
+        refreshDeliveryEstimate();
+        setTimeout(()=>{prefillClientData();},100);
+        setTimeout(()=>{ if(!selectedPayment) selectPayment('paypal'); }, 50);
+        const cpBtn=document.getElementById('completePurchaseBtn') || document.querySelector('.checkout-btn'); if(cpBtn){ cpBtn.onclick=function(e){ if(e) e.preventDefault(); openConfirmationModal(); return false; }; }
+window.addEventListener('DOMContentLoaded', ()=>{ try{ applyCheckoutLanguage(); refreshDeliveryEstimate(); }catch(e){} });
+    
+
+</script>
+
+
+<script>
+function nexoHideInternalTaxesForCustomer(){
+  const ids = ['sumItLbl','sumIueLbl','itf','iue','taxAmount','retentionAmount','taxSection'];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) {
+      const row = el.closest('.summary-row') || el.parentElement;
+      if (row) row.style.display = 'none';
+      else el.style.display = 'none';
+    }
+  });
+  ['sumCommissionLbl'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.textContent = (el.textContent || '').replace(/\s*\(.*?\)/g,'').replace(/35%/g,'').replace(/30%/g,'').trim();
+      if(!el.textContent.endsWith(':')) el.textContent = el.textContent.replace(/:?$/,'') + ':';
+    }
+  });
+}
+window.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(nexoHideInternalTaxesForCustomer, 50);
+  setTimeout(nexoHideInternalTaxesForCustomer, 300);
+});
+</script>
+
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  function nexoCustomerFinalCleanup(){
+    // hide any lingering undefined rows anywhere
+    document.querySelectorAll('div, p, span, strong').forEach(el=>{
+      const t = (el.textContent || '').trim();
+      if (/^undefined\s*:/i.test(t)) {
+        const row = el.closest('.summary-row') || el.parentElement;
+        if (row) row.remove(); else el.remove();
+      }
+    });
+
+    // remove 35% if still printed in client summary/cart
+    document.querySelectorAll('*').forEach(el=>{
+      if (el.children.length === 0 && el.textContent) {
+        el.textContent = el.textContent.replace(/\s*\(35%\)/g,'').replace(/\s*35%/g,'');
+      }
+    });
+
+    // translatable delivery label in summary card
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const deliveryMap = {
+      es: 'Entrega estimada',
+      en: 'Estimated delivery',
+      pt: 'Entrega estimada',
+      it: 'Consegna stimata',
+      fr: 'Livraison estimée'
+    };
+    const lbl = document.getElementById('sumDeliveryLbl');
+    if (lbl) lbl.textContent = deliveryMap[lang] || deliveryMap.es;
+  }
+  setTimeout(nexoCustomerFinalCleanup, 50);
+  setTimeout(nexoCustomerFinalCleanup, 250);
+  setTimeout(nexoCustomerFinalCleanup, 800);
+});
+</script>
+
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+</body>
+</html>

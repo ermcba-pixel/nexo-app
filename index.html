@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO - Portal Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --success: #27AE60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            gap: 30px;
+        }
+
+        .portal-container {
+            width: 100%;
+            max-width: 1300px;
+            background-color: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: row;
+            min-height: 650px;
+        }
+
+        /* ============ HEADER IZQUIERDO ============ */
+        .portal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 60px 50px;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .portal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        /* ========== LOGO COMPLETO BLANCO ========== */
+        .logo-container {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-box {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 14px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            gap: 6px;
+            width: 130px;
+        }
+
+        .logo-text-nexo {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .logo-ne {
+            color: var(--primary);
+        }
+
+        .logo-x {
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .logo-o {
+            color: var(--primary);
+        }
+
+        .logo-subtitle {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .portal-title {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 15px 0 10px 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .portal-description {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+            max-width: 95%;
+            margin: 0 auto;
+        }
+
+        /* ============ CONTENT DERECHO ============ */
+        .portal-content {
+            padding: 45px 45px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 30px;
+        }
+
+        .access-section {
+            margin-bottom: 0;
+        }
+
+        .access-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .access-card {
+            background-color: var(--light);
+            border-radius: 18px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .access-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(122, 199, 66, 0.08) 0%, rgba(74, 107, 109, 0.05) 100%);
+        }
+
+        .access-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .access-content {
+            flex: 1;
+        }
+
+        .access-card h3 {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .access-card p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .access-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 107, 109, 0.2);
+        }
+
+        .access-btn:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.3);
+        }
+
+        /* ============ LANGUAGE SELECTOR ============ */
+        .language-footer {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(232, 240, 240, 0.8) 100%);
+            padding: 24px 32px;
+            border-radius: 16px;
+            border: 2px solid rgba(74, 107, 109, 0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .language-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .language-title {
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            background-color: var(--white);
+            color: var(--dark);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+        }
+
+        .lang-btn:hover,
+        .lang-btn.active {
+            background-color: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 1024px) {
+            .portal-container {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .portal-header {
+                width: 100%;
+                padding: 45px 40px;
+                min-height: 280px;
+            }
+
+            .portal-content {
+                padding: 40px;
+            }
+
+            .language-footer {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .portal-header {
+                padding: 35px 30px;
+                gap: 20px;
+            }
+
+            .logo-box {
+                padding: 12px 18px;
+            }
+
+            .logo-text-nexo {
+                font-size: 42px;
+            }
+
+            .portal-title {
+                font-size: 26px;
+            }
+
+            .portal-content {
+                padding: 35px;
+            }
+
+            .access-card {
+                padding: 20px;
+            }
+
+            .access-card h3 {
+                font-size: 18px;
+            }
+
+            .language-footer {
+                padding: 20px 25px;
+                gap: 16px;
+            }
+
+            .language-title {
+                font-size: 14px;
+            }
+        }
+    </style>
+
+<script>
+(function(){
+  function syncNexoLanguage(){
+    var lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang); localStorage.setItem('nexoLang', lang);
+    document.documentElement.lang = lang;
+    window.nexoLangCurrent = lang;
+  }
+  syncNexoLanguage();
+})();
+</script>
+
+
+<style>
+#nexo-legal-footer{max-width:1300px;width:100%;text-align:center;color:rgba(255,255,255,.88);font-size:12px;padding:8px 0 18px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+#nexo-legal-footer a{color:inherit;text-decoration:none;font-weight:700}
+#nexo-legal-footer a:hover{text-decoration:underline}
+.nexo-policy-modal{position:fixed;inset:0;background:rgba(24,35,36,.62);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.nexo-policy-modal.open{display:flex}
+.nexo-policy-card{width:min(980px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:24px;box-shadow:0 20px 50px rgba(0,0,0,.24);padding:28px}
+.nexo-policy-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.nexo-policy-top h2{margin:0;color:#4A6B6D;font-size:28px}
+.nexo-close-btn{border:none;background:#eef4f4;color:#2D3E3F;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800}
+.nexo-policy-body h3{color:#4A6B6D;margin:20px 0 8px;font-size:19px}
+.nexo-policy-body p,.nexo-policy-body li{color:#44595c;line-height:1.65;font-size:15px}
+.nexo-policy-body ul{padding-left:20px}
+</style>
+
+</head>
+<body>
+    <div class="portal-container">
+        <!-- HEADER IZQUIERDO -->
+        <div class="portal-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-box">
+                        <div class="logo-text-nexo">
+                            <span class="logo-ne">ne</span><span class="logo-x">X</span><span class="logo-o">o</span>
+                        </div>
+                        <div class="logo-subtitle">Servicios Generales y Empresariales</div>
+                    </div>
+                </div>
+
+                <h2 class="portal-title">Sistema de<br>Intermediación Digital</h2>
+
+                <p class="portal-description">
+                    Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
+                </p>
+            </div>
+        </div>
+
+        <!-- CONTENT DERECHO -->
+        <div class="portal-content">
+            <!-- ACCESO CLIENTE -->
+            <div class="access-section">
+                <div class="access-title">👥 Acceso Cliente</div>
+                <div class="access-card" onclick="goToPublicStore()">
+                    <div class="access-icon">🛒</div>
+                    <div class="access-content">
+                        <h3>Tienda Pública</h3>
+                        <p>Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.</p>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                            <button class="access-btn" onclick="event.stopPropagation(); goToPublicStore()">Ir a la Tienda</button>
+                            <button class="access-btn" onclick="event.stopPropagation(); goToCustomerSupport()">Ir a Atención al Cliente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANGUAGE SELECTOR -->
+            <div style="display: flex; justify-content: center; width: 100%;">
+                <div class="language-footer">
+                    <div class="language-section">
+                        <div class="language-title">🌍 Idioma</div>
+                        <div class="language-buttons">
+                            <button class="lang-btn active" data-lang="es" onclick="setLanguage('es', event)">Español</button>
+                            <button class="lang-btn" data-lang="en" onclick="setLanguage('en', event)">English</button>
+                            <button class="lang-btn" data-lang="pt" onclick="setLanguage('pt', event)">Português</button>
+                            <button class="lang-btn" data-lang="it" onclick="setLanguage('it', event)">Italiano</button>
+                            <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr', event)">Français</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCESO ADMINISTRATIVO -->
+            <div class="access-section">
+                <div class="access-title">🔐 Acceso Administrativo</div>
+                <div class="access-card" onclick="goToAdminLogin()">
+                    <div class="access-icon">⚙️</div>
+                    <div class="access-content">
+                        <h3 >Panel Administrativo</h3>
+                        <p>Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.</p>
+                        <button class="access-btn">Ingresar Panel Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER COPYRIGHT -->
+    <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600;">
+        NEXO SRL © 2024 | NIT: 774651015 | Intermediación Digital | 3 Agentes IA Integrados
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('nexo_language', lang); localStorage.setItem('nexoLang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function goToPublicStore() {
+            window.location.href = 'nexo-cliente-login.html';
+        }
+
+        function goToAdminLogin() {
+            window.location.href = 'nexo-admin-login.html';
+        }
+
+        function goToCustomerSupport() {
+            window.location.href = 'nexo-agent2-soporte.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('nexo_language') || 'es';
+            const langs = ['es', 'en', 'pt', 'it', 'fr'];
+            document.querySelectorAll('.lang-btn').forEach((btn, idx) => {
+                if (langs[idx] === savedLang) btn.classList.add('active');
+            });
+        });
+    </script>
+
+<script>
+(function(){
+  const portalTexts = {
+    es:{client:'👥 Acceso Cliente', storeTitle:'Tienda Pública', storeDesc:'Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.', storeBtn:'Ir a la Tienda', admin:'🔐 Acceso Administrativo', adminTitle:'Panel Administrativo', adminDesc:'Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.', adminBtn:'Ir a Atencion al Cliente', lang:'🌍 Idioma', header:'Sistema de<br>Intermediación Digital', desc:'Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics'},
+    en:{client:'👥 Client Access', storeTitle:'Public Store', storeDesc:'Explore our product catalog, add items to cart and complete your purchase securely.', storeBtn:'Go to Store', admin:'🔐 Administrative Access', adminTitle:'Admin Panel', adminDesc:'Exclusive access with 3 AI Agents, metrics, user control and ROI analysis.', adminBtn:'Enter Customer Service', lang:'🌍 Language', header:'Digital<br>Intermediation System', desc:'Public Store • International Payments • Automatic Purchasing • AI Support • Marketing Analytics'},
+    pt:{client:'👥 Acesso do Cliente', storeTitle:'Loja Pública', storeDesc:'Explore nosso catálogo de produtos, adicione ao carrinho e conclua sua compra com segurança.', storeBtn:'Ir para a Loja', admin:'🔐 Acesso Administrativo', adminTitle:'Painel Administrativo', adminDesc:'Acesso exclusivo com 3 agentes IA, métricas, controle de usuários e análise ROI.', adminBtn:'Entrar no Painel Admin', lang:'🌍 Idioma', header:'Sistema de<br>Intermediação Digital', desc:'Loja Pública • Pagamentos Internacionais • Compra Automática • Suporte IA • Marketing Analytics'},
+    it:{client:'👥 Accesso Cliente', storeTitle:'Negozio Pubblico', storeDesc:'Esplora il nostro catalogo prodotti, aggiungi al carrello e completa il tuo acquisto in sicurezza.', storeBtn:'Vai al Negozio', admin:'🔐 Accesso Amministrativo', adminTitle:'Pannello Amministrativo', adminDesc:'Accesso esclusivo con 3 Agenti IA, metriche, controllo utenti e analisi ROI.', adminBtn:'Entra nel Pannello Admin', lang:'🌍 Lingua', header:'Sistema di<br>Intermediazione Digitale', desc:'Negozio Pubblico • Pagamenti Internazionali • Acquisto Automatico • Supporto IA • Marketing Analytics'},
+    fr:{client:'👥 Accès Client', storeTitle:'Boutique Publique', storeDesc:'Explorez notre catalogue, ajoutez au panier et finalisez votre achat en toute sécurité.', storeBtn:'Aller à la Boutique', admin:'🔐 Accès Administratif', adminTitle:'Panneau Administratif', adminDesc:'Accès exclusif avec 3 agents IA, métriques, contrôle des utilisateurs et analyse ROI.', adminBtn:'Entrer dans le Panneau Admin', lang:'🌍 Langue', header:'Système d’<br>Intermédiation Digitale', desc:'Boutique Publique • Paiements Internationaux • Achat Automatique • Support IA • Marketing Analytics'}
+  };
+  window.setLanguage = function(lang, ev){
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang);
+    if(ev && ev.target){
+      document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+      ev.target.classList.add('active');
+    }
+    applyPortalLanguage();
+  }
+  window.goToPublicStore = function(){ window.location.href='nexo-cliente-login.html'; }
+  window.goToAdminLogin = function(){ window.location.href='nexo-admin-login.html'; }
+  function applyPortalLanguage(){
+    var lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    var t = portalTexts[lang] || portalTexts.es;
+    document.documentElement.lang = lang;
+    var access = document.querySelectorAll('.access-title');
+    if(access[0]) access[0].textContent = t.client;
+    if(access[1]) access[1].textContent = t.admin;
+    var titles = document.querySelectorAll('.access-card h3');
+    if(titles[0]) titles[0].textContent = t.storeTitle;
+    if(titles[1]) titles[1].textContent = t.adminTitle;
+    var ps = document.querySelectorAll('.access-card p');
+    if(ps[0]) ps[0].textContent = t.storeDesc;
+    if(ps[1]) ps[1].textContent = t.adminDesc;
+    var btns = document.querySelectorAll('.access-btn');
+    if(btns[0]) btns[0].textContent = t.storeBtn;
+    if(btns[1]) btns[1].textContent = t.adminBtn;
+    var lt = document.querySelector('.language-title'); if(lt) lt.textContent = t.lang;
+    var ht = document.querySelector('.portal-title'); if(ht) ht.innerHTML = t.header;
+    var hd = document.querySelector('.portal-description'); if(hd) hd.textContent = t.desc;
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang===lang));
+  }
+  document.addEventListener('DOMContentLoaded', applyPortalLanguage);
+})();
+</script>
+
+
+
+
+
+<div id="nexo-legal-footer">
+  <a href="#" data-policy-link="legal">Aviso legal</a>
+  <span>|</span>
+  <a href="#" data-policy-link="privacy">Privacidad</a>
+  <span>|</span>
+  <a href="#" data-policy-link="terms">Términos</a>
+  <span>|</span>
+  <a href="#" data-policy-link="cookies">Cookies</a>
+  <span>|</span>
+  <a href="#" data-policy-link="security">Seguridad</a>
+  <span>|</span>
+  <a href="#" data-policy-link="refunds">Reembolsos</a>
+</div>
+
+<div class="nexo-policy-modal" id="nexoPolicyModal">
+  <div class="nexo-policy-card">
+    <div class="nexo-policy-top">
+      <h2 id="nexoPolicyTitle">Aviso legal</h2>
+      <button class="nexo-close-btn" type="button" onclick="closePolicyModal()">Cerrar</button>
+    </div>
+    <div class="nexo-policy-body" id="nexoPolicyBody"></div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const portalTextsExtra = {
+    es:{
+      legalFooter:{legal:'Aviso legal',privacy:'Privacidad',terms:'Términos',cookies:'Cookies',security:'Seguridad',refunds:'Reembolsos',close:'Cerrar'},
+      policies:{
+        legal:{title:'Aviso legal',body:`<p>Este portal es operado por NEXO Servicios Generales y Empresariales como plataforma digital de acceso a tienda, soporte y panel administrativo. El contenido tiene finalidad informativa y operativa.</p><h3>Uso del sitio</h3><p>El usuario debe utilizar el portal de forma lícita, sin intentar alterar su funcionamiento, vulnerar accesos o introducir software malicioso.</p><h3>Propiedad intelectual</h3><p>Los textos, diseños, logotipos, estructura visual y componentes del portal pertenecen a NEXO o se usan con autorización.</p>`},
+        privacy:{title:'Política de privacidad',body:`<p>NEXO tratará los datos que el usuario envíe en formularios de acceso, soporte o compra únicamente para la gestión del servicio, autenticación, soporte y mejora operativa.</p><h3>Datos tratados</h3><ul><li>Datos de contacto</li><li>Datos operativos de pedidos o solicitudes</li><li>Información técnica básica del navegador cuando sea necesaria para el funcionamiento</li></ul><h3>Derechos</h3><p>El usuario podrá solicitar corrección, actualización o eliminación de sus datos por los canales habilitados por NEXO.</p>`},
+        terms:{title:'Términos y condiciones',body:`<p>Al usar este portal, el usuario acepta las condiciones de uso de la plataforma. Si no está de acuerdo, debe abstenerse de utilizarla.</p><h3>Responsabilidades del usuario</h3><ul><li>Proporcionar información veraz</li><li>Proteger sus credenciales</li><li>No usar el sistema con fines ilícitos o fraudulentos</li></ul><h3>Disponibilidad</h3><p>NEXO podrá actualizar, suspender o modificar funcionalidades por motivos operativos, de mantenimiento o seguridad.</p>`},
+        cookies:{title:'Política de cookies',body:`<p>Este portal puede utilizar almacenamiento local del navegador y tecnologías equivalentes para recordar idioma, mantener sesión y soportar funciones necesarias del sistema.</p><h3>Control</h3><p>El usuario puede borrar cookies o almacenamiento local desde su navegador. Esto podría afectar ciertas funciones del portal.</p>`},
+        security:{title:'Seguridad de la plataforma',body:`<p>NEXO aplica medidas técnicas y operativas razonables para proteger la integridad del portal y la información gestionada.</p><h3>Medidas generales</h3><ul><li>Separación de accesos de cliente y administración</li><li>Controles de autenticación</li><li>Buenas prácticas para sesiones y almacenamiento local</li><li>Revisión operativa y mantenimiento del sistema</li></ul><h3>Recomendaciones al usuario</h3><ul><li>No compartir claves</li><li>Usar contraseñas seguras</li><li>Cerrar sesión en equipos compartidos</li><li>Verificar que el dominio publicado sea el oficial</li></ul>`},
+        refunds:{title:'Política de reembolsos',body:`<p>Las solicitudes de reembolso estarán sujetas a validación del caso, estado del pedido, proveedor involucrado y condiciones de operación aplicables.</p><h3>Criterios generales</h3><ul><li>Error confirmado en el cobro o duplicidad</li><li>Pedido no procesado cuando corresponda</li><li>Incidencias verificadas de entrega o producto conforme a la revisión del caso</li></ul><h3>Proceso</h3><p>El cliente deberá presentar su solicitud por los canales de atención habilitados, indicando datos del pedido y descripción clara del incidente. NEXO revisará el caso y comunicará la resolución correspondiente.</p>`}
+      }
+    },
+    en:{
+      legalFooter:{legal:'Legal notice',privacy:'Privacy',terms:'Terms',cookies:'Cookies',security:'Security',refunds:'Refunds',close:'Close'},
+      policies:{
+        legal:{title:'Legal notice',body:`<p>This portal is operated by NEXO Servicios Generales y Empresariales as a digital platform for store access, support and administrative access. The content is provided for operational and informational purposes.</p><h3>Use of the site</h3><p>Users must use the portal lawfully and must not attempt to alter its operation, bypass access controls or introduce malicious software.</p><h3>Intellectual property</h3><p>The texts, design, logos, visual structure and portal components belong to NEXO or are used with authorization.</p>`},
+        privacy:{title:'Privacy policy',body:`<p>NEXO will process the data submitted by users through access, support or purchase forms only for service management, authentication, support and operational improvement.</p><h3>Data processed</h3><ul><li>Contact data</li><li>Operational order or request data</li><li>Basic browser technical information when required for operation</li></ul><h3>Rights</h3><p>Users may request correction, update or deletion of their data through NEXO’s enabled channels.</p>`},
+        terms:{title:'Terms and conditions',body:`<p>By using this portal, the user accepts the platform terms of use. If the user disagrees, they should refrain from using it.</p><h3>User responsibilities</h3><ul><li>Provide truthful information</li><li>Protect their credentials</li><li>Not use the system for unlawful or fraudulent purposes</li></ul><h3>Availability</h3><p>NEXO may update, suspend or modify functionalities for operational, maintenance or security reasons.</p>`},
+        cookies:{title:'Cookie policy',body:`<p>This portal may use local browser storage and equivalent technologies to remember language, keep sessions and support necessary system functions.</p><h3>Control</h3><p>Users may clear cookies or local storage from their browser. This may affect certain portal functions.</p>`},
+        security:{title:'Platform security',body:`<p>NEXO applies reasonable technical and operational measures to protect portal integrity and managed information.</p><h3>General measures</h3><ul><li>Separated client and administrative access</li><li>Authentication controls</li><li>Good practices for sessions and local storage</li><li>Operational review and maintenance</li></ul><h3>User recommendations</h3><ul><li>Do not share passwords</li><li>Use strong credentials</li><li>Sign out on shared devices</li><li>Verify the published domain is the official one</li></ul>`},
+        refunds:{title:'Refund policy',body:`<p>Refund requests are subject to validation according to the case, order status, involved provider and applicable operating conditions.</p><h3>General criteria</h3><ul><li>Confirmed billing error or duplicate charge</li><li>Order not processed when applicable</li><li>Verified delivery or product incident subject to case review</li></ul><h3>Process</h3><p>The customer must submit the request through the enabled support channels, including order details and a clear description of the incident. NEXO will review the case and communicate the corresponding resolution.</p>`}
+      }
+    },
+    pt:{
+      legalFooter:{legal:'Aviso legal',privacy:'Privacidade',terms:'Termos',cookies:'Cookies',security:'Segurança',refunds:'Reembolsos',close:'Fechar'},
+      policies:{
+        legal:{title:'Aviso legal',body:`<p>Este portal é operado pela NEXO Servicios Generales y Empresariales como plataforma digital de acesso à loja, suporte e área administrativa. O conteúdo tem finalidade informativa e operacional.</p>`},
+        privacy:{title:'Política de privacidade',body:`<p>A NEXO tratará os dados enviados pelo usuário apenas para gestão do serviço, autenticação, suporte e melhoria operacional.</p>`},
+        terms:{title:'Termos e condições',body:`<p>Ao usar este portal, o usuário aceita os termos de uso da plataforma.</p>`},
+        cookies:{title:'Política de cookies',body:`<p>Este portal pode usar armazenamento local do navegador e tecnologias equivalentes para lembrar idioma, sessão e funções necessárias.</p>`},
+        security:{title:'Segurança da plataforma',body:`<p>A NEXO aplica medidas técnicas e operacionais razoáveis para proteger a integridade do portal.</p>`},
+        refunds:{title:'Política de reembolsos',body:`<p>Pedidos de reembolso estarão sujeitos à validação do caso, status do pedido, fornecedor envolvido e condições aplicáveis.</p>`}
+      }
+    },
+    it:{
+      legalFooter:{legal:'Avviso legale',privacy:'Privacy',terms:'Termini',cookies:'Cookie',security:'Sicurezza',refunds:'Rimborsi',close:'Chiudi'},
+      policies:{
+        legal:{title:'Avviso legale',body:`<p>Questo portale è gestito da NEXO Servicios Generales y Empresariales come piattaforma digitale per negozio, supporto e accesso amministrativo.</p>`},
+        privacy:{title:'Informativa sulla privacy',body:`<p>NEXO tratterà i dati inviati dall’utente solo per gestione del servizio, autenticazione, supporto e miglioramento operativo.</p>`},
+        terms:{title:'Termini e condizioni',body:`<p>Usando questo portale, l’utente accetta i termini di utilizzo della piattaforma.</p>`},
+        cookies:{title:'Politica sui cookie',body:`<p>Questo portale può usare archiviazione locale del browser e tecnologie equivalenti per lingua, sessione e funzioni necessarie.</p>`},
+        security:{title:'Sicurezza della piattaforma',body:`<p>NEXO applica misure tecniche e operative ragionevoli per proteggere l’integrità del portale.</p>`},
+        refunds:{title:'Politica di rimborso',body:`<p>Le richieste di rimborso sono soggette a verifica del caso, stato dell’ordine, fornitore coinvolto e condizioni applicabili.</p>`}
+      }
+    },
+    fr:{
+      legalFooter:{legal:'Mentions légales',privacy:'Confidentialité',terms:'Conditions',cookies:'Cookies',security:'Sécurité',refunds:'Remboursements',close:'Fermer'},
+      policies:{
+        legal:{title:'Mentions légales',body:`<p>Ce portail est exploité par NEXO Servicios Generales y Empresariales comme plateforme numérique d’accès boutique, support et zone administrative.</p>`},
+        privacy:{title:'Politique de confidentialité',body:`<p>NEXO traitera les données envoyées par l’utilisateur uniquement pour la gestion du service, l’authentification, le support et l’amélioration opérationnelle.</p>`},
+        terms:{title:'Conditions générales',body:`<p>En utilisant ce portail, l’utilisateur accepte les conditions d’utilisation de la plateforme.</p>`},
+        cookies:{title:'Politique de cookies',body:`<p>Ce portail peut utiliser le stockage local du navigateur et des technologies équivalentes pour la langue, la session et les fonctions nécessaires.</p>`},
+        security:{title:'Sécurité de la plateforme',body:`<p>NEXO applique des mesures techniques et opérationnelles raisonnables pour protéger l’intégrité du portail.</p>`},
+        refunds:{title:'Politique de remboursement',body:`<p>Les demandes de remboursement sont soumises à la validation du cas, du statut de la commande, du fournisseur concerné et des conditions applicables.</p>`}
+      }
+    }
+  };
+
+  window.openPolicyModal = function(key){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const dict = portalTextsExtra[lang] || portalTextsExtra.es;
+    const entry = dict.policies[key];
+    if(!entry) return;
+    document.getElementById('nexoPolicyTitle').textContent = entry.title;
+    document.getElementById('nexoPolicyBody').innerHTML = entry.body;
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal) modal.classList.add('open');
+  };
+  window.closePolicyModal = function(){
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal) modal.classList.remove('open');
+  };
+
+  const oldApply = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof oldApply === 'function') oldApply();
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const dict = portalTextsExtra[lang] || portalTextsExtra.es;
+    document.querySelectorAll('[data-policy-link]').forEach(a=>{
+      const key = a.getAttribute('data-policy-link');
+      if(dict.legalFooter[key]) a.textContent = dict.legalFooter[key];
+      a.onclick = function(e){ e.preventDefault(); openPolicyModal(key); };
+    });
+    const btn = document.querySelector('.nexo-close-btn');
+    if(btn) btn.textContent = dict.legalFooter.close;
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof window.applyPortalLanguage === 'function') window.applyPortalLanguage();
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal){
+      modal.addEventListener('click', function(e){
+        if(e.target === modal) closePolicyModal();
+      });
+    }
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const nexoFooterLabels = {
+    es:{legal:'Aviso legal',privacy:'Privacidad',terms:'Términos',cookies:'Cookies',security:'Seguridad',refunds:'Reembolsos'},
+    en:{legal:'Legal Notice',privacy:'Privacy',terms:'Terms',cookies:'Cookies',security:'Security',refunds:'Refunds'},
+    pt:{legal:'Aviso legal',privacy:'Privacidade',terms:'Termos',cookies:'Cookies',security:'Segurança',refunds:'Reembolsos'},
+    it:{legal:'Avviso legale',privacy:'Privacy',terms:'Termini',cookies:'Cookie',security:'Sicurezza',refunds:'Rimborsi'},
+    fr:{legal:'Mentions légales',privacy:'Confidentialité',terms:'Conditions',cookies:'Cookies',security:'Sécurité',refunds:'Remboursements'}
+  };
+  function applyFooterLegalTitles(){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const t = nexoFooterLabels[lang] || nexoFooterLabels.es;
+    document.querySelectorAll('[data-policy-link]').forEach(a=>{
+      const key = a.getAttribute('data-policy-link');
+      if(t[key]) a.textContent = t[key];
+    });
+  }
+  const oldApplyPortalLanguage = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof oldApplyPortalLanguage === 'function') oldApplyPortalLanguage();
+    applyFooterLegalTitles();
+  };
+  document.addEventListener('DOMContentLoaded', applyFooterLegalTitles);
+})();
+</script>
+
+</body>
+</html>

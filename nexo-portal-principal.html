@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO - Portal Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --success: #27AE60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            gap: 30px;
+        }
+
+        .portal-container {
+            width: 100%;
+            max-width: 1300px;
+            background-color: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: row;
+            min-height: 650px;
+        }
+
+        /* ============ HEADER IZQUIERDO ============ */
+        .portal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 60px 50px;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .portal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        /* ========== LOGO COMPLETO BLANCO ========== */
+        .logo-container {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-box {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 14px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            gap: 6px;
+            width: 130px;
+        }
+
+        .logo-text-nexo {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .logo-ne {
+            color: var(--primary);
+        }
+
+        .logo-x {
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .logo-o {
+            color: var(--primary);
+        }
+
+        .logo-subtitle {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .portal-title {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 15px 0 10px 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .portal-description {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+            max-width: 95%;
+            margin: 0 auto;
+        }
+
+        /* ============ CONTENT DERECHO ============ */
+        .portal-content {
+            padding: 45px 45px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 30px;
+        }
+
+        .access-section {
+            margin-bottom: 0;
+        }
+
+        .access-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .access-card {
+            background-color: var(--light);
+            border-radius: 18px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .access-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(122, 199, 66, 0.08) 0%, rgba(74, 107, 109, 0.05) 100%);
+        }
+
+        .access-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .access-content {
+            flex: 1;
+        }
+
+        .access-card h3 {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .access-card p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .access-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 107, 109, 0.2);
+        }
+
+        .access-btn:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.3);
+        }
+
+        /* ============ LANGUAGE SELECTOR ============ */
+        .language-footer {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(232, 240, 240, 0.8) 100%);
+            padding: 24px 32px;
+            border-radius: 16px;
+            border: 2px solid rgba(74, 107, 109, 0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .language-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .language-title {
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            background-color: var(--white);
+            color: var(--dark);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+        }
+
+        .lang-btn:hover,
+        .lang-btn.active {
+            background-color: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 1024px) {
+            .portal-container {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .portal-header {
+                width: 100%;
+                padding: 45px 40px;
+                min-height: 280px;
+            }
+
+            .portal-content {
+                padding: 40px;
+            }
+
+            .language-footer {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .portal-header {
+                padding: 35px 30px;
+                gap: 20px;
+            }
+
+            .logo-box {
+                padding: 12px 18px;
+            }
+
+            .logo-text-nexo {
+                font-size: 42px;
+            }
+
+            .portal-title {
+                font-size: 26px;
+            }
+
+            .portal-content {
+                padding: 35px;
+            }
+
+            .access-card {
+                padding: 20px;
+            }
+
+            .access-card h3 {
+                font-size: 18px;
+            }
+
+            .language-footer {
+                padding: 20px 25px;
+                gap: 16px;
+            }
+
+            .language-title {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-container">
+        <!-- HEADER IZQUIERDO -->
+        <div class="portal-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-box">
+                        <div class="logo-text-nexo">
+                            <span class="logo-ne">ne</span><span class="logo-x">X</span><span class="logo-o">o</span>
+                        </div>
+                        <div class="logo-subtitle">Servicios Empresariales</div>
+                    </div>
+                </div>
+
+                <h2 class="portal-title">Sistema de<br>Intermediación Digital</h2>
+
+                <p class="portal-description">
+                    Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
+                </p>
+            </div>
+        </div>
+
+        <!-- CONTENT DERECHO -->
+        <div class="portal-content">
+            <!-- ACCESO CLIENTE -->
+            <div class="access-section">
+                <div class="access-title">👥 Acceso Cliente</div>
+                <div class="access-card" onclick="goToPublicStore()">
+                    <div class="access-icon">🛒</div>
+                    <div class="access-content">
+                        <h3>Tienda Pública</h3>
+                        <p>Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.</p>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                            <button class="access-btn" onclick="event.stopPropagation(); goToPublicStore()">Ir a la Tienda</button>
+                            <button class="access-btn" onclick="event.stopPropagation(); goToCustomerSupport()">Ir a Atención al Cliente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANGUAGE SELECTOR -->
+            <div style="display: flex; justify-content: center; width: 100%;">
+                <div class="language-footer">
+                    <div class="language-section">
+                        <div class="language-title">🌍 Idioma</div>
+                        <div class="language-buttons">
+                            <button class="lang-btn active" onclick="setLanguage('es')">Español</button>
+                            <button class="lang-btn" onclick="setLanguage('en')">English</button>
+                            <button class="lang-btn" onclick="setLanguage('pt')">Português</button>
+                            <button class="lang-btn" onclick="setLanguage('it')">Italiano</button>
+                            <button class="lang-btn" onclick="setLanguage('fr')">Français</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCESO ADMINISTRATIVO -->
+            <div class="access-section">
+                <div class="access-title">🔐 Acceso Administrativo</div>
+                <div class="access-card" onclick="goToAdminLogin()">
+                    <div class="access-icon">⚙️</div>
+                    <div class="access-content">
+                        <h3>Panel Administrativo</h3>
+                        <p>Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.</p>
+                        <button class="access-btn">Ingresar Panel Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER COPYRIGHT -->
+    <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600;">
+        NEXO SRL © 2024 | NIT:  | Intermediación Digital | 3 Agentes IA Integrados
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('nexo_language', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function goToPublicStore() {
+            window.location.href = 'nexo-tienda-publica.html';
+        }
+
+        function goToAdminLogin() {
+            window.location.href = 'nexo-admin-login.html';
+        }
+
+        function goToCustomerSupport() {
+            window.location.href = 'nexo-agent2-soporte.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('nexo_language') || 'es';
+            const langs = ['es', 'en', 'pt', 'it', 'fr'];
+            document.querySelectorAll('.lang-btn').forEach((btn, idx) => {
+                if (langs[idx] === savedLang) btn.classList.add('active');
+            });
+        });
+    </script>
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+<div id="nexo-legal-footer" style="text-align:center;color:rgba(255,255,255,0.88);font-size:12px;padding:8px 0 18px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap;">
+  <a href="aviso-legal.html" style="color:inherit;text-decoration:none;">Aviso legal</a>
+  <span>|</span>
+  <a href="politica-privacidad.html" style="color:inherit;text-decoration:none;">Privacidad</a>
+  <span>|</span>
+  <a href="terminos-condiciones.html" style="color:inherit;text-decoration:none;">Términos</a>
+  <span>|</span>
+  <a href="politica-cookies.html" style="color:inherit;text-decoration:none;">Cookies</a>
+</div>
+
+</body>
+</html>
