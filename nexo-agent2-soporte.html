@@ -1,565 +1,1074 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXO Agent 1 - Compra Automática IA</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --primary: #4A6B6D;
-            --secondary: #5A7C7E;
-            --tertiary: #6A8C8D;
-            --light: #E8F0F0;
-            --white: #FFFFFF;
-            --dark: #2D3E3F;
-            --accent: #7AC742;
-            --accent-light: #A8D965;
-            --danger: #E74C3C;
-            --warning: #F39C12;
-            --success: #27AE60;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .agent-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--white);
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-        }
-
-        .agent-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
-            padding: 40px;
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .agent-header h1 {
-            font-size: 36px;
-            font-weight: 900;
-            margin: 0;
-            letter-spacing: -1px;
-        }
-
-        .agent-header p {
-            font-size: 14px;
-            opacity: 0.9;
-            margin: 8px 0 0 0;
-        }
-
-        .agent-status {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            background: rgba(255,255,255,0.15);
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #27AE60;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .agent-content {
-            padding: 40px;
-        }
-
-        .agent-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        .agent-panel {
-            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
-            border: 2px solid rgba(74, 107, 109, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-        }
-
-        .agent-panel-title {
-            font-size: 22px;
-            font-weight: 900;
-            color: var(--primary);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px;
-        }
-
-        .agent-panel-title emoji {
-            font-size: 32px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--dark);
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-        }
-
-        .form-input,
-        .form-select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.3s;
-        }
-
-        .form-input:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(122, 199, 66, 0.2);
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(74, 107, 109, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .data-grid {
-            display: grid;
-            gap: 12px;
-        }
-
-        .data-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px;
-            background: var(--white);
-            border-radius: 10px;
-            border-left: 4px solid var(--accent);
-        }
-
-        .data-item-label {
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 13px;
-        }
-
-        .data-item-value {
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--accent);
-            letter-spacing: -0.5px;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(74, 107, 109, 0.2);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .alert {
-            padding: 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 16px;
-            border-left: 4px solid;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left-color: #27AE60;
-        }
-
-        .alert-info {
-            background: #e3f2fd;
-            color: #1565c0;
-            border-left-color: #2196F3;
-        }
-
-        .purchases-list {
-            background: var(--white);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .purchase-item {
-            padding: 16px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .purchase-item:last-child {
-            border-bottom: none;
-        }
-
-        .purchase-item:hover {
-            background: #f9f9f9;
-        }
-
-        .purchase-info {
-            flex: 1;
-        }
-
-        .purchase-product {
-            font-weight: 900;
-            color: var(--dark);
-            font-size: 14px;
-        }
-
-        .purchase-date {
-            font-size: 12px;
-            color: #888;
-            margin-top: 4px;
-        }
-
-        .purchase-amount {
-            font-weight: 900;
-            color: var(--accent);
-            font-size: 16px;
-            text-align: right;
-        }
-
-
-        .nexo-ai-panel{margin-top:30px;background:linear-gradient(135deg,#f6fbf8 0%,#eef5f3 100%);border:2px solid rgba(74,107,109,.14);border-radius:18px;padding:24px;box-shadow:0 12px 30px rgba(0,0,0,.06)}
-        .nexo-ai-title{font-size:20px;font-weight:900;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:10px}
-        .nexo-ai-subtitle{font-size:13px;color:#5f7283;line-height:1.5;margin-bottom:14px;font-weight:600}
-        .nexo-ai-textarea{width:100%;min-height:92px;border:1px solid #c7d5d1;border-radius:12px;padding:12px;font-family:inherit;font-size:13px;resize:vertical;background:#fff;color:#102038}
-        .nexo-ai-textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}
-        .nexo-ai-actions{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
-        .nexo-ai-button{background:#09152e;color:#fff;border:none;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:900;cursor:pointer;min-width:180px}
-        .nexo-ai-button:disabled{opacity:.55;cursor:not-allowed}
-        .nexo-ai-answer{margin-top:14px;background:#fff;border-left:5px solid #7ac742;border-radius:12px;padding:16px;line-height:1.55;font-size:13px;color:#102038;white-space:pre-wrap;box-shadow:0 6px 18px rgba(0,0,0,.05)}
-        .nexo-ai-note{font-size:11px;color:#60707a;font-weight:700}
-
-        .agent-footer {
-            padding: 20px 40px;
-            background: #f5f5f5;
-            border-top: 1px solid #eee;
-            font-size: 12px;
-            color: #888;
-            text-align: center;
-        }
-
-        @media (max-width: 1024px) {
-            .agent-grid {
-                grid-template-columns: 1fr;
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>NEXO - Atención al Cliente</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">NEXO</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Correo de destino</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3><div style="font-size:13px; line-height:1.7; font-weight:700;"><span id="officialDesc"></span><br>.</div></div><div class="info-card virtual-box"><h3 id="virtualTitle">🤖 🤖 Agente virtual NEXO</h3><div style="font-size:13px; color:#5f7283; line-height:1.6;" id="virtualDesc"></div><textarea id="virtualQuestion"></textarea><button type="button" class="mini-btn" id="consultBtn" onclick="consultarNexoAI('soporte')"></button><div class="ai-note">Respuesta automática con IA de soporte. Si la API no está disponible, se mostrará una orientación local segura.</div><div id="virtualAnswer" class="ai-answer" style="display:none;"></div></div></div></section></div><script>
+const countriesPhoneData=[
+            {
+                        "code": "AF",
+                        "name": "Afganistán",
+                        "area": "+93"
+            },
+            {
+                        "code": "AL",
+                        "name": "Albania",
+                        "area": "+355"
+            },
+            {
+                        "code": "DE",
+                        "name": "Alemania",
+                        "area": "+49"
+            },
+            {
+                        "code": "AD",
+                        "name": "Andorra",
+                        "area": "+376"
+            },
+            {
+                        "code": "AO",
+                        "name": "Angola",
+                        "area": "+244"
+            },
+            {
+                        "code": "AI",
+                        "name": "Anguila",
+                        "area": "+1"
+            },
+            {
+                        "code": "AG",
+                        "name": "Antigua y Barbuda",
+                        "area": "+1"
+            },
+            {
+                        "code": "SA",
+                        "name": "Arabia Saudita",
+                        "area": "+966"
+            },
+            {
+                        "code": "DZ",
+                        "name": "Argelia",
+                        "area": "+213"
+            },
+            {
+                        "code": "AR",
+                        "name": "Argentina",
+                        "area": "+54"
+            },
+            {
+                        "code": "AM",
+                        "name": "Armenia",
+                        "area": "+374"
+            },
+            {
+                        "code": "AW",
+                        "name": "Aruba",
+                        "area": "+297"
+            },
+            {
+                        "code": "AU",
+                        "name": "Australia",
+                        "area": "+61"
+            },
+            {
+                        "code": "AT",
+                        "name": "Austria",
+                        "area": "+43"
+            },
+            {
+                        "code": "AZ",
+                        "name": "Azerbaiyán",
+                        "area": "+994"
+            },
+            {
+                        "code": "BS",
+                        "name": "Bahamas",
+                        "area": "+1"
+            },
+            {
+                        "code": "BD",
+                        "name": "Bangladesh",
+                        "area": "+880"
+            },
+            {
+                        "code": "BB",
+                        "name": "Barbados",
+                        "area": "+1"
+            },
+            {
+                        "code": "BH",
+                        "name": "Baréin",
+                        "area": "+973"
+            },
+            {
+                        "code": "BZ",
+                        "name": "Belice",
+                        "area": "+501"
+            },
+            {
+                        "code": "BJ",
+                        "name": "Benín",
+                        "area": "+229"
+            },
+            {
+                        "code": "BM",
+                        "name": "Bermudas",
+                        "area": "+1"
+            },
+            {
+                        "code": "BY",
+                        "name": "Bielorrusia",
+                        "area": "+375"
+            },
+            {
+                        "code": "BO",
+                        "name": "Bolivia",
+                        "area": ""
+            },
+            {
+                        "code": "BA",
+                        "name": "Bosnia y Herzegovina",
+                        "area": "+387"
+            },
+            {
+                        "code": "BW",
+                        "name": "Botsuana",
+                        "area": "+267"
+            },
+            {
+                        "code": "BR",
+                        "name": "Brasil",
+                        "area": "+55"
+            },
+            {
+                        "code": "BN",
+                        "name": "Brunéi",
+                        "area": "+673"
+            },
+            {
+                        "code": "BG",
+                        "name": "Bulgaria",
+                        "area": "+359"
+            },
+            {
+                        "code": "BF",
+                        "name": "Burkina Faso",
+                        "area": "+226"
+            },
+            {
+                        "code": "BI",
+                        "name": "Burundi",
+                        "area": "+257"
+            },
+            {
+                        "code": "BE",
+                        "name": "Bélgica",
+                        "area": "+32"
+            },
+            {
+                        "code": "CV",
+                        "name": "Cabo Verde",
+                        "area": "+238"
+            },
+            {
+                        "code": "KH",
+                        "name": "Camboya",
+                        "area": "+855"
+            },
+            {
+                        "code": "CM",
+                        "name": "Camerún",
+                        "area": "+237"
+            },
+            {
+                        "code": "CA",
+                        "name": "Canadá",
+                        "area": "+1"
+            },
+            {
+                        "code": "CL",
+                        "name": "Chile",
+                        "area": "+56"
+            },
+            {
+                        "code": "CN",
+                        "name": "China",
+                        "area": "+86"
+            },
+            {
+                        "code": "CY",
+                        "name": "Chipre",
+                        "area": "+357"
+            },
+            {
+                        "code": "VA",
+                        "name": "Ciudad del Vaticano",
+                        "area": "+39"
+            },
+            {
+                        "code": "CO",
+                        "name": "Colombia",
+                        "area": "+57"
+            },
+            {
+                        "code": "KP",
+                        "name": "Corea del Norte",
+                        "area": "+850"
+            },
+            {
+                        "code": "KR",
+                        "name": "Corea del Sur",
+                        "area": "+82"
+            },
+            {
+                        "code": "CI",
+                        "name": "Costa de Marfil",
+                        "area": "+225"
+            },
+            {
+                        "code": "CR",
+                        "name": "Costa Rica",
+                        "area": "+506"
+            },
+            {
+                        "code": "HR",
+                        "name": "Croacia",
+                        "area": "+385"
+            },
+            {
+                        "code": "CU",
+                        "name": "Cuba",
+                        "area": "+53"
+            },
+            {
+                        "code": "CW",
+                        "name": "Curazao",
+                        "area": "+599"
+            },
+            {
+                        "code": "DK",
+                        "name": "Dinamarca",
+                        "area": "+45"
+            },
+            {
+                        "code": "DM",
+                        "name": "Dominica",
+                        "area": "+1"
+            },
+            {
+                        "code": "EC",
+                        "name": "Ecuador",
+                        "area": "+593"
+            },
+            {
+                        "code": "EG",
+                        "name": "Egipto",
+                        "area": "+20"
+            },
+            {
+                        "code": "SV",
+                        "name": "El Salvador",
+                        "area": "+503"
+            },
+            {
+                        "code": "AE",
+                        "name": "Emiratos Árabes",
+                        "area": "+971"
+            },
+            {
+                        "code": "ER",
+                        "name": "Eritrea",
+                        "area": "+291"
+            },
+            {
+                        "code": "SK",
+                        "name": "Eslovaquia",
+                        "area": "+421"
+            },
+            {
+                        "code": "SI",
+                        "name": "Eslovenia",
+                        "area": "+386"
+            },
+            {
+                        "code": "ES",
+                        "name": "España",
+                        "area": "+34"
+            },
+            {
+                        "code": "US",
+                        "name": "Estados Unidos",
+                        "area": "+1"
+            },
+            {
+                        "code": "EE",
+                        "name": "Estonia",
+                        "area": "+372"
+            },
+            {
+                        "code": "ET",
+                        "name": "Etiopía",
+                        "area": "+251"
+            },
+            {
+                        "code": "PH",
+                        "name": "Filipinas",
+                        "area": "+63"
+            },
+            {
+                        "code": "FI",
+                        "name": "Finlandia",
+                        "area": "+358"
+            },
+            {
+                        "code": "FJ",
+                        "name": "Fiyi",
+                        "area": "+679"
+            },
+            {
+                        "code": "FR",
+                        "name": "Francia",
+                        "area": "+33"
+            },
+            {
+                        "code": "GA",
+                        "name": "Gabón",
+                        "area": "+241"
+            },
+            {
+                        "code": "GM",
+                        "name": "Gambia",
+                        "area": "+220"
+            },
+            {
+                        "code": "GE",
+                        "name": "Georgia",
+                        "area": "+995"
+            },
+            {
+                        "code": "GH",
+                        "name": "Ghana",
+                        "area": "+233"
+            },
+            {
+                        "code": "GD",
+                        "name": "Granada",
+                        "area": "+1"
+            },
+            {
+                        "code": "GR",
+                        "name": "Grecia",
+                        "area": "+30"
+            },
+            {
+                        "code": "GU",
+                        "name": "Guam",
+                        "area": "+1"
+            },
+            {
+                        "code": "GT",
+                        "name": "Guatemala",
+                        "area": "+502"
+            },
+            {
+                        "code": "GF",
+                        "name": "Guayana Francesa",
+                        "area": "+594"
+            },
+            {
+                        "code": "GN",
+                        "name": "Guinea",
+                        "area": "+224"
+            },
+            {
+                        "code": "GQ",
+                        "name": "Guinea Ecuatorial",
+                        "area": "+240"
+            },
+            {
+                        "code": "GW",
+                        "name": "Guinea-Bisáu",
+                        "area": "+245"
+            },
+            {
+                        "code": "GY",
+                        "name": "Guyana",
+                        "area": "+592"
+            },
+            {
+                        "code": "HT",
+                        "name": "Haití",
+                        "area": "+509"
+            },
+            {
+                        "code": "HN",
+                        "name": "Honduras",
+                        "area": "+504"
+            },
+            {
+                        "code": "HK",
+                        "name": "Hong Kong",
+                        "area": "+852"
+            },
+            {
+                        "code": "HU",
+                        "name": "Hungría",
+                        "area": "+36"
+            },
+            {
+                        "code": "IN",
+                        "name": "India",
+                        "area": "+91"
+            },
+            {
+                        "code": "ID",
+                        "name": "Indonesia",
+                        "area": "+62"
+            },
+            {
+                        "code": "IQ",
+                        "name": "Irak",
+                        "area": "+964"
+            },
+            {
+                        "code": "IE",
+                        "name": "Irlanda",
+                        "area": "+353"
+            },
+            {
+                        "code": "IR",
+                        "name": "Irán",
+                        "area": "+98"
+            },
+            {
+                        "code": "IS",
+                        "name": "Islandia",
+                        "area": "+354"
+            },
+            {
+                        "code": "KY",
+                        "name": "Islas Caimán",
+                        "area": "+1"
+            },
+            {
+                        "code": "MP",
+                        "name": "Islas Marianas del Norte",
+                        "area": "+1"
+            },
+            {
+                        "code": "MH",
+                        "name": "Islas Marshall",
+                        "area": "+692"
+            },
+            {
+                        "code": "SB",
+                        "name": "Islas Salomón",
+                        "area": "+677"
+            },
+            {
+                        "code": "TC",
+                        "name": "Islas Turcas y Caicos",
+                        "area": "+1"
+            },
+            {
+                        "code": "VG",
+                        "name": "Islas Vírgenes Británicas",
+                        "area": "+1"
+            },
+            {
+                        "code": "VI",
+                        "name": "Islas Vírgenes Estadounidenses",
+                        "area": "+1"
+            },
+            {
+                        "code": "IL",
+                        "name": "Israel",
+                        "area": "+972"
+            },
+            {
+                        "code": "IT",
+                        "name": "Italia",
+                        "area": "+39"
+            },
+            {
+                        "code": "JM",
+                        "name": "Jamaica",
+                        "area": "+1"
+            },
+            {
+                        "code": "JP",
+                        "name": "Japón",
+                        "area": "+81"
+            },
+            {
+                        "code": "JO",
+                        "name": "Jordania",
+                        "area": "+962"
+            },
+            {
+                        "code": "KZ",
+                        "name": "Kazajistán",
+                        "area": "+7"
+            },
+            {
+                        "code": "KE",
+                        "name": "Kenia",
+                        "area": "+254"
+            },
+            {
+                        "code": "KG",
+                        "name": "Kirguistán",
+                        "area": "+996"
+            },
+            {
+                        "code": "KI",
+                        "name": "Kiribati",
+                        "area": "+686"
+            },
+            {
+                        "code": "XK",
+                        "name": "Kosovo",
+                        "area": "+383"
+            },
+            {
+                        "code": "KW",
+                        "name": "Kuwait",
+                        "area": "+965"
+            },
+            {
+                        "code": "LA",
+                        "name": "Laos",
+                        "area": "+856"
+            },
+            {
+                        "code": "LV",
+                        "name": "Letonia",
+                        "area": "+371"
+            },
+            {
+                        "code": "LR",
+                        "name": "Liberia",
+                        "area": "+231"
+            },
+            {
+                        "code": "LY",
+                        "name": "Libia",
+                        "area": "+218"
+            },
+            {
+                        "code": "LI",
+                        "name": "Liechtenstein",
+                        "area": "+423"
+            },
+            {
+                        "code": "LT",
+                        "name": "Lituania",
+                        "area": "+370"
+            },
+            {
+                        "code": "LU",
+                        "name": "Luxemburgo",
+                        "area": "+352"
+            },
+            {
+                        "code": "LB",
+                        "name": "Líbano",
+                        "area": "+961"
+            },
+            {
+                        "code": "MO",
+                        "name": "Macao",
+                        "area": "+853"
+            },
+            {
+                        "code": "MK",
+                        "name": "Macedonia del Norte",
+                        "area": "+389"
+            },
+            {
+                        "code": "MG",
+                        "name": "Madagascar",
+                        "area": "+261"
+            },
+            {
+                        "code": "MY",
+                        "name": "Malasia",
+                        "area": "+60"
+            },
+            {
+                        "code": "MW",
+                        "name": "Malaui",
+                        "area": "+265"
+            },
+            {
+                        "code": "ML",
+                        "name": "Mali",
+                        "area": "+223"
+            },
+            {
+                        "code": "MT",
+                        "name": "Malta",
+                        "area": "+356"
+            },
+            {
+                        "code": "MA",
+                        "name": "Marruecos",
+                        "area": "+212"
+            },
+            {
+                        "code": "MU",
+                        "name": "Mauricio",
+                        "area": "+230"
+            },
+            {
+                        "code": "MR",
+                        "name": "Mauritania",
+                        "area": "+222"
+            },
+            {
+                        "code": "FM",
+                        "name": "Micronesia",
+                        "area": "+691"
+            },
+            {
+                        "code": "MD",
+                        "name": "Moldavia",
+                        "area": "+373"
+            },
+            {
+                        "code": "ME",
+                        "name": "Montenegro",
+                        "area": "+382"
+            },
+            {
+                        "code": "MS",
+                        "name": "Montserrat",
+                        "area": "+1"
+            },
+            {
+                        "code": "MM",
+                        "name": "Myanmar",
+                        "area": "+95"
+            },
+            {
+                        "code": "MX",
+                        "name": "México",
+                        "area": "+52"
+            },
+            {
+                        "code": "MC",
+                        "name": "Mónaco",
+                        "area": "+377"
+            },
+            {
+                        "code": "NA",
+                        "name": "Namibia",
+                        "area": "+264"
+            },
+            {
+                        "code": "NR",
+                        "name": "Nauru",
+                        "area": "+674"
+            },
+            {
+                        "code": "NP",
+                        "name": "Nepal",
+                        "area": "+977"
+            },
+            {
+                        "code": "NI",
+                        "name": "Nicaragua",
+                        "area": "+505"
+            },
+            {
+                        "code": "NG",
+                        "name": "Nigeria",
+                        "area": "+234"
+            },
+            {
+                        "code": "NO",
+                        "name": "Noruega",
+                        "area": "+47"
+            },
+            {
+                        "code": "NZ",
+                        "name": "Nueva Zelanda",
+                        "area": "+64"
+            },
+            {
+                        "code": "NE",
+                        "name": "Níger",
+                        "area": "+227"
+            },
+            {
+                        "code": "OM",
+                        "name": "Omán",
+                        "area": "+968"
+            },
+            {
+                        "code": "PK",
+                        "name": "Pakistán",
+                        "area": "+92"
+            },
+            {
+                        "code": "PW",
+                        "name": "Palaos",
+                        "area": "+680"
+            },
+            {
+                        "code": "PA",
+                        "name": "Panamá",
+                        "area": "+507"
+            },
+            {
+                        "code": "PG",
+                        "name": "Papúa Nueva Guinea",
+                        "area": "+675"
+            },
+            {
+                        "code": "PY",
+                        "name": "Paraguay",
+                        "area": "+595"
+            },
+            {
+                        "code": "NL",
+                        "name": "Países Bajos",
+                        "area": "+31"
+            },
+            {
+                        "code": "PE",
+                        "name": "Perú",
+                        "area": "+51"
+            },
+            {
+                        "code": "PL",
+                        "name": "Polonia",
+                        "area": "+48"
+            },
+            {
+                        "code": "PT",
+                        "name": "Portugal",
+                        "area": "+351"
+            },
+            {
+                        "code": "PR",
+                        "name": "Puerto Rico",
+                        "area": "+1"
+            },
+            {
+                        "code": "QA",
+                        "name": "Qatar",
+                        "area": "+974"
+            },
+            {
+                        "code": "GB",
+                        "name": "Reino Unido",
+                        "area": "+44"
+            },
+            {
+                        "code": "CF",
+                        "name": "República Centroafricana",
+                        "area": "+236"
+            },
+            {
+                        "code": "CZ",
+                        "name": "República Checa",
+                        "area": "+420"
+            },
+            {
+                        "code": "CG",
+                        "name": "República del Congo",
+                        "area": "+242"
+            },
+            {
+                        "code": "CD",
+                        "name": "República Democrática del Congo",
+                        "area": "+243"
+            },
+            {
+                        "code": "DO",
+                        "name": "República Dominicana",
+                        "area": "+1"
+            },
+            {
+                        "code": "RW",
+                        "name": "Ruanda",
+                        "area": "+250"
+            },
+            {
+                        "code": "RO",
+                        "name": "Rumania",
+                        "area": "+40"
+            },
+            {
+                        "code": "RU",
+                        "name": "Rusia",
+                        "area": "+7"
+            },
+            {
+                        "code": "MF",
+                        "name": "Saint Martín",
+                        "area": "+590"
+            },
+            {
+                        "code": "WS",
+                        "name": "Samoa",
+                        "area": "+685"
+            },
+            {
+                        "code": "AS",
+                        "name": "Samoa Americana",
+                        "area": "+1"
+            },
+            {
+                        "code": "BL",
+                        "name": "San Bartolomé",
+                        "area": "+590"
+            },
+            {
+                        "code": "KN",
+                        "name": "San Cristóbal y Nieves",
+                        "area": "+1"
+            },
+            {
+                        "code": "SM",
+                        "name": "San Marino",
+                        "area": "+378"
+            },
+            {
+                        "code": "VC",
+                        "name": "San Vicente y las Granadinas",
+                        "area": "+1"
+            },
+            {
+                        "code": "LC",
+                        "name": "Santa Lucía",
+                        "area": "+1"
+            },
+            {
+                        "code": "ST",
+                        "name": "Santo Tomé y Príncipe",
+                        "area": "+239"
+            },
+            {
+                        "code": "SN",
+                        "name": "Senegal",
+                        "area": "+221"
+            },
+            {
+                        "code": "RS",
+                        "name": "Serbia",
+                        "area": "+381"
+            },
+            {
+                        "code": "SC",
+                        "name": "Seychelles",
+                        "area": "+248"
+            },
+            {
+                        "code": "SL",
+                        "name": "Sierra Leona",
+                        "area": "+232"
+            },
+            {
+                        "code": "SG",
+                        "name": "Singapur",
+                        "area": "+65"
+            },
+            {
+                        "code": "SX",
+                        "name": "Sint Maarten",
+                        "area": "+1"
+            },
+            {
+                        "code": "SY",
+                        "name": "Siria",
+                        "area": "+963"
+            },
+            {
+                        "code": "SO",
+                        "name": "Somalia",
+                        "area": "+252"
+            },
+            {
+                        "code": "LK",
+                        "name": "Sri Lanka",
+                        "area": "+94"
+            },
+            {
+                        "code": "ZA",
+                        "name": "Sudáfrica",
+                        "area": "+27"
+            },
+            {
+                        "code": "SE",
+                        "name": "Suecia",
+                        "area": "+46"
+            },
+            {
+                        "code": "CH",
+                        "name": "Suiza",
+                        "area": "+41"
+            },
+            {
+                        "code": "SR",
+                        "name": "Surinam",
+                        "area": "+597"
+            },
+            {
+                        "code": "TH",
+                        "name": "Tailandia",
+                        "area": "+66"
+            },
+            {
+                        "code": "TW",
+                        "name": "Taiwán",
+                        "area": "+886"
+            },
+            {
+                        "code": "TZ",
+                        "name": "Tanzania",
+                        "area": "+255"
+            },
+            {
+                        "code": "TJ",
+                        "name": "Tayikistán",
+                        "area": "+992"
+            },
+            {
+                        "code": "TL",
+                        "name": "Timor Oriental",
+                        "area": "+670"
+            },
+            {
+                        "code": "TG",
+                        "name": "Togo",
+                        "area": "+228"
+            },
+            {
+                        "code": "TO",
+                        "name": "Tonga",
+                        "area": "+676"
+            },
+            {
+                        "code": "TT",
+                        "name": "Trinidad y Tobago",
+                        "area": "+1"
+            },
+            {
+                        "code": "TM",
+                        "name": "Turkmenistán",
+                        "area": "+993"
+            },
+            {
+                        "code": "TR",
+                        "name": "Turquía",
+                        "area": "+90"
+            },
+            {
+                        "code": "TN",
+                        "name": "Túnez",
+                        "area": "+216"
+            },
+            {
+                        "code": "UA",
+                        "name": "Ucrania",
+                        "area": "+380"
+            },
+            {
+                        "code": "UG",
+                        "name": "Uganda",
+                        "area": "+256"
+            },
+            {
+                        "code": "UY",
+                        "name": "Uruguay",
+                        "area": "+598"
+            },
+            {
+                        "code": "UZ",
+                        "name": "Uzbekistán",
+                        "area": "+998"
+            },
+            {
+                        "code": "VU",
+                        "name": "Vanuatu",
+                        "area": "+678"
+            },
+            {
+                        "code": "VE",
+                        "name": "Venezuela",
+                        "area": "+58"
+            },
+            {
+                        "code": "VN",
+                        "name": "Vietnam",
+                        "area": "+84"
+            },
+            {
+                        "code": "YE",
+                        "name": "Yemen",
+                        "area": "+967"
+            },
+            {
+                        "code": "DJ",
+                        "name": "Yibuti",
+                        "area": "+253"
+            },
+            {
+                        "code": "ZM",
+                        "name": "Zambia",
+                        "area": "+260"
+            },
+            {
+                        "code": "ZW",
+                        "name": "Zimbabue",
+                        "area": "+263"
             }
-        }
+];
+const i18n={"es": {"title": "Atención al Cliente", "desc": "Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.", "home": "Inicio", "store": "Tienda", "ticket": "Número de ticket", "destMail": "Correo de destino", "formTitle": "Formulario de soporte", "helper": "Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.", "fullName": "Nombre completo", "fullNamePh": "Escriba su nombre completo", "email": "Correo electrónico", "emailPh": "", "phone": "Teléfono / WhatsApp", "phonePh": "Escriba su número", "country": "País", "countryPh": "Seleccione país", "order": "Número de pedido", "orderPh": "Ej. ", "product": "Producto", "productPh": "Ej. Auriculares inalámbricos Pro", "request": "Tipo de solicitud", "requestPh": "Seleccione una opción", "priority": "Prioridad", "priorityPh": "Seleccione prioridad", "channel": "Canal de contacto preferido", "channelPh": "Seleccione canal", "details": "Descripción detallada", "detailsPh": "Describa el problema, fechas, qué ocurrió y qué solución espera.", "send": "Enviar reclamo", "levels": "Niveles de atención", "lvl1": "Recepción y clasificación automática del caso", "lvl2": "Validación de pedido, producto y canal de pago", "lvl3": "Asignación de prioridad para seguimiento", "lvl4": "Respuesta inicial por el canal elegido", "official": "Correo oficial de reclamos", "officialDesc": "Todos los reclamos enviados desde este formulario deben dirigirse al correo oficial.", "virtual": "🤖 🤖 Agente virtual NEXO", "virtualDesc": "Asistente inicial para orientar consultas frecuentes antes de escalar el caso al equipo humano.", "virtualPh": "Escriba aquí su consulta rápida...", "consult": "Consultar", "reqOptions": ["Seleccione una opción", "Reclamo", "Consulta", "Cambio", "Devolución"], "priorityOptions": ["Seleccione prioridad", "Baja", "Media", "Alta", "Urgente"], "channelOptions": ["Seleccione canal", "Correo electrónico", "WhatsApp", "Llamada telefónica", "Chat web"]}, "en": {"title": "Customer Care", "desc": "Manage claims, inquiries, exchanges, returns and order tracking in one corporate panel.", "home": "Home", "store": "Store", "ticket": "Ticket number", "destMail": "Destination email", "formTitle": "Support form", "helper": "Complete the information so the team can review your case with priority, traceability and a formal ticket record.", "fullName": "Full name", "fullNamePh": "Enter your full name", "email": "Email", "emailPh": "customer@email.com", "phone": "Phone / WhatsApp", "phonePh": "Enter your number", "country": "Country", "countryPh": "Select country", "order": "Order number", "orderPh": "E.g. ", "product": "Product", "productPh": "E.g. Wireless earbuds Pro", "request": "Request type", "requestPh": "Select an option", "priority": "Priority", "priorityPh": "Select priority", "channel": "Preferred contact channel", "channelPh": "Select channel", "details": "Detailed description", "detailsPh": "Describe the issue, dates, what happened and the solution you expect.", "send": "Send request", "levels": "Service levels", "lvl1": "Automatic intake and case classification", "lvl2": "Order, product and payment-channel validation", "lvl3": "Priority assignment for follow-up", "lvl4": "Initial response through the selected channel", "official": "Official claims email", "officialDesc": "All claims sent from this form must be directed to the official email.", "virtual": "🤖 NEXO virtual agent", "virtualDesc": "Initial assistant to guide frequent questions before escalating the case to the human team.", "virtualPh": "Type your quick question here...", "consult": "Consult", "reqOptions": ["Select an option", "Claim", "Inquiry", "Exchange", "Return"], "priorityOptions": ["Select priority", "Low", "Medium", "High", "Urgent"], "channelOptions": ["Select channel", "Email", "WhatsApp", "Phone call", "Web chat"]}, "pt": {"title": "Atendimento ao Cliente", "desc": "Gerencie reclamações, consultas, trocas, devoluções e acompanhamento de pedidos em um único painel corporativo.", "home": "Início", "store": "Loja", "ticket": "Número do ticket", "destMail": "E-mail de destino", "formTitle": "Formulário de suporte", "helper": "Preencha os dados para que a equipe revise o seu caso com prioridade, rastreabilidade e registro formal do ticket.", "fullName": "Nome completo", "fullNamePh": "Digite seu nome completo", "email": "E-mail", "emailPh": "", "phone": "Telefone / WhatsApp", "phonePh": "Digite seu número", "country": "País", "countryPh": "Selecione o país", "order": "Número do pedido", "orderPh": "Ex.: ", "product": "Produto", "productPh": "Ex.: Fones de ouvido sem fio Pro", "request": "Tipo de solicitação", "requestPh": "Selecione uma opção", "priority": "Prioridade", "priorityPh": "Selecione a prioridade", "channel": "Canal de contato preferido", "channelPh": "Selecione o canal", "details": "Descrição detalhada", "detailsPh": "Descreva o problema, datas, o que aconteceu e a solução esperada.", "send": "Enviar solicitação", "levels": "Níveis de atendimento", "lvl1": "Recepção e classificação automática do caso", "lvl2": "Validação de pedido, produto e canal de pagamento", "lvl3": "Atribuição de prioridade para acompanhamento", "lvl4": "Resposta inicial pelo canal selecionado", "official": "E-mail oficial de reclamações", "officialDesc": "Todas as reclamações enviadas deste formulário devem ser encaminhadas ao e-mail oficial.", "virtual": "🤖 🤖 Agente virtual NEXO", "virtualDesc": "Assistente inicial para orientar perguntas frequentes antes de escalar o caso para a equipe humana.", "virtualPh": "Escreva aqui sua consulta rápida...", "consult": "Consultar", "reqOptions": ["Selecione uma opção", "Reclamação", "Consulta", "Troca", "Devolução"], "priorityOptions": ["Selecione a prioridade", "Baixa", "Média", "Alta", "Urgente"], "channelOptions": ["Selecione o canal", "E-mail", "WhatsApp", "Ligação telefônica", "Chat web"]}, "it": {"title": "Assistenza Clienti", "desc": "Gestisci reclami, richieste, cambi, resi e monitoraggio ordini in un unico pannello aziendale.", "home": "Home", "store": "Negozio", "ticket": "Numero ticket", "destMail": "Email di destinazione", "formTitle": "Modulo di supporto", "helper": "Compila i dati affinché il team possa esaminare il tuo caso con priorità, tracciabilità e registrazione formale del ticket.", "fullName": "Nome completo", "fullNamePh": "Inserisci il tuo nome completo", "email": "Email", "emailPh": "cliente@email.com", "phone": "Telefono / WhatsApp", "phonePh": "Inserisci il tuo numero", "country": "Paese", "countryPh": "Seleziona il paese", "order": "Numero ordine", "orderPh": "Es. ", "product": "Prodotto", "productPh": "Es. Auricolari wireless Pro", "request": "Tipo di richiesta", "requestPh": "Seleziona un’opzione", "priority": "Priorità", "priorityPh": "Seleziona priorità", "channel": "Canale di contatto preferito", "channelPh": "Seleziona canale", "details": "Descrizione dettagliata", "detailsPh": "Descrivi il problema, le date, cosa è successo e la soluzione attesa.", "send": "Invia richiesta", "levels": "Livelli di assistenza", "lvl1": "Ricezione e classificazione automatica del caso", "lvl2": "Validazione di ordine, prodotto e canale di pagamento", "lvl3": "Assegnazione della priorità per il follow-up", "lvl4": "Risposta iniziale tramite il canale selezionato", "official": "Email ufficiale reclami", "officialDesc": "Tutti i reclami inviati da questo modulo devono essere diretti all’email ufficiale.", "virtual": "Agente virtuale NEXO", "virtualDesc": "Assistente iniziale per orientare le domande frequenti prima di inoltrare il caso al team umano.", "virtualPh": "Scrivi qui la tua domanda rapida...", "consult": "Consulta", "reqOptions": ["Seleziona un’opzione", "Reclamo", "Richiesta", "Cambio", "Reso"], "priorityOptions": ["Seleziona priorità", "Bassa", "Media", "Alta", "Urgente"], "channelOptions": ["Seleziona canale", "Email", "WhatsApp", "Telefonata", "Chat web"]}, "fr": {"title": "Service Client", "desc": "Gérez réclamations, demandes, échanges, retours et suivi des commandes dans un seul panneau professionnel.", "home": "Accueil", "store": "Boutique", "ticket": "Numéro de ticket", "destMail": "E-mail de destination", "formTitle": "Formulaire de support", "helper": "Complétez les informations afin que l’équipe examine votre dossier avec priorité, traçabilité et enregistrement formel du ticket.", "fullName": "Nom complet", "fullNamePh": "Saisissez votre nom complet", "email": "E-mail", "emailPh": "client@email.com", "phone": "Téléphone / WhatsApp", "phonePh": "Saisissez votre numéro", "country": "Pays", "countryPh": "Sélectionnez le pays", "order": "Numéro de commande", "orderPh": "Ex. ", "product": "Produit", "productPh": "Ex. Écouteurs sans fil Pro", "request": "Type de demande", "requestPh": "Sélectionnez une option", "priority": "Priorité", "priorityPh": "Sélectionnez la priorité", "channel": "Canal de contact préféré", "channelPh": "Sélectionnez le canal", "details": "Description détaillée", "detailsPh": "Décrivez le problème, les dates, ce qui s’est passé et la solution attendue.", "send": "Envoyer la demande", "levels": "Niveaux de service", "lvl1": "Réception et classification automatique du dossier", "lvl2": "Validation de la commande, du produit et du canal de paiement", "lvl3": "Attribution de la priorité pour le suivi", "lvl4": "Réponse initiale via le canal choisi", "official": "E-mail officiel des réclamations", "officialDesc": "Toutes les réclamations envoyées depuis ce formulaire doivent être adressées à l’e-mail officiel.", "virtual": "Agent virtuel NEXO", "virtualDesc": "Assistant initial pour orienter les questions fréquentes avant d’escalader le dossier à l’équipe humaine.", "virtualPh": "Écrivez ici votre question rapide...", "consult": "Consulter", "reqOptions": ["Sélectionnez une option", "Réclamation", "Question", "Échange", "Retour"], "priorityOptions": ["Sélectionnez la priorité", "Faible", "Moyenne", "Haute", "Urgente"], "channelOptions": ["Sélectionnez le canal", "E-mail", "WhatsApp", "Appel téléphonique", "Chat web"]}};
 
-        @media (max-width: 768px) {
-            .agent-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 16px;
-            }
-
-            .agent-header h1 {
-                font-size: 28px;
-            }
-
-            .agent-content {
-                padding: 25px;
-            }
-
-            .agent-panel {
-                padding: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="agent-container">
-        <div class="agent-header">
-            <div>
-                <h1>🤖 Agente 1: Compra Automática IA</h1>
-                <p>Procesamiento automático de compras en Amazon y CJ Dropshipping</p>
-            </div>
-            <div class="agent-status">
-                <div class="status-dot"></div>
-                ACTIVO
-            </div>
-        </div>
-
-        <div class="agent-content">
-            <div class="agent-grid">
-                <!-- PANEL IZQUIERDO: CONFIGURACIÓN -->
-                <div class="agent-panel">
-                    <div class="agent-panel-title">
-                        <emoji>⚙️</emoji>
-                        Configurar Compra
-                    </div>
-
-                    <form id="purchaseForm">
-                        <div class="form-group">
-                            <label class="form-label">Proveedor</label>
-                            <select class="form-select" id="supplier">
-                                <option value="">Selecciona proveedor...</option>
-                                <option value="">Amazon Global</option>
-                                <option value="">CJ Dropshipping</option>
-                                <option value="">Ambos (Mejor Precio)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Nombre del Producto</label>
-                            <input type="text" class="form-input" id="productName" placeholder="ej: Audífonos Bluetooth">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Cantidad</label>
-                            <input type="number" class="form-input" id="quantity" placeholder="1" min="1" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Presupuesto Máximo (USD)</label>
-                            <input type="number" class="form-input" id="budget" placeholder="100" min="0" step="0.01">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Prioridad</label>
-                            <select class="form-select" id="priority">
-                                <option value="">Normal (5-7 días)</option>
-                                <option value="">Expresada (2-3 días)</option>
-                                <option value="">Urgente (1 día)</option>
-                            </select>
-                        </div>
-
-                        <button type="button" class="btn-primary" onclick="procesarCompra()" id="submitBtn">
-                            🚀 Procesar Compra Automática
-                        </button>
-                    </form>
-
-                    <div id="alertContainer"></div>
-                </div>
-
-                <!-- PANEL DERECHO: ANÁLISIS -->
-                <div class="agent-panel">
-                    <div class="agent-panel-title">
-                        <emoji>📊</emoji>
-                        Análisis de Compra
-                    </div>
-
-                    <div class="data-grid">
-                        <div class="data-item">
-                            <span class="data-item-label">Estado Búsqueda</span>
-                            <span class="data-item-value" id="searchStatus">-</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-item-label">Mejores Ofertas</span>
-                            <span class="data-item-value" id="offersCount">0</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-item-label">Precio Mínimo</span>
-                            <span class="data-item-value" id="minPrice">$0.00</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-item-label">Precio Promedio</span>
-                            <span class="data-item-value" id="avgPrice">$0.00</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-item-label">Ahorro Estimado</span>
-                            <span class="data-item-value" id="savings">$0.00</span>
-                        </div>
-                        <div class="data-item">
-                            <span class="data-item-label">Califación Proveedor</span>
-                            <span class="data-item-value" id="rating">4.8⭐</span>
-                        </div>
-                    </div>
-
-                    <div id="processingContainer" style="display:none; text-align:center; margin-top:20px;">
-                        <div class="spinner" style="margin: 0 auto;"></div>
-                        <p style="margin-top:15px; color:#666; font-size:13px;">Procesando búsqueda en proveedores...</p>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="nexo-ai-panel">
-                <div class="nexo-ai-title">🤖 Agente IA de Compras nexo</div>
-                <div class="nexo-ai-subtitle">Consulta sobre productos, proveedores, precios, disponibilidad, tiempos de entrega, margen y riesgo de compra. La IA responderá automáticamente y guardará historial local.</div>
-                <textarea id="nexoAiQuestion" class="nexo-ai-textarea" placeholder="Ej.: Quiero comprar audífonos Bluetooth para enviar a España. Presupuesto máximo USD 80. ¿Qué debería validar?"></textarea>
-                <div class="nexo-ai-actions">
-                    <button type="button" id="nexoAiButton" class="nexo-ai-button" onclick="consultarNexoAI('compras')">Consultar IA</button>
-                    <span class="nexo-ai-note">Funciona con OpenAI al configurar OPENAI_API_KEY en Vercel.</span>
-                </div>
-                <div id="nexoAiAnswer" class="nexo-ai-answer" style="display:none;"></div>
-            </div>
-
-            <!-- HISTÓRICO DE COMPRAS -->
-            <div style="margin-top: 30px;">
-                <h2 style="font-size:22px; font-weight:900; color:var(--dark); margin-bottom:20px; letter-spacing:-0.5px;">
-                    📦 Últimas Compras Automáticas
-                </h2>
-
-                <div id="purchasesList" class="purchases-list">
-                    <div style="padding:20px; text-align:center; color:#999;">
-                        No hay compras aún. Procesa la primera compra automática.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="agent-footer">
-            🤖 Agent 1 - Compra Automática IA | Integración Amazon & CJ Dropshipping | Búsqueda inteligente de mejores precios
-        </div>
-    </div>
-
-    <script>
-        let purchases = JSON.parse(localStorage.getItem('agentPurchases')) || [];
-
-        function procesarCompra() {
-            const supplier = document.getElementById('supplier').value;
-            const productName = document.getElementById('productName').value;
-            const quantity = document.getElementById('quantity').value;
-            const budget = parseFloat(document.getElementById('budget').value);
-            const priority = document.getElementById('priority').value;
-
-            if (!supplier || !productName || !budget) {
-                showAlert('Por favor completa todos los campos', 'error');
-                return;
-            }
-
-            document.getElementById('processingContainer').style.display = 'block';
-            document.getElementById('submitBtn').disabled = true;
-
-            // Simulación de búsqueda en proveedores
-            setTimeout(() => {
-                const priceAmazon = (Math.random() * budget * 0.8) + (budget * 0.1);
-                const priceCJ = (Math.random() * budget * 0.85) + (budget * 0.05);
-                
-                const minPrice = Math.min(priceAmazon, priceCJ);
-                const avgPrice = (priceAmazon + priceCJ) / 2;
-                const savings = budget - minPrice;
-
-                document.getElementById('searchStatus').textContent = 'Completado ✓';
-                document.getElementById('offersCount').textContent = '2';
-                document.getElementById('minPrice').textContent = '$' + minPrice.toFixed(2);
-                document.getElementById('avgPrice').textContent = '$' + avgPrice.toFixed(2);
-                document.getElementById('savings').textContent = '$' + savings.toFixed(2);
-                document.getElementById('rating').textContent = (4.5 + Math.random()).toFixed(1) + '⭐';
-
-                // Agregar a histórico
-                const purchase = {
-                    id: Date.now(),
-                    product: productName,
-                    supplier: supplier,
-                    quantity: quantity,
-                    price: minPrice,
-                    priority: priority,
-                    date: new Date().toLocaleString('es-ES'),
-                    status: 'Procesada'
-                };
-
-                purchases.unshift(purchase);
-                localStorage.setItem('agentPurchases', JSON.stringify(purchases));
-
-                renderPurchases();
-                showAlert('✅ Compra procesada automáticamente', 'success');
-
-                document.getElementById('processingContainer').style.display = 'none';
-                document.getElementById('submitBtn').disabled = false;
-                document.getElementById('purchaseForm').reset();
-            }, 2500);
-        }
-
-        function renderPurchases() {
-            const container = document.getElementById('purchasesList');
-            
-            if (purchases.length === 0) {
-                container.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">No hay compras aún.</div>';
-                return;
-            }
-
-            container.innerHTML = purchases.map(p => `
-                <div class="purchase-item">
-                    <div class="purchase-info">
-                        <div class="purchase-product">📦 ${p.product} (x${p.quantity})</div>
-                        <div class="purchase-date">${p.date} • ${p.supplier.toUpperCase()} • Prioridad: ${p.priority}</div>
-                    </div>
-                    <div class="purchase-amount">$${parseFloat(p.price).toFixed(2)}</div>
-                </div>
-            `).join('');
-        }
-
-        function showAlert(message, type) {
-            const container = document.getElementById('alertContainer');
-            const alertClass = type === 'error' ? 'alert alert-danger' : 'alert alert-success';
-            const alertDiv = document.createElement('div');
-            alertDiv.className = alertClass;
-            alertDiv.innerHTML = `<span>${message}</span>`;
-            container.innerHTML = '';
-            container.appendChild(alertDiv);
-            setTimeout(() => container.innerHTML = '', 5000);
-        }
-
-        document.addEventListener('DOMContentLoaded', renderPurchases);
-    </script>
-
+let currentLang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es');
+function populateCountryOptions(){ const sel=document.getElementById('country'); if(!sel) return; sel.innerHTML=''; const t=i18n[currentLang]||i18n.es; const first=document.createElement('option'); first.value=''; first.textContent=t.countryPh || 'Seleccione país'; sel.appendChild(first); countriesPhoneData.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.code; opt.textContent=`${c.name} (${c.area})`; opt.dataset.area=c.area; sel.appendChild(opt); }); }
+function goBackSupport(){ window.location.href='index.html'; }
+function updatePhoneCode(){ const select=document.getElementById('country'); if(!select) return; const opt=select.options[select.selectedIndex]; const phoneCode=document.getElementById('phoneCode'); if(phoneCode) phoneCode.value=opt?.dataset?.area || ''; }
+function fillOptions(id, values){ const sel=document.getElementById(id); if(!sel) return; sel.innerHTML=''; values.forEach((txt,i)=>{ const o=document.createElement('option'); o.value=i===0?'':txt; o.textContent=txt; sel.appendChild(o); }); }
+function applyLanguage(){
+  currentLang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es');
+  const t=i18n[currentLang] || i18n.es;
+  document.documentElement.lang=currentLang;
+  const map={title:'title',desc:'desc',homeLink:'home',storeLink:'store',ticketLbl:'ticket',destLbl:'destMail',formTitle:'formTitle',helper:'helper',fullNameLbl:'fullName',emailLbl:'email',phoneLbl:'phone',countryLbl:'country',orderLbl:'order',productLbl:'product',requestLbl:'request',priorityLbl:'priority',channelLbl:'channel',detailsLbl:'details',sendBtn:'send',levelsTitle:'levels',lvl1:'lvl1',lvl2:'lvl2',lvl3:'lvl3',lvl4:'lvl4',officialTitle:'official',officialDesc:'officialDesc',virtualTitle:'virtual',virtualDesc:'virtualDesc',consultBtn:'consult'};
+  Object.entries(map).forEach(([id,key])=>{ const el=document.getElementById(id); if(el && t[key]) el.textContent=t[key]; });
+  if(document.getElementById('fullName')) document.getElementById('fullName').placeholder=t.fullNamePh||'Escriba su nombre completo';
+  if(document.getElementById('email')) document.getElementById('email').placeholder=t.emailPh||'';
+  if(document.getElementById('phone')) document.getElementById('phone').placeholder=t.phonePh||'Escriba su número';
+  if(document.getElementById('orderNumber')) document.getElementById('orderNumber').placeholder=t.orderPh||'Ej. ';
+  if(document.getElementById('product')) document.getElementById('product').placeholder=t.productPh||'Ej. Producto';
+  if(document.getElementById('details')) document.getElementById('details').placeholder=t.detailsPh||'Describa el caso';
+  if(document.getElementById('virtualQuestion')) document.getElementById('virtualQuestion').placeholder=t.virtualPh||'Escriba aquí su consulta rápida';
+  fillOptions('requestType', t.reqOptions || ['Seleccione una opción','Reclamo','Consulta','Cambio','Devolución']);
+  fillOptions('priority', t.priorityOptions || ['Seleccione prioridad','Baja','Media','Alta','Urgente']);
+  fillOptions('preferredChannel', t.channelOptions || ['Seleccione canal','Correo electrónico','WhatsApp','Llamada telefónica','Chat web']);
+  const currentCountry=document.getElementById('country')?.value;
+  populateCountryOptions();
+  if(currentCountry && document.getElementById('country')) document.getElementById('country').value=currentCountry;
+  updatePhoneCode();
+}
+function nextSupportTicket(){
+  const n=Number(localStorage.getItem('nexoSupportTicketCounter')||3996)+1;
+  localStorage.setItem('nexoSupportTicketCounter',String(n));
+  const d=new Date();
+  return `NEXO-R-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${n}`;
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  populateCountryOptions(); applyLanguage(); updatePhoneCode();
+  const tEl=document.getElementById('ticketCode'); if(tEl && !tEl.textContent.trim()) tEl.textContent=nextSupportTicket();
+  const form=document.getElementById('supportForm');
+  if(form) form.addEventListener('submit', e=>{e.preventDefault(); const ticket=tEl?.textContent||nextSupportTicket();
+    const arr=JSON.parse(localStorage.getItem('nexoSupportTickets')||'[]');
+    arr.push({ticket,createdAt:new Date().toISOString(),fullName:document.getElementById('fullName').value,email:document.getElementById('email').value,phone:(document.getElementById('phoneCode').value+' '+document.getElementById('phone').value).trim(),country:document.getElementById('country').selectedOptions?.[0]?.textContent||'',orderNumber:document.getElementById('orderNumber').value,product:document.getElementById('product').value,requestType:document.getElementById('requestType').value,priority:document.getElementById('priority').value,preferredChannel:document.getElementById('preferredChannel').value,details:document.getElementById('details').value});
+    localStorage.setItem('nexoSupportTickets', JSON.stringify(arr));
+    alert('Solicitud enviada correctamente. Ticket: '+ticket);
+    form.reset(); populateCountryOptions(); updatePhoneCode(); if(tEl) tEl.textContent=nextSupportTicket();
+  });
+});
+</script>
 <script>
 function nexoPublicCleanup(){
   try{
@@ -581,66 +1090,105 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <script>
-const NEXO_AI_CONFIG = window.NEXO_AI_CONFIG || { agent: 'general', title: 'Agente IA nexo' };
+(function(){
+  function findOption(selectEl, mode){
+    if(!selectEl) return;
+    var matchValue = '';
+    Array.from(selectEl.options).forEach(function(opt){
+      var t = (opt.textContent || '').toLowerCase();
+      if(mode === 'user' && (t.indexOf('usuario') !== -1 || t.indexOf('user') !== -1)){
+        matchValue = opt.value;
+      }
+      if(mode !== 'user' && (t.indexOf('contrase') !== -1 || t.indexOf('password') !== -1)){
+        matchValue = opt.value;
+      }
+    });
+    if(matchValue) selectEl.value = matchValue;
+  }
 
-function nexoLocalFallback(question, agent){
-  const q = (question || '').toLowerCase();
-  const ticket = 'NEXO-IA-' + new Date().toISOString().slice(0,10).replaceAll('-','') + '-' + Math.floor(1000 + Math.random()*9000);
-  if(agent === 'compras'){
-    if(q.includes('amazon') || q.includes('producto') || q.includes('precio') || q.includes('compr')){
-      return `Analicé tu consulta como agente de compras nexo.\n\nRecomendación inicial:\n1. Validar proveedor, precio, disponibilidad y costo logístico.\n2. Confirmar presupuesto máximo, país de destino y tiempo esperado.\n3. Comparar opciones antes de emitir la orden.\n\nTicket preliminar: ${ticket}\n\nCuando conectemos OpenAI + Supabase, esta respuesta será generada por IA real y quedará guardada en historial.`;
-    }
-    return `Soy el agente de compras nexo. Puedo ayudarte a evaluar proveedor, precio, disponibilidad, envío y riesgo de compra.\n\nTicket preliminar: ${ticket}`;
+  function applyRecoveryPrefill(){
+    try{
+      var params = new URLSearchParams(window.location.search);
+      var mode = params.get('recovery') || localStorage.getItem('nexoRecoveryType') || '';
+      if(!mode) return;
+
+      var selectSolicitud = document.querySelector('select[name="tipoSolicitud"], #tipoSolicitud, #requestType');
+      var textarea = document.querySelector('textarea, #descripcion, #detailMessage');
+
+      findOption(selectSolicitud, mode);
+
+      if(textarea && !textarea.value){
+        textarea.value = mode === 'user'
+          ? 'Necesito recuperar mi usuario de acceso a la tienda.'
+          : 'Necesito recuperar mi contraseña de acceso a la tienda.';
+      }
+
+      localStorage.removeItem('nexoRecoveryType');
+      localStorage.removeItem('nexoRecoveryFrom');
+    }catch(e){}
   }
-  if(agent === 'soporte'){
-    if(q.includes('pedido') || q.includes('reclamo') || q.includes('devol') || q.includes('pago') || q.includes('cambio')){
-      return `Analicé tu caso como agente de soporte nexo.\n\nAcción recomendada:\n1. Registrar número de pedido, producto y canal de pago.\n2. Clasificar el caso por prioridad.\n3. Escalar a soporte humano si requiere validación documental.\n\nTicket preliminar: ${ticket}\n\nCompleta el formulario para dejar registro formal del caso.`;
-    }
-    return `Soy el agente de soporte nexo. Describe tu consulta, pedido, pago, cambio o devolución y te orientaré con el siguiente paso.\n\nTicket preliminar: ${ticket}`;
+
+  document.addEventListener('DOMContentLoaded', applyRecoveryPrefill);
+})();
+</script>
+
+
+<script>
+function nexoLocalSoporte(question){
+  const q=(question||'').toLowerCase();
+  const ticket='NEXO-SOP-'+new Date().toISOString().slice(0,10).replaceAll('-','')+'-'+Math.floor(1000+Math.random()*9000);
+  if(q.includes('ticket') || q.includes('pedido') || q.includes('order')){
+    return `He revisado tu consulta como Agente 2 de Soporte nexo.\n\nPara ubicar tu ticket o pedido necesito que completes o confirmes:\n1. Correo usado en la compra.\n2. Número de pedido o comprobante, si lo tienes.\n3. Producto y fecha aproximada.\n\nCódigo preliminar de atención: ${ticket}\n\nTambién puedes llenar el formulario de la izquierda para dejar registro formal.`;
   }
-  if(agent === 'marketing'){
-    if(q.includes('ventas') || q.includes('campaña') || q.includes('roi') || q.includes('marketing') || q.includes('clientes')){
-      return `Analicé tu consulta como agente de marketing nexo.\n\nRecomendación inicial:\n1. Definir objetivo: ventas, tráfico, captación o retención.\n2. Medir conversión, costo por cliente y ROI.\n3. Priorizar campañas con mayor margen y menor costo operativo.\n\nCódigo de análisis: ${ticket}\n\nCon OpenAI + Supabase podremos generar estrategias dinámicas con historial real.`;
-    }
-    return `Soy el agente de marketing nexo. Puedo ayudarte con campañas, ROI, conversión, posicionamiento y estrategia comercial.\n\nCódigo de análisis: ${ticket}`;
+  if(q.includes('pago') || q.includes('paypal') || q.includes('payoneer')){
+    return `Como Agente 2 de Soporte nexo, para revisar pagos necesito método de pago, fecha, monto y correo usado.\n\nCódigo preliminar de atención: ${ticket}`;
   }
-  return `Soy el agente IA nexo. Recibí tu consulta y prepararé una orientación inicial.\n\nReferencia: ${ticket}`;
+  if(q.includes('devol') || q.includes('cambio') || q.includes('reclamo')){
+    return `Como Agente 2 de Soporte nexo, clasificaré tu caso como reclamo/cambio/devolución.\n\nIndica producto, motivo, evidencia y solución esperada.\n\nCódigo preliminar de atención: ${ticket}`;
+  }
+  return `Soy el Agente 2 de Soporte nexo. Puedo ayudarte con tickets, pedidos, reclamos, pagos, cambios y devoluciones.\n\nCódigo preliminar de atención: ${ticket}`;
 }
 
 async function consultarNexoAI(agent){
-  const input = document.getElementById('nexoAiQuestion') || document.getElementById('virtualQuestion');
-  const answer = document.getElementById('nexoAiAnswer') || document.getElementById('virtualAnswer');
-  const button = document.getElementById('nexoAiButton') || document.getElementById('consultBtn');
-  const question = (input?.value || '').trim();
+  const input=document.getElementById('virtualQuestion');
+  const answer=document.getElementById('virtualAnswer');
+  const button=document.getElementById('consultBtn');
+  const question=(input?.value||'').trim();
   if(!question){
-    if(answer){ answer.textContent = 'Por favor escribe tu consulta para que el agente IA pueda responder.'; answer.style.display='block'; }
+    if(answer){ answer.textContent='Por favor escribe tu consulta para que el Agente 2 de Soporte pueda responder.'; answer.style.display='block'; }
     return;
   }
-  if(answer){ answer.textContent = 'Analizando con agente IA nexo...'; answer.style.display='block'; }
-  if(button) button.disabled = true;
+  if(answer){ answer.textContent='Analizando con Agente 2 de Soporte IA nexo...'; answer.style.display='block'; }
+  if(button) button.disabled=true;
   try{
-    const res = await fetch('/api/nexo-ai', {
+    const res=await fetch('/api/nexo-ai',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ agent, question, page: location.pathname })
+      body:JSON.stringify({agent:'soporte',question,page:location.pathname})
     });
     if(!res.ok) throw new Error('API no disponible');
-    const data = await res.json();
-    const text = data.answer || data.message || nexoLocalFallback(question, agent);
-    if(answer) answer.textContent = text;
+    const data=await res.json();
+    const text=data.answer || data.message || nexoLocalSoporte(question);
+    if(answer) answer.textContent=text;
     try{
-      const key = 'nexoAIHistory_' + agent;
-      const arr = JSON.parse(localStorage.getItem(key) || '[]');
-      arr.unshift({question, answer:text, createdAt:new Date().toISOString()});
-      localStorage.setItem(key, JSON.stringify(arr.slice(0,50)));
+      const arr=JSON.parse(localStorage.getItem('nexoAIHistory_soporte')||'[]');
+      arr.unshift({question,answer:text,createdAt:new Date().toISOString()});
+      localStorage.setItem('nexoAIHistory_soporte',JSON.stringify(arr.slice(0,50)));
     }catch(e){}
   }catch(e){
-    if(answer) answer.textContent = nexoLocalFallback(question, agent);
+    if(answer) answer.textContent=nexoLocalSoporte(question);
   }finally{
-    if(button) button.disabled = false;
+    if(button) button.disabled=false;
   }
 }
-</script>
 
-</body>
-</html>
+// Blindaje: elimina cualquier alerta antigua del botón Consultar.
+document.addEventListener('DOMContentLoaded',function(){
+  const oldBtn=document.getElementById('consultBtn');
+  if(!oldBtn) return;
+  const btn=oldBtn.cloneNode(true);
+  oldBtn.parentNode.replaceChild(btn,oldBtn);
+  btn.onclick=function(){ consultarNexoAI('soporte'); };
+});
+</script>
+</body></html>
