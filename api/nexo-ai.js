@@ -1,86 +1,106 @@
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const apiKey = (process.env.OPENAI_API_KEY || '').trim();
+
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      ok: true,
+      service: 'nexo-ai',
+      hasOpenAIKey: Boolean(apiKey),
+      keyPrefix: apiKey ? apiKey.slice(0, 10) + '...' : null,
+      environment: process.env.VERCEL_ENV || 'unknown'
+    });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { agent = 'general', question = '', page = '' } = req.body || {};
+    const { agent = 'soporte', question = '', page = '' } = req.body || {};
+
     if (!question || typeof question !== 'string') {
       return res.status(400).json({ error: 'Consulta vacía' });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return res.status(200).json({
         answer: respuestaLocal(agent, question),
-        mode: 'fallback_without_openai_key'
+        mode: 'fallback_without_openai_key',
+        hasOpenAIKey: false
       });
     }
 
     const systemPrompt = construirPrompt(agent);
-    const response = await fetch('https://api.openai.com/v1/responses', {
+
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-        input: [
+        model: 'gpt-4o-mini',
+        messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Página: ${page}\nConsulta del usuario: ${question}` }
+          { role: 'user', content: question }
         ],
-        max_output_tokens: 650
+        temperature: 0.35,
+        max_tokens: 450
       })
     });
 
-    if (!response.ok) {
-      const detail = await response.text();
-      console.error('OpenAI error:', detail);
-      return res.status(200).json({ answer: respuestaLocal(agent, question), mode: 'fallback_openai_error' });
+    const data = await r.json();
+
+    if (!r.ok) {
+      return res.status(200).json({
+        answer: respuestaLocal(agent, question) + "\n\nAviso técnico: la clave existe, pero OpenAI devolvió error. Revise créditos/facturación o permisos de la API.",
+        mode: 'openai_error',
+        hasOpenAIKey: true,
+        openaiStatus: r.status,
+        openaiError: data?.error?.message || 'Error no especificado'
+      });
     }
 
-    const data = await response.json();
-    const answer = extraerTexto(data) || respuestaLocal(agent, question);
-    return res.status(200).json({ answer, mode: 'openai' });
-  } catch (error) {
-    console.error(error);
-    return res.status(200).json({ answer: respuestaLocal('general', req.body?.question || ''), mode: 'fallback_exception' });
+    const answer = data?.choices?.[0]?.message?.content || respuestaLocal(agent, question);
+
+    return res.status(200).json({
+      answer,
+      mode: 'openai',
+      hasOpenAIKey: true
+    });
+
+  } catch (err) {
+    return res.status(200).json({
+      answer: 'No pude conectar con la IA en este momento. El caso puede registrarse mediante el formulario de soporte.',
+      mode: 'server_error',
+      error: err?.message || String(err)
+    });
   }
 }
 
 function construirPrompt(agent) {
-  const base = `Eres un agente virtual profesional de nexo, plataforma de intermediación digital internacional. Responde en español claro, ejecutivo y útil. No inventes datos. Si faltan datos, pide lo mínimo necesario. No prometas acciones imposibles. Mantén tono corporativo y orientado a solución.`;
-  const reglas = `\nReglas: no solicites claves ni datos bancarios completos; no digas que una compra o pago fue ejecutado si no hay confirmación; si el caso requiere revisión humana, genera pasos y sugiere crear ticket.`;
-  if (agent === 'compras') return base + reglas + `\nRol: Agente 1 de compras. Ayudas con búsqueda de productos, proveedor, precio, disponibilidad, compra internacional, riesgo, tiempos de entrega y comparación Amazon/CJ Dropshipping.`;
-  if (agent === 'soporte') return base + reglas + `\nRol: Agente 2 de soporte. Ayudas con reclamos, consultas, cambios, devoluciones, seguimiento de pedido, pago y prioridad del ticket.`;
-  if (agent === 'marketing') return base + reglas + `\nRol: Agente 3 de marketing. Ayudas con campañas, ventas, ROI, conversión, segmentación, posicionamiento y recomendaciones comerciales para nexo.`;
-  return base + reglas;
-}
-
-function extraerTexto(data) {
-  if (data.output_text) return data.output_text;
-  const parts = [];
-  for (const item of data.output || []) {
-    for (const content of item.content || []) {
-      if (content.type === 'output_text' && content.text) parts.push(content.text);
-      if (content.text && typeof content.text === 'string') parts.push(content.text);
-    }
+  if (agent === 'compras') {
+    return `Eres el Agente IA de Compras de nexo. Ayudas a clientes con productos, proveedores, presupuesto, tiempos, riesgos de compra, validación de pedido y pasos de compra internacional. Responde en español, claro, profesional y breve.`;
   }
-  return parts.join('\n').trim();
+  if (agent === 'marketing') {
+    return `Eres el Agente IA de Marketing de nexo. Ayudas con ventas digitales, campañas, ROI, segmentación, anuncios, embudos y recomendaciones comerciales. Responde en español, claro, profesional y accionable.`;
+  }
+  return `Eres el Agente IA de Soporte de nexo. Atiendes reclamos, pedidos, pagos, devoluciones, cambios, seguimiento y tickets. Responde en español, con tono profesional, humano y orientado a resolver. Si faltan datos, pide número de pedido, correo registrado, producto, país, método de pago y detalle del problema. No inventes información.`;
 }
 
 function respuestaLocal(agent, question) {
-  const ticket = 'NEXO-IA-' + new Date().toISOString().slice(0,10).replaceAll('-', '') + '-' + Math.floor(1000 + Math.random() * 9000);
-  const q = String(question || '').toLowerCase();
+  const ref = 'NEXO-IA-' + new Date().toISOString().slice(0,10).replaceAll('-','') + '-' + Math.floor(1000 + Math.random()*9000);
   if (agent === 'compras') {
-    return `Agente IA Compras nexo\n\nRecibí tu consulta: "${question}".\n\nOrientación inicial:\n1. Confirmar producto, cantidad, país de destino y presupuesto.\n2. Comparar proveedor, disponibilidad, precio final y tiempo de entrega.\n3. Validar margen y riesgo antes de emitir la orden.\n\nReferencia: ${ticket}\n\nModo actual: respuesta local. Para IA completa, configura OPENAI_API_KEY en Vercel.`;
-  }
-  if (agent === 'soporte') {
-    return `Agente IA Soporte nexo\n\nRecibí tu consulta: "${question}".\n\nOrientación inicial:\n1. Indica número de pedido, producto y correo registrado.\n2. Describe si es reclamo, devolución, cambio, pago o seguimiento.\n3. Completa el formulario para registrar el ticket formal.\n\nReferencia: ${ticket}\n\nModo actual: respuesta local. Para IA completa, configura OPENAI_API_KEY en Vercel.`;
+    return `Agente IA Compras nexo\n\nRecibí tu consulta: "${question}".\n\nOrientación inicial:\n1. Indica producto exacto, país de destino y presupuesto máximo.\n2. Valida proveedor, tiempo de entrega y costo total antes de confirmar.\n3. Si deseas, registra la solicitud para análisis de compra.\n\nReferencia: ${ref}\n\nModo actual: respuesta local. Para IA completa, configura OPENAI_API_KEY en Vercel.`;
   }
   if (agent === 'marketing') {
-    return `Agente IA Marketing nexo\n\nRecibí tu consulta: "${question}".\n\nOrientación inicial:\n1. Definir objetivo: ventas, tráfico, captación o retención.\n2. Medir conversión, costo por cliente y ROI.\n3. Priorizar campañas con mayor margen y menor riesgo operativo.\n\nReferencia: ${ticket}\n\nModo actual: respuesta local. Para IA completa, configura OPENAI_API_KEY en Vercel.`;
+    return `Agente IA Marketing nexo\n\nRecibí tu consulta: "${question}".\n\nOrientación inicial:\n1. Define objetivo: ventas, tráfico, posicionamiento o conversión.\n2. Indica canal, presupuesto y público objetivo.\n3. Solicita un plan de campaña para medir ROI.\n\nReferencia: ${ref}\n\nModo actual: respuesta local. Para IA completa, configura OPENAI_API_KEY en Vercel.`;
   }
-  return `Agente IA nexo\n\nRecibí tu consulta. Referencia: ${ticket}\n\nPara IA completa, configura OPENAI_API_KEY en Vercel.`;
+  return `Agente IA Soporte nexo\n\nRecibí tu consulta: "${question}".\n\nOrientación inicial:\n1. Indica número de pedido, producto y correo registrado.\n2. Describe si es reclamo, devolución, cambio, pago o seguimiento.\n3. Completa el formulario para registrar el ticket formal.\n\nReferencia: ${ref}\n\nModo actual: respuesta local. Para IA completa, configura OPENAI_API_KEY en Vercel.`;
 }
