@@ -288,6 +288,18 @@
             color: var(--dark);
         }
 
+
+        .nexo-ai-panel{margin-top:30px;background:linear-gradient(135deg,#f6fbf8 0%,#eef5f3 100%);border:2px solid rgba(74,107,109,.14);border-radius:18px;padding:24px;box-shadow:0 12px 30px rgba(0,0,0,.06)}
+        .nexo-ai-title{font-size:20px;font-weight:900;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:10px}
+        .nexo-ai-subtitle{font-size:13px;color:#5f7283;line-height:1.5;margin-bottom:14px;font-weight:600}
+        .nexo-ai-textarea{width:100%;min-height:92px;border:1px solid #c7d5d1;border-radius:12px;padding:12px;font-family:inherit;font-size:13px;resize:vertical;background:#fff;color:#102038}
+        .nexo-ai-textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}
+        .nexo-ai-actions{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+        .nexo-ai-button{background:#09152e;color:#fff;border:none;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:900;cursor:pointer;min-width:180px}
+        .nexo-ai-button:disabled{opacity:.55;cursor:not-allowed}
+        .nexo-ai-answer{margin-top:14px;background:#fff;border-left:5px solid #7ac742;border-radius:12px;padding:16px;line-height:1.55;font-size:13px;color:#102038;white-space:pre-wrap;box-shadow:0 6px 18px rgba(0,0,0,.05)}
+        .nexo-ai-note{font-size:11px;color:#60707a;font-weight:700}
+
         .agent-footer {
             padding: 20px 40px;
             background: #f5f5f5;
@@ -490,6 +502,18 @@
                 </div>
             </div>
 
+
+            <div class="nexo-ai-panel">
+                <div class="nexo-ai-title">🤖 Agente IA de Marketing nexo</div>
+                <div class="nexo-ai-subtitle">Consulta sobre campañas, ROI, conversión, posicionamiento, promociones y estrategia comercial. La IA responderá automáticamente con recomendaciones.</div>
+                <textarea id="nexoAiQuestion" class="nexo-ai-textarea" placeholder="Ej.: Quiero aumentar ventas internacionales con bajo presupuesto. ¿Qué campaña me recomiendas y cómo mido el ROI?"></textarea>
+                <div class="nexo-ai-actions">
+                    <button type="button" id="nexoAiButton" class="nexo-ai-button" onclick="consultarNexoAI('marketing')">Consultar IA</button>
+                    <span class="nexo-ai-note">Funciona con OpenAI al configurar OPENAI_API_KEY en Vercel.</span>
+                </div>
+                <div id="nexoAiAnswer" class="nexo-ai-answer" style="display:none;"></div>
+            </div>
+
             <!-- RECOMENDACIONES -->
             <div class="recommendations">
                 <div class="recommendations-title">
@@ -541,6 +565,69 @@ function nexoPublicCleanup(){
   }catch(e){}
 }
 document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+<script>
+const NEXO_AI_CONFIG = window.NEXO_AI_CONFIG || { agent: 'general', title: 'Agente IA nexo' };
+
+function nexoLocalFallback(question, agent){
+  const q = (question || '').toLowerCase();
+  const ticket = 'NEXO-IA-' + new Date().toISOString().slice(0,10).replaceAll('-','') + '-' + Math.floor(1000 + Math.random()*9000);
+  if(agent === 'compras'){
+    if(q.includes('amazon') || q.includes('producto') || q.includes('precio') || q.includes('compr')){
+      return `Analicé tu consulta como agente de compras nexo.\n\nRecomendación inicial:\n1. Validar proveedor, precio, disponibilidad y costo logístico.\n2. Confirmar presupuesto máximo, país de destino y tiempo esperado.\n3. Comparar opciones antes de emitir la orden.\n\nTicket preliminar: ${ticket}\n\nCuando conectemos OpenAI + Supabase, esta respuesta será generada por IA real y quedará guardada en historial.`;
+    }
+    return `Soy el agente de compras nexo. Puedo ayudarte a evaluar proveedor, precio, disponibilidad, envío y riesgo de compra.\n\nTicket preliminar: ${ticket}`;
+  }
+  if(agent === 'soporte'){
+    if(q.includes('pedido') || q.includes('reclamo') || q.includes('devol') || q.includes('pago') || q.includes('cambio')){
+      return `Analicé tu caso como agente de soporte nexo.\n\nAcción recomendada:\n1. Registrar número de pedido, producto y canal de pago.\n2. Clasificar el caso por prioridad.\n3. Escalar a soporte humano si requiere validación documental.\n\nTicket preliminar: ${ticket}\n\nCompleta el formulario para dejar registro formal del caso.`;
+    }
+    return `Soy el agente de soporte nexo. Describe tu consulta, pedido, pago, cambio o devolución y te orientaré con el siguiente paso.\n\nTicket preliminar: ${ticket}`;
+  }
+  if(agent === 'marketing'){
+    if(q.includes('ventas') || q.includes('campaña') || q.includes('roi') || q.includes('marketing') || q.includes('clientes')){
+      return `Analicé tu consulta como agente de marketing nexo.\n\nRecomendación inicial:\n1. Definir objetivo: ventas, tráfico, captación o retención.\n2. Medir conversión, costo por cliente y ROI.\n3. Priorizar campañas con mayor margen y menor costo operativo.\n\nCódigo de análisis: ${ticket}\n\nCon OpenAI + Supabase podremos generar estrategias dinámicas con historial real.`;
+    }
+    return `Soy el agente de marketing nexo. Puedo ayudarte con campañas, ROI, conversión, posicionamiento y estrategia comercial.\n\nCódigo de análisis: ${ticket}`;
+  }
+  return `Soy el agente IA nexo. Recibí tu consulta y prepararé una orientación inicial.\n\nReferencia: ${ticket}`;
+}
+
+async function consultarNexoAI(agent){
+  const input = document.getElementById('nexoAiQuestion') || document.getElementById('virtualQuestion');
+  const answer = document.getElementById('nexoAiAnswer') || document.getElementById('virtualAnswer');
+  const button = document.getElementById('nexoAiButton') || document.getElementById('consultBtn');
+  const question = (input?.value || '').trim();
+  if(!question){
+    if(answer){ answer.textContent = 'Por favor escribe tu consulta para que el agente IA pueda responder.'; answer.style.display='block'; }
+    return;
+  }
+  if(answer){ answer.textContent = 'Analizando con agente IA nexo...'; answer.style.display='block'; }
+  if(button) button.disabled = true;
+  try{
+    const res = await fetch('/api/nexo-ai', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ agent, question, page: location.pathname })
+    });
+    if(!res.ok) throw new Error('API no disponible');
+    const data = await res.json();
+    const text = data.answer || data.message || nexoLocalFallback(question, agent);
+    if(answer) answer.textContent = text;
+    try{
+      const key = 'nexoAIHistory_' + agent;
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      arr.unshift({question, answer:text, createdAt:new Date().toISOString()});
+      localStorage.setItem(key, JSON.stringify(arr.slice(0,50)));
+    }catch(e){}
+  }catch(e){
+    if(answer) answer.textContent = nexoLocalFallback(question, agent);
+  }finally{
+    if(button) button.disabled = false;
+  }
+}
 </script>
 
 </body>
