@@ -1070,16 +1070,95 @@ function nextSupportTicket(){
   const r = Math.floor(100 + Math.random()*900);
   return `NEXO-R-${y}${m}${day}-${h}${min}${s}-${r}`;
 }
+
+const NEXO_SUPABASE_URL='https://ujqbbniptflzytdankwp.supabase.co';
+const NEXO_SUPABASE_KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+
+async function nexoSupabaseRequest(path, options={}){
+  const res = await fetch(NEXO_SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      'apikey': NEXO_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + NEXO_SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    }
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
+  if(!res.ok){
+    const msg = (data && (data.message || data.details || data.error)) || text || ('HTTP ' + res.status);
+    throw new Error(msg);
+  }
+  return data;
+}
+
+async function guardarTicketSupabaseDirecto(ticket){
+  const nombre = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const telefono = (document.getElementById('phoneCode').value+' '+document.getElementById('phone').value).trim();
+  const pais = document.getElementById('country').selectedOptions?.[0]?.textContent || '';
+  const pedido = document.getElementById('orderNumber').value.trim();
+  const producto = document.getElementById('product').value.trim();
+  const tipo = document.getElementById('requestType').value || 'Soporte';
+  const prioridad = document.getElementById('priority').value || 'Media';
+  const canal = document.getElementById('preferredChannel').value || 'No informado';
+  const detalles = document.getElementById('details').value.trim();
+
+  const mensaje = [
+    'Ticket: '+ticket,
+    'Nombre: '+nombre,
+    'Correo: '+email,
+    'Teléfono / WhatsApp: '+telefono,
+    'País: '+pais,
+    'Pedido: '+(pedido || 'No informado'),
+    'Producto: '+(producto || 'No informado'),
+    'Canal preferido: '+canal,
+    '',
+    'Descripción:',
+    detalles
+  ].join('\n');
+
+  const asunto = ticket + ' - ' + tipo + (pedido ? ' - Pedido '+pedido : '');
+
+  return await nexoSupabaseRequest('/rest/v1/tickets', {
+    method: 'POST',
+    body: JSON.stringify({
+      nombre_cliente: nombre,
+      email: email,
+      asunto: asunto,
+      tipo_reclamo: tipo,
+      mensaje: mensaje,
+      estado: 'Nuevo',
+      prioridad: prioridad,
+      fecha_creacion: new Date().toISOString(),
+      fecha_actualizacion: new Date().toISOString()
+    })
+  });
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   populateCountryOptions(); applyLanguage(); updatePhoneCode();
   const tEl=document.getElementById('ticketCode'); if(tEl){ tEl.textContent = nextSupportTicket(); }
   const form=document.getElementById('supportForm');
-  if(form) form.addEventListener('submit', e=>{e.preventDefault(); const ticket = tEl?.textContent || nextSupportTicket();
-    const arr=JSON.parse(localStorage.getItem('nexoSupportTickets')||'[]');
-    arr.push({ticket,createdAt:new Date().toISOString(),fullName:document.getElementById('fullName').value,email:document.getElementById('email').value,phone:(document.getElementById('phoneCode').value+' '+document.getElementById('phone').value).trim(),country:document.getElementById('country').selectedOptions?.[0]?.textContent||'',orderNumber:document.getElementById('orderNumber').value,product:document.getElementById('product').value,requestType:document.getElementById('requestType').value,priority:document.getElementById('priority').value,preferredChannel:document.getElementById('preferredChannel').value,details:document.getElementById('details').value});
-    localStorage.setItem('nexoSupportTickets', JSON.stringify(arr));
-    alert('Solicitud enviada correctamente. Ticket: '+ticket);
-    form.reset(); populateCountryOptions(); updatePhoneCode(); if(tEl) tEl.textContent=nextSupportTicket();
+  if(form) form.addEventListener('submit', async e=>{
+    e.preventDefault();
+    const ticket = tEl?.textContent || nextSupportTicket();
+    const btn=document.getElementById('sendBtn');
+    const originalText=btn?.textContent || 'Enviar reclamo';
+    try{
+      if(btn){ btn.disabled=true; btn.textContent='Guardando en Supabase...'; }
+      await guardarTicketSupabaseDirecto(ticket);
+      alert('Ticket guardado en SUPABASE correctamente.\n\nTicket: '+ticket+'\n\nAhora debe aparecer en el panel admin de tickets.');
+      form.reset(); populateCountryOptions(); updatePhoneCode(); if(tEl) tEl.textContent=nextSupportTicket();
+    }catch(error){
+      console.error('Error Supabase nexo:', error);
+      alert('ERROR: No se pudo guardar en Supabase.\n\nDetalle: '+(error.message || error));
+    }finally{
+      if(btn){ btn.disabled=false; btn.textContent=originalText; }
+    }
   });
 });
 </script>
