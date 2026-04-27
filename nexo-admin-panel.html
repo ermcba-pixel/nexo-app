@@ -586,16 +586,15 @@
                 <div class="menu-item" onclick="switchSection('marketing', this)">
                     <span class="menu-icon">📢</span> Agente Marketing IA
                 </div>
+                <div class="menu-item" onclick="switchSection('tickets', this)">
+                    <span class="menu-icon">🎫</span> Tickets soporte
+                </div>
                 <div class="menu-item" onclick="switchSection('users', this)">
                     <span class="menu-icon">👤</span> Usuarios
                 </div>
                 <div class="menu-item" onclick="switchSection('cash', this)">
                     <span class="menu-icon">💰</span> Caja
-                
-<div class="menu-item" onclick="switchSection('tickets', this)">
-    <span class="menu-icon">🎫</span> Tickets soporte
-</div>
-
+                </div>
             </div>
 
             <div class="menu-section">
@@ -891,6 +890,51 @@
                 </div>
             </div>
 
+            <!-- TICKETS SOPORTE -->
+            <div class="section" id="tickets">
+                <h1 class="page-title">🎫 TICKETS DE SOPORTE</h1>
+                <p class="page-subtitle">Reclamos reales guardados en Supabase</p>
+
+                <div class="section-box">
+                    <div class="section-box-title">📋 TICKETS RECIBIDOS</div>
+                    <div class="filters-bar">
+                        <button class="btn btn-primary" onclick="loadTickets()">Actualizar tickets</button>
+                        <div class="form-group">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-input" id="ticketSearch" placeholder="Cliente, email o asunto" oninput="renderTicketsTable()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="ticketStatusFilter" onchange="renderTicketsTable()">
+                                <option value="">Todos</option>
+                                <option value="Nuevo">Nuevo</option>
+                                <option value="En revisión">En revisión</option>
+                                <option value="Respondido">Respondido</option>
+                                <option value="Cerrado">Cerrado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>FECHA</th>
+                                <th>CLIENTE</th>
+                                <th>EMAIL</th>
+                                <th>ASUNTO</th>
+                                <th>TIPO</th>
+                                <th>ESTADO</th>
+                                <th>PRIORIDAD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsTable">
+                            <tr>
+                                <td colspan="7" style="text-align:center;color:var(--gray);">Presione “Actualizar tickets”.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- USUARIOS -->
             <div class="section" id="users">
                 <h1 class="page-title">👤 GESTIÓN DE USUARIOS</h1>
@@ -1079,33 +1123,7 @@
                         <button class="btn btn-primary" onclick="saveSettings()">💾 GUARDAR</button>
                     </div>
                 </div>
-            
-<!-- TICKETS SOPORTE -->
-<div class="section" id="tickets">
-    <h1 class="page-title">🎫 TICKETS DE SOPORTE</h1>
-    <p class="page-subtitle">Reclamos reales desde clientes (Supabase)</p>
-
-    <div class="section-box">
-        <div class="section-box-title">📋 LISTA DE TICKETS</div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>FECHA</th>
-                    <th>CLIENTE</th>
-                    <th>EMAIL</th>
-                    <th>ASUNTO</th>
-                    <th>TIPO</th>
-                </tr>
-            </thead>
-            <tbody id="ticketsTable">
-                <tr>
-                    <td colspan="5">Cargando tickets...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
+            </div>
 
         </div>
 
@@ -1147,49 +1165,9 @@
                 renderUsers();
             } else if (sectionId === 'reports') {
                 applyReportFilters();
-
-async function loadTickets() {
-    const table = document.getElementById('ticketsTable');
-    if (!table) return;
-
-    table.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
-
-    const SUPABASE_URL = "https://TU_URL.supabase.co";
-    const SUPABASE_KEY = "TU_ANON_KEY";
-
-    try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?select=*`, {
-            headers: {
-                apikey: SUPABASE_KEY,
-                Authorization: `Bearer ${SUPABASE_KEY}`
-            }
-        });
-
-        const data = await res.json();
-
-        if (!data.length) {
-            table.innerHTML = '<tr><td colspan="5">No hay tickets</td></tr>';
-            return;
-        }
-
-        table.innerHTML = data.map(t => `
-            <tr>
-                <td>${new Date().toLocaleDateString()}</td>
-                <td>${t.nombre_cliente}</td>
-                <td>${t.email}</td>
-                <td>${t.asunto}</td>
-                <td>${t.tipo_reclamo}</td>
-            </tr>
-        `).join('');
-
-    } catch (err) {
-        table.innerHTML = '<tr><td colspan="5">Error cargando tickets</td></tr>';
-    }
-}
-
             } else if (sectionId === 'tickets') {
-    loadTickets();
-} else if (sectionId === 'clientdata') {
+                loadTickets();
+            } else if (sectionId === 'clientdata') {
                 renderClientData();
             }
         }
@@ -1658,6 +1636,75 @@ async function loadTickets() {
             }
         }
 
+
+        // ===== TICKETS SOPORTE · SUPABASE =====
+        const NEXO_SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
+        const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
+        let nexoTicketsCache = [];
+
+        async function loadTickets() {
+            const table = document.getElementById('ticketsTable');
+            if (!table) return;
+            table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);">Cargando tickets desde Supabase...</td></tr>';
+
+            try {
+                const res = await fetch(`${NEXO_SUPABASE_URL}/rest/v1/tickets?select=*&order=fecha_creacion.desc`, {
+                    method: 'GET',
+                    headers: {
+                        apikey: NEXO_SUPABASE_KEY,
+                        Authorization: `Bearer ${NEXO_SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText || 'No se pudo cargar Supabase');
+                }
+
+                nexoTicketsCache = await res.json();
+                renderTicketsTable();
+            } catch (err) {
+                table.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">Error cargando tickets: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderTicketsTable() {
+            const table = document.getElementById('ticketsTable');
+            if (!table) return;
+
+            const q = (document.getElementById('ticketSearch')?.value || '').toLowerCase().trim();
+            const estado = document.getElementById('ticketStatusFilter')?.value || '';
+
+            let rows = nexoTicketsCache.filter(t => {
+                const text = `${t.nombre_cliente || ''} ${t.email || ''} ${t.asunto || ''} ${t.tipo_reclamo || ''} ${t.mensaje || ''}`.toLowerCase();
+                const okSearch = !q || text.includes(q);
+                const okEstado = !estado || (t.estado || 'Nuevo') === estado;
+                return okSearch && okEstado;
+            });
+
+            if (!rows.length) {
+                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);">No hay tickets para mostrar.</td></tr>';
+                return;
+            }
+
+            table.innerHTML = rows.map(t => {
+                const fecha = t.fecha_creacion ? new Date(t.fecha_creacion).toLocaleString('es-BO') : '';
+                return `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td>${t.nombre_cliente || ''}</td>
+                        <td>${t.email || ''}</td>
+                        <td>${t.asunto || ''}</td>
+                        <td>${t.tipo_reclamo || ''}</td>
+                        <td>${t.estado || 'Nuevo'}</td>
+                        <td>${t.prioridad || 'Media'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+
 function logout() {
             if (confirm('¿Deseas cerrar sesión?')) {
                 window.location.href = 'nexo-admin-login.html';
@@ -1672,46 +1719,6 @@ function logout() {
         renderProducts();
         renderUsers();
         applyReportFilters();
-
-async function loadTickets() {
-    const table = document.getElementById('ticketsTable');
-    if (!table) return;
-
-    table.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
-
-    const SUPABASE_URL = "https://TU_URL.supabase.co";
-    const SUPABASE_KEY = "TU_ANON_KEY";
-
-    try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?select=*`, {
-            headers: {
-                apikey: SUPABASE_KEY,
-                Authorization: `Bearer ${SUPABASE_KEY}`
-            }
-        });
-
-        const data = await res.json();
-
-        if (!data.length) {
-            table.innerHTML = '<tr><td colspan="5">No hay tickets</td></tr>';
-            return;
-        }
-
-        table.innerHTML = data.map(t => `
-            <tr>
-                <td>${new Date().toLocaleDateString()}</td>
-                <td>${t.nombre_cliente}</td>
-                <td>${t.email}</td>
-                <td>${t.asunto}</td>
-                <td>${t.tipo_reclamo}</td>
-            </tr>
-        `).join('');
-
-    } catch (err) {
-        table.innerHTML = '<tr><td colspan="5">Error cargando tickets</td></tr>';
-    }
-}
-
     </script>
 
     <div id="passwordModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('passwordModal')">
