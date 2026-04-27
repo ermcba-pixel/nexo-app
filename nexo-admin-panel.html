@@ -591,7 +591,11 @@
                 </div>
                 <div class="menu-item" onclick="switchSection('cash', this)">
                     <span class="menu-icon">💰</span> Caja
-                </div>
+                
+<div class="menu-item" onclick="switchSection('tickets', this)">
+    <span class="menu-icon">🎫</span> Tickets soporte
+</div>
+
             </div>
 
             <div class="menu-section">
@@ -1075,7 +1079,33 @@
                         <button class="btn btn-primary" onclick="saveSettings()">💾 GUARDAR</button>
                     </div>
                 </div>
-            </div>
+            
+<!-- TICKETS SOPORTE -->
+<div class="section" id="tickets">
+    <h1 class="page-title">🎫 TICKETS DE SOPORTE</h1>
+    <p class="page-subtitle">Reclamos reales desde clientes (Supabase)</p>
+
+    <div class="section-box">
+        <div class="section-box-title">📋 LISTA DE TICKETS</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>FECHA</th>
+                    <th>CLIENTE</th>
+                    <th>EMAIL</th>
+                    <th>ASUNTO</th>
+                    <th>TIPO</th>
+                </tr>
+            </thead>
+            <tbody id="ticketsTable">
+                <tr>
+                    <td colspan="5">Cargando tickets...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 
         </div>
 
@@ -1117,7 +1147,49 @@
                 renderUsers();
             } else if (sectionId === 'reports') {
                 applyReportFilters();
-            } else if (sectionId === 'clientdata') {
+
+async function loadTickets() {
+    const table = document.getElementById('ticketsTable');
+    if (!table) return;
+
+    table.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+
+    const SUPABASE_URL = "https://TU_URL.supabase.co";
+    const SUPABASE_KEY = "TU_ANON_KEY";
+
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?select=*`, {
+            headers: {
+                apikey: SUPABASE_KEY,
+                Authorization: `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (!data.length) {
+            table.innerHTML = '<tr><td colspan="5">No hay tickets</td></tr>';
+            return;
+        }
+
+        table.innerHTML = data.map(t => `
+            <tr>
+                <td>${new Date().toLocaleDateString()}</td>
+                <td>${t.nombre_cliente}</td>
+                <td>${t.email}</td>
+                <td>${t.asunto}</td>
+                <td>${t.tipo_reclamo}</td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        table.innerHTML = '<tr><td colspan="5">Error cargando tickets</td></tr>';
+    }
+}
+
+            } else if (sectionId === 'tickets') {
+    loadTickets();
+} else if (sectionId === 'clientdata') {
                 renderClientData();
             }
         }
@@ -1600,6 +1672,46 @@ function logout() {
         renderProducts();
         renderUsers();
         applyReportFilters();
+
+async function loadTickets() {
+    const table = document.getElementById('ticketsTable');
+    if (!table) return;
+
+    table.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+
+    const SUPABASE_URL = "https://TU_URL.supabase.co";
+    const SUPABASE_KEY = "TU_ANON_KEY";
+
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tickets?select=*`, {
+            headers: {
+                apikey: SUPABASE_KEY,
+                Authorization: `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (!data.length) {
+            table.innerHTML = '<tr><td colspan="5">No hay tickets</td></tr>';
+            return;
+        }
+
+        table.innerHTML = data.map(t => `
+            <tr>
+                <td>${new Date().toLocaleDateString()}</td>
+                <td>${t.nombre_cliente}</td>
+                <td>${t.email}</td>
+                <td>${t.asunto}</td>
+                <td>${t.tipo_reclamo}</td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        table.innerHTML = '<tr><td colspan="5">Error cargando tickets</td></tr>';
+    }
+}
+
     </script>
 
     <div id="passwordModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('passwordModal')">
