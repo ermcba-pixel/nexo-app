@@ -1,0 +1,1287 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>NEXO - Atención al Cliente</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">NEXO</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
+<div style="font-size:13px; line-height:1.7; font-weight:700;">
+  <a href="mailto:ermcba@hotmail.com?subject=RECLAMO"
+     style="color:white; text-decoration:none;">
+     ermcba@hotmail.com
+  </a>
+</div>
+<div style="font-size:13px; line-height:1.7; margin-top:8px;">
+  <span id="officialDesc"></span>
+</div></div><div class="info-card virtual-box"><h3 id="virtualTitle">🤖 🤖 Agente virtual NEXO</h3><div style="font-size:13px; color:#5f7283; line-height:1.6;" id="virtualDesc"></div><textarea id="virtualQuestion"></textarea><button type="button" class="mini-btn" id="consultBtn" onclick="consultarNexoAI('soporte')"></button><div class="ai-note">Respuesta automática con IA real de soporte nexo. Si OpenAI no responde, se mostrará una orientación segura de respaldo.</div><div id="virtualAnswer" class="ai-answer" style="display:none;"></div></div></div></section></div><script>
+const countriesPhoneData=[
+            {
+                        "code": "AF",
+                        "name": "Afganistán",
+                        "area": "+93"
+            },
+            {
+                        "code": "AL",
+                        "name": "Albania",
+                        "area": "+355"
+            },
+            {
+                        "code": "DE",
+                        "name": "Alemania",
+                        "area": "+49"
+            },
+            {
+                        "code": "AD",
+                        "name": "Andorra",
+                        "area": "+376"
+            },
+            {
+                        "code": "AO",
+                        "name": "Angola",
+                        "area": "+244"
+            },
+            {
+                        "code": "AI",
+                        "name": "Anguila",
+                        "area": "+1"
+            },
+            {
+                        "code": "AG",
+                        "name": "Antigua y Barbuda",
+                        "area": "+1"
+            },
+            {
+                        "code": "SA",
+                        "name": "Arabia Saudita",
+                        "area": "+966"
+            },
+            {
+                        "code": "DZ",
+                        "name": "Argelia",
+                        "area": "+213"
+            },
+            {
+                        "code": "AR",
+                        "name": "Argentina",
+                        "area": "+54"
+            },
+            {
+                        "code": "AM",
+                        "name": "Armenia",
+                        "area": "+374"
+            },
+            {
+                        "code": "AW",
+                        "name": "Aruba",
+                        "area": "+297"
+            },
+            {
+                        "code": "AU",
+                        "name": "Australia",
+                        "area": "+61"
+            },
+            {
+                        "code": "AT",
+                        "name": "Austria",
+                        "area": "+43"
+            },
+            {
+                        "code": "AZ",
+                        "name": "Azerbaiyán",
+                        "area": "+994"
+            },
+            {
+                        "code": "BS",
+                        "name": "Bahamas",
+                        "area": "+1"
+            },
+            {
+                        "code": "BD",
+                        "name": "Bangladesh",
+                        "area": "+880"
+            },
+            {
+                        "code": "BB",
+                        "name": "Barbados",
+                        "area": "+1"
+            },
+            {
+                        "code": "BH",
+                        "name": "Baréin",
+                        "area": "+973"
+            },
+            {
+                        "code": "BZ",
+                        "name": "Belice",
+                        "area": "+501"
+            },
+            {
+                        "code": "BJ",
+                        "name": "Benín",
+                        "area": "+229"
+            },
+            {
+                        "code": "BM",
+                        "name": "Bermudas",
+                        "area": "+1"
+            },
+            {
+                        "code": "BY",
+                        "name": "Bielorrusia",
+                        "area": "+375"
+            },
+            {
+                        "code": "BO",
+                        "name": "Bolivia",
+                        "area": "+591"
+            },
+            {
+                        "code": "BA",
+                        "name": "Bosnia y Herzegovina",
+                        "area": "+387"
+            },
+            {
+                        "code": "BW",
+                        "name": "Botsuana",
+                        "area": "+267"
+            },
+            {
+                        "code": "BR",
+                        "name": "Brasil",
+                        "area": "+55"
+            },
+            {
+                        "code": "BN",
+                        "name": "Brunéi",
+                        "area": "+673"
+            },
+            {
+                        "code": "BG",
+                        "name": "Bulgaria",
+                        "area": "+359"
+            },
+            {
+                        "code": "BF",
+                        "name": "Burkina Faso",
+                        "area": "+226"
+            },
+            {
+                        "code": "BI",
+                        "name": "Burundi",
+                        "area": "+257"
+            },
+            {
+                        "code": "BE",
+                        "name": "Bélgica",
+                        "area": "+32"
+            },
+            {
+                        "code": "CV",
+                        "name": "Cabo Verde",
+                        "area": "+238"
+            },
+            {
+                        "code": "KH",
+                        "name": "Camboya",
+                        "area": "+855"
+            },
+            {
+                        "code": "CM",
+                        "name": "Camerún",
+                        "area": "+237"
+            },
+            {
+                        "code": "CA",
+                        "name": "Canadá",
+                        "area": "+1"
+            },
+            {
+                        "code": "CL",
+                        "name": "Chile",
+                        "area": "+56"
+            },
+            {
+                        "code": "CN",
+                        "name": "China",
+                        "area": "+86"
+            },
+            {
+                        "code": "CY",
+                        "name": "Chipre",
+                        "area": "+357"
+            },
+            {
+                        "code": "VA",
+                        "name": "Ciudad del Vaticano",
+                        "area": "+39"
+            },
+            {
+                        "code": "CO",
+                        "name": "Colombia",
+                        "area": "+57"
+            },
+            {
+                        "code": "KP",
+                        "name": "Corea del Norte",
+                        "area": "+850"
+            },
+            {
+                        "code": "KR",
+                        "name": "Corea del Sur",
+                        "area": "+82"
+            },
+            {
+                        "code": "CI",
+                        "name": "Costa de Marfil",
+                        "area": "+225"
+            },
+            {
+                        "code": "CR",
+                        "name": "Costa Rica",
+                        "area": "+506"
+            },
+            {
+                        "code": "HR",
+                        "name": "Croacia",
+                        "area": "+385"
+            },
+            {
+                        "code": "CU",
+                        "name": "Cuba",
+                        "area": "+53"
+            },
+            {
+                        "code": "CW",
+                        "name": "Curazao",
+                        "area": "+599"
+            },
+            {
+                        "code": "DK",
+                        "name": "Dinamarca",
+                        "area": "+45"
+            },
+            {
+                        "code": "DM",
+                        "name": "Dominica",
+                        "area": "+1"
+            },
+            {
+                        "code": "EC",
+                        "name": "Ecuador",
+                        "area": "+593"
+            },
+            {
+                        "code": "EG",
+                        "name": "Egipto",
+                        "area": "+20"
+            },
+            {
+                        "code": "SV",
+                        "name": "El Salvador",
+                        "area": "+503"
+            },
+            {
+                        "code": "AE",
+                        "name": "Emiratos Árabes",
+                        "area": "+971"
+            },
+            {
+                        "code": "ER",
+                        "name": "Eritrea",
+                        "area": "+291"
+            },
+            {
+                        "code": "SK",
+                        "name": "Eslovaquia",
+                        "area": "+421"
+            },
+            {
+                        "code": "SI",
+                        "name": "Eslovenia",
+                        "area": "+386"
+            },
+            {
+                        "code": "ES",
+                        "name": "España",
+                        "area": "+34"
+            },
+            {
+                        "code": "US",
+                        "name": "Estados Unidos",
+                        "area": "+1"
+            },
+            {
+                        "code": "EE",
+                        "name": "Estonia",
+                        "area": "+372"
+            },
+            {
+                        "code": "ET",
+                        "name": "Etiopía",
+                        "area": "+251"
+            },
+            {
+                        "code": "PH",
+                        "name": "Filipinas",
+                        "area": "+63"
+            },
+            {
+                        "code": "FI",
+                        "name": "Finlandia",
+                        "area": "+358"
+            },
+            {
+                        "code": "FJ",
+                        "name": "Fiyi",
+                        "area": "+679"
+            },
+            {
+                        "code": "FR",
+                        "name": "Francia",
+                        "area": "+33"
+            },
+            {
+                        "code": "GA",
+                        "name": "Gabón",
+                        "area": "+241"
+            },
+            {
+                        "code": "GM",
+                        "name": "Gambia",
+                        "area": "+220"
+            },
+            {
+                        "code": "GE",
+                        "name": "Georgia",
+                        "area": "+995"
+            },
+            {
+                        "code": "GH",
+                        "name": "Ghana",
+                        "area": "+233"
+            },
+            {
+                        "code": "GD",
+                        "name": "Granada",
+                        "area": "+1"
+            },
+            {
+                        "code": "GR",
+                        "name": "Grecia",
+                        "area": "+30"
+            },
+            {
+                        "code": "GU",
+                        "name": "Guam",
+                        "area": "+1"
+            },
+            {
+                        "code": "GT",
+                        "name": "Guatemala",
+                        "area": "+502"
+            },
+            {
+                        "code": "GF",
+                        "name": "Guayana Francesa",
+                        "area": "+594"
+            },
+            {
+                        "code": "GN",
+                        "name": "Guinea",
+                        "area": "+224"
+            },
+            {
+                        "code": "GQ",
+                        "name": "Guinea Ecuatorial",
+                        "area": "+240"
+            },
+            {
+                        "code": "GW",
+                        "name": "Guinea-Bisáu",
+                        "area": "+245"
+            },
+            {
+                        "code": "GY",
+                        "name": "Guyana",
+                        "area": "+592"
+            },
+            {
+                        "code": "HT",
+                        "name": "Haití",
+                        "area": "+509"
+            },
+            {
+                        "code": "HN",
+                        "name": "Honduras",
+                        "area": "+504"
+            },
+            {
+                        "code": "HK",
+                        "name": "Hong Kong",
+                        "area": "+852"
+            },
+            {
+                        "code": "HU",
+                        "name": "Hungría",
+                        "area": "+36"
+            },
+            {
+                        "code": "IN",
+                        "name": "India",
+                        "area": "+91"
+            },
+            {
+                        "code": "ID",
+                        "name": "Indonesia",
+                        "area": "+62"
+            },
+            {
+                        "code": "IQ",
+                        "name": "Irak",
+                        "area": "+964"
+            },
+            {
+                        "code": "IE",
+                        "name": "Irlanda",
+                        "area": "+353"
+            },
+            {
+                        "code": "IR",
+                        "name": "Irán",
+                        "area": "+98"
+            },
+            {
+                        "code": "IS",
+                        "name": "Islandia",
+                        "area": "+354"
+            },
+            {
+                        "code": "KY",
+                        "name": "Islas Caimán",
+                        "area": "+1"
+            },
+            {
+                        "code": "MP",
+                        "name": "Islas Marianas del Norte",
+                        "area": "+1"
+            },
+            {
+                        "code": "MH",
+                        "name": "Islas Marshall",
+                        "area": "+692"
+            },
+            {
+                        "code": "SB",
+                        "name": "Islas Salomón",
+                        "area": "+677"
+            },
+            {
+                        "code": "TC",
+                        "name": "Islas Turcas y Caicos",
+                        "area": "+1"
+            },
+            {
+                        "code": "VG",
+                        "name": "Islas Vírgenes Británicas",
+                        "area": "+1"
+            },
+            {
+                        "code": "VI",
+                        "name": "Islas Vírgenes Estadounidenses",
+                        "area": "+1"
+            },
+            {
+                        "code": "IL",
+                        "name": "Israel",
+                        "area": "+972"
+            },
+            {
+                        "code": "IT",
+                        "name": "Italia",
+                        "area": "+39"
+            },
+            {
+                        "code": "JM",
+                        "name": "Jamaica",
+                        "area": "+1"
+            },
+            {
+                        "code": "JP",
+                        "name": "Japón",
+                        "area": "+81"
+            },
+            {
+                        "code": "JO",
+                        "name": "Jordania",
+                        "area": "+962"
+            },
+            {
+                        "code": "KZ",
+                        "name": "Kazajistán",
+                        "area": "+7"
+            },
+            {
+                        "code": "KE",
+                        "name": "Kenia",
+                        "area": "+254"
+            },
+            {
+                        "code": "KG",
+                        "name": "Kirguistán",
+                        "area": "+996"
+            },
+            {
+                        "code": "KI",
+                        "name": "Kiribati",
+                        "area": "+686"
+            },
+            {
+                        "code": "XK",
+                        "name": "Kosovo",
+                        "area": "+383"
+            },
+            {
+                        "code": "KW",
+                        "name": "Kuwait",
+                        "area": "+965"
+            },
+            {
+                        "code": "LA",
+                        "name": "Laos",
+                        "area": "+856"
+            },
+            {
+                        "code": "LV",
+                        "name": "Letonia",
+                        "area": "+371"
+            },
+            {
+                        "code": "LR",
+                        "name": "Liberia",
+                        "area": "+231"
+            },
+            {
+                        "code": "LY",
+                        "name": "Libia",
+                        "area": "+218"
+            },
+            {
+                        "code": "LI",
+                        "name": "Liechtenstein",
+                        "area": "+423"
+            },
+            {
+                        "code": "LT",
+                        "name": "Lituania",
+                        "area": "+370"
+            },
+            {
+                        "code": "LU",
+                        "name": "Luxemburgo",
+                        "area": "+352"
+            },
+            {
+                        "code": "LB",
+                        "name": "Líbano",
+                        "area": "+961"
+            },
+            {
+                        "code": "MO",
+                        "name": "Macao",
+                        "area": "+853"
+            },
+            {
+                        "code": "MK",
+                        "name": "Macedonia del Norte",
+                        "area": "+389"
+            },
+            {
+                        "code": "MG",
+                        "name": "Madagascar",
+                        "area": "+261"
+            },
+            {
+                        "code": "MY",
+                        "name": "Malasia",
+                        "area": "+60"
+            },
+            {
+                        "code": "MW",
+                        "name": "Malaui",
+                        "area": "+265"
+            },
+            {
+                        "code": "ML",
+                        "name": "Mali",
+                        "area": "+223"
+            },
+            {
+                        "code": "MT",
+                        "name": "Malta",
+                        "area": "+356"
+            },
+            {
+                        "code": "MA",
+                        "name": "Marruecos",
+                        "area": "+212"
+            },
+            {
+                        "code": "MU",
+                        "name": "Mauricio",
+                        "area": "+230"
+            },
+            {
+                        "code": "MR",
+                        "name": "Mauritania",
+                        "area": "+222"
+            },
+            {
+                        "code": "FM",
+                        "name": "Micronesia",
+                        "area": "+691"
+            },
+            {
+                        "code": "MD",
+                        "name": "Moldavia",
+                        "area": "+373"
+            },
+            {
+                        "code": "ME",
+                        "name": "Montenegro",
+                        "area": "+382"
+            },
+            {
+                        "code": "MS",
+                        "name": "Montserrat",
+                        "area": "+1"
+            },
+            {
+                        "code": "MM",
+                        "name": "Myanmar",
+                        "area": "+95"
+            },
+            {
+                        "code": "MX",
+                        "name": "México",
+                        "area": "+52"
+            },
+            {
+                        "code": "MC",
+                        "name": "Mónaco",
+                        "area": "+377"
+            },
+            {
+                        "code": "NA",
+                        "name": "Namibia",
+                        "area": "+264"
+            },
+            {
+                        "code": "NR",
+                        "name": "Nauru",
+                        "area": "+674"
+            },
+            {
+                        "code": "NP",
+                        "name": "Nepal",
+                        "area": "+977"
+            },
+            {
+                        "code": "NI",
+                        "name": "Nicaragua",
+                        "area": "+505"
+            },
+            {
+                        "code": "NG",
+                        "name": "Nigeria",
+                        "area": "+234"
+            },
+            {
+                        "code": "NO",
+                        "name": "Noruega",
+                        "area": "+47"
+            },
+            {
+                        "code": "NZ",
+                        "name": "Nueva Zelanda",
+                        "area": "+64"
+            },
+            {
+                        "code": "NE",
+                        "name": "Níger",
+                        "area": "+227"
+            },
+            {
+                        "code": "OM",
+                        "name": "Omán",
+                        "area": "+968"
+            },
+            {
+                        "code": "PK",
+                        "name": "Pakistán",
+                        "area": "+92"
+            },
+            {
+                        "code": "PW",
+                        "name": "Palaos",
+                        "area": "+680"
+            },
+            {
+                        "code": "PA",
+                        "name": "Panamá",
+                        "area": "+507"
+            },
+            {
+                        "code": "PG",
+                        "name": "Papúa Nueva Guinea",
+                        "area": "+675"
+            },
+            {
+                        "code": "PY",
+                        "name": "Paraguay",
+                        "area": "+595"
+            },
+            {
+                        "code": "NL",
+                        "name": "Países Bajos",
+                        "area": "+31"
+            },
+            {
+                        "code": "PE",
+                        "name": "Perú",
+                        "area": "+51"
+            },
+            {
+                        "code": "PL",
+                        "name": "Polonia",
+                        "area": "+48"
+            },
+            {
+                        "code": "PT",
+                        "name": "Portugal",
+                        "area": "+351"
+            },
+            {
+                        "code": "PR",
+                        "name": "Puerto Rico",
+                        "area": "+1"
+            },
+            {
+                        "code": "QA",
+                        "name": "Qatar",
+                        "area": "+974"
+            },
+            {
+                        "code": "GB",
+                        "name": "Reino Unido",
+                        "area": "+44"
+            },
+            {
+                        "code": "CF",
+                        "name": "República Centroafricana",
+                        "area": "+236"
+            },
+            {
+                        "code": "CZ",
+                        "name": "República Checa",
+                        "area": "+420"
+            },
+            {
+                        "code": "CG",
+                        "name": "República del Congo",
+                        "area": "+242"
+            },
+            {
+                        "code": "CD",
+                        "name": "República Democrática del Congo",
+                        "area": "+243"
+            },
+            {
+                        "code": "DO",
+                        "name": "República Dominicana",
+                        "area": "+1"
+            },
+            {
+                        "code": "RW",
+                        "name": "Ruanda",
+                        "area": "+250"
+            },
+            {
+                        "code": "RO",
+                        "name": "Rumania",
+                        "area": "+40"
+            },
+            {
+                        "code": "RU",
+                        "name": "Rusia",
+                        "area": "+7"
+            },
+            {
+                        "code": "MF",
+                        "name": "Saint Martín",
+                        "area": "+590"
+            },
+            {
+                        "code": "WS",
+                        "name": "Samoa",
+                        "area": "+685"
+            },
+            {
+                        "code": "AS",
+                        "name": "Samoa Americana",
+                        "area": "+1"
+            },
+            {
+                        "code": "BL",
+                        "name": "San Bartolomé",
+                        "area": "+590"
+            },
+            {
+                        "code": "KN",
+                        "name": "San Cristóbal y Nieves",
+                        "area": "+1"
+            },
+            {
+                        "code": "SM",
+                        "name": "San Marino",
+                        "area": "+378"
+            },
+            {
+                        "code": "VC",
+                        "name": "San Vicente y las Granadinas",
+                        "area": "+1"
+            },
+            {
+                        "code": "LC",
+                        "name": "Santa Lucía",
+                        "area": "+1"
+            },
+            {
+                        "code": "ST",
+                        "name": "Santo Tomé y Príncipe",
+                        "area": "+239"
+            },
+            {
+                        "code": "SN",
+                        "name": "Senegal",
+                        "area": "+221"
+            },
+            {
+                        "code": "RS",
+                        "name": "Serbia",
+                        "area": "+381"
+            },
+            {
+                        "code": "SC",
+                        "name": "Seychelles",
+                        "area": "+248"
+            },
+            {
+                        "code": "SL",
+                        "name": "Sierra Leona",
+                        "area": "+232"
+            },
+            {
+                        "code": "SG",
+                        "name": "Singapur",
+                        "area": "+65"
+            },
+            {
+                        "code": "SX",
+                        "name": "Sint Maarten",
+                        "area": "+1"
+            },
+            {
+                        "code": "SY",
+                        "name": "Siria",
+                        "area": "+963"
+            },
+            {
+                        "code": "SO",
+                        "name": "Somalia",
+                        "area": "+252"
+            },
+            {
+                        "code": "LK",
+                        "name": "Sri Lanka",
+                        "area": "+94"
+            },
+            {
+                        "code": "ZA",
+                        "name": "Sudáfrica",
+                        "area": "+27"
+            },
+            {
+                        "code": "SE",
+                        "name": "Suecia",
+                        "area": "+46"
+            },
+            {
+                        "code": "CH",
+                        "name": "Suiza",
+                        "area": "+41"
+            },
+            {
+                        "code": "SR",
+                        "name": "Surinam",
+                        "area": "+597"
+            },
+            {
+                        "code": "TH",
+                        "name": "Tailandia",
+                        "area": "+66"
+            },
+            {
+                        "code": "TW",
+                        "name": "Taiwán",
+                        "area": "+886"
+            },
+            {
+                        "code": "TZ",
+                        "name": "Tanzania",
+                        "area": "+255"
+            },
+            {
+                        "code": "TJ",
+                        "name": "Tayikistán",
+                        "area": "+992"
+            },
+            {
+                        "code": "TL",
+                        "name": "Timor Oriental",
+                        "area": "+670"
+            },
+            {
+                        "code": "TG",
+                        "name": "Togo",
+                        "area": "+228"
+            },
+            {
+                        "code": "TO",
+                        "name": "Tonga",
+                        "area": "+676"
+            },
+            {
+                        "code": "TT",
+                        "name": "Trinidad y Tobago",
+                        "area": "+1"
+            },
+            {
+                        "code": "TM",
+                        "name": "Turkmenistán",
+                        "area": "+993"
+            },
+            {
+                        "code": "TR",
+                        "name": "Turquía",
+                        "area": "+90"
+            },
+            {
+                        "code": "TN",
+                        "name": "Túnez",
+                        "area": "+216"
+            },
+            {
+                        "code": "UA",
+                        "name": "Ucrania",
+                        "area": "+380"
+            },
+            {
+                        "code": "UG",
+                        "name": "Uganda",
+                        "area": "+256"
+            },
+            {
+                        "code": "UY",
+                        "name": "Uruguay",
+                        "area": "+598"
+            },
+            {
+                        "code": "UZ",
+                        "name": "Uzbekistán",
+                        "area": "+998"
+            },
+            {
+                        "code": "VU",
+                        "name": "Vanuatu",
+                        "area": "+678"
+            },
+            {
+                        "code": "VE",
+                        "name": "Venezuela",
+                        "area": "+58"
+            },
+            {
+                        "code": "VN",
+                        "name": "Vietnam",
+                        "area": "+84"
+            },
+            {
+                        "code": "YE",
+                        "name": "Yemen",
+                        "area": "+967"
+            },
+            {
+                        "code": "DJ",
+                        "name": "Yibuti",
+                        "area": "+253"
+            },
+            {
+                        "code": "ZM",
+                        "name": "Zambia",
+                        "area": "+260"
+            },
+            {
+                        "code": "ZW",
+                        "name": "Zimbabue",
+                        "area": "+263"
+            }
+];
+const i18n={"es": {"title": "Atención al Cliente", "desc": "Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.", "home": "Inicio", "store": "Tienda", "ticket": "Número de ticket", "destMail": "Correo de destino", "formTitle": "Formulario de soporte", "helper": "Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.", "fullName": "Nombre completo", "fullNamePh": "Escriba su nombre completo", "email": "Correo electrónico", "emailPh": "", "phone": "Teléfono / WhatsApp", "phonePh": "Escriba su número", "country": "País", "countryPh": "Seleccione país", "order": "Número de pedido", "orderPh": "Ej. ", "product": "Producto", "productPh": "Ej. Auriculares inalámbricos Pro", "request": "Tipo de solicitud", "requestPh": "Seleccione una opción", "priority": "Prioridad", "priorityPh": "Seleccione prioridad", "channel": "Canal de contacto preferido", "channelPh": "Seleccione canal", "details": "Descripción detallada", "detailsPh": "Describa el problema, fechas, qué ocurrió y qué solución espera.", "send": "Enviar reclamo", "levels": "Niveles de atención", "lvl1": "Recepción y clasificación automática del caso", "lvl2": "Validación de pedido, producto y canal de pago", "lvl3": "Asignación de prioridad para seguimiento", "lvl4": "Respuesta inicial por el canal elegido", "official": "Correo oficial de reclamos", "officialDesc": "Todos los reclamos enviados desde este formulario deben dirigirse al correo oficial.", "virtual": "🤖 🤖 Agente virtual NEXO", "virtualDesc": "Asistente inicial para orientar consultas frecuentes antes de escalar el caso al equipo humano.", "virtualPh": "Escriba aquí su consulta rápida...", "consult": "Consultar", "reqOptions": ["Seleccione una opción", "Reclamo", "Consulta", "Cambio", "Devolución"], "priorityOptions": ["Seleccione prioridad", "Baja", "Media", "Alta", "Urgente"], "channelOptions": ["Seleccione canal", "Correo electrónico", "WhatsApp", "Llamada telefónica", "Chat web"]}, "en": {"title": "Customer Care", "desc": "Manage claims, inquiries, exchanges, returns and order tracking in one corporate panel.", "home": "Home", "store": "Store", "ticket": "Ticket number", "destMail": "Destination email", "formTitle": "Support form", "helper": "Complete the information so the team can review your case with priority, traceability and a formal ticket record.", "fullName": "Full name", "fullNamePh": "Enter your full name", "email": "Email", "emailPh": "customer@email.com", "phone": "Phone / WhatsApp", "phonePh": "Enter your number", "country": "Country", "countryPh": "Select country", "order": "Order number", "orderPh": "E.g. ", "product": "Product", "productPh": "E.g. Wireless earbuds Pro", "request": "Request type", "requestPh": "Select an option", "priority": "Priority", "priorityPh": "Select priority", "channel": "Preferred contact channel", "channelPh": "Select channel", "details": "Detailed description", "detailsPh": "Describe the issue, dates, what happened and the solution you expect.", "send": "Send request", "levels": "Service levels", "lvl1": "Automatic intake and case classification", "lvl2": "Order, product and payment-channel validation", "lvl3": "Priority assignment for follow-up", "lvl4": "Initial response through the selected channel", "official": "Official claims email", "officialDesc": "All claims sent from this form must be directed to the official email.", "virtual": "🤖 NEXO virtual agent", "virtualDesc": "Initial assistant to guide frequent questions before escalating the case to the human team.", "virtualPh": "Type your quick question here...", "consult": "Consult", "reqOptions": ["Select an option", "Claim", "Inquiry", "Exchange", "Return"], "priorityOptions": ["Select priority", "Low", "Medium", "High", "Urgent"], "channelOptions": ["Select channel", "Email", "WhatsApp", "Phone call", "Web chat"]}, "pt": {"title": "Atendimento ao Cliente", "desc": "Gerencie reclamações, consultas, trocas, devoluções e acompanhamento de pedidos em um único painel corporativo.", "home": "Início", "store": "Loja", "ticket": "Número do ticket", "destMail": "E-mail de destino", "formTitle": "Formulário de suporte", "helper": "Preencha os dados para que a equipe revise o seu caso com prioridade, rastreabilidade e registro formal do ticket.", "fullName": "Nome completo", "fullNamePh": "Digite seu nome completo", "email": "E-mail", "emailPh": "", "phone": "Telefone / WhatsApp", "phonePh": "Digite seu número", "country": "País", "countryPh": "Selecione o país", "order": "Número do pedido", "orderPh": "Ex.: ", "product": "Produto", "productPh": "Ex.: Fones de ouvido sem fio Pro", "request": "Tipo de solicitação", "requestPh": "Selecione uma opção", "priority": "Prioridade", "priorityPh": "Selecione a prioridade", "channel": "Canal de contato preferido", "channelPh": "Selecione o canal", "details": "Descrição detalhada", "detailsPh": "Descreva o problema, datas, o que aconteceu e a solução esperada.", "send": "Enviar solicitação", "levels": "Níveis de atendimento", "lvl1": "Recepção e classificação automática do caso", "lvl2": "Validação de pedido, produto e canal de pagamento", "lvl3": "Atribuição de prioridade para acompanhamento", "lvl4": "Resposta inicial pelo canal selecionado", "official": "E-mail oficial de reclamações", "officialDesc": "Todas as reclamações enviadas deste formulário devem ser encaminhadas ao e-mail oficial.", "virtual": "🤖 🤖 Agente virtual NEXO", "virtualDesc": "Assistente inicial para orientar perguntas frequentes antes de escalar o caso para a equipe humana.", "virtualPh": "Escreva aqui sua consulta rápida...", "consult": "Consultar", "reqOptions": ["Selecione uma opção", "Reclamação", "Consulta", "Troca", "Devolução"], "priorityOptions": ["Selecione a prioridade", "Baixa", "Média", "Alta", "Urgente"], "channelOptions": ["Selecione o canal", "E-mail", "WhatsApp", "Ligação telefônica", "Chat web"]}, "it": {"title": "Assistenza Clienti", "desc": "Gestisci reclami, richieste, cambi, resi e monitoraggio ordini in un unico pannello aziendale.", "home": "Home", "store": "Negozio", "ticket": "Numero ticket", "destMail": "Email di destinazione", "formTitle": "Modulo di supporto", "helper": "Compila i dati affinché il team possa esaminare il tuo caso con priorità, tracciabilità e registrazione formale del ticket.", "fullName": "Nome completo", "fullNamePh": "Inserisci il tuo nome completo", "email": "Email", "emailPh": "cliente@email.com", "phone": "Telefono / WhatsApp", "phonePh": "Inserisci il tuo numero", "country": "Paese", "countryPh": "Seleziona il paese", "order": "Numero ordine", "orderPh": "Es. ", "product": "Prodotto", "productPh": "Es. Auricolari wireless Pro", "request": "Tipo di richiesta", "requestPh": "Seleziona un’opzione", "priority": "Priorità", "priorityPh": "Seleziona priorità", "channel": "Canale di contatto preferito", "channelPh": "Seleziona canale", "details": "Descrizione dettagliata", "detailsPh": "Descrivi il problema, le date, cosa è successo e la soluzione attesa.", "send": "Invia richiesta", "levels": "Livelli di assistenza", "lvl1": "Ricezione e classificazione automatica del caso", "lvl2": "Validazione di ordine, prodotto e canale di pagamento", "lvl3": "Assegnazione della priorità per il follow-up", "lvl4": "Risposta iniziale tramite il canale selezionato", "official": "Email ufficiale reclami", "officialDesc": "Tutti i reclami inviati da questo modulo devono essere diretti all’email ufficiale.", "virtual": "Agente virtuale NEXO", "virtualDesc": "Assistente iniziale per orientare le domande frequenti prima di inoltrare il caso al team umano.", "virtualPh": "Scrivi qui la tua domanda rapida...", "consult": "Consulta", "reqOptions": ["Seleziona un’opzione", "Reclamo", "Richiesta", "Cambio", "Reso"], "priorityOptions": ["Seleziona priorità", "Bassa", "Media", "Alta", "Urgente"], "channelOptions": ["Seleziona canale", "Email", "WhatsApp", "Telefonata", "Chat web"]}, "fr": {"title": "Service Client", "desc": "Gérez réclamations, demandes, échanges, retours et suivi des commandes dans un seul panneau professionnel.", "home": "Accueil", "store": "Boutique", "ticket": "Numéro de ticket", "destMail": "E-mail de destination", "formTitle": "Formulaire de support", "helper": "Complétez les informations afin que l’équipe examine votre dossier avec priorité, traçabilité et enregistrement formel du ticket.", "fullName": "Nom complet", "fullNamePh": "Saisissez votre nom complet", "email": "E-mail", "emailPh": "client@email.com", "phone": "Téléphone / WhatsApp", "phonePh": "Saisissez votre numéro", "country": "Pays", "countryPh": "Sélectionnez le pays", "order": "Numéro de commande", "orderPh": "Ex. ", "product": "Produit", "productPh": "Ex. Écouteurs sans fil Pro", "request": "Type de demande", "requestPh": "Sélectionnez une option", "priority": "Priorité", "priorityPh": "Sélectionnez la priorité", "channel": "Canal de contact préféré", "channelPh": "Sélectionnez le canal", "details": "Description détaillée", "detailsPh": "Décrivez le problème, les dates, ce qui s’est passé et la solution attendue.", "send": "Envoyer la demande", "levels": "Niveaux de service", "lvl1": "Réception et classification automatique du dossier", "lvl2": "Validation de la commande, du produit et du canal de paiement", "lvl3": "Attribution de la priorité pour le suivi", "lvl4": "Réponse initiale via le canal choisi", "official": "E-mail officiel des réclamations", "officialDesc": "Toutes les réclamations envoyées depuis ce formulaire doivent être adressées à l’e-mail officiel.", "virtual": "Agent virtuel NEXO", "virtualDesc": "Assistant initial pour orienter les questions fréquentes avant d’escalader le dossier à l’équipe humaine.", "virtualPh": "Écrivez ici votre question rapide...", "consult": "Consulter", "reqOptions": ["Sélectionnez une option", "Réclamation", "Question", "Échange", "Retour"], "priorityOptions": ["Sélectionnez la priorité", "Faible", "Moyenne", "Haute", "Urgente"], "channelOptions": ["Sélectionnez le canal", "E-mail", "WhatsApp", "Appel téléphonique", "Chat web"]}};
+
+let currentLang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es');
+function populateCountryOptions(){ const sel=document.getElementById('country'); if(!sel) return; sel.innerHTML=''; const t=i18n[currentLang]||i18n.es; const first=document.createElement('option'); first.value=''; first.textContent=t.countryPh || 'Seleccione país'; sel.appendChild(first); countriesPhoneData.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.code; opt.textContent=`${c.name} (${c.area})`; opt.dataset.area=c.area; sel.appendChild(opt); }); }
+function goBackSupport(){ window.location.href='index.html'; }
+function updatePhoneCode(){ const select=document.getElementById('country'); if(!select) return; const opt=select.options[select.selectedIndex]; const phoneCode=document.getElementById('phoneCode'); if(phoneCode) phoneCode.value=opt?.dataset?.area || ''; }
+function fillOptions(id, values){ const sel=document.getElementById(id); if(!sel) return; sel.innerHTML=''; values.forEach((txt,i)=>{ const o=document.createElement('option'); o.value=i===0?'':txt; o.textContent=txt; sel.appendChild(o); }); }
+function applyLanguage(){
+  currentLang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es');
+  const t=i18n[currentLang] || i18n.es;
+  document.documentElement.lang=currentLang;
+  const map={title:'title',desc:'desc',homeLink:'home',storeLink:'store',ticketLbl:'ticket',formTitle:'formTitle',helper:'helper',fullNameLbl:'fullName',emailLbl:'email',phoneLbl:'phone',countryLbl:'country',orderLbl:'order',productLbl:'product',requestLbl:'request',priorityLbl:'priority',channelLbl:'channel',detailsLbl:'details',sendBtn:'send',levelsTitle:'levels',lvl1:'lvl1',lvl2:'lvl2',lvl3:'lvl3',lvl4:'lvl4',officialTitle:'official',officialDesc:'officialDesc',virtualTitle:'virtual',virtualDesc:'virtualDesc',consultBtn:'consult'};
+  Object.entries(map).forEach(([id,key])=>{ const el=document.getElementById(id); if(el && t[key]) el.textContent=t[key]; });
+  if(document.getElementById('fullName')) document.getElementById('fullName').placeholder=t.fullNamePh||'Escriba su nombre completo';
+  if(document.getElementById('email')) document.getElementById('email').placeholder=t.emailPh||'';
+  if(document.getElementById('phone')) document.getElementById('phone').placeholder=t.phonePh||'Escriba su número';
+  if(document.getElementById('orderNumber')) document.getElementById('orderNumber').placeholder=t.orderPh||'Ej. ';
+  if(document.getElementById('product')) document.getElementById('product').placeholder=t.productPh||'Ej. Producto';
+  if(document.getElementById('details')) document.getElementById('details').placeholder=t.detailsPh||'Describa el caso';
+  if(document.getElementById('virtualQuestion')) document.getElementById('virtualQuestion').placeholder=t.virtualPh||'Escriba aquí su consulta rápida';
+  fillOptions('requestType', t.reqOptions || ['Seleccione una opción','Reclamo','Consulta','Cambio','Devolución']);
+  fillOptions('priority', t.priorityOptions || ['Seleccione prioridad','Baja','Media','Alta','Urgente']);
+  fillOptions('preferredChannel', t.channelOptions || ['Seleccione canal','Correo electrónico','WhatsApp','Llamada telefónica','Chat web']);
+  const currentCountry=document.getElementById('country')?.value;
+  populateCountryOptions();
+  if(currentCountry && document.getElementById('country')) document.getElementById('country').value=currentCountry;
+  updatePhoneCode();
+}
+function nextSupportTicket(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  const h = String(d.getHours()).padStart(2,'0');
+  const min = String(d.getMinutes()).padStart(2,'0');
+  const s = String(d.getSeconds()).padStart(2,'0');
+  const r = Math.floor(100 + Math.random()*900);
+  return `NEXO-R-${y}${m}${day}-${h}${min}${s}-${r}`;
+}
+
+const NEXO_SUPABASE_URL='https://ujqbbniptflzytdankwp.supabase.co';
+const NEXO_SUPABASE_KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+
+async function nexoSupabaseRequest(path, options={}){
+  const res = await fetch(NEXO_SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      'apikey': NEXO_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + NEXO_SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    }
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
+  if(!res.ok){
+    const msg = (data && (data.message || data.details || data.error)) || text || ('HTTP ' + res.status);
+    throw new Error(msg);
+  }
+  return data;
+}
+
+async function guardarTicketSupabaseDirecto(ticket){
+  const nombre = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const telefono = (document.getElementById('phoneCode').value+' '+document.getElementById('phone').value).trim();
+  const pais = document.getElementById('country').selectedOptions?.[0]?.textContent || '';
+  const pedido = document.getElementById('orderNumber').value.trim();
+  const producto = document.getElementById('product').value.trim();
+  const tipo = document.getElementById('requestType').value || 'Soporte';
+  const prioridad = document.getElementById('priority').value || 'Media';
+  const canal = document.getElementById('preferredChannel').value || 'No informado';
+  const detalles = document.getElementById('details').value.trim();
+
+  const mensaje = [
+    'Ticket: '+ticket,
+    'Nombre: '+nombre,
+    'Correo: '+email,
+    'Teléfono / WhatsApp: '+telefono,
+    'País: '+pais,
+    'Pedido: '+(pedido || 'No informado'),
+    'Producto: '+(producto || 'No informado'),
+    'Canal preferido: '+canal,
+    '',
+    'Descripción:',
+    detalles
+  ].join('\n');
+
+  const asunto = ticket + ' - ' + tipo + (pedido ? ' - Pedido '+pedido : '');
+
+  return await nexoSupabaseRequest('/rest/v1/tickets', {
+    method: 'POST',
+    body: JSON.stringify({
+      nombre_cliente: nombre,
+      email: email,
+      asunto: asunto,
+      tipo_reclamo: tipo,
+      mensaje: mensaje,
+      estado: 'Nuevo',
+      prioridad: prioridad,
+      fecha_creacion: new Date().toISOString(),
+      fecha_actualizacion: new Date().toISOString()
+    })
+  });
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  populateCountryOptions(); applyLanguage(); updatePhoneCode();
+  const tEl=document.getElementById('ticketCode'); if(tEl){ tEl.textContent = nextSupportTicket(); }
+  const form=document.getElementById('supportForm');
+  if(form) form.addEventListener('submit', async e=>{
+    e.preventDefault();
+    const ticket = tEl?.textContent || nextSupportTicket();
+    const btn=document.getElementById('sendBtn');
+    const originalText=btn?.textContent || 'Enviar reclamo';
+    try{
+      if(btn){ btn.disabled=true; btn.textContent='Guardando en Supabase...'; }
+      await guardarTicketSupabaseDirecto(ticket);
+      alert('Ticket guardado en SUPABASE correctamente.\n\nTicket: '+ticket+'\n\nAhora debe aparecer en el panel admin de tickets.');
+      form.reset(); populateCountryOptions(); updatePhoneCode(); if(tEl) tEl.textContent=nextSupportTicket();
+    }catch(error){
+      console.error('Error Supabase nexo:', error);
+      alert('ERROR: No se pudo guardar en Supabase.\n\nDetalle: '+(error.message || error));
+    }finally{
+      if(btn){ btn.disabled=false; btn.textContent=originalText; }
+    }
+  });
+});
+</script>
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+<script>
+(function(){
+  function findOption(selectEl, mode){
+    if(!selectEl) return;
+    var matchValue = '';
+    Array.from(selectEl.options).forEach(function(opt){
+      var t = (opt.textContent || '').toLowerCase();
+      if(mode === 'user' && (t.indexOf('usuario') !== -1 || t.indexOf('user') !== -1)){
+        matchValue = opt.value;
+      }
+      if(mode !== 'user' && (t.indexOf('contrase') !== -1 || t.indexOf('password') !== -1)){
+        matchValue = opt.value;
+      }
+    });
+    if(matchValue) selectEl.value = matchValue;
+  }
+
+  function applyRecoveryPrefill(){
+    try{
+      var params = new URLSearchParams(window.location.search);
+      var mode = params.get('recovery') || localStorage.getItem('nexoRecoveryType') || '';
+      if(!mode) return;
+
+      var selectSolicitud = document.querySelector('select[name="tipoSolicitud"], #tipoSolicitud, #requestType');
+      var textarea = document.querySelector('textarea, #descripcion, #detailMessage');
+
+      findOption(selectSolicitud, mode);
+
+      if(textarea && !textarea.value){
+        textarea.value = mode === 'user'
+          ? 'Necesito recuperar mi usuario de acceso a la tienda.'
+          : 'Necesito recuperar mi contraseña de acceso a la tienda.';
+      }
+
+      localStorage.removeItem('nexoRecoveryType');
+      localStorage.removeItem('nexoRecoveryFrom');
+    }catch(e){}
+  }
+
+  document.addEventListener('DOMContentLoaded', applyRecoveryPrefill);
+})();
+</script>
+
+
+<script>
+function nexoLocalSoporte(question){
+  const q=(question||'').toLowerCase();
+  const ticket='NEXO-SOP-'+new Date().toISOString().slice(0,10).replaceAll('-','')+'-'+Math.floor(1000+Math.random()*9000);
+  if(q.includes('ticket') || q.includes('pedido') || q.includes('order')){
+    return `He revisado tu consulta como Agente 2 de Soporte nexo.\n\nPara ubicar tu ticket o pedido necesito que completes o confirmes:\n1. Correo usado en la compra.\n2. Número de pedido o comprobante, si lo tienes.\n3. Producto y fecha aproximada.\n\nCódigo preliminar de atención: ${ticket}\n\nTambién puedes llenar el formulario de la izquierda para dejar registro formal.`;
+  }
+  if(q.includes('pago') || q.includes('paypal') || q.includes('payoneer')){
+    return `Como Agente 2 de Soporte nexo, para revisar pagos necesito método de pago, fecha, monto y correo usado.\n\nCódigo preliminar de atención: ${ticket}`;
+  }
+  if(q.includes('devol') || q.includes('cambio') || q.includes('reclamo')){
+    return `Como Agente 2 de Soporte nexo, clasificaré tu caso como reclamo/cambio/devolución.\n\nIndica producto, motivo, evidencia y solución esperada.\n\nCódigo preliminar de atención: ${ticket}`;
+  }
+  return `Soy el Agente 2 de Soporte nexo. Puedo ayudarte con tickets, pedidos, reclamos, pagos, cambios y devoluciones.\n\nCódigo preliminar de atención: ${ticket}`;
+}
+
+async function consultarNexoAI(agent){
+  const input=document.getElementById('virtualQuestion');
+  const answer=document.getElementById('virtualAnswer');
+  const button=document.getElementById('consultBtn');
+  const question=(input?.value||'').trim();
+  if(!question){
+    if(answer){ answer.textContent='Por favor escribe tu consulta para que el Agente 2 de Soporte pueda responder.'; answer.style.display='block'; }
+    return;
+  }
+  if(answer){ answer.textContent='Analizando con Agente 2 de Soporte IA nexo...'; answer.style.display='block'; }
+  if(button) button.disabled=true;
+  try{
+    const res=await fetch('/api/nexo-ai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({agent:'soporte',question,page:location.pathname})
+    });
+    if(!res.ok) throw new Error('API no disponible');
+    const data=await res.json();
+    const text=data.answer || data.message || nexoLocalSoporte(question);
+    if(answer) answer.textContent=text;
+    try{
+      const arr=JSON.parse(localStorage.getItem('nexoAIHistory_soporte')||'[]');
+      arr.unshift({question,answer:text,createdAt:new Date().toISOString()});
+      localStorage.setItem('nexoAIHistory_soporte',JSON.stringify(arr.slice(0,50)));
+    }catch(e){}
+  }catch(e){
+    if(answer) answer.textContent=nexoLocalSoporte(question);
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
+// Blindaje: elimina cualquier alerta antigua del botón Consultar.
+document.addEventListener('DOMContentLoaded',function(){
+  const oldBtn=document.getElementById('consultBtn');
+  if(!oldBtn) return;
+  const btn=oldBtn.cloneNode(true);
+  oldBtn.parentNode.replaceChild(btn,oldBtn);
+  btn.onclick=function(){ consultarNexoAI('soporte'); };
+});
+</script>
+</body></html>
