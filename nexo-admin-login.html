@@ -831,7 +831,7 @@
 
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !document.getElementById('loginBtn').disabled) {
-                login();
+                validarLogin();
             }
         });
 
@@ -891,17 +891,23 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 <script>
 (function(){
+  const NEXO_SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
+  const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
+  const NEXO_SUPERADMIN_EMAIL = "ermcba@hotmail.com";
+
   function getEmailInput(){
     return document.getElementById('emailInput') ||
            document.querySelector('input[type="email"]') ||
            document.querySelector('input[name="email"]');
   }
+
   function getPasswordInput(){
     return document.getElementById('passwordInput') ||
            document.querySelector('input[type="password"]') ||
            document.querySelector('input[name="password"]');
   }
-  function showMsg(msg){
+
+  function showMsg(msg, ok){
     var box = document.getElementById('adminLoginMsg');
     if(!box){
       box = document.createElement('div');
@@ -909,62 +915,118 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
       box.style.marginTop = '12px';
       box.style.padding = '12px 14px';
       box.style.borderRadius = '12px';
-      box.style.background = '#fff4f4';
-      box.style.borderLeft = '4px solid #d9534f';
-      box.style.color = '#6a2f2d';
-      var notice = document.getElementById('adminSecurityNotice');
-      if(notice && notice.parentNode){
-        notice.parentNode.insertBefore(box, notice);
-      }
+      box.style.fontWeight = '700';
+      box.style.fontSize = '12px';
+      box.style.lineHeight = '1.5';
+      var form = document.querySelector('.form-wrapper') || document.body;
+      form.appendChild(box);
     }
+    box.style.background = ok ? '#eef9ee' : '#fff4f4';
+    box.style.borderLeft = ok ? '4px solid #27AE60' : '4px solid #d9534f';
+    box.style.color = ok ? '#1f6b35' : '#6a2f2d';
     box.textContent = msg;
   }
 
-  window.validarLogin = function(){
-    var emailEl = document.getElementById('emailInput') || document.querySelector('input[type="email"]');
-    var passEl = document.getElementById('passwordInput') || document.querySelector('input[type="password"]');
+  async function supabaseLogin(email, password){
+    const res = await fetch(`${NEXO_SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        apikey: NEXO_SUPABASE_KEY,
+        Authorization: `Bearer ${NEXO_SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json().catch(function(){ return {}; });
+
+    if(!res.ok){
+      throw new Error(data.error_description || data.msg || data.message || 'No se pudo validar el usuario en Supabase.');
+    }
+
+    return data;
+  }
+
+  window.validarLogin = async function(){
+    var emailEl = getEmailInput();
+    var passEl = getPasswordInput();
+    var btn = document.getElementById('loginBtn');
+
     var email = ((emailEl && emailEl.value) || '').trim().toLowerCase();
     var pass = ((passEl && passEl.value) || '').trim();
 
-    var validUser = atob('ZXJtY2JhQGhvdG1haWwuY29t');
-    var validPass = atob('TG9sbzEyNjRA');
-
-    if(email === validUser && pass === validPass){
-      localStorage.setItem('nexoAdminAuth','ok');
-      localStorage.setItem('nexoAdminEmail', validUser);
-      sessionStorage.setItem('nexoAdminSession','ok');
-      window.location.href = 'nexo-admin-panel.html';
+    if(email !== NEXO_SUPERADMIN_EMAIL){
+      showMsg('Acceso denegado. Use el usuario superadministrador de la empresa: ' + NEXO_SUPERADMIN_EMAIL, false);
       return false;
     }
-    showMsg('Acceso denegado. Verifica tu correo y contraseña.');
-    return false;
+
+    if(!pass){
+      showMsg('Ingrese la contraseña registrada en Supabase.', false);
+      return false;
+    }
+
+    try{
+      if(btn){
+        btn.disabled = true;
+        btn.textContent = 'Validando en Supabase...';
+      }
+
+      const auth = await supabaseLogin(email, pass);
+
+      localStorage.setItem('nexoAdminAuth', 'supabase');
+      localStorage.setItem('nexoAdminRole', 'superadmin');
+      localStorage.setItem('nexoAdminEmail', email);
+      localStorage.setItem('nexoSupabaseAccessToken', auth.access_token || '');
+      localStorage.setItem('nexoSupabaseRefreshToken', auth.refresh_token || '');
+      sessionStorage.setItem('nexoAdminSession', 'ok');
+
+      showMsg('Acceso autorizado. Ingresando al panel...', true);
+      setTimeout(function(){
+        window.location.href = 'nexo-admin-panel.html';
+      }, 450);
+
+      return false;
+    }catch(err){
+      showMsg('Acceso denegado por Supabase: ' + err.message, false);
+      return false;
+    }finally{
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = 'Ingresar al Panel';
+      }
+    }
   };
 
   document.addEventListener('DOMContentLoaded', function(){
     var emailEl = getEmailInput();
     var passEl = getPasswordInput();
+
     if(emailEl){
       emailEl.removeAttribute('readonly');
       emailEl.removeAttribute('disabled');
-      emailEl.value = '';
-      emailEl.placeholder = 'tu@correo.com';
+      emailEl.value = NEXO_SUPERADMIN_EMAIL;
+      emailEl.placeholder = NEXO_SUPERADMIN_EMAIL;
     }
+
     if(passEl){
       passEl.removeAttribute('readonly');
       passEl.removeAttribute('disabled');
       passEl.value = '';
-      passEl.placeholder = 'Ingresa tu contraseña';
+      passEl.placeholder = 'Contraseña registrada en Supabase';
     }
+
     var form = document.querySelector('form');
     if(form){
       form.setAttribute('onsubmit','return validarLogin()');
     }
+
     var btn = document.querySelector('button[type="submit"], #loginBtn, .login-btn, .primary-btn');
     if(btn){
-      btn.addEventListener('click', function(e){
+      btn.onclick = function(e){
         e.preventDefault();
         validarLogin();
-      });
+        return false;
+      };
     }
   });
 })();
