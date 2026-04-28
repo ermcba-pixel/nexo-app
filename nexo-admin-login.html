@@ -1,42 +1,973 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXO - Login Admin</title>
-<style>
-body{font-family:Arial;background:#4A6B6D;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-.box{background:#fff;padding:30px;border-radius:15px;width:350px}
-input{width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:8px}
-button{width:100%;padding:12px;background:#4A6B6D;color:#fff;border:none;border-radius:8px;font-weight:bold}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXO - Login Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            min-height: auto;
+            max-height: 100vh;
+        }
+
+        /* ============ HEADER IZQUIERDO ============ */
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 50px 45px;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            min-height: 100%;
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* ========== LOGO COMPLETO BLANCO ========== */
+        .login-logo {
+            width: auto;
+            background-color: var(--white);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 10px 16px;
+            gap: 3px;
+        }
+
+        .logo-text-nexo {
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .logo-ne {
+            color: var(--primary);
+        }
+
+        .logo-x {
+            color: var(--accent);
+        }
+
+        .logo-o {
+            color: var(--primary);
+        }
+
+        .logo-subtitle {
+            font-size: 8px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .login-header p {
+            font-size: 12px;
+            opacity: 0.85;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* ============ CONTENT DERECHO ============ */
+        .login-content {
+            padding: 40px 45px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            align-self: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .back-btn:hover {
+            color: var(--secondary);
+            transform: translateX(-5px);
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            font-weight: 600;
+            border-left: 4px solid;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left-color: #E74C3C;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #27AE60;
+        }
+
+        /* SELECTOR PERFIL */
+        .profile-selector {
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(74, 107, 109, 0.1);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .profile-title {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 11px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .profile-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
+
+        .profile-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: var(--white);
+            gap: 5px;
+        }
+
+        .profile-option:hover {
+            border-color: var(--accent);
+            background-color: #fafdf9;
+            transform: translateY(-2px);
+        }
+
+        .profile-option.selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(122, 199, 66, 0.08) 0%, rgba(74, 107, 109, 0.05) 100%);
+            box-shadow: 0 4px 12px rgba(122, 199, 66, 0.15);
+        }
+
+        .profile-radio {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .profile-option.selected .profile-radio {
+            border-color: var(--accent);
+            background-color: var(--accent);
+        }
+
+        .profile-radio::after {
+            content: '';
+            width: 5px;
+            height: 5px;
+            background-color: var(--white);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .profile-option.selected .profile-radio::after {
+            opacity: 1;
+        }
+
+        .profile-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 12px;
+        }
+
+        .profile-description {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* FORMULARIO */
+        .form-wrapper {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: var(--white);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(122, 199, 66, 0.2);
+            background-color: #f9fdf9;
+        }
+
+        .form-input[readonly] {
+            background-color: #f5f5f5;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .form-input::placeholder {
+            color: #bbb;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+        }
+
+        .strength-bars {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 5px;
+        }
+
+        .strength-bar {
+            flex: 1;
+            height: 3px;
+            background-color: #ddd;
+            border-radius: 2px;
+            transition: background-color 0.3s;
+        }
+
+        .strength-bar.weak { background-color: #E74C3C; }
+        .strength-bar.medium { background-color: #F39C12; }
+        .strength-bar.strong { background-color: #27AE60; }
+
+        .strength-text {
+            font-size: 11px;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .strength-text.weak { color: #E74C3C; }
+        .strength-text.medium { color: #F39C12; }
+        .strength-text.strong { color: #27AE60; }
+
+        .requirements {
+            background-color: var(--light);
+            padding: 9px;
+            border-radius: 8px;
+            font-size: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .requirement-icon {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            font-size: 6px;
+            color: #999;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .requirement.met .requirement-icon {
+            background-color: var(--accent);
+            color: var(--white);
+            transform: scale(1.08);
+        }
+
+        .requirement.met {
+            color: var(--accent);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.2);
+        }
+
+        .btn-login:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 107, 109, 0.3);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-login.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: var(--white);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: #555;
+            border-left: 4px solid var(--accent);
+            line-height: 1.5;
+            width: 100%;
+            max-width: 420px;
+            margin-top: 8px;
+        }
+
+        .info-box strong {
+            display: block;
+            color: var(--dark);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .info-box code {
+            background: var(--white);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .login-container {
+                flex-direction: column;
+            }
+
+            .login-header {
+                width: 100%;
+                padding: 35px 35px;
+                min-height: auto;
+            }
+
+            .login-content {
+                padding: 35px 35px;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-options {
+                grid-template-columns: 1fr;
+            }
+
+            .login-header {
+                padding: 30px 28px;
+            }
+
+            .login-content {
+                padding: 30px 28px;
+            }
+
+            .logo-text-nexo {
+                font-size: 50px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                border-radius: 20px;
+            }
+
+            .login-header {
+                padding: 25px 22px;
+                gap: 14px;
+            }
+
+            .login-content {
+                padding: 25px 22px;
+                gap: 12px;
+            }
+
+            .logo-text-nexo {
+                font-size: 45px;
+            }
+
+            .login-header h1 {
+                font-size: 22px;
+            }
+
+            .login-header p {
+                font-size: 11px;
+            }
+
+            .back-btn {
+                font-size: 12px;
+            }
+
+            .profile-selector {
+                padding: 13px;
+            }
+
+            .profile-title {
+                font-size: 12px;
+                margin-bottom: 9px;
+            }
+
+            .profile-options {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .profile-option {
+                padding: 11px;
+            }
+
+            .profile-name {
+                font-size: 11px;
+            }
+
+            .profile-description {
+                font-size: 9px;
+            }
+
+            .form-wrapper {
+                max-width: 100%;
+            }
+
+            .form-input {
+                padding: 11px 12px;
+                font-size: 13px;
+            }
+
+            .form-label {
+                font-size: 13px;
+                margin-bottom: 7px;
+            }
+
+            .btn-login {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .info-box {
+                padding: 10px;
+                font-size: 10px;
+            }
+
+            .info-box code {
+                font-size: 9px;
+            }
+
+            .requirements {
+                padding: 8px;
+                font-size: 9px;
+                gap: 3px;
+            }
+
+            .strength-text {
+                font-size: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="login-container">
+        <!-- HEADER IZQUIERDO -->
+        <div class="login-header">
+            <div class="header-content">
+                <!-- LOGO COMPLETO CON FONDO BLANCO -->
+                <div class="login-logo">
+                    <div class="logo-text-nexo">
+                        <span class="logo-ne">ne</span><span class="logo-x">X</span><span class="logo-o">o</span>
+                    </div>
+                    </div>
+                <h1>NEXO</h1>
+                <p>Panel Administrativo - Acceso Interno</p>
+            </div>
+        </div>
 
-<div class="box">
-<h2>Ingreso Admin</h2>
+        <!-- CONTENT DERECHO -->
+        <div class="login-content">
+            <a class="back-btn" onclick="goBack()">← Volver al Portal</a>
 
-<label>Correo electrónico</label>
-<input type="email" id="emailInput" placeholder="tu@correo.com">
+            <!-- SELECTOR DE PERFIL -->
+            <div class="profile-selector">
+                <div class="profile-title">👤 Selecciona tu Perfil</div>
+                <div class="profile-options">
+                    <div class="profile-option selected" onclick="selectProfile('superadmin')">
+                        <div class="profile-name">🔴 Super Admin</div>
+                        <div class="profile-description">Control total</div>
+                    </div>
 
-<label>Contraseña</label>
-<input type="password" id="passwordInput" placeholder="Ingresa tu contraseña">
+                    <div class="profile-option" onclick="selectProfile('admin')">
+                        <div class="profile-name">🟢 Admin</div>
+                        <div class="profile-description">Panel general</div>
+                    </div>
 
-<button onclick="validarLogin()">INGRESAR AL PANEL</button>
-</div>
+                    <div class="profile-option" onclick="selectProfile('operador')">
+                        <div class="profile-name">🟡 Operador</div>
+                        <div class="profile-description">Pedidos</div>
+                    </div>
+
+                    <div class="profile-option" onclick="selectProfile('finanzas')">
+                        <div class="profile-name">🟣 Finanzas</div>
+                        <div class="profile-description">Pagos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-wrapper">
+                <!-- EMAIL (READONLY) -->
+                <div class="form-group">
+                    <label class="form-label">📧 Correo Electrónico</label>
+                    <input 
+                        type="email" 
+                        id="emailInput" 
+                        class="form-input" 
+                        value=""
+                       
+                    >
+                </div>
+
+                <!-- CONTRASEÑA -->
+                <div class="form-group">
+                    <label class="form-label">🔐 Contraseña (acceso seguro)</label>
+                    <div style="position:relative;"><input 
+                        type="password" 
+                        id="passwordInput" 
+                        class="form-input" 
+                        placeholder="Mayús + minús + número + símbolo"
+                        onkeyup="checkPasswordStrength()"
+                        style="padding-right:44px;"
+                    ><button type="button" id="adminEyeBtn" onclick="toggleAdminPassword()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:18px;">👁️</button></div>
+                    <div class="password-strength">
+                        <div class="strength-bars">
+                            </div>
+                        <div class="strength-text" id="strengthText">Muy débil</div>
+                    </div>
+                    <div class="requirements">
+                        <div class="requirement" id="req-upper">
+                            <div class="requirement-icon">✓</div>
+                            Mayús
+                        </div>
+                        <div class="requirement" id="req-lower">
+                            <div class="requirement-icon">✓</div>
+                            minús
+                        </div>
+                        <div class="requirement" id="req-number">
+                            <div class="requirement-icon">✓</div>
+                            Número
+                        </div>
+                        <div class="requirement" id="req-symbol">
+                            <div class="requirement-icon">✓</div>
+                            Símbolo
+                        </div>
+                        <div class="requirement" id="req-length">
+                            <div class="requirement-icon">✓</div>
+                            8 carac
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTÓN LOGIN -->
+                <button 
+                    class="btn-login" 
+                    id="loginBtn" 
+                    onclick="return validarLogin()"
+                >
+                    Ingresar al Panel
+                </button>
+            </div>
+
+            <!-- INFO BOX -->
+            <div class="info-box">
+                <strong>📝 
+        </div>
+    </div>
+
+    <script>
+        let selectedProfile = 'superadmin';
+
+        const profiles = {
+            superadmin:{email:'',password:''},
+            admin:{email:'',password:''},
+            operador:{email:'',password:''},
+            finanzas:{email:'',password:''}
+        };
+
+        function selectProfile(profile) {
+            selectedProfile = profile;
+            document.querySelectorAll('.profile-option').forEach(el => el.classList.remove('selected'));
+            try { event.target.closest('.profile-option').classList.add('selected'); } catch(e) {}
+            const emailEl = document.getElementById('emailInput');
+            const passEl = document.getElementById('passwordInput');
+            if (emailEl) {
+                emailEl.value = '';
+                emailEl.removeAttribute('readonly');
+                emailEl.removeAttribute('disabled');
+                emailEl.focus();
+            }
+            if (passEl) {
+                passEl.value = '';
+                passEl.removeAttribute('readonly');
+                passEl.removeAttribute('disabled');
+            }
+            checkPasswordStrength();
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('passwordInput').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSymbol = /[!@#$%^&*]/.test(password);
+            const isLongEnough = password.length >= 8;
+
+            updateReq('req-upper', hasUpper);
+            updateReq('req-lower', hasLower);
+            updateReq('req-number', hasNumber);
+            updateReq('req-symbol', hasSymbol);
+            updateReq('req-length', isLongEnough);
+
+            let strength = 0;
+            if (hasUpper) strength++;
+            if (hasLower) strength++;
+            if (hasNumber) strength++;
+            if (hasSymbol) strength++;
+            if (isLongEnough) strength++;
+
+            const bars = document.querySelectorAll('.strength-bar');
+            bars.forEach(bar => bar.classList.remove('weak', 'medium', 'strong'));
+
+            if (strength <= 2) {
+                for (let i = 0; i < strength; i++) bars[i].classList.add('weak');
+                document.getElementById('strengthText').textContent = 'Muy débil';
+                document.getElementById('strengthText').className = 'strength-text weak';
+            } else if (strength <= 4) {
+                for (let i = 0; i < strength; i++) bars[i].classList.add('medium');
+                document.getElementById('strengthText').textContent = 'Moderada';
+                document.getElementById('strengthText').className = 'strength-text medium';
+            } else {
+                for (let i = 0; i < strength; i++) bars[i].classList.add('strong');
+                document.getElementById('strengthText').textContent = 'Fuerte';
+                document.getElementById('strengthText').className = 'strength-text strong';
+            }
+
+            loginBtn.disabled = false;
+        }
+
+        function updateReq(id, met) {
+            const element = document.getElementById(id);
+            if (met) element.classList.add('met');
+            else element.classList.remove('met');
+        }
+
+        
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert show alert-${type}`;
+            setTimeout(() => alertBox.classList.remove('show'), 4000);
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('loginBtn').disabled) {
+                login();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            selectProfile('superadmin');
+        });
+    
+        function togglePasswordVisibility(){
+            const i=document.getElementById('passwordInput'); if(!i) return;
+            i.type = i.type === 'password' ? 'text' : 'password';
+        }
+        document.addEventListener('DOMContentLoaded', ()=>{
+            selectProfile('superadmin');
+            const input=document.getElementById('passwordInput');
+            if(input && !document.getElementById('toggleEyeBtn')){
+                const wrap=input.parentElement;
+                if(wrap){
+                    wrap.style.position='relative';
+                    const b=document.createElement('button');
+                    b.type='button'; b.id='toggleEyeBtn'; b.textContent='👁️';
+                    b.style.cssText='position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:18px;';
+                    b.onclick=togglePasswordVisibility;
+                    wrap.appendChild(b);
+                }
+            }
+        });
+    
+function toggleAdminPassword(){
+  var i=document.getElementById('passwordInput');
+  if(!i) return;
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+</script>
 
 <script>
-function validarLogin(){
-  var pass = document.getElementById('passwordInput').value.trim();
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
 
-  if(pass === "Lolo1234@"){
-    localStorage.setItem('nexoAdminAuth','ok');
-    window.location.href = 'nexo-admin-panel.html';
-    return false;
+
+
+
+
+<script>
+(function(){
+  function getEmailInput(){
+    return document.getElementById('emailInput') ||
+           document.querySelector('input[type="email"]') ||
+           document.querySelector('input[name="email"]');
+  }
+  function getPasswordInput(){
+    return document.getElementById('passwordInput') ||
+           document.querySelector('input[type="password"]') ||
+           document.querySelector('input[name="password"]');
+  }
+  function showMsg(msg){
+    var box = document.getElementById('adminLoginMsg');
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'adminLoginMsg';
+      box.style.marginTop = '12px';
+      box.style.padding = '12px 14px';
+      box.style.borderRadius = '12px';
+      box.style.background = '#fff4f4';
+      box.style.borderLeft = '4px solid #d9534f';
+      box.style.color = '#6a2f2d';
+      var notice = document.getElementById('adminSecurityNotice');
+      if(notice && notice.parentNode){
+        notice.parentNode.insertBefore(box, notice);
+      }
+    }
+    box.textContent = msg;
   }
 
-  alert("Contraseña incorrecta");
-}
+  window.validarLogin = function(){
+    var emailEl = document.getElementById('emailInput') || document.querySelector('input[type="email"]');
+    var passEl = document.getElementById('passwordInput') || document.querySelector('input[type="password"]');
+    var email = ((emailEl && emailEl.value) || '').trim().toLowerCase();
+    var pass = ((passEl && passEl.value) || '').trim();
+
+    var validUser = atob('ZXJtY2JhQGhvdG1haWwuY29t');
+    var validPass = atob('TG9sbzEyNjRA');
+
+    if(email === validUser && pass === validPass){
+      localStorage.setItem('nexoAdminAuth','ok');
+      localStorage.setItem('nexoAdminEmail', validUser);
+      sessionStorage.setItem('nexoAdminSession','ok');
+      window.location.href = 'nexo-admin-panel.html';
+      return false;
+    }
+    showMsg('Acceso denegado. Verifica tu correo y contraseña.');
+    return false;
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var emailEl = getEmailInput();
+    var passEl = getPasswordInput();
+    if(emailEl){
+      emailEl.removeAttribute('readonly');
+      emailEl.removeAttribute('disabled');
+      emailEl.value = '';
+      emailEl.placeholder = 'tu@correo.com';
+    }
+    if(passEl){
+      passEl.removeAttribute('readonly');
+      passEl.removeAttribute('disabled');
+      passEl.value = '';
+      passEl.placeholder = 'Ingresa tu contraseña';
+    }
+    var form = document.querySelector('form');
+    if(form){
+      form.setAttribute('onsubmit','return validarLogin()');
+    }
+    var btn = document.querySelector('button[type="submit"], #loginBtn, .login-btn, .primary-btn');
+    if(btn){
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        validarLogin();
+      });
+    }
+  });
+})();
 </script>
 
 </body>
