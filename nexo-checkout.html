@@ -677,6 +677,122 @@
         <span><strong>NEXO</strong> © 2024 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | <strong>NIT: </strong> | <strong>🔐 256-bit SSL</strong></span>
     </div>
 
+
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
+const nexoSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+window.nexoSupabase = nexoSupabase;
+
+window.nexoPrefillCheckoutFromSupabase = async function () {
+  try {
+    const email = (sessionStorage.getItem('clientEmail') || document.getElementById('email')?.value || '').trim();
+    if (!email) return;
+
+    const { data, error } = await nexoSupabase
+      .from('clientes')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (error || !data) return;
+
+    const setVal = (id, value) => {
+      const el = document.getElementById(id);
+      if (el && value !== null && value !== undefined) el.value = value;
+    };
+
+    const nombreCompleto = `${data.nombre || ''} ${data.apellido || ''}`.trim();
+    setVal('fullName', nombreCompleto);
+    setVal('email', data.email || email);
+    setVal('phoneCode', data.codigo_area || '');
+    setVal('phoneNumber', data.telefono || '');
+    setVal('region', data.region || '');
+    setVal('city', data.ciudad || '');
+    setVal('address', data.direccion || '');
+    setVal('zipCode', data.codigo_postal || '');
+
+    const sel = document.getElementById('countrySelect');
+    if (sel && data.pais) {
+      const pCountry = String(data.pais).toLowerCase();
+      const opt = [...sel.options].find(o =>
+        String(o.value).toLowerCase() === pCountry ||
+        String(o.textContent).toLowerCase().includes(pCountry)
+      );
+      if (opt) sel.value = opt.value;
+    }
+
+    sessionStorage.setItem('nexoActiveClient', JSON.stringify({
+      fullName: nombreCompleto,
+      name: data.nombre || '',
+      lastName: data.apellido || '',
+      documentId: data.documento || '',
+      email: data.email || email,
+      country: data.pais || '',
+      areaCode: data.codigo_area || '',
+      phone: data.telefono || '',
+      postalCode: data.codigo_postal || '',
+      region: data.region || '',
+      city: data.ciudad || '',
+      address: data.direccion || ''
+    }));
+  } catch (err) {
+    console.warn('No se pudo precargar cliente desde Supabase:', err);
+  }
+};
+
+window.nexoSavePedidoToSupabase = async function (orderData) {
+  const items = Array.isArray(orderData.items) ? orderData.items : [];
+  const firstItem = items[0] || {};
+  const customer = orderData.customer || {};
+  const nameParts = String(orderData.fullName || '').trim().split(/\s+/);
+  const clienteNombre = nameParts.shift() || '';
+  const clienteApellido = nameParts.join(' ');
+
+  const row = {
+    cliente_email: orderData.email || customer.email || '',
+    cliente_nombre: clienteNombre,
+    cliente_apellido: clienteApellido,
+    cliente_documento: customer.documentId || '',
+    cliente_tel: customer.phone || orderData.phone || '',
+    cliente_pais: customer.country || orderData.country || '',
+    cliente_ciudad: customer.city || orderData.city || '',
+    cliente_direccion: customer.address || orderData.address || '',
+    producto: items.map(i => `${i.name || 'Producto'} x${i.quantity || 1}`).join(' | '),
+    producto_url: firstItem.url || firstItem.link || '',
+    producto_nombre: firstItem.name || 'Pedido NEXO',
+    proveedor: firstItem.provider || firstItem.vendor || 'Marketplace externo',
+    cantidad: items.reduce((n, i) => n + Number(i.quantity || 1), 0) || 1,
+    precio_usd: Number(orderData.total || 0),
+    costo_producto_usd: Number(orderData.subtotal || 0),
+    costo_envio_usd: Number(orderData.amazonShipping || 0),
+    comision_nexo_usd: Number(orderData.commission || 0),
+    impuesto_it_usd: Number(orderData.itf || 0),
+    impuesto_iue_usd: Number(orderData.iue || 0),
+    total_cliente_usd: Number(orderData.total || 0),
+    moneda: 'USD',
+    metodo_pago: orderData.paymentMethod || '',
+    estado: 'pendiente',
+    estado_pago: 'pendiente',
+    estado_compra: 'pendiente',
+    estado_envio: 'pendiente',
+    tracking: '',
+    fecha_estimada_entrega: orderData.deliveryEstimate || '',
+    prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
+    observaciones: orderData.note || ''
+  };
+
+  return await nexoSupabase.from('pedidos').insert([row]).select().single();
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => window.nexoPrefillCheckoutFromSupabase?.(), 350);
+  setTimeout(() => window.nexoPrefillCheckoutFromSupabase?.(), 900);
+});
+</script>
     <script>
         
 const checkoutI18n={
@@ -1134,8 +1250,12 @@ const t = ctt();
             applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
-        function submitPurchase(){
+        async function submitPurchase(){
             if(!orderData) return;
+            const confirmBtn = document.getElementById('confirmBuyText');
+            const oldBtnText = confirmBtn ? confirmBtn.textContent : '';
+            if(confirmBtn) confirmBtn.textContent = 'Guardando pedido...';
+
             orderData.note = document.getElementById('customerNote').value.trim();
             orderData.timestamp = new Date().toISOString();
             orderData.id = orderData.id || ('NEXO-' + Date.now());
@@ -1156,7 +1276,7 @@ const t = ctt();
                 city: document.getElementById('city').value.trim(),
                 address: document.getElementById('address').value.trim(),
                 zipCode: document.getElementById('zipCode').value.trim(),
-                documentId: (JSON.parse(localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
+                documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
             };
             orderData.totals = {
                 subtotal: +orderData.subtotal.toFixed(2),
@@ -1178,25 +1298,22 @@ const t = ctt();
                 iueFiscal: +orderData.iue.toFixed(2)
             };
 
+            try {
+                if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
+                const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
+                if (error) throw error;
+                orderData.supabase_id = data?.id || null;
+                orderData.estado = 'pendiente';
+            } catch (err) {
+                if(confirmBtn) confirmBtn.textContent = oldBtnText || 'Confirmar compra';
+                alert('No se pudo guardar el pedido en Supabase: ' + (err.message || err));
+                return;
+            }
+
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             const orders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
             orders.push(orderData);
             localStorage.setItem('nexoOrders', JSON.stringify(orders));
-
-            const prof = JSON.parse(localStorage.getItem('nexoClientProfile') || '{}');
-            const updated = {
-                ...prof,
-                fullName: orderData.fullName,
-                email: orderData.email,
-                countryCode: document.getElementById('countrySelect').value,
-                country: orderData.country,
-                areaCode: document.getElementById('phoneCode').value,
-                phone: document.getElementById('phoneNumber').value.trim(),
-                region: document.getElementById('region').value.trim(),
-                city: document.getElementById('city').value.trim(),
-                address: document.getElementById('address').value.trim(),
-                zipCode: document.getElementById('zipCode').value.trim()
-            };
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html';
         }
@@ -1360,7 +1477,8 @@ function nexoPublicCleanup(){
     if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
   }catch(e){}
 }
-document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+// Limpieza desactivada: ahora usamos datos reales de cliente en Supabase.
+// document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 
 </body>
