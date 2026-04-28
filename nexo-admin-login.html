@@ -889,85 +889,23 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 
+
+
+
 <script>
-(function(){
-  function getEmailInput(){
-    return document.getElementById('emailInput') ||
-           document.querySelector('input[type="email"]') ||
-           document.querySelector('input[name="email"]');
-  }
-  function getPasswordInput(){
-    return document.getElementById('passwordInput') ||
-           document.querySelector('input[type="password"]') ||
-           document.querySelector('input[name="password"]');
-  }
-  function showMsg(msg){
-    var box = document.getElementById('adminLoginMsg');
-    if(!box){
-      box = document.createElement('div');
-      box.id = 'adminLoginMsg';
-      box.style.marginTop = '12px';
-      box.style.padding = '12px 14px';
-      box.style.borderRadius = '12px';
-      box.style.background = '#fff4f4';
-      box.style.borderLeft = '4px solid #d9534f';
-      box.style.color = '#6a2f2d';
-      var notice = document.getElementById('adminSecurityNotice');
-      if(notice && notice.parentNode){
-        notice.parentNode.insertBefore(box, notice);
-      }
+function validarLogin(){
+    var passEl = document.getElementById('passwordInput');
+    var pass = (passEl && passEl.value || '').trim();
+
+    if(pass === "Lolo1234@"){
+        localStorage.setItem('nexoAdminAuth','ok');
+        window.location.href = 'nexo-admin-panel.html';
+        return false;
     }
-    box.textContent = msg;
-  }
 
-  window.validarLogin = function(){
-    var emailEl = document.getElementById('emailInput') || document.querySelector('input[type="email"]');
-    var passEl = document.getElementById('passwordInput') || document.querySelector('input[type="password"]');
-    var email = ((emailEl && emailEl.value) || '').trim().toLowerCase();
-    var pass = ((passEl && passEl.value) || '').trim();
-
-    var validUser = atob('ZXJtY2JhQGhvdG1haWwuY29t');
-    var validPass = atob('TG9sbzEyNjRA');
-
-    if(email === validUser && pass === validPass){
-      localStorage.setItem('nexoAdminAuth','ok');
-      localStorage.setItem('nexoAdminEmail', validUser);
-      sessionStorage.setItem('nexoAdminSession','ok');
-      window.location.href = 'nexo-admin-panel.html';
-      return false;
-    }
-    showMsg('Acceso denegado. Verifica tu correo y contraseña.');
+    alert("Acceso denegado. Contraseña incorrecta.");
     return false;
-  };
-
-  document.addEventListener('DOMContentLoaded', function(){
-    var emailEl = getEmailInput();
-    var passEl = getPasswordInput();
-    if(emailEl){
-      emailEl.removeAttribute('readonly');
-      emailEl.removeAttribute('disabled');
-      emailEl.value = '';
-      emailEl.placeholder = 'tu@correo.com';
-    }
-    if(passEl){
-      passEl.removeAttribute('readonly');
-      passEl.removeAttribute('disabled');
-      passEl.value = '';
-      passEl.placeholder = 'Ingresa tu contraseña';
-    }
-    var form = document.querySelector('form');
-    if(form){
-      form.setAttribute('onsubmit','return validarLogin()');
-    }
-    var btn = document.querySelector('button[type="submit"], #loginBtn, .login-btn, .primary-btn');
-    if(btn){
-      btn.addEventListener('click', function(e){
-        e.preventDefault();
-        validarLogin();
-      });
-    }
-  });
-})();
+}
 </script>
 
 </body>
