@@ -543,6 +543,7 @@
         @media(max-width:900px){.ticket-detail-grid{grid-template-columns:1fr;}}
 
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
     <!-- HEADER -->
@@ -906,7 +907,7 @@
                         <button class="btn btn-primary" onclick="loadTickets()">Actualizar tickets</button>
                         <div class="form-group">
                             <label class="form-label">Buscar</label>
-                            <input type="text" class="form-input" id="ticketSearch" placeholder="Cliente, asunto o canal" oninput="renderTicketsTable()">
+                            <input type="text" class="form-input" id="ticketSearch" autocomplete="off" value="" placeholder="Cliente, asunto o canal" oninput="renderTicketsTable()">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Estado</label>
@@ -1389,7 +1390,8 @@
         function openPrintableReport(title, subtitle, tableHeaders, tableRows, summaryRows = []) {
             const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${c}</td>`).join('')}</tr>`).join('');
             const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(s => `<div style="margin:4px 0;"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>` : '';
-            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title></head>
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title>    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
             <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
                 <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${title}</h1>
                 <div style="margin-bottom:18px;color:#5A7C7E;">${subtitle}</div>
@@ -1650,10 +1652,23 @@
         }
 
 
-        // ===== TICKETS SOPORTE · SUPABASE · XHR ESTABLE =====
+        // ===== TICKETS SOPORTE · SUPABASE JS UMD CORREGIDO =====
         const NEXO_SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
         const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
         let nexoTicketsCache = [];
+        let nexoSupabaseClient = null;
+
+        function getNexoSupabaseClient(){
+            if (!window.supabase || !window.supabase.createClient) {
+                throw new Error("No cargó la librería Supabase JS. Revise conexión a internet o CDN.");
+            }
+            if (!nexoSupabaseClient) {
+                nexoSupabaseClient = window.supabase.createClient(NEXO_SUPABASE_URL, NEXO_SUPABASE_KEY, {
+                    auth: { persistSession: false, autoRefreshToken: false }
+                });
+            }
+            return nexoSupabaseClient;
+        }
 
         function ticketSafe(v){
             return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
@@ -1669,42 +1684,32 @@
             return 'Correo';
         }
 
-        function supabaseReadTickets(){
-            return new Promise(function(resolve, reject){
-                const url = NEXO_SUPABASE_URL + '/rest/v1/tickets?select=*&order=fecha_creacion.desc';
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.setRequestHeader('apikey', NEXO_SUPABASE_KEY);
-                xhr.setRequestHeader('Authorization', 'Bearer ' + NEXO_SUPABASE_KEY);
-                xhr.setRequestHeader('Accept', 'application/json');
-                xhr.onload = function(){
-                    if(xhr.status >= 200 && xhr.status < 300){
-                        try {
-                            resolve(JSON.parse(xhr.responseText || '[]'));
-                        } catch(e) {
-                            reject(new Error('Respuesta inválida de Supabase'));
-                        }
-                    } else {
-                        reject(new Error('HTTP ' + xhr.status + ' - ' + (xhr.responseText || 'sin detalle')));
-                    }
-                };
-                xhr.onerror = function(){
-                    reject(new Error('No hay conexión REST con Supabase desde este navegador/Vercel'));
-                };
-                xhr.send();
-            });
-        }
-
         async function loadTickets() {
             const table = document.getElementById('ticketsTable');
+            const search = document.getElementById('ticketSearch');
+            if (search && search.value === 'ermcba@gmail.com') search.value = '';
             if (!table) return;
+
             table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);font-weight:700;">Cargando tickets desde Supabase...</td></tr>';
 
             try {
-                nexoTicketsCache = await supabaseReadTickets();
+                const client = getNexoSupabaseClient();
+                const { data, error } = await client
+                    .from('tickets')
+                    .select('*')
+                    .order('fecha_creacion', { ascending: false });
+
+                if (error) throw error;
+
+                nexoTicketsCache = data || [];
                 renderTicketsTable();
             } catch (err) {
-                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">No se pudo cargar desde Supabase.<br>Detalle técnico: ' + ticketSafe(err.message) + '<br><br>Revise que este archivo esté subido a Vercel y que la Publishable Key corresponda al proyecto nexo-db.</td></tr>';
+                table.innerHTML =
+                    '<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">' +
+                    'No se pudo cargar desde Supabase.<br>' +
+                    'Detalle técnico: ' + ticketSafe(err.message || err) + '<br><br>' +
+                    'Si el ticket sí está en Supabase, revise que Vercel haya publicado este archivo nuevo y presione Ctrl + F5.' +
+                    '</td></tr>';
             }
         }
 
