@@ -432,7 +432,7 @@
             padding:10px 14px; border-radius:999px; font-size:12px; font-weight:800; box-shadow:0 2px 8px rgba(0,0,0,.05); border:1px solid #e7ecec;
         }
         
-        .dashboard-return-btn{
+        .dashboard-return-btn{display:none!important;
             position: fixed;
             top: 18px;
             right: 22px;
@@ -545,8 +545,6 @@
 </style>
 </head>
 <body>
-    <button id="dashboardReturnBtn" class="dashboard-return-btn" onclick="returnToDashboard()" title="Volver al panel principal">↩</button>
-
     <!-- HEADER -->
     <div class="header">
         <div class="header-left">
@@ -554,7 +552,6 @@
             <span class="logo-admin">NEXO Admin</span>
         </div>
         <div class="header-right">
-            <span class="user-badge">S 🏠</span>
             <button class="logout-btn" onclick="logout()">SALIR</button>
         </div>
     </div>
@@ -909,7 +906,7 @@
                         <button class="btn btn-primary" onclick="loadTickets()">Actualizar tickets</button>
                         <div class="form-group">
                             <label class="form-label">Buscar</label>
-                            <input type="text" class="form-input" id="ticketSearch" placeholder="Cliente, email, asunto" oninput="renderTicketsTable()">
+                            <input type="text" class="form-input" id="ticketSearch" placeholder="Cliente, asunto o canal" oninput="renderTicketsTable()">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Estado</label>
@@ -1162,7 +1159,7 @@
 
             const backBtn = document.getElementById('dashboardReturnBtn');
             if (backBtn) {
-                backBtn.style.display = sectionId && sectionId !== 'dashboard' ? 'block' : 'none';
+                backBtn.style.display = 'none';
             }
 
             if (sectionId === 'dashboard') {
@@ -1658,12 +1655,16 @@
         const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
         let nexoTicketsCache = [];
 
-        function ticketSafe(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); }
+        function ticketSafe(v){
+            return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]);
+            });
+        }
 
         function getTicketChannel(t){
             const text = `${t.mensaje || ''} ${t.asunto || ''}`.toLowerCase();
             if(text.includes('whatsapp')) return 'WhatsApp';
-            if(text.includes('llamada') || text.includes('teléfono') || text.includes('telefono')) return 'Llamada';
+            if(text.includes('llamada') || text.includes('telefono') || text.includes('teléfono')) return 'Llamada';
             if(text.includes('chat')) return 'Chat web';
             return 'Correo';
         }
@@ -1674,16 +1675,13 @@
             table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);">Cargando tickets desde Supabase...</td></tr>';
 
             try {
-                const url = NEXO_SUPABASE_URL + '/rest/v1/tickets?select=*';
-                const res = await fetch(url, {
+                const res = await fetch(NEXO_SUPABASE_URL + '/rest/v1/tickets?select=*', {
                     method: 'GET',
-                    mode: 'cors',
                     cache: 'no-store',
                     headers: {
-                        'apikey': NEXO_SUPABASE_KEY,
-                        'Authorization': 'Bearer ' + NEXO_SUPABASE_KEY,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        apikey: NEXO_SUPABASE_KEY,
+                        Authorization: 'Bearer ' + NEXO_SUPABASE_KEY,
+                        Accept: 'application/json'
                     }
                 });
 
@@ -1698,7 +1696,7 @@
                 });
                 renderTicketsTable();
             } catch (err) {
-                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">Error cargando tickets: ' + ticketSafe(err.message) + '</td></tr>';
+                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">No se pudo cargar desde Supabase. Verifique que esté en Vercel o abra con internet activo.<br>Detalle: ' + ticketSafe(err.message) + '</td></tr>';
             }
         }
 
@@ -1710,7 +1708,8 @@
             const estado = document.getElementById('ticketStatusFilter')?.value || '';
 
             let rows = nexoTicketsCache.filter(function(t){
-                const text = `${t.nombre_cliente || ''} ${t.email || ''} ${t.asunto || ''} ${t.tipo_reclamo || ''} ${t.mensaje || ''}`.toLowerCase();
+                const channel = getTicketChannel(t);
+                const text = `${t.nombre_cliente || ''} ${t.asunto || ''} ${t.tipo_reclamo || ''} ${t.mensaje || ''} ${channel}`.toLowerCase();
                 const okSearch = !q || text.includes(q);
                 const okEstado = !estado || (t.estado || 'Nuevo') === estado;
                 return okSearch && okEstado;
@@ -1754,15 +1753,13 @@
                     <div class="ticket-detail-grid">
                         <div><span class="info-label">Cliente</span><div class="info-value highlight">${ticketSafe(t.nombre_cliente || '')}</div></div>
                         <div><span class="info-label">Canal solicitado</span><div class="info-value highlight">${ticketSafe(channel)}</div></div>
-                        <div><span class="info-label">Correo</span><div class="info-value">${ticketSafe(t.email || '')}</div></div>
                         <div><span class="info-label">Prioridad</span><div class="info-value">${ticketSafe(t.prioridad || 'Media')}</div></div>
                         <div><span class="info-label">Estado</span><div class="info-value">${ticketSafe(t.estado || 'Nuevo')}</div></div>
-                        <div><span class="info-label">Tipo</span><div class="info-value">${ticketSafe(t.tipo_reclamo || '')}</div></div>
                     </div>
                     <div class="ticket-message">${ticketSafe(t.mensaje || '')}</div>
                     <div class="button-group">
-                        <button class="btn btn-primary" onclick="window.location.href='${mailto}'">Responder por correo</button>
-                        <button class="btn btn-secondary" onclick="alert('Canal solicitado por el cliente: ${ticketSafe(channel)}')">Ver canal solicitado</button>
+                        <button class="btn btn-primary" onclick="window.location.href='${mailto}'">Responder</button>
+                        <button class="btn btn-secondary" onclick="alert('Canal solicitado por el cliente: ${ticketSafe(channel)}')">Canal solicitado</button>
                     </div>
                 `;
                 box.scrollIntoView({behavior:'smooth', block:'start'});
