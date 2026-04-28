@@ -432,7 +432,7 @@
             padding:10px 14px; border-radius:999px; font-size:12px; font-weight:800; box-shadow:0 2px 8px rgba(0,0,0,.05); border:1px solid #e7ecec;
         }
         
-        .dashboard-return-btn{
+        .dashboard-return-btn{display:none!important;
             position: fixed;
             top: 18px;
             right: 22px;
@@ -535,16 +535,16 @@
         @media (max-width: 980px){.tax-layout,.tax-fields{grid-template-columns:1fr;}}
 
 
-        .ticket-response-btn{
-            background:#4A6B6D;color:white;border:none;border-radius:8px;
-            padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;
-        }
-        .ticket-response-btn:hover{background:#7AC742;color:#102020;}
+        .ticket-response-btn{background:var(--secondary);color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;}
+        .ticket-response-btn:hover{background:var(--primary);}
+        .ticket-pill{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef4ef;color:var(--primary);font-size:10px;font-weight:900;text-transform:uppercase;}
+        .ticket-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+        .ticket-message{background:#f7faf8;border-left:4px solid var(--accent);border-radius:10px;padding:14px;line-height:1.6;font-size:13px;white-space:pre-wrap;}
+        @media(max-width:900px){.ticket-detail-grid{grid-template-columns:1fr;}}
+
 </style>
 </head>
 <body>
-    <button id="dashboardReturnBtn" class="dashboard-return-btn" onclick="returnToDashboard()" title="Volver al panel principal">↩</button>
-
     <!-- HEADER -->
     <div class="header">
         <div class="header-left">
@@ -552,7 +552,6 @@
             <span class="logo-admin">NEXO Admin</span>
         </div>
         <div class="header-right">
-            <span class="user-badge">S 🏠</span>
             <button class="logout-btn" onclick="logout()">SALIR</button>
         </div>
     </div>
@@ -591,6 +590,9 @@
                 </div>
                 <div class="menu-item" onclick="switchSection('marketing', this)">
                     <span class="menu-icon">📢</span> Agente Marketing IA
+                </div>
+                <div class="menu-item" onclick="switchSection('tickets', this)">
+                    <span class="menu-icon">🎫</span> Tickets soporte
                 </div>
                 <div class="menu-item" onclick="switchSection('users', this)">
                     <span class="menu-icon">👤</span> Usuarios
@@ -893,6 +895,59 @@
                 </div>
             </div>
 
+            <!-- TICKETS SOPORTE -->
+            <div class="section" id="tickets">
+                <h1 class="page-title">🎫 TICKETS DE SOPORTE</h1>
+                <p class="page-subtitle">Reclamos reales guardados en Supabase</p>
+
+                <div class="section-box">
+                    <div class="section-box-title">📋 TICKETS RECIBIDOS</div>
+                    <div class="filters-bar">
+                        <button class="btn btn-primary" onclick="loadTickets()">Actualizar tickets</button>
+                        <div class="form-group">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-input" id="ticketSearch" placeholder="Cliente, asunto o canal" oninput="renderTicketsTable()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="ticketStatusFilter" onchange="renderTicketsTable()">
+                                <option value="">Todos</option>
+                                <option value="Nuevo">Nuevo</option>
+                                <option value="En revisión">En revisión</option>
+                                <option value="Respondido">Respondido</option>
+                                <option value="Cerrado">Cerrado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="overflow:auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>CLIENTE</th>
+                                    <th>ASUNTO</th>
+                                    <th>TIPO</th>
+                                    <th>ESTADO</th>
+                                    <th>PRIORIDAD</th>
+                                    <th>RESPONDER</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticketsTable">
+                                <tr>
+                                    <td colspan="7" style="text-align:center;color:var(--gray);">Presione “Actualizar tickets”.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-box" id="ticketDetailBox" style="display:none;">
+                    <div class="section-box-title">🧾 DETALLE Y RESPUESTA DEL TICKET</div>
+                    <div id="ticketDetailContent"></div>
+                </div>
+            </div>
+
             <!-- USUARIOS -->
             <div class="section" id="users">
                 <h1 class="page-title">👤 GESTIÓN DE USUARIOS</h1>
@@ -1104,7 +1159,7 @@
 
             const backBtn = document.getElementById('dashboardReturnBtn');
             if (backBtn) {
-                backBtn.style.display = sectionId && sectionId !== 'dashboard' ? 'block' : 'none';
+                backBtn.style.display = 'none';
             }
 
             if (sectionId === 'dashboard') {
@@ -1595,66 +1650,83 @@
         }
 
 
+        // ===== TICKETS SOPORTE · SUPABASE CORREGIDO =====
         const NEXO_SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
         const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
         let nexoTicketsCache = [];
 
-        // ===== TICKETS SOPORTE · SUPABASE · VERSION CORREGIDA =====
-        const NEXO_SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
-        const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-        let nexoTicketsCache = [];
-
-        function ticketSafe(v) {
-            return String(v == null ? '' : v).replace(/[&<>"']/g, function(m) {
+        function ticketSafe(v){
+            return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
                 return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]);
             });
         }
 
-        function getTicketChannel(t) {
+        function getTicketChannel(t){
             const text = `${t.mensaje || ''} ${t.asunto || ''} ${t.tipo_reclamo || ''}`.toLowerCase();
-            if (text.includes('whatsapp')) return 'WhatsApp';
-            if (text.includes('llamada') || text.includes('telefono') || text.includes('teléfono')) return 'Llamada';
-            if (text.includes('chat')) return 'Chat web';
+            if(text.includes('whatsapp')) return 'WhatsApp';
+            if(text.includes('llamada') || text.includes('telefono') || text.includes('teléfono')) return 'Llamada';
+            if(text.includes('chat')) return 'Chat web';
             return 'Correo';
         }
 
-        function supabaseGetTickets() {
-            return new Promise(function(resolve, reject) {
-                const url = NEXO_SUPABASE_URL + '/rest/v1/tickets?select=*&order=fecha_creacion.desc';
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.setRequestHeader('apikey', NEXO_SUPABASE_KEY);
-                xhr.setRequestHeader('Authorization', 'Bearer ' + NEXO_SUPABASE_KEY);
-                xhr.setRequestHeader('Accept', 'application/json');
-                xhr.onload = function() {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            resolve(JSON.parse(xhr.responseText || '[]'));
-                        } catch(e) {
-                            reject(new Error('Respuesta inválida de Supabase'));
-                        }
-                    } else {
-                        reject(new Error('Supabase HTTP ' + xhr.status + ': ' + xhr.responseText));
-                    }
-                };
-                xhr.onerror = function() {
-                    reject(new Error('No se pudo conectar a Supabase. Revise URL/API KEY o Firewall de Supabase.'));
-                };
-                xhr.send();
+        function loadScriptOnce(src){
+            return new Promise(function(resolve, reject){
+                if(document.querySelector('script[src="'+src+'"]')) return resolve();
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
             });
+        }
+
+        async function readTicketsWithRest(){
+            const url = NEXO_SUPABASE_URL + '/rest/v1/tickets?select=*&order=fecha_creacion.desc';
+            const res = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-store',
+                headers: {
+                    'apikey': NEXO_SUPABASE_KEY,
+                    'Authorization': 'Bearer ' + NEXO_SUPABASE_KEY,
+                    'Accept': 'application/json'
+                }
+            });
+            if(!res.ok){
+                const txt = await res.text();
+                throw new Error('REST ' + res.status + ' - ' + txt);
+            }
+            return await res.json();
+        }
+
+        async function readTicketsWithSupabaseJs(){
+            await loadScriptOnce('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+            const client = window.supabase.createClient(NEXO_SUPABASE_URL, NEXO_SUPABASE_KEY, {
+                auth: { persistSession:false, autoRefreshToken:false }
+            });
+            const { data, error } = await client
+                .from('tickets')
+                .select('*')
+                .order('fecha_creacion', { ascending:false });
+            if(error) throw new Error(error.message || 'Error Supabase JS');
+            return data || [];
         }
 
         async function loadTickets() {
             const table = document.getElementById('ticketsTable');
             if (!table) return;
-
-            table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#6A8C8D;font-weight:700;">Cargando tickets desde Supabase...</td></tr>';
+            table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);font-weight:700;">Cargando tickets desde Supabase...</td></tr>';
 
             try {
-                nexoTicketsCache = await supabaseGetTickets();
+                try {
+                    nexoTicketsCache = await readTicketsWithRest();
+                } catch(primaryErr) {
+                    console.warn('REST falló, probando supabase-js:', primaryErr);
+                    nexoTicketsCache = await readTicketsWithSupabaseJs();
+                }
                 renderTicketsTable();
             } catch (err) {
-                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">No se pudo cargar desde Supabase.<br>Detalle: ' + ticketSafe(err.message) + '</td></tr>';
+                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#E74C3C;font-weight:700;">No se pudo cargar desde Supabase.<br>Detalle técnico: ' + ticketSafe(err.message) + '<br><br>Verifique en Supabase: Project Settings → API Keys que la publishable key sea la misma del proyecto nexo-db.</td></tr>';
             }
         }
 
@@ -1662,12 +1734,10 @@
             const table = document.getElementById('ticketsTable');
             if (!table) return;
 
-            const searchEl = document.getElementById('ticketSearch');
-            const statusEl = document.getElementById('ticketStatusFilter');
-            const q = (searchEl ? searchEl.value : '').toLowerCase().trim();
-            const estado = statusEl ? statusEl.value : '';
+            const q = (document.getElementById('ticketSearch')?.value || '').toLowerCase().trim();
+            const estado = document.getElementById('ticketStatusFilter')?.value || '';
 
-            const rows = (nexoTicketsCache || []).filter(function(t) {
+            let rows = (nexoTicketsCache || []).filter(function(t){
                 const channel = getTicketChannel(t);
                 const text = `${t.nombre_cliente || ''} ${t.email || ''} ${t.asunto || ''} ${t.tipo_reclamo || ''} ${t.mensaje || ''} ${channel}`.toLowerCase();
                 const okSearch = !q || text.includes(q);
@@ -1676,11 +1746,11 @@
             });
 
             if (!rows.length) {
-                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#6A8C8D;font-weight:700;">No hay tickets para mostrar.</td></tr>';
+                table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);font-weight:700;">No hay tickets para mostrar.</td></tr>';
                 return;
             }
 
-            table.innerHTML = rows.map(function(t, idx) {
+            table.innerHTML = rows.map(function(t, idx){
                 const fecha = t.fecha_creacion ? new Date(t.fecha_creacion).toLocaleString('es-BO') : '';
                 const channel = getTicketChannel(t);
                 return `
@@ -1689,7 +1759,7 @@
                         <td>${ticketSafe(t.nombre_cliente || '')}</td>
                         <td>${ticketSafe(t.asunto || '')}</td>
                         <td>${ticketSafe(t.tipo_reclamo || '')}</td>
-                        <td>${ticketSafe(t.estado || 'Nuevo')}</td>
+                        <td><span class="ticket-pill">${ticketSafe(t.estado || 'Nuevo')}</span></td>
                         <td>${ticketSafe(t.prioridad || 'Media')}</td>
                         <td><button class="ticket-response-btn" onclick="openTicketDetail(${idx})">Responder por ${ticketSafe(channel)}</button></td>
                     </tr>
@@ -1697,14 +1767,38 @@
             }).join('');
         }
 
-        function openTicketDetail(index) {
+        function openTicketDetail(index){
             const t = nexoTicketsCache[index];
-            if (!t) return;
+            if(!t) return;
+            const box = document.getElementById('ticketDetailBox');
+            const content = document.getElementById('ticketDetailContent');
+            const channel = getTicketChannel(t);
             const subject = encodeURIComponent('Respuesta ticket NEXO - ' + (t.asunto || 'Soporte'));
             const body = encodeURIComponent('Estimado/a ' + (t.nombre_cliente || '') + ',\n\nEn atención a su ticket de soporte, le informamos lo siguiente:\n\n');
-            window.location.href = 'mailto:' + (t.email || '') + '?subject=' + subject + '&body=' + body;
+            const mailto = 'mailto:' + (t.email || '') + '?subject=' + subject + '&body=' + body;
+
+            if(box) box.style.display = 'block';
+            if(content){
+                content.innerHTML = `
+                    <div class="ticket-detail-grid">
+                        <div><span class="info-label">Cliente</span><div class="info-value highlight">${ticketSafe(t.nombre_cliente || '')}</div></div>
+                        <div><span class="info-label">Canal solicitado</span><div class="info-value highlight">${ticketSafe(channel)}</div></div>
+                        <div><span class="info-label">Correo</span><div class="info-value">${ticketSafe(t.email || '')}</div></div>
+                        <div><span class="info-label">Prioridad</span><div class="info-value">${ticketSafe(t.prioridad || 'Media')}</div></div>
+                        <div><span class="info-label">Estado</span><div class="info-value">${ticketSafe(t.estado || 'Nuevo')}</div></div>
+                        <div><span class="info-label">Tipo</span><div class="info-value">${ticketSafe(t.tipo_reclamo || '')}</div></div>
+                    </div>
+                    <div class="ticket-message">${ticketSafe(t.mensaje || '')}</div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="window.location.href='${mailto}'">Responder</button>
+                        <button class="btn btn-secondary" onclick="alert('Canal solicitado por el cliente: ${ticketSafe(channel)}')">Canal solicitado</button>
+                    </div>
+                `;
+                box.scrollIntoView({behavior:'smooth', block:'start'});
+            }
         }
 
+        
         function logout() {
             if (confirm('¿Deseas cerrar sesión?')) {
                 window.location.href = 'nexo-admin-login.html';
