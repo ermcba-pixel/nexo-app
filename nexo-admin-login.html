@@ -955,10 +955,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
     var email = ((emailEl && emailEl.value) || '').trim().toLowerCase();
     var pass = ((passEl && passEl.value) || '').trim();
 
-    if(email !== NEXO_SUPERADMIN_EMAIL){
-      showMsg('Acceso denegado. Use el usuario superadministrador de la empresa: ' + NEXO_SUPERADMIN_EMAIL, false);
-      return false;
-    }
+    
 
     if(!pass){
       showMsg('Ingrese la contraseña registrada en Supabase.', false);
@@ -1004,8 +1001,8 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
     if(emailEl){
       emailEl.removeAttribute('readonly');
       emailEl.removeAttribute('disabled');
-      emailEl.value = NEXO_SUPERADMIN_EMAIL;
-      emailEl.placeholder = NEXO_SUPERADMIN_EMAIL;
+      emailEl.value = "";
+      emailEl.placeholder = "Ingrese su correo";
     }
 
     if(passEl){
