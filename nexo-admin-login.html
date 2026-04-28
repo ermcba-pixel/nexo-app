@@ -4,81 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXO - Login Admin</title>
-
 <style>
-body {
-    font-family: Arial;
-    background: linear-gradient(135deg, #4A6B6D, #5A7C7E);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.container {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 350px;
-}
-
-h2 {
-    text-align: center;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 20px;
-    background: #4A6B6D;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #3a5557;
-}
+body{font-family:Arial;background:#4A6B6D;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.box{background:#fff;padding:30px;border-radius:15px;width:350px}
+input{width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:8px}
+button{width:100%;padding:12px;background:#4A6B6D;color:#fff;border:none;border-radius:8px;font-weight:bold}
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
+<div class="box">
 <h2>Ingreso Admin</h2>
 
 <label>Correo electrónico</label>
-<input type="email" id="emailInput" placeholder="Ingrese su correo">
+<input type="email" id="emailInput" placeholder="tu@correo.com">
 
 <label>Contraseña</label>
-<input type="password" id="passwordInput" placeholder="Ingrese su contraseña">
+<input type="password" id="passwordInput" placeholder="Ingresa tu contraseña">
 
 <button onclick="validarLogin()">INGRESAR AL PANEL</button>
-
 </div>
 
 <script>
-function validarLogin() {
-    const pass = document.getElementById('passwordInput').value;
+function validarLogin(){
+  var pass = document.getElementById('passwordInput').value.trim();
 
-    if (!pass) {
-        alert("Ingrese la contraseña");
-        return;
-    }
+  if(pass === "Lolo1234@"){
+    localStorage.setItem('nexoAdminAuth','ok');
+    window.location.href = 'nexo-admin-panel.html';
+    return false;
+  }
 
-    if (pass === "Lolo1234@") {
-        localStorage.setItem("nexoAdmin", "ok");
-        window.location.href = "nexo-admin-panel.html";
-    } else {
-        alert("Contraseña incorrecta");
-    }
+  alert("Contraseña incorrecta");
 }
 </script>
 
