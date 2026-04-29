@@ -584,8 +584,8 @@
             <div class="form-group">
                 <label class="form-label" id="lblDelivery">Preferencia de envío</label>
                 <select class="form-select" id="shippingPriority" onchange="refreshDeliveryEstimate()">
-                    <option value="">Envío estándar</option>
-                    <option value="">Envío prioritario</option>
+                    <option value="standard">Envío estándar</option>
+                    <option value="priority">Envío prioritario</option>
                 </select>
             </div>
             <div class="form-group">
@@ -754,7 +754,7 @@ function applyCheckoutLanguage(){
 
         // DATOS DE 196 PAÍSES CON CÓDIGOS DE ÁREA
         const countriesPhoneData = [
-            { code: 'BO', name: 'Bolivia', area: '' },
+            { code: 'BO', name: 'Bolivia', area: '+591' },
             { code: 'AR', name: 'Argentina', area: '+54' },
             { code: 'BR', name: 'Brasil', area: '+55' },
             { code: 'CL', name: 'Chile', area: '+56' },
@@ -1187,12 +1187,17 @@ const t = ctt();
             applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
-        function submitPurchase(){
+        async function submitPurchase(){
             if(!orderData) return;
+            const btnText = document.getElementById('confirmBuyText');
+            const oldBtnText = btnText ? btnText.textContent : '';
+            if(btnText) btnText.textContent = 'Guardando pedido...';
+
             orderData.note = document.getElementById('customerNote').value.trim();
             orderData.timestamp = new Date().toISOString();
             orderData.id = orderData.id || ('NEXO-' + Date.now());
-            orderData.paypalEmail = '';
+            orderData.payoneerEmail = NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com';
+            orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
             orderData.currency = 'USD';
             orderData.company = 'NEXO';
             orderData.commissionRate = 0.30;
@@ -1209,7 +1214,7 @@ const t = ctt();
                 city: document.getElementById('city').value.trim(),
                 address: document.getElementById('address').value.trim(),
                 zipCode: document.getElementById('zipCode').value.trim(),
-                documentId: (JSON.parse(localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
+                documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
             };
             orderData.totals = {
                 subtotal: +orderData.subtotal.toFixed(2),
@@ -1231,6 +1236,18 @@ const t = ctt();
                 iueFiscal: +orderData.iue.toFixed(2)
             };
 
+            try {
+                if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
+                const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
+                if (error) throw error;
+                orderData.supabase_id = data?.id || null;
+                orderData.estado = 'pendiente';
+            } catch (err) {
+                if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
+                alert('No se pudo guardar el pedido en Supabase: ' + (err.message || err));
+                return;
+            }
+
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             const orders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
             orders.push(orderData);
@@ -1250,6 +1267,7 @@ const t = ctt();
                 address: document.getElementById('address').value.trim(),
                 zipCode: document.getElementById('zipCode').value.trim()
             };
+            localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html';
         }
