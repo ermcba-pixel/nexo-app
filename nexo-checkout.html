@@ -1049,9 +1049,9 @@ function selectPayment(methodId, btnEl=null) {
                     <div class="form-group"><label class="form-label">Código SWIFT/BIC</label><input type="text" class="form-input" placeholder="ABCDEFGH" id="bankSwift"></div>
                 `;
             } else if (methodId === 'paypal') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo: se registrará el cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong> si Payoneer no está disponible.</p>`;
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo activado: cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong>.</p><p style="font-size:12px;font-weight:700;margin-top:8px;"><a href="https://www.paypal.com/paypalme/" target="_blank" rel="noopener">Abrir PayPal</a></p>`;
             } else if (methodId === 'payoneer') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Método recomendado: Payoneer. Cobro operativo: <strong>${NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com'}</strong>. La comisión NEXO queda controlada en el pedido.</p>`;
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Payoneer activado como método recomendado. Cobro operativo: <strong>${NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com'}</strong>. La comisión nexo queda controlada en el pedido.</p><p style="font-size:12px;font-weight:700;margin-top:8px;"><a href="https://www.payoneer.com/" target="_blank" rel="noopener">Abrir Payoneer</a></p>`;
             }
         }
 
@@ -1191,7 +1191,7 @@ const t = ctt();
             if(!orderData) return;
             const btnText = document.getElementById('confirmBuyText');
             const oldBtnText = btnText ? btnText.textContent : '';
-            if(btnText) btnText.textContent = 'Guardando pedido...';
+            if(btnText) btnText.textContent = 'Finalizando compra...';
 
             orderData.note = document.getElementById('customerNote').value.trim();
             orderData.timestamp = new Date().toISOString();
@@ -1236,16 +1236,38 @@ const t = ctt();
                 iueFiscal: +orderData.iue.toFixed(2)
             };
 
+            // NEXO PRO: la compra NO se frena si Supabase/CDN falla.
+            // Primero se confirma localmente, luego Supabase queda como respaldo remoto.
+            orderData.estado = 'compra_finalizada';
+            orderData.estado_pago = 'pendiente_confirmacion_operativa';
+            orderData.estado_compra = 'agente_1_activado';
+            orderData.estado_proveedor = 'busqueda_proveedores_activada';
+            orderData.providerFlow = {
+                active: true,
+                agent: 'AGENTE 1',
+                mode: 'automatico',
+                status: 'buscar_cotizar_comprar_en_proveedor',
+                providers: ['Amazon', 'Marketplace externo', 'Proveedor alternativo'],
+                instruction: 'Buscar el producto solicitado en varios proveedores, comparar costo/envio/ETA y preparar compra externa.'
+            };
+            orderData.paymentFlow = {
+                active: true,
+                preferred: 'payoneer',
+                fallback: 'paypal',
+                payoneerEmail: NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com',
+                paypalEmail: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
+                status: 'pago_activado_pendiente_confirmacion'
+            };
             try {
                 if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
                 const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
                 if (error) throw error;
                 orderData.supabase_id = data?.id || null;
-                orderData.estado = 'pendiente';
+                orderData.supabase_status = 'guardado';
             } catch (err) {
-                if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
-                alert('No se pudo guardar el pedido en Supabase: ' + (err.message || err));
-                return;
+                console.warn('NEXO: Supabase no disponible. Pedido continúa con respaldo local.', err);
+                orderData.supabase_status = 'pendiente_sincronizacion';
+                orderData.supabase_error = (err && err.message) ? err.message : String(err || 'Error Supabase');
             }
 
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
