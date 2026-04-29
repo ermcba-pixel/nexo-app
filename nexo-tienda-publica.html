@@ -222,19 +222,6 @@
             gap: 8px;
         }
 
-        .product-provider {
-            font-size: 11px;
-            color: var(--primary);
-            font-weight: 900;
-            background: rgba(122,199,66,0.12);
-            padding: 4px 8px;
-            border-radius: 999px;
-            display: inline-flex;
-            width: fit-content;
-            align-items: center;
-            gap: 4px;
-        }
-
         .product-name {
             font-weight: 900;
             color: var(--dark);
@@ -514,14 +501,15 @@
                     <label class="filter-label"><span id="catLabel">📁 Categoría</span></label>
                     <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
                         <option value="" id="catAll">Todas las categorías</option>
-                        <option value="electrónica" id="catElect">Electrónica</option>
+                        <option value="electronica" id="catElect">Electrónica</option>
                         <option value="accesorios" id="catAcc">Accesorios</option>
                         <option value="moda" id="catFashion">Moda</option>
-                        <option value="hogar">Hogar</option>
-                        <option value="oficina">Oficina</option>
-                        <option value="belleza">Belleza</option>
-                        <option value="deportes">Deportes</option>
-                        <option value="niños">Niños</option>
+                        <option value="calzados" id="catShoes">Calzados</option>
+                        <option value="hogar" id="catHome">Hogar</option>
+                        <option value="belleza" id="catBeauty">Belleza</option>
+                        <option value="oficina" id="catOffice">Oficina</option>
+                        <option value="deportes" id="catSports">Deportes</option>
+                        <option value="autos" id="catAutos">Autos</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -559,33 +547,33 @@
 
     <script>
         const products = [
-            { id: 1, name: 'Cable USB-C', provider: 'Amazon', providerLogo: '🟠', price: 2.99, shippingAmazon: 1.50, vendorFee: 0.50, category: 'accesorios', emoji: '🔌', stock: 50 },
-            { id: 2, name: 'Adaptador USB-C', provider: 'AliExpress', providerLogo: '🔴', price: 3.49, shippingAmazon: 1.20, vendorFee: 0.40, category: 'accesorios', emoji: '🔗', stock: 80 },
-            { id: 3, name: 'Protector de cable', provider: 'Temu', providerLogo: '🟧', price: 1.25, shippingAmazon: 0.90, vendorFee: 0.30, category: 'accesorios', emoji: '🧩', stock: 120 },
-            { id: 4, name: 'Funda iPhone básica', provider: 'AliExpress', providerLogo: '🔴', price: 4.95, shippingAmazon: 1.70, vendorFee: 0.60, category: 'accesorios', emoji: '📦', stock: 60 },
-            { id: 5, name: 'Lápiz táctil universal', provider: 'Amazon', providerLogo: '🟠', price: 4.75, shippingAmazon: 1.50, vendorFee: 0.50, category: 'oficina', emoji: '🖊️', stock: 45 },
-            { id: 6, name: 'Soporte celular plegable', provider: 'Temu', providerLogo: '🟧', price: 3.99, shippingAmazon: 1.30, vendorFee: 0.50, category: 'accesorios', emoji: '📱', stock: 70 },
-            { id: 7, name: 'Paño microfibra', provider: 'Amazon', providerLogo: '🟠', price: 2.50, shippingAmazon: 1.00, vendorFee: 0.30, category: 'hogar', emoji: '🧽', stock: 90 },
-            { id: 8, name: 'Organizador de cables', provider: 'AliExpress', providerLogo: '🔴', price: 4.20, shippingAmazon: 1.20, vendorFee: 0.45, category: 'hogar', emoji: '🧷', stock: 65 },
-            { id: 9, name: 'Mini luz LED USB', provider: 'Amazon', providerLogo: '🟠', price: 4.99, shippingAmazon: 1.40, vendorFee: 0.55, category: 'electrónica', emoji: '💡', stock: 40 },
-            { id: 10, name: 'Sticker protector teclado', provider: 'Temu', providerLogo: '🟧', price: 2.75, shippingAmazon: 1.00, vendorFee: 0.35, category: 'oficina', emoji: '⌨️', stock: 75 },
-            { id: 11, name: 'Audífonos Inalámbricos', provider: 'Amazon', providerLogo: '🟠', price: 29.00, shippingAmazon: 6.00, vendorFee: 2.00, category: 'electrónica', emoji: '🎧', stock: 14 },
-            { id: 12, name: 'Mochila Gamer', provider: 'Amazon', providerLogo: '🟠', price: 79.00, shippingAmazon: 11.00, vendorFee: 4.00, category: 'accesorios', emoji: '🎒', stock: 15 },
-            { id: 13, name: 'Reloj Deportivo', provider: 'eBay', providerLogo: '🔵', price: 49.00, shippingAmazon: 8.00, vendorFee: 3.00, category: 'deportes', emoji: '⌚', stock: 12 },
-            { id: 14, name: 'Sudadera NEXO', provider: 'Proveedor externo', providerLogo: '🏪', price: 49.00, shippingAmazon: 9.00, vendorFee: 3.00, category: 'moda', emoji: '👕', stock: 20 },
-            { id: 15, name: 'Gafas de Sol', provider: 'Amazon', providerLogo: '🟠', price: 19.00, shippingAmazon: 4.00, vendorFee: 1.50, category: 'moda', emoji: '😎', stock: 18 },
-            { id: 16, name: 'Termo deportivo', provider: 'AliExpress', providerLogo: '🔴', price: 12.90, shippingAmazon: 3.50, vendorFee: 1.20, category: 'deportes', emoji: '🥤', stock: 35 },
-            { id: 17, name: 'Mouse inalámbrico', provider: 'Amazon', providerLogo: '🟠', price: 14.99, shippingAmazon: 4.00, vendorFee: 1.50, category: 'electrónica', emoji: '🖱️', stock: 32 },
-            { id: 18, name: 'Cargador pared USB', provider: 'Amazon', providerLogo: '🟠', price: 9.99, shippingAmazon: 3.00, vendorFee: 1.00, category: 'electrónica', emoji: '🔋', stock: 55 },
-            { id: 19, name: 'Set maquillaje viaje', provider: 'Temu', providerLogo: '🟧', price: 7.50, shippingAmazon: 2.80, vendorFee: 0.90, category: 'belleza', emoji: '💄', stock: 38 },
-            { id: 20, name: 'Juguete educativo', provider: 'AliExpress', providerLogo: '🔴', price: 6.99, shippingAmazon: 2.50, vendorFee: 0.80, category: 'niños', emoji: '🧸', stock: 42 }
+            { id: 1, name: 'Cable USB-C', price: 2.99, shippingAmazon: 1.20, vendorFee: 0.40, category: 'accesorios', emoji: '🔌', stock: 50, provider:'Amazon', providerLogo:'🟠', aliases:'cable cargador usb tipo c electronica accesorios' },
+            { id: 2, name: 'Funda iPhone', price: 3.95, shippingAmazon: 1.10, vendorFee: 0.35, category: 'accesorios', emoji: '📱', stock: 42, provider:'AliExpress', providerLogo:'🔴', aliases:'case carcasa protector iphone celular accesorios' },
+            { id: 3, name: 'Protector de pantalla', price: 1.49, shippingAmazon: 0.80, vendorFee: 0.20, category: 'accesorios', emoji: '🛡️', stock: 80, provider:'Temu', providerLogo:'🟧', aliases:'vidrio templado mica celular pantalla' },
+            { id: 4, name: 'Cordones deportivos', price: 1.99, shippingAmazon: 0.70, vendorFee: 0.20, category: 'calzados', emoji: '👟', stock: 60, provider:'Shein', providerLogo:'⚫', aliases:'calzado calzados zapatos zapatillas tenis cordones deportivo' },
+            { id: 5, name: 'Plantillas gel', price: 4.75, shippingAmazon: 1.30, vendorFee: 0.45, category: 'calzados', emoji: '👞', stock: 35, provider:'Amazon', providerLogo:'🟠', aliases:'calzado calzados zapatos plantillas gel comodidad' },
+            { id: 6, name: 'Llavero metálico', price: 2.50, shippingAmazon: 0.90, vendorFee: 0.25, category: 'accesorios', emoji: '🔑', stock: 70, provider:'Marketplace', providerLogo:'🏪', aliases:'llavero accesorios regalo' },
+            { id: 7, name: 'Bolígrafo premium', price: 1.20, shippingAmazon: 0.50, vendorFee: 0.15, category: 'oficina', emoji: '🖊️', stock: 100, provider:'CJ Dropshipping', providerLogo:'🔵', aliases:'lapicero boligrafo oficina escritura' },
+            { id: 8, name: 'Mouse pad', price: 4.99, shippingAmazon: 1.20, vendorFee: 0.40, category: 'oficina', emoji: '🖱️', stock: 45, provider:'Amazon', providerLogo:'🟠', aliases:'alfombrilla mouse escritorio oficina gamer' },
+            { id: 9, name: 'Calcetines deportivos', price: 3.49, shippingAmazon: 1.00, vendorFee: 0.30, category: 'moda', emoji: '🧦', stock: 55, provider:'Shein', providerLogo:'⚫', aliases:'calzado calzados medias calcetines deportes ropa' },
+            { id: 10, name: 'Cepillo de limpieza', price: 2.25, shippingAmazon: 0.90, vendorFee: 0.25, category: 'hogar', emoji: '🧹', stock: 65, provider:'Temu', providerLogo:'🟧', aliases:'hogar limpieza cocina bano cepillo' },
+            { id: 11, name: 'Organizador cables', price: 3.10, shippingAmazon: 0.90, vendorFee: 0.30, category: 'hogar', emoji: '🧰', stock: 40, provider:'AliExpress', providerLogo:'🔴', aliases:'cables organizador oficina hogar accesorios' },
+            { id: 12, name: 'Botella deportiva', price: 4.80, shippingAmazon: 1.40, vendorFee: 0.45, category: 'deportes', emoji: '🥤', stock: 32, provider:'Amazon', providerLogo:'🟠', aliases:'deporte botella agua gym gimnasio' },
+            { id: 13, name: 'Toalla microfibra', price: 4.60, shippingAmazon: 1.20, vendorFee: 0.40, category: 'deportes', emoji: '🏋️', stock: 30, provider:'CJ Dropshipping', providerLogo:'🔵', aliases:'toalla deporte gimnasio viaje' },
+            { id: 14, name: 'Sticker decorativo', price: 0.99, shippingAmazon: 0.35, vendorFee: 0.10, category: 'hogar', emoji: '🏷️', stock: 120, provider:'Temu', providerLogo:'🟧', aliases:'pegatina sticker decoracion hogar' },
+            { id: 15, name: 'Pulsera simple', price: 2.80, shippingAmazon: 0.90, vendorFee: 0.25, category: 'moda', emoji: '📿', stock: 48, provider:'Shein', providerLogo:'⚫', aliases:'pulsera moda accesorio bisuteria' },
+            { id: 16, name: 'Soporte celular', price: 4.30, shippingAmazon: 1.00, vendorFee: 0.35, category: 'electronica', emoji: '📲', stock: 38, provider:'AliExpress', providerLogo:'🔴', aliases:'soporte celular telefono auto escritorio' },
+            { id: 17, name: 'Cargador auto USB', price: 4.95, shippingAmazon: 1.20, vendorFee: 0.45, category: 'autos', emoji: '🚗', stock: 25, provider:'Amazon', providerLogo:'🟠', aliases:'auto carro cargador usb coche' },
+            { id: 18, name: 'Esponja maquillaje', price: 1.75, shippingAmazon: 0.60, vendorFee: 0.20, category: 'belleza', emoji: '💄', stock: 90, provider:'Shein', providerLogo:'⚫', aliases:'belleza maquillaje esponja cosmetico' },
+            { id: 19, name: 'Peine portátil', price: 1.10, shippingAmazon: 0.45, vendorFee: 0.10, category: 'belleza', emoji: '💇', stock: 85, provider:'Marketplace', providerLogo:'🏪', aliases:'peine belleza cabello pelo' },
+            { id: 20, name: 'Audífonos básicos', price: 4.99, shippingAmazon: 1.40, vendorFee: 0.45, category: 'electronica', emoji: '🎧', stock: 22, provider:'CJ Dropshipping', providerLogo:'🔵', aliases:'audifonos auriculares earphones musica electronica' }
         ];
 
         
 const storeI18n={
  es:{title:'Tienda NEXO',subtitle:'20 Productos multi-proveedor • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío (Amazon/Marketplace):',sumVendor:'Gastos de la empresa vendedora:',sumCom:'Comisión NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
- en:{title:'NEXO Store',subtitle:'20 multi-supplier products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
- pt:{title:'Loja NEXO',subtitle:'20 produtos multi-fornecedor • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
+ en:{title:'NEXO Store',subtitle:'12 Premium Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
+ pt:{title:'Loja NEXO',subtitle:'12 Produtos Premium • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
  it:{title:'Negozio NEXO',subtitle:'12 Prodotti Premium • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
  fr:{title:'Boutique NEXO',subtitle:'12 Produits Premium • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
 };
@@ -598,16 +586,15 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
-            const list = (productsToShow || []).slice(0, 20);
-            if (!list.length) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#6f8182;font-weight:900;padding:35px;">🤖 Agente 1 no encontró coincidencias para ese filtro. Pruebe otro precio, categoría o nombre.</div>`;
+            if(!productsToShow || productsToShow.length === 0){
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#6f8182;font-weight:900;padding:50px 10px;">🤖 Agente 1 no encontró coincidencias para ese filtro. Pruebe otro precio, categoría o nombre.</div>`;
                 return;
             }
-            grid.innerHTML = list.map(p => `
+            grid.innerHTML = productsToShow.slice(0,20).map(p => `
                 <div class="product-card">
                     <div class="product-image">${p.emoji}</div>
                     <div class="product-info">
-                        <div class="product-provider">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
+                        <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
                         <div class="product-name">${p.name}</div>
                         <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
                         <div class="product-price">$${Number(p.price).toFixed(2)}</div>
@@ -620,20 +607,32 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             `).join('');
         }
 
+        function normalizeText(v){
+            return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+        }
+
         function filterProducts() {
-            const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const search = normalizeText(document.getElementById('searchInput').value);
             const category = document.getElementById('categoryFilter').value;
-            const rawPrice = (document.getElementById('priceFilter').value || '').trim();
-            const maxPrice = rawPrice === '' ? Infinity : Number(rawPrice);
-
+            const priceValue = document.getElementById('priceFilter').value;
+            const maxPrice = priceValue === '' ? Infinity : Number(priceValue);
             const filtered = products
-                .filter(p => Number(p.price) >= 0.0001)
-                .filter(p => !search || `${p.name} ${p.provider || ''} ${p.category || ''}`.toLowerCase().includes(search))
-                .filter(p => category === '' || p.category === category)
-                .filter(p => !Number.isFinite(maxPrice) || Number(p.price) <= maxPrice)
-                .sort((a,b) => Number(a.price) - Number(b.price))
-                .slice(0,20);
-
+              .filter(p => Number(p.price) >= 0.0001)
+              .filter(p => category === '' || p.category === category)
+              .filter(p => Number(p.price) <= maxPrice)
+              .map(p => {
+                const hay = normalizeText([p.name, p.category, p.provider, p.aliases].join(' '));
+                let score = 0;
+                if(!search) score = 1;
+                else {
+                  const words = search.split(/\s+/).filter(Boolean);
+                  score = words.reduce((s,w)=> s + (hay.includes(w) ? 1 : 0), 0);
+                }
+                return { ...p, _score: score };
+              })
+              .filter(p => !search || p._score > 0)
+              .sort((a,b)=> (b._score - a._score) || (a.price - b.price))
+              .slice(0,20);
             renderProducts(filtered);
         }
 
@@ -677,7 +676,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
             container.innerHTML = cart.map(item => `
                 <div class="cart-item">
-                    <div class="cart-item-name"><span style="display:block;font-size:11px;color:#4A6B6D;font-weight:900;margin-bottom:4px;">${item.providerLogo || '🏪'} ${item.provider || 'Proveedor externo'}</span>${item.emoji} ${item.name}</div>
+                    <div class="cart-item-name"><div style="font-size:10px;color:#4A6B6D;font-weight:900;margin-bottom:4px;">${item.providerLogo || '🏪'} ${item.provider || 'Proveedor externo'}</div>${item.emoji} ${item.name}</div>
                     <div class="cart-item-qty">
                         <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
                         <span>${item.quantity}</span>
@@ -753,7 +752,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         document.addEventListener('DOMContentLoaded', () => {
             applyStoreLanguage();
-            filterProducts();
+            renderProducts();
             updateCartCount();
         });
 

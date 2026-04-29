@@ -165,16 +165,6 @@
             text-align: center;
         }
 
-        .cart-item-provider {
-            font-size: 10px;
-            color: var(--primary);
-            font-weight: 900;
-            background: rgba(122,199,66,0.12);
-            padding: 4px 6px;
-            border-radius: 999px;
-            width: fit-content;
-        }
-
         .cart-item-name {
             font-size: 12px;
             font-weight: 700;
@@ -688,7 +678,7 @@
     </div>
 
     
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
@@ -697,14 +687,13 @@ const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
 let nexoSupabase = null;
 function initNexoSupabase(){
   if (nexoSupabase) return nexoSupabase;
-  if (!window.supabase || !window.supabase.createClient) { console.warn('Supabase no cargó. Continúa con respaldo local.'); return null; }
+  if (!window.supabase || !window.supabase.createClient) throw new Error('Librería Supabase no cargada. Revise conexión/CDN.');
   nexoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   window.nexoSupabase = nexoSupabase;
   return nexoSupabase;
 }
 window.nexoSavePedidoToSupabase = async function(orderData){
   const client = initNexoSupabase();
-  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
   const items = Array.isArray(orderData.items) ? orderData.items : [];
   const firstItem = items[0] || {};
   const customer = orderData.customer || {};
@@ -973,7 +962,10 @@ function applyCheckoutLanguage(){
 
         // MÉTODOS DE PAGO (SIN CRIPTOMONEDAS)
         const paymentMethods = [
-            { id: 'pago_seguro', name: '🔒 Pago seguro internacional', icon: '🔒' }
+            { id: 'payoneer', name: '💼 Payoneer', icon: '💼' },
+            { id: 'paypal', name: '🅿️ PayPal', icon: '🅿️' },
+            { id: 'card', name: '💳 Tarjeta de Crédito/Débito', icon: '💳' },
+            { id: 'bank', name: '🏦 Transferencia Bancaria', icon: '🏦' }
         ];
 
         let selectedPayment = null;
@@ -1032,27 +1024,36 @@ function selectPayment(methodId, btnEl=null) {
       if(found) found.classList.add('active');
     }
     const details = document.getElementById('paymentDetails');
-    const box = (title, text) => `<div style="background:#fff;border:2px solid #7AC742;border-radius:12px;padding:14px;color:#2D3E3F;font-weight:800;line-height:1.5;margin-bottom:14px;">${title}<br><span style="font-size:12px;font-weight:700;color:#4A6B6D;">${text}</span></div>`;
 
-    if (methodId === 'card') {
-        details.innerHTML = box('💳 Tarjeta seleccionada', 'Al confirmar se abrirá el procesador seguro disponible.') + `
-            <div class="form-group">
-                <label class="form-label">Número de Tarjeta</label>
-                <input type="text" class="form-input" placeholder="1234 5678 8765 4567" id="cardNumber" inputmode="numeric" maxlength="19">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div class="form-group"><label class="form-label">MM/AA</label><input type="text" class="form-input" placeholder="11/32" id="cardExpiry" inputmode="numeric" maxlength="5"></div>
-                <div class="form-group"><label class="form-label">CVV</label><input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4"></div>
-            </div>`;
-        attachCardFormatters();
-    } else if (methodId === 'bank') {
-        details.innerHTML = box('🏦 Transferencia bancaria seleccionada', 'Se registrará la orden y se enviarán instrucciones bancarias operativas al finalizar.');
-    } else if (methodId === 'paypal') {
-        details.innerHTML = box('🅿️ PayPal seleccionado', 'Al confirmar la compra se abrirá PayPal para completar el pago real.');
-    } else if (methodId === 'payoneer') {
-        details.innerHTML = box('💼 Payoneer seleccionado', 'Método recomendado. La orden queda registrada y preparada para cobro operativo Payoneer.');
-    }
-}
+            if (methodId === 'card') {
+                details.innerHTML = `
+                    <div class="form-group">
+                        <label class="form-label">Número de Tarjeta</label>
+                        <input type="text" class="form-input" placeholder="1234 5678 8765 4567" id="cardNumber" inputmode="numeric" maxlength="19">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">MM/AA</label>
+                            <input type="text" class="form-input" placeholder="11/32" id="cardExpiry" inputmode="numeric" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
+                        </div>
+                    </div>
+                `;
+                attachCardFormatters();
+            } else if (methodId === 'bank') {
+                details.innerHTML = `
+                    <div class="form-group"><label class="form-label">Número de Cuenta</label><input type="text" class="form-input" placeholder="000123456789" id="bankAccount"></div>
+                    <div class="form-group"><label class="form-label">Código SWIFT/BIC</label><input type="text" class="form-input" placeholder="ABCDEFGH" id="bankSwift"></div>
+                `;
+            } else if (methodId === 'paypal') {
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo: se registrará el cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong> si Payoneer no está disponible.</p>`;
+            } else if (methodId === 'payoneer') {
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Método recomendado: Payoneer. Cobro operativo: <strong>${NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com'}</strong>. La comisión NEXO queda controlada en el pedido.</p>`;
+            }
+        }
 
         // CARGAR CARRITO
         function loadCart() {
@@ -1073,12 +1074,9 @@ function selectPayment(methodId, btnEl=null) {
                 item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
                 item.shippingAmazon = Number(item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
                 item.vendorFee = Number(item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
-                item.provider = item.provider || item.proveedor || item.vendor || 'Proveedor externo';
-                item.providerLogo = item.providerLogo || '🏪';
                 return `
                 <div class="cart-item">
                     <div class="cart-item-icon">${item.icon}</div>
-                    <div class="cart-item-provider">${item.providerLogo || '🏪'} ${item.provider || item.proveedor || item.vendor || 'Proveedor externo'}</div>
                     <div class="cart-item-name">${item.name}</div>
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
                     <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
@@ -1157,7 +1155,7 @@ function openConfirmationModal() {
             const zipCode = document.getElementById('zipCode').value.trim() || '0000';
             const phoneCode = document.getElementById('phoneCode').value.trim() || '';
             const phoneNumber = document.getElementById('phoneNumber').value.trim() || '70000000';
-            if (!selectedPayment) selectedPayment = 'pago_seguro';
+            if (!selectedPayment) selectedPayment = 'payoneer';
             if(country && !country.value) country.value='';
             const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
 
@@ -1178,10 +1176,9 @@ function openConfirmationModal() {
             
 const t = ctt();
             const paymentMap = {
-              pago_seguro:{es:'Pago seguro internacional',en:'Secure international payment',pt:'Pagamento internacional seguro',it:'Pagamento internazionale sicuro',fr:'Paiement international sécurisé'},
-              card:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
+              paypal:{es:'PayPal',en:'PayPal',pt:'PayPal',it:'PayPal',fr:'PayPal'},
+              payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'},
               tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
-              bank:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'},
               transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}
             };
             const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
@@ -1190,40 +1187,11 @@ const t = ctt();
             applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
-
-        async function startNexoPagoSeguro(orderData){
-            const pedidoId = orderData.supabase_id;
-            if(!pedidoId){
-                throw new Error('El pedido no tiene ID de Supabase. No se puede iniciar cobro real.');
-            }
-            const res = await fetch('https://ujqbbnipftlzytdankwp.supabase.co/functions/v1/crear-pago-paypal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    pedido_id: pedidoId,
-                    total_cliente_usd: orderData.total,
-                    moneda: 'USD',
-                    descripcion: `Pedido NEXO ${pedidoId}`,
-                    cliente_email: orderData.email,
-                    success_url: `${window.location.origin}/nexo-confirmacion.html?pedido_id=${pedidoId}&pago=aprobado`,
-                    cancel_url: `${window.location.origin}/nexo-checkout.html?pedido_id=${pedidoId}&pago=cancelado`
-                })
-            });
-            const data = await res.json().catch(()=>({}));
-            if(!res.ok || !data.ok || !data.approval_url){
-                throw new Error(data.error || 'No se pudo crear el pago seguro.');
-            }
-            orderData.paypal_order_id = data.paypal_order_id;
-            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            localStorage.setItem('nexoPendingOrder', JSON.stringify(orderData));
-            window.location.href = data.approval_url;
-        }
-
         async function submitPurchase(){
             if(!orderData) return;
             const btnText = document.getElementById('confirmBuyText');
             const oldBtnText = btnText ? btnText.textContent : '';
-            if(btnText) btnText.textContent = 'Finalizando compra...';
+            if(btnText) btnText.textContent = 'Guardando pedido...';
 
             orderData.note = document.getElementById('customerNote').value.trim();
             orderData.timestamp = new Date().toISOString();
@@ -1268,38 +1236,16 @@ const t = ctt();
                 iueFiscal: +orderData.iue.toFixed(2)
             };
 
-            // NEXO: la compra NO se frena si Supabase/CDN falla.
-            // Primero se confirma localmente, luego Supabase queda como respaldo remoto.
-            orderData.estado = 'compra_finalizada';
-            orderData.estado_pago = 'pendiente_confirmacion_operativa';
-            orderData.estado_compra = 'agente_1_activado';
-            orderData.estado_proveedor = 'busqueda_proveedores_activada';
-            orderData.providerFlow = {
-                active: true,
-                agent: 'AGENTE 1',
-                mode: 'automatico',
-                status: 'buscar_cotizar_comprar_en_proveedor',
-                providers: ['Amazon', 'Marketplace externo', 'Proveedor alternativo'],
-                instruction: 'Buscar el producto solicitado en varios proveedores, comparar costo/envio/ETA y preparar compra externa.'
-            };
-            orderData.paymentFlow = {
-                active: true,
-                preferred: 'payoneer',
-                fallback: 'paypal',
-                payoneerEmail: NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com',
-                paypalEmail: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
-                status: 'pago_activado_pendiente_confirmacion'
-            };
             try {
                 if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
                 const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
                 if (error) throw error;
                 orderData.supabase_id = data?.id || null;
-                orderData.supabase_status = 'guardado';
+                orderData.estado = 'pendiente';
             } catch (err) {
-                console.warn('NEXO: Supabase no disponible. Pedido continúa con respaldo local.', err);
-                orderData.supabase_status = 'pendiente_sincronizacion';
-                orderData.supabase_error = (err && err.message) ? err.message : String(err || 'Error Supabase');
+                if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
+                alert('No se pudo guardar el pedido en Supabase: ' + (err.message || err));
+                return;
             }
 
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
@@ -1322,18 +1268,8 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim()
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
-
-            // NEXO: inicia cobro real. El Agente 1 se activa desde webhook-paypal al confirmar pago.
-            try {
-                if(btnText) btnText.textContent = 'Abriendo pago seguro...';
-                await startNexoPagoSeguro(orderData);
-                return;
-            } catch (payErr) {
-                console.error('NEXO PAGO SEGURO:', payErr);
-                if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
-                alert('No se pudo abrir el pago seguro: ' + (payErr.message || payErr));
-                return;
-            }
+            localStorage.removeItem('nexoCart');
+            window.location.href = 'nexo-confirmacion.html';
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
@@ -1408,7 +1344,7 @@ function prefillClientData(){
         prefillClientData();
         refreshDeliveryEstimate();
         setTimeout(()=>{prefillClientData();},100);
-        setTimeout(()=>{ if(!selectedPayment) selectPayment('pago_seguro'); }, 50);
+        setTimeout(()=>{ if(!selectedPayment) selectPayment('payoneer'); }, 50);
         const cpBtn=document.getElementById('completePurchaseBtn') || document.querySelector('.checkout-btn'); if(cpBtn){ cpBtn.onclick=function(e){ if(e) e.preventDefault(); openConfirmationModal(); return false; }; }
 window.addEventListener('DOMContentLoaded', ()=>{ try{ applyCheckoutLanguage(); refreshDeliveryEstimate(); }catch(e){} });
     
