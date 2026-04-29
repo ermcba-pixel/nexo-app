@@ -270,59 +270,6 @@
             cursor: not-allowed;
         }
 
-        .provider-strip {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 4px;
-        }
-        .provider-pill {
-            background: rgba(74,107,109,0.10);
-            color: var(--primary);
-            border: 1px solid rgba(74,107,109,0.18);
-            border-radius: 999px;
-            padding: 4px 7px;
-            font-size: 10px;
-            font-weight: 800;
-        }
-        .agent-status {
-            margin: -18px 0 24px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: #f2fbef;
-            border: 2px solid rgba(122,199,66,.35);
-            color: var(--dark);
-            font-size: 13px;
-            font-weight: 800;
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            align-items: center;
-        }
-        .agent-status strong { color: var(--accent); }
-        .product-source {
-            color: var(--primary);
-            font-size: 11px;
-            font-weight: 900;
-            line-height: 1.35;
-        }
-        .product-meta {
-            font-size: 11px;
-            color: #667;
-            line-height: 1.45;
-        }
-        .agent-request-box {
-            background: #fff7ef;
-            border: 2px solid rgba(243,156,18,.30);
-            border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 22px;
-            color: #855000;
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-
         /* ========== CART MODAL ========== */
         .modal {
             display: none;
@@ -531,7 +478,7 @@
                 </div>
                 <div class="header-title">
                     <h1 id="storeTitle">Tienda NEXO</h1>
-                    <p id="storeSubtitle">Productos multi-proveedor • Agente 1 activo • Envíos Internacionales</p>
+                    <p id="storeSubtitle">12 Productos Premium • Envíos Internacionales</p>
                 </div>
             </div>
             <div class="header-right">
@@ -554,9 +501,9 @@
                     <label class="filter-label"><span id="catLabel">📁 Categoría</span></label>
                     <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
                         <option value="" id="catAll">Todas las categorías</option>
-                        <option value="electrónica" id="catElect">Electrónica</option>
-                        <option value="accesorios" id="catAcc">Accesorios</option>
-                        <option value="moda" id="catFashion">Moda</option>
+                        <option value="" id="catElect">Electrónica</option>
+                        <option value="" id="catAcc">Accesorios</option>
+                        <option value="" id="catFashion">Moda</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -564,12 +511,6 @@
                     <input type="number" class="filter-input" id="priceFilter" placeholder="USD" min="0" onchange="filterProducts()">
                 </div>
             </div>
-
-            <div class="agent-status">
-                <span>🤖 <strong>Agente 1 activado:</strong> búsqueda automática por varios proveedores, selección de mejor opción y preparación del pedido para checkout.</span>
-                <span id="providerCounter">0 proveedores activos</span>
-            </div>
-            <div class="agent-request-box" id="agentRequestBox">Escriba lo que necesita. La tienda mostrará coincidencias del catálogo y alternativas de varios proveedores.</div>
 
             <!-- PRODUCTOS -->
             <div class="products-grid" id="productsGrid"></div>
@@ -600,29 +541,27 @@
 
     <script>
         const products = [
-            { id: 1, name: 'Cable USB-C', price: 29, shippingAmazon: 6, vendorFee: 2, category: 'accesorios', emoji: '🔌', stock: 50, provider:'Amazon', marketplace:'Amazon US', eta:'8-12 días', providerUrl:'https://www.amazon.com/s?k=usb+c+cable', alternatives:['Amazon','Walmart','eBay'] },
-            { id: 2, name: 'Cable USB-C reforzado', price: 24, shippingAmazon: 7, vendorFee: 2, category: 'accesorios', emoji: '🔌', stock: 42, provider:'Walmart', marketplace:'Marketplace externo', eta:'10-14 días', providerUrl:'https://www.walmart.com/search?q=usb+c+cable', alternatives:['Walmart','Amazon','AliExpress'] },
-            { id: 3, name: 'Cable USB-C carga rápida 100W', price: 34, shippingAmazon: 8, vendorFee: 3, category: 'accesorios', emoji: '⚡', stock: 30, provider:'AliExpress', marketplace:'Proveedor internacional', eta:'12-18 días', providerUrl:'https://www.aliexpress.com/wholesale?SearchText=usb+c+cable+100w', alternatives:['AliExpress','Amazon','eBay'] },
-            { id: 4, name: 'AirPods Pro', price: 249, shippingAmazon: 24, vendorFee: 12, category: 'electrónica', emoji: '🎧', stock: 8, provider:'Amazon', marketplace:'Amazon US', eta:'8-12 días', providerUrl:'https://www.amazon.com/s?k=airpods+pro', alternatives:['Amazon','Best Buy','eBay'] },
-            { id: 5, name: 'Audífonos inalámbricos premium', price: 129, shippingAmazon: 13, vendorFee: 5, category: 'electrónica', emoji: '🎧', stock: 14, provider:'Best Buy', marketplace:'Proveedor externo', eta:'9-13 días', providerUrl:'https://www.bestbuy.com/site/searchpage.jsp?st=wireless+headphones', alternatives:['Best Buy','Amazon','Walmart'] },
-            { id: 6, name: 'iPad Air 5', price: 599, shippingAmazon: 35, vendorFee: 18, category: 'electrónica', emoji: '📱', stock: 5, provider:'Amazon', marketplace:'Amazon US', eta:'8-12 días', providerUrl:'https://www.amazon.com/s?k=ipad+air+5', alternatives:['Amazon','Best Buy','Apple'] },
-            { id: 7, name: 'MacBook Air', price: 1299, shippingAmazon: 48, vendorFee: 26, category: 'electrónica', emoji: '💻', stock: 3, provider:'Apple / Amazon', marketplace:'Proveedor oficial/marketplace', eta:'8-15 días', providerUrl:'https://www.amazon.com/s?k=macbook+air', alternatives:['Apple','Amazon','Best Buy'] },
-            { id: 8, name: 'Apple Watch', price: 399, shippingAmazon: 22, vendorFee: 9, category: 'electrónica', emoji: '⌚', stock: 12, provider:'Best Buy', marketplace:'Proveedor externo', eta:'9-13 días', providerUrl:'https://www.bestbuy.com/site/searchpage.jsp?st=apple+watch', alternatives:['Best Buy','Amazon','Apple'] },
-            { id: 9, name: 'iPhone 15', price: 999, shippingAmazon: 41, vendorFee: 21, category: 'electrónica', emoji: '📲', stock: 7, provider:'Amazon Renewed / Apple', marketplace:'Marketplace externo', eta:'8-15 días', providerUrl:'https://www.amazon.com/s?k=iphone+15', alternatives:['Apple','Amazon','Best Buy'] },
-            { id: 10, name: 'Mochila Gamer', price: 79, shippingAmazon: 11, vendorFee: 4, category: 'accesorios', emoji: '🎒', stock: 15, provider:'Amazon', marketplace:'Amazon US', eta:'8-12 días', providerUrl:'https://www.amazon.com/s?k=gamer+backpack', alternatives:['Amazon','Walmart','eBay'] },
-            { id: 11, name: 'Funda iPhone', price: 39, shippingAmazon: 7, vendorFee: 3, category: 'accesorios', emoji: '📦', stock: 25, provider:'Walmart', marketplace:'Marketplace externo', eta:'10-14 días', providerUrl:'https://www.walmart.com/search?q=iphone+case', alternatives:['Walmart','Amazon','AliExpress'] },
-            { id: 12, name: 'Sudadera NEXO', price: 49, shippingAmazon: 9, vendorFee: 3, category: 'moda', emoji: '👕', stock: 20, provider:'Proveedor textil', marketplace:'Proveedor NEXO', eta:'10-16 días', providerUrl:'#', alternatives:['Proveedor textil','Marketplace local'] },
-            { id: 13, name: 'Gafas de Sol', price: 149, shippingAmazon: 14, vendorFee: 5, category: 'moda', emoji: '😎', stock: 18, provider:'eBay', marketplace:'Marketplace externo', eta:'10-16 días', providerUrl:'https://www.ebay.com/sch/i.html?_nkw=sunglasses', alternatives:['eBay','Amazon','Walmart'] },
-            { id: 14, name: 'Reloj Deportivo', price: 189, shippingAmazon: 17, vendorFee: 7, category: 'electrónica', emoji: '⌚', stock: 10, provider:'Amazon', marketplace:'Amazon US', eta:'8-12 días', providerUrl:'https://www.amazon.com/s?k=sports+watch', alternatives:['Amazon','Best Buy','Walmart'] }
+            { id: 1, name: 'AirPods Pro', price: 249, shippingAmazon: 24, vendorFee: 12, category: 'electrónica', emoji: '🎧', stock: 8 },
+            { id: 2, name: 'iPad Air 5', price: 599, shippingAmazon: 35, vendorFee: 18, category: 'electrónica', emoji: '📱', stock: 5 },
+            { id: 3, name: 'MacBook Air', price: 1299, shippingAmazon: 48, vendorFee: 26, category: 'electrónica', emoji: '💻', stock: 3 },
+            { id: 4, name: 'Apple Watch', price: 399, shippingAmazon: 22, vendorFee: 9, category: 'electrónica', emoji: '⌚', stock: 12 },
+            { id: 5, name: 'iPhone 15', price: 999, shippingAmazon: 41, vendorFee: 21, category: 'electrónica', emoji: '📲', stock: 7 },
+            { id: 6, name: 'Mochila Gamer', price: 79, shippingAmazon: 11, vendorFee: 4, category: 'accesorios', emoji: '🎒', stock: 15 },
+            { id: 7, name: 'Cable USB-C', price: 29, shippingAmazon: 6, vendorFee: 2, category: 'accesorios', emoji: '🔌', stock: 50 },
+            { id: 8, name: 'Funda iPhone', price: 39, shippingAmazon: 7, vendorFee: 3, category: 'accesorios', emoji: '📦', stock: 25 },
+            { id: 9, name: 'Sudadera NEXO', price: 49, shippingAmazon: 9, vendorFee: 3, category: 'moda', emoji: '👕', stock: 20 },
+            { id: 10, name: 'Gafas de Sol', price: 149, shippingAmazon: 14, vendorFee: 5, category: 'moda', emoji: '😎', stock: 18 },
+            { id: 11, name: 'Reloj Deportivo', price: 189, shippingAmazon: 17, vendorFee: 7, category: 'electrónica', emoji: '⌚', stock: 10 },
+            { id: 12, name: 'Audífonos Inalámbricos', price: 129, shippingAmazon: 13, vendorFee: 5, category: 'electrónica', emoji: '🎧', stock: 14 }
         ];
 
         
 const storeI18n={
- es:{title:'Tienda NEXO',subtitle:'Productos multi-proveedor • Agente 1 activo • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío (Amazon/Marketplace):',sumVendor:'Gastos de la empresa vendedora:',sumCom:'Comisión NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
- en:{title:'NEXO Store',subtitle:'Multi-provider products • Agent 1 active • International shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
- pt:{title:'Loja NEXO',subtitle:'Produtos multi-fornecedor • Agente 1 ativo • Envio internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
- it:{title:'Negozio NEXO',subtitle:'Prodotti multi-fornitore • Agente 1 attivo • Spedizione internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
- fr:{title:'Boutique NEXO',subtitle:'Produits multi-fournisseurs • Agent 1 actif • Livraison internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
+ es:{title:'Tienda NEXO',subtitle:'12 Productos Premium • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío (Amazon/Marketplace):',sumVendor:'Gastos de la empresa vendedora:',sumCom:'Comisión NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
+ en:{title:'NEXO Store',subtitle:'12 Premium Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
+ pt:{title:'Loja NEXO',subtitle:'12 Produtos Premium • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
+ it:{title:'Negozio NEXO',subtitle:'12 Prodotti Premium • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
+ fr:{title:'Boutique NEXO',subtitle:'12 Produits Premium • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
 };
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
@@ -633,26 +572,16 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
-            const providers = [...new Set(productsToShow.flatMap(p => p.alternatives || [p.provider]).filter(Boolean))];
-            const pc = document.getElementById('providerCounter');
-            if(pc) pc.textContent = `${providers.length} proveedores activos`;
-            if(!productsToShow.length){
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:35px;color:#6f8182;font-weight:800;">🤖 Agente 1 no encontró coincidencia exacta. Pruebe con otro nombre: cable, iPhone, audífonos, mochila, reloj, funda, gafas.</div>`;
-                return;
-            }
             grid.innerHTML = productsToShow.map(p => `
                 <div class="product-card">
                     <div class="product-image">${p.emoji}</div>
                     <div class="product-info">
                         <div class="product-name">${p.name}</div>
-                        <div class="product-source">Proveedor principal: ${p.provider}</div>
-                        <div class="provider-strip">${(p.alternatives || [p.provider]).map(a=>`<span class="provider-pill">${a}</span>`).join('')}</div>
                         <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
                         <div class="product-price">$${p.price.toFixed(2)}</div>
-                        <div class="product-meta">Envío externo: $${(p.shippingAmazon||0).toFixed(2)} · Vendedor: $${(p.vendorFee||0).toFixed(2)}<br>Entrega estimada: ${p.eta || '8-15 días'}</div>
                         <div class="product-stock">${tt().stock}: ${p.stock} ${tt().available}</div>
                         <button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
-                            ${p.stock === 0 ? tt().soldOut : '🤖 Activar agente + carrito'}
+                            ${p.stock === 0 ? tt().soldOut : tt().add}
                         </button>
                     </div>
                 </div>
@@ -660,26 +589,16 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         }
 
         function filterProducts() {
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const search = document.getElementById('searchInput').value.toLowerCase();
             const category = document.getElementById('categoryFilter').value;
             const maxPrice = parseFloat(document.getElementById('priceFilter').value) || Infinity;
-            const terms = search.split(/\s+/).filter(Boolean);
-            const filtered = products.filter(p => {
-                const hay = `${p.name} ${p.category} ${p.provider||''} ${p.marketplace||''} ${(p.alternatives||[]).join(' ')}`.toLowerCase();
-                const matchesSearch = !terms.length || terms.some(term => hay.includes(term)) || hay.includes(search);
-                return matchesSearch && (category === '' || p.category === category) && (p.price <= maxPrice);
-            }).sort((a,b)=>{
-                const as = terms.reduce((n,t)=> n + (`${a.name} ${a.provider}`.toLowerCase().includes(t)?1:0),0);
-                const bs = terms.reduce((n,t)=> n + (`${b.name} ${b.provider}`.toLowerCase().includes(t)?1:0),0);
-                return bs - as || a.price - b.price;
-            });
 
-            const box = document.getElementById('agentRequestBox');
-            if(box){
-                box.innerHTML = search
-                  ? `🤖 Agente 1 buscando: <strong>${search}</strong>. Resultado: ${filtered.length} opción(es) en varios proveedores.`
-                  : 'Escriba lo que necesita. La tienda mostrará coincidencias del catálogo y alternativas de varios proveedores.';
-            }
+            const filtered = products.filter(p =>
+                (p.name.toLowerCase().includes(search)) &&
+                (category === '' || p.category === category) &&
+                (p.price <= maxPrice)
+            );
+
             renderProducts(filtered);
         }
 
@@ -690,12 +609,12 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
-                cart.push({ ...product, quantity: 1, agentStatus: 'Agente 1 activo', proveedor: product.provider, provider: product.provider, url: product.providerUrl, link: product.providerUrl });
+                cart.push({ ...product, quantity: 1 });
             }
 
             localStorage.setItem('nexoCart', JSON.stringify(cart));
             updateCartCount();
-            showNotification(`🤖 Agente 1 activado: ${product.name} (${product.provider}) agregado al carrito`);
+            showNotification(`${product.name} ${tt().notifAdded}`);
         }
 
         function updateCartCount() {
@@ -799,7 +718,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         document.addEventListener('DOMContentLoaded', () => {
             applyStoreLanguage();
-            renderProducts();
+            filterProducts();
             updateCartCount();
         });
 
