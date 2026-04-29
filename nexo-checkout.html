@@ -1201,6 +1201,26 @@ const t = ctt();
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
+
+        function nexoPaypalFallbackUrl(orderData){
+            const pedidoId = encodeURIComponent(orderData.supabase_id || orderData.id || ('NEXO-' + Date.now()));
+            const amount = Math.max(1, Number(orderData.total || 1)).toFixed(2);
+            const ret = encodeURIComponent(`${window.location.origin}/nexo-confirmacion.html?pedido_id=${pedidoId}&pago=paypal`);
+            const cancel = encodeURIComponent(`${window.location.origin}/nexo-checkout.html?pedido_id=${pedidoId}&pago=cancelado`);
+            return `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=Pedido+nexo+${pedidoId}&amount=${amount}&currency_code=USD&return=${ret}&cancel_return=${cancel}`;
+        }
+        function nexoPayoneerFallbackUrl(orderData){
+            const pedidoId = encodeURIComponent(orderData.supabase_id || orderData.id || ('NEXO-' + Date.now()));
+            localStorage.setItem('nexoPayoneerInstruction', JSON.stringify({
+                pedido_id: pedidoId,
+                email_cobro: NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com',
+                total: Number(orderData.total || 0).toFixed(2),
+                moneda: 'USD',
+                estado: 'pendiente_pago_payoneer'
+            }));
+            return `nexo-confirmacion.html?pedido_id=${pedidoId}&pago=payoneer&email=${encodeURIComponent(NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com')}`;
+        }
+
         async function startNexoPagoSeguro(orderData){
             const pedidoId = orderData.supabase_id || orderData.id;
             const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
@@ -1313,15 +1333,26 @@ const t = ctt();
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             if (['paypal','card'].includes(orderData.paymentMethod)) {
                 try {
-                    if(btnText) btnText.textContent = 'Abriendo pago seguro...';
+                    if(btnText) btnText.textContent = 'Abriendo PayPal...';
                     await startNexoPagoSeguro(orderData);
                     return;
                 } catch(payErr) {
-                    console.warn('PayPal no abrió. Se mantiene pedido registrado y pasa a confirmación operativa.', payErr);
-                    orderData.payment_status = 'pendiente_confirmacion_operativa';
+                    console.warn('Edge Function PayPal no disponible. Abriendo enlace directo PayPal.', payErr);
+                    orderData.payment_status = 'paypal_redireccion_directa';
                     orderData.payment_error = String(payErr && payErr.message ? payErr.message : payErr);
                     localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                    localStorage.removeItem('nexoCart');
+                    window.location.href = nexoPaypalFallbackUrl(orderData);
+                    return;
                 }
+            }
+            if (orderData.paymentMethod === 'payoneer') {
+                if(btnText) btnText.textContent = 'Abriendo Payoneer...';
+                orderData.payment_status = 'pendiente_pago_payoneer';
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                localStorage.removeItem('nexoCart');
+                window.location.href = nexoPayoneerFallbackUrl(orderData);
+                return;
             }
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html';
