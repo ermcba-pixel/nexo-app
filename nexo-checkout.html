@@ -677,123 +677,50 @@
         <span><strong>NEXO</strong> © 2024 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | <strong>NIT: </strong> | <strong>🔐 256-bit SSL</strong></span>
     </div>
 
-
-
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
+    
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
 const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-const nexoSupabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-window.nexoSupabase = nexoSupabase;
-
-window.nexoPrefillCheckoutFromSupabase = async function () {
-  try {
-    const email = (sessionStorage.getItem('clientEmail') || document.getElementById('email')?.value || '').trim();
-    if (!email) return;
-
-    const { data, error } = await nexoSupabase
-      .from('clientes')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (error || !data) return;
-
-    const setVal = (id, value) => {
-      const el = document.getElementById(id);
-      if (el && value !== null && value !== undefined) el.value = value;
-    };
-
-    const nombreCompleto = `${data.nombre || ''} ${data.apellido || ''}`.trim();
-    setVal('fullName', nombreCompleto);
-    setVal('email', data.email || email);
-    setVal('phoneCode', data.codigo_area || '');
-    setVal('phoneNumber', data.telefono || '');
-    setVal('region', data.region || '');
-    setVal('city', data.ciudad || '');
-    setVal('address', data.direccion || '');
-    setVal('zipCode', data.codigo_postal || '');
-
-    const sel = document.getElementById('countrySelect');
-    if (sel && data.pais) {
-      const pCountry = String(data.pais).toLowerCase();
-      const opt = [...sel.options].find(o =>
-        String(o.value).toLowerCase() === pCountry ||
-        String(o.textContent).toLowerCase().includes(pCountry)
-      );
-      if (opt) sel.value = opt.value;
-    }
-
-    sessionStorage.setItem('nexoActiveClient', JSON.stringify({
-      fullName: nombreCompleto,
-      name: data.nombre || '',
-      lastName: data.apellido || '',
-      documentId: data.documento || '',
-      email: data.email || email,
-      country: data.pais || '',
-      areaCode: data.codigo_area || '',
-      phone: data.telefono || '',
-      postalCode: data.codigo_postal || '',
-      region: data.region || '',
-      city: data.ciudad || '',
-      address: data.direccion || ''
-    }));
-  } catch (err) {
-    console.warn('No se pudo precargar cliente desde Supabase:', err);
-  }
-};
-
-window.nexoSavePedidoToSupabase = async function (orderData) {
+const NEXO_PAYONEER_EMAIL = "ermcba@hotmail.com";
+const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
+let nexoSupabase = null;
+function initNexoSupabase(){
+  if (nexoSupabase) return nexoSupabase;
+  if (!window.supabase || !window.supabase.createClient) throw new Error('Librería Supabase no cargada. Revise conexión/CDN.');
+  nexoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  window.nexoSupabase = nexoSupabase;
+  return nexoSupabase;
+}
+window.nexoSavePedidoToSupabase = async function(orderData){
+  const client = initNexoSupabase();
   const items = Array.isArray(orderData.items) ? orderData.items : [];
   const firstItem = items[0] || {};
   const customer = orderData.customer || {};
-  const nameParts = String(orderData.fullName || '').trim().split(/\s+/);
-  const clienteNombre = nameParts.shift() || '';
-  const clienteApellido = nameParts.join(' ');
-
+  const parts = String(orderData.fullName || '').trim().split(/\s+/);
+  const clienteNombre = parts.shift() || '';
+  const clienteApellido = parts.join(' ');
+  const metodo = orderData.paymentMethod || 'payoneer';
   const row = {
     cliente_email: orderData.email || customer.email || '',
-    cliente_nombre: clienteNombre,
-    cliente_apellido: clienteApellido,
-    cliente_documento: customer.documentId || '',
-    cliente_tel: customer.phone || orderData.phone || '',
-    cliente_pais: customer.country || orderData.country || '',
-    cliente_ciudad: customer.city || orderData.city || '',
-    cliente_direccion: customer.address || orderData.address || '',
-    producto: items.map(i => `${i.name || 'Producto'} x${i.quantity || 1}`).join(' | '),
-    producto_url: firstItem.url || firstItem.link || '',
-    producto_nombre: firstItem.name || 'Pedido NEXO',
-    proveedor: firstItem.provider || firstItem.vendor || 'Marketplace externo',
-    cantidad: items.reduce((n, i) => n + Number(i.quantity || 1), 0) || 1,
-    precio_usd: Number(orderData.total || 0),
-    costo_producto_usd: Number(orderData.subtotal || 0),
-    costo_envio_usd: Number(orderData.amazonShipping || 0),
-    comision_nexo_usd: Number(orderData.commission || 0),
-    impuesto_it_usd: Number(orderData.itf || 0),
-    impuesto_iue_usd: Number(orderData.iue || 0),
-    total_cliente_usd: Number(orderData.total || 0),
-    moneda: 'USD',
-    metodo_pago: orderData.paymentMethod || '',
-    estado: 'pendiente',
-    estado_pago: 'pendiente',
-    estado_compra: 'pendiente',
-    estado_envio: 'pendiente',
-    tracking: '',
-    fecha_estimada_entrega: orderData.deliveryEstimate || '',
-    prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
-    observaciones: orderData.note || ''
+    cliente_nombre: clienteNombre, cliente_apellido: clienteApellido, cliente_documento: customer.documentId || '',
+    cliente_tel: customer.phone || orderData.phone || '', cliente_pais: customer.country || orderData.country || '', cliente_ciudad: customer.city || orderData.city || '', cliente_direccion: customer.address || orderData.address || '',
+    producto: items.map(i => `${i.name || i.nombre || i.producto || 'Producto NEXO'} x${i.quantity || i.cantidad || 1}`).join(' | '),
+    producto_url: firstItem.url || firstItem.link || '', producto_nombre: firstItem.name || firstItem.nombre || firstItem.producto || 'Pedido NEXO', proveedor: firstItem.provider || firstItem.vendor || firstItem.proveedor || 'Marketplace externo',
+    cantidad: items.reduce((n,i)=>n+Number(i.quantity || i.cantidad || 1),0) || 1, precio_usd: Number(orderData.total || 0), costo_producto_usd: Number(orderData.subtotal || 0), costo_envio_usd: Number(orderData.amazonShipping || 0),
+    comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
+    moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
+    fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
+    observaciones: `Cobro preferente: Payoneer (${NEXO_PAYONEER_EMAIL}). Respaldo: PayPal (${NEXO_PAYPAL_EMAIL}). ${orderData.note || ''}`.trim()
   };
-
-  return await nexoSupabase.from('pedidos').insert([row]).select().single();
+  return await client.from('pedidos').insert([row]).select().single();
 };
-
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => window.nexoPrefillCheckoutFromSupabase?.(), 350);
-  setTimeout(() => window.nexoPrefillCheckoutFromSupabase?.(), 900);
-});
+window.nexoPrefillCheckoutFromSupabase = async function(){
+  try{ const client=initNexoSupabase(); const email=(sessionStorage.getItem('clientEmail')||document.getElementById('email')?.value||'').trim(); if(!email)return; const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle(); if(error||!data)return; const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!==undefined&&v!==null)el.value=v;}; const full=`${data.nombre||''} ${data.apellido||''}`.trim(); set('fullName',full); set('email',data.email||email); set('phoneCode',data.codigo_area||''); set('phoneNumber',data.telefono||''); set('region',data.region||''); set('city',data.ciudad||''); set('address',data.direccion||''); set('zipCode',data.codigo_postal||''); sessionStorage.setItem('nexoActiveClient', JSON.stringify({fullName:full,name:data.nombre||'',lastName:data.apellido||'',documentId:data.documento||'',email:data.email||email,country:data.pais||'',areaCode:data.codigo_area||'',phone:data.telefono||'',postalCode:data.codigo_postal||'',region:data.region||'',city:data.ciudad||'',address:data.direccion||''})); }catch(e){console.warn(e);}
+};
+window.addEventListener('DOMContentLoaded',()=>{try{initNexoSupabase();}catch(e){console.warn(e)} setTimeout(()=>window.nexoPrefillCheckoutFromSupabase?.(),400);});
 </script>
-    <script>
+<script>
         
 const checkoutI18n={
  es:{chkTitle:'Checkout NEXO',chkSubtitle:'Compra Segura • 256-bit SSL • 196 Países',backStore:'← Volver a Tienda',cartHeader:'🛒 Tu Carrito',personalTitle:'👤 Datos Personales',lblFullName:'Nombre Completo',lblEmail:'Email',lblPhone:'Teléfono',lblCode:'Código',lblNumber:'Número',shippingTitle:'📍 Dirección de Envío',lblCountry:'País',lblRegion:'Región/Estado',lblCity:'Ciudad',lblAddress:'Dirección Completa',lblZip:'Código Postal',lblDelivery:'Preferencia de envío',lblArrival:'Entrega estimada',paymentTitle:'💳 Método de Pago',summaryTitle:'📊 Resumen de Costo',prodSection:'📦 Precio del Producto',sumSubtotalLbl:'Subtotal (Producto):',sumShipLbl:'Gastos de Envío (Amazon/Marketplace):',sumVendorLbl:'Gastos de la Empresa Vendedora:',comSection:'🏢 Comisión de Intermediación',sumCommissionLbl:'Comisión NEXO:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL A PAGAR:',completeBtnText:'🔒 Completar Compra',confirmMiniTitle:'Confirmación de compra',confirmTitle:'Revisa y confirma el pedido',lblNote:'Observación del cliente',confirmBackText:'Volver',confirmBuyText:'Confirmar compra',footerCheckout:'Checkout Seguro Internacional',phCountry:'Selecciona un país...', phRegion:'La Paz, Santa Cruz, etc.', phCity:'La Paz', phAddress:'Calle, número, apartamento...', phZip:'CP 1234', phNote:'Ej.: entregar en horario de oficina, referencia de dirección, etc.', itemWord:'artículos', confirmClient:'Cliente', confirmEmail:'Email', confirmPhone:'Teléfono', confirmDestination:'Destino', confirmAddress:'Dirección', confirmPayment:'Método de pago', confirmSubtotal:'Subtotal producto', confirmShip:'Gastos Amazon/Marketplace', confirmVendor:'Gastos empresa vendedora', confirmCommission:'Comisión NEXO',  confirmTotal:'Total a pagar',deliveryStandard:'Envío estándar',deliveryPriority:'Envío prioritario',deliveryEta:'Entrega estimada',deliveryOrange:'Detalle de envío externo'},
@@ -1035,10 +962,10 @@ function applyCheckoutLanguage(){
 
         // MÉTODOS DE PAGO (SIN CRIPTOMONEDAS)
         const paymentMethods = [
+            { id: 'payoneer', name: '📱 Payoneer (recomendado)', icon: '📱' },
+            { id: 'paypal', name: '🅿️ PayPal (respaldo)', icon: '🅿️' },
             { id: 'card', name: '💳 Tarjeta de Crédito/Débito', icon: '💳' },
-            { id: 'bank', name: '🏦 Transferencia Bancaria', icon: '🏦' },
-            { id: 'paypal', name: '🅿️ PayPal', icon: '🅿️' },
-            { id: 'payoneer', name: '📱 Payoneer', icon: '📱' }
+            { id: 'bank', name: '🏦 Transferencia Bancaria', icon: '🏦' }
         ];
 
         let selectedPayment = null;
@@ -1122,9 +1049,9 @@ function selectPayment(methodId, btnEl=null) {
                     <div class="form-group"><label class="form-label">Código SWIFT/BIC</label><input type="text" class="form-input" placeholder="ABCDEFGH" id="bankSwift"></div>
                 `;
             } else if (methodId === 'paypal') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Serás redirigido a PayPal para completar el pago de forma segura.</p>`;
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo: se registrará el cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong> si Payoneer no está disponible.</p>`;
             } else if (methodId === 'payoneer') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Serás redirigido a Payoneer para completar el pago de forma segura.</p>`;
+                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Método recomendado: Payoneer. Cobro operativo: <strong>${NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com'}</strong>. La comisión NEXO queda controlada en el pedido.</p>`;
             }
         }
 
@@ -1138,7 +1065,16 @@ function selectPayment(methodId, btnEl=null) {
                 return;
             }
 
-            container.innerHTML = cart.map(item => `
+            container.innerHTML = cart.map((rawItem, idx) => {
+                const item = { ...rawItem };
+                item.id = item.id ?? idx;
+                item.icon = item.icon || item.emoji || '📦';
+                item.name = item.name || item.nombre || item.producto || item.title || 'Producto NEXO';
+                item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? 0);
+                item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
+                item.shippingAmazon = Number(item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
+                item.vendorFee = Number(item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
+                return `
                 <div class="cart-item">
                     <div class="cart-item-icon">${item.icon}</div>
                     <div class="cart-item-name">${item.name}</div>
@@ -1152,7 +1088,8 @@ function selectPayment(methodId, btnEl=null) {
                     </div>
                     <button class="cart-item-delete" onclick="removeFromCart(${item.id})">🗑️ Eliminar</button>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // ACTUALIZAR CANTIDAD
@@ -1218,7 +1155,7 @@ function openConfirmationModal() {
             const zipCode = document.getElementById('zipCode').value.trim() || '0000';
             const phoneCode = document.getElementById('phoneCode').value.trim() || '';
             const phoneNumber = document.getElementById('phoneNumber').value.trim() || '70000000';
-            if (!selectedPayment) selectedPayment = 'paypal';
+            if (!selectedPayment) selectedPayment = 'payoneer';
             if(country && !country.value) country.value='';
             const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
 
@@ -1250,12 +1187,8 @@ const t = ctt();
             applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
-        async function submitPurchase(){
+        function submitPurchase(){
             if(!orderData) return;
-            const confirmBtn = document.getElementById('confirmBuyText');
-            const oldBtnText = confirmBtn ? confirmBtn.textContent : '';
-            if(confirmBtn) confirmBtn.textContent = 'Guardando pedido...';
-
             orderData.note = document.getElementById('customerNote').value.trim();
             orderData.timestamp = new Date().toISOString();
             orderData.id = orderData.id || ('NEXO-' + Date.now());
@@ -1276,7 +1209,7 @@ const t = ctt();
                 city: document.getElementById('city').value.trim(),
                 address: document.getElementById('address').value.trim(),
                 zipCode: document.getElementById('zipCode').value.trim(),
-                documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
+                documentId: (JSON.parse(localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
             };
             orderData.totals = {
                 subtotal: +orderData.subtotal.toFixed(2),
@@ -1298,22 +1231,25 @@ const t = ctt();
                 iueFiscal: +orderData.iue.toFixed(2)
             };
 
-            try {
-                if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
-                const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
-                if (error) throw error;
-                orderData.supabase_id = data?.id || null;
-                orderData.estado = 'pendiente';
-            } catch (err) {
-                if(confirmBtn) confirmBtn.textContent = oldBtnText || 'Confirmar compra';
-                alert('No se pudo guardar el pedido en Supabase: ' + (err.message || err));
-                return;
-            }
-
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             const orders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
             orders.push(orderData);
             localStorage.setItem('nexoOrders', JSON.stringify(orders));
+
+            const prof = JSON.parse(localStorage.getItem('nexoClientProfile') || '{}');
+            const updated = {
+                ...prof,
+                fullName: orderData.fullName,
+                email: orderData.email,
+                countryCode: document.getElementById('countrySelect').value,
+                country: orderData.country,
+                areaCode: document.getElementById('phoneCode').value,
+                phone: document.getElementById('phoneNumber').value.trim(),
+                region: document.getElementById('region').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                zipCode: document.getElementById('zipCode').value.trim()
+            };
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html';
         }
@@ -1390,7 +1326,7 @@ function prefillClientData(){
         prefillClientData();
         refreshDeliveryEstimate();
         setTimeout(()=>{prefillClientData();},100);
-        setTimeout(()=>{ if(!selectedPayment) selectPayment('paypal'); }, 50);
+        setTimeout(()=>{ if(!selectedPayment) selectPayment('payoneer'); }, 50);
         const cpBtn=document.getElementById('completePurchaseBtn') || document.querySelector('.checkout-btn'); if(cpBtn){ cpBtn.onclick=function(e){ if(e) e.preventDefault(); openConfirmationModal(); return false; }; }
 window.addEventListener('DOMContentLoaded', ()=>{ try{ applyCheckoutLanguage(); refreshDeliveryEstimate(); }catch(e){} });
     
@@ -1477,8 +1413,7 @@ function nexoPublicCleanup(){
     if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
   }catch(e){}
 }
-// Limpieza desactivada: ahora usamos datos reales de cliente en Supabase.
-// document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 
 </body>
