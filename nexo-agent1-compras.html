@@ -331,7 +331,6 @@
             }
         }
     </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
     <div class="agent-container">
@@ -360,9 +359,9 @@
                             <label class="form-label">Proveedor</label>
                             <select class="form-select" id="supplier">
                                 <option value="">Selecciona proveedor...</option>
-                                <option value="">Amazon Global</option>
-                                <option value="">CJ Dropshipping</option>
-                                <option value="">Ambos (Mejor Precio)</option>
+                                <option value="amazon">Amazon Global</option>
+                                <option value="cj">CJ Dropshipping</option>
+                                <option value="ambos">Ambos (Mejor Precio)</option>
                             </select>
                         </div>
 
@@ -384,9 +383,9 @@
                         <div class="form-group">
                             <label class="form-label">Prioridad</label>
                             <select class="form-select" id="priority">
-                                <option value="">Normal (5-7 días)</option>
-                                <option value="">Expresada (2-3 días)</option>
-                                <option value="">Urgente (1 día)</option>
+                                <option value="normal">Normal (5-7 días)</option>
+                                <option value="expres">Expresada (2-3 días)</option>
+                                <option value="urgente">Urgente (1 día)</option>
                             </select>
                         </div>
 
@@ -396,12 +395,6 @@
                     </form>
 
                     <div id="alertContainer"></div>
-
-                    <div style="margin-top:18px;padding:16px;background:#fff;border-radius:14px;border-left:4px solid var(--accent);">
-                        <div style="font-weight:900;color:var(--primary);margin-bottom:10px;">📦 Pedidos reales desde Supabase</div>
-                        <select class="form-select" id="supabaseOrderSelect"><option value="">Cargar pedidos pendientes...</option></select>
-                        <button type="button" class="btn-primary" style="margin-top:10px;" onclick="procesarPedidoRealSupabase()">⚙️ Ejecutar Agente 1 sobre pedido real</button>
-                    </div>
                 </div>
 
                 <!-- PANEL DERECHO: ANÁLISIS -->
@@ -649,16 +642,5 @@ async function consultarNexoAI(agent){
 }
 </script>
 
-
-<script>
-// ===== AGENTE 1 REAL OPERATIVO · SUPABASE =====
-const NEXO_AGENT_DB_URL="https://ujqbbnipftlzytdankwp.supabase.co";
-const NEXO_AGENT_DB_KEY="sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-let nexoAgentDb=null, nexoPendingOrders=[];
-function getNexoAgentDb(){ if(!window.supabase||!window.supabase.createClient) throw new Error('Supabase JS no cargó'); if(!nexoAgentDb) nexoAgentDb=window.supabase.createClient(NEXO_AGENT_DB_URL,NEXO_AGENT_DB_KEY,{auth:{persistSession:false,autoRefreshToken:false}}); return nexoAgentDb; }
-async function cargarPedidosPendientesAgente(){ const sel=document.getElementById('supabaseOrderSelect'); if(!sel)return; sel.innerHTML='<option value="">Cargando pedidos...</option>'; try{ const db=getNexoAgentDb(); const {data,error}=await db.from('pedidos').select('*').in('estado_compra',['pendiente','pendiente_agente_1']).order('creado_en',{ascending:false}).limit(50); if(error)throw error; nexoPendingOrders=data||[]; if(!nexoPendingOrders.length){sel.innerHTML='<option value="">No hay pedidos pendientes</option>';return;} sel.innerHTML='<option value="">Seleccione pedido real...</option>'+nexoPendingOrders.map(o=>`<option value="${o.id}">${(o.cliente_nombre||'Cliente')} · ${(o.producto_nombre||o.producto||'Producto')} · US$ ${Number(o.total_cliente_usd||0).toFixed(2)}</option>`).join(''); }catch(e){ sel.innerHTML='<option value="">Error cargando pedidos</option>'; showAlert('No se pudieron cargar pedidos reales: '+e.message,'error'); } }
-async function procesarPedidoRealSupabase(){ const sel=document.getElementById('supabaseOrderSelect'); const id=sel?.value; if(!id){showAlert('Selecciona un pedido real de Supabase','error');return;} const pedido=nexoPendingOrders.find(o=>String(o.id)===String(id)); if(!pedido){showAlert('Pedido no encontrado','error');return;} document.getElementById('processingContainer').style.display='block'; try{ const db=getNexoAgentDb(); await db.from('pedidos').update({estado_compra:'procesando_agente_1',estado:'procesando',observaciones:((pedido.observaciones||'')+'\nAgente 1 inició búsqueda de proveedor y validación de precio.').trim()}).eq('id',id); document.getElementById('productName').value=pedido.producto_nombre||pedido.producto||'Producto NEXO'; document.getElementById('quantity').value=pedido.cantidad||1; document.getElementById('budget').value=Number(pedido.costo_producto_usd||pedido.total_cliente_usd||0).toFixed(2); document.getElementById('supplier').selectedIndex=1; document.getElementById('priority').selectedIndex=1; document.getElementById('searchStatus').textContent='Validado ✓'; document.getElementById('offersCount').textContent='1'; document.getElementById('minPrice').textContent='$'+Number(pedido.costo_producto_usd||0).toFixed(2); document.getElementById('avgPrice').textContent='$'+Number(pedido.costo_producto_usd||0).toFixed(2); document.getElementById('savings').textContent='$0.00'; setTimeout(async()=>{ await db.from('pedidos').update({estado_compra:'proveedor_validado',estado_envio:'preparacion',estado:'agente_1_validado',observaciones:((pedido.observaciones||'')+'\nAgente 1 validó proveedor. Pendiente ejecución de pago externo/API proveedor.').trim()}).eq('id',id); showAlert('✅ Agente 1 ejecutado sobre pedido real. Estado actualizado en Supabase.','success'); document.getElementById('processingContainer').style.display='none'; cargarPedidosPendientesAgente(); },1600); }catch(e){ document.getElementById('processingContainer').style.display='none'; showAlert('Error procesando pedido real: '+e.message,'error'); } }
-window.addEventListener('DOMContentLoaded',()=>setTimeout(cargarPedidosPendientesAgente,700));
-</script>
 </body>
 </html>
