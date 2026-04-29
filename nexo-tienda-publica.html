@@ -652,6 +652,61 @@
             const ratio = (i + 1) / NEXO_AGENT_MIN_RESULTS;
             return +(min + (max - min) * ratio * (0.72 + ((i % 5) * 0.045))).toFixed(2);
         }
+
+        function nexoProductPhoto(name, category, index=0){
+            const text = normalizeText(`${name || ''} ${category || ''}`);
+            const pools = {
+                laptop: [
+                    'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=700&q=80'
+                ],
+                zapato: [
+                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=700&q=80'
+                ],
+                reloj: [
+                    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=700&q=80'
+                ],
+                audifono: [
+                    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=700&q=80'
+                ],
+                camisa: [
+                    'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=700&q=80'
+                ],
+                mochila: [
+                    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=700&q=80'
+                ],
+                electronica: [
+                    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=700&q=80'
+                ],
+                hogar: [
+                    'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&w=700&q=80'
+                ],
+                default: [
+                    'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=80',
+                    'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=700&q=80'
+                ]
+            };
+            let key = 'default';
+            if(text.includes('laptop') || text.includes('notebook') || text.includes('computador')) key = 'laptop';
+            else if(text.includes('zapato') || text.includes('zapatilla') || text.includes('calzado') || text.includes('tenis')) key = 'zapato';
+            else if(text.includes('reloj') || text.includes('watch')) key = 'reloj';
+            else if(text.includes('audif') || text.includes('auricular') || text.includes('headphone')) key = 'audifono';
+            else if(text.includes('camisa') || text.includes('camiseta') || text.includes('ropa')) key = 'camisa';
+            else if(text.includes('mochila') || text.includes('bolso')) key = 'mochila';
+            else if(text.includes('electronica') || text.includes('cable') || text.includes('usb') || text.includes('parlante')) key = 'electronica';
+            else if(text.includes('hogar') || text.includes('limpieza')) key = 'hogar';
+            const arr = pools[key] || pools.default;
+            return arr[Math.abs(index) % arr.length];
+        }
+
         function nexoBuildAgentProduct(search, category, maxPrice, index){
             const key = Object.keys(NEXO_QUERY_TEMPLATES).find(k => normalizeText(search).includes(k));
             const names = key ? NEXO_QUERY_TEMPLATES[key] : [search || 'Producto internacional', `${search || 'Producto'} premium`, `${search || 'Producto'} recomendado`, `${search || 'Producto'} importado`];
@@ -667,7 +722,7 @@
                 vendorFee: +(Math.max(0.4, price * 0.025)).toFixed(2),
                 category,
                 emoji: category === 'calzados' ? '👟' : '🛒',
-                image: `https://source.unsplash.com/600x450/?${imageQ}`,
+                image: nexoProductPhoto(baseName, category, index),
                 stock: 20 + ((index * 7) % 80),
                 provider: prov.provider,
                 providerLogo: prov.providerLogo,
@@ -677,8 +732,7 @@
         }
         products.forEach((p, i) => {
             if(!p.image){
-                const q = encodeURIComponent((p.name || p.category || 'product') + ' product');
-                p.image = `https://source.unsplash.com/600x450/?${q}`;
+                p.image = nexoProductPhoto(p.name, p.category, i);
             }
         });
         function nexoEnsureAgentResults(search, category, maxPrice, current){
@@ -724,7 +778,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             }
             grid.innerHTML = productsToShow.slice(0,20).map(p => `
                 <div class="product-card">
-                    <div class="product-image">${p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.remove();">` : p.emoji}<span class="agent-badge">Agente 1</span></div>
+                    <div class="product-image">${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\'image-fallback\'>📦</div>'">` : `<div class="image-fallback">${p.emoji || '📦'}</div>`}</div>
                     <div class="product-info">
                         <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
                         <div class="product-name">${p.name}</div>
@@ -811,7 +865,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
             container.innerHTML = cart.map(item => `
                 <div class="cart-item">
-                    <div class="cart-item-name"><div style="font-size:10px;color:#4A6B6D;font-weight:900;margin-bottom:4px;">${item.providerLogo || '🏪'} ${item.provider || 'Proveedor externo'}</div>${item.emoji} ${item.name}</div>
+                    <div class="cart-item-name"><div style="font-size:10px;color:#4A6B6D;font-weight:900;margin-bottom:4px;">${item.providerLogo || '🏪'} ${item.provider || 'Proveedor externo'}</div><div style="display:flex;gap:8px;align-items:center;">${item.image ? `<img src="${item.image}" style="width:46px;height:38px;object-fit:cover;border-radius:8px;" onerror="this.remove()">` : (item.emoji || '📦')} <span>${item.name}</span></div></div>
                     <div class="cart-item-qty">
                         <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
                         <span>${item.quantity}</span>

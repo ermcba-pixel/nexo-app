@@ -164,6 +164,14 @@
             font-size: 40px;
             text-align: center;
         }
+        .cart-item-photo {
+            width:100%;
+            height:96px;
+            object-fit:cover;
+            border-radius:12px;
+            background:#eef5f3;
+            display:block;
+        }
 
         .cart-item-provider {
             font-size: 10px;
@@ -977,7 +985,7 @@ function applyCheckoutLanguage(){
         const paymentMethods = [
             { id: 'paypal', name: 'PayPal — cuenta principal NEXO', icon: '🅿️' },
             { id: 'card', name: 'Tarjeta vía PayPal', icon: '💳' },
-            { id: 'bank', name: 'Transferencia Bancaria', icon: '🏦' }
+            { id: 'bank', name: 'Transferencia PayPal / Cuenta: ermcba@hotmail.com', icon: '🏦' }
         ];
 
         let selectedPayment = null;
@@ -1056,7 +1064,7 @@ function selectPayment(methodId, btnEl=null) {
                 `;
                 attachCardFormatters();
             } else if (methodId === 'bank') {
-                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🏦 Transferencia seleccionada. Al confirmar se registrará el pedido y se emitirán instrucciones de pago internas.</p>`;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🏦 Transferencia NEXO por PayPal: use la cuenta principal de cobro <strong>${NEXO_PAYPAL_EMAIL}</strong>. Al confirmar también se abrirá PayPal para completar el pago seguro.</p>`;
             } else if (methodId === 'paypal') {
                 details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🅿️ PayPal seleccionado como cuenta principal NEXO. Al confirmar se abrirá el procesador seguro. Después el Agente 1 registra el pago a proveedor desde PayPal y calcula la diferencia para Payoneer.</p>`;
             }
@@ -1076,6 +1084,7 @@ function selectPayment(methodId, btnEl=null) {
                 const item = { ...rawItem };
                 item.id = item.id ?? idx;
                 item.icon = item.icon || item.emoji || '📦';
+                item.image = item.image || item.imagen || item.foto || item.productImage || '';
                 item.name = item.name || item.nombre || item.producto || item.title || 'Producto NEXO';
                 item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? 0);
                 item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
@@ -1085,7 +1094,7 @@ function selectPayment(methodId, btnEl=null) {
                 item.providerLogo = item.providerLogo || '🏪';
                 return `
                 <div class="cart-item">
-                    <div class="cart-item-icon">${item.icon}</div>
+                    <div class="cart-item-icon">${item.image ? `<img class="cart-item-photo" src="${item.image}" alt="${item.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='${item.icon || '📦'}'">` : item.icon}</div>
                     <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
                     <div class="cart-item-name">${item.name}</div>
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
@@ -1239,6 +1248,8 @@ const t = ctt();
         }
 
         async function startNexoPagoSeguro(orderData){
+            window.location.href = nexoPaypalFallbackUrl(orderData);
+            return;
             const pedidoId = orderData.supabase_id || orderData.id;
             const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
             const payload = {
@@ -1352,7 +1363,7 @@ const t = ctt();
             orderData.providerFlow = { active:true, agent:'AGENTE 1', status:'activado', origenFondos:'PayPal NEXO', destinoMargen:'Payoneer NEXO', providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace'] };
             orderData.settlementFlow = buildNexoSettlementFlow(orderData);
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            if (['paypal','card'].includes(orderData.paymentMethod)) {
+            if (['paypal','card','bank'].includes(orderData.paymentMethod)) {
                 try {
                     if(btnText) btnText.textContent = 'Abriendo PayPal...';
                     await startNexoPagoSeguro(orderData);
