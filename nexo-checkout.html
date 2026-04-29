@@ -711,7 +711,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
   const parts = String(orderData.fullName || '').trim().split(/\s+/);
   const clienteNombre = parts.shift() || '';
   const clienteApellido = parts.join(' ');
-  const metodo = orderData.paymentMethod || 'payoneer';
+  const metodo = orderData.paymentMethod || 'paypal';
   const row = {
     cliente_email: orderData.email || customer.email || '',
     cliente_nombre: clienteNombre, cliente_apellido: clienteApellido, cliente_documento: customer.documentId || '',
@@ -722,7 +722,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
     comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
     moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
     fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
-    observaciones: `Cobro preferente: Payoneer (${NEXO_PAYONEER_EMAIL}). Respaldo: PayPal (${NEXO_PAYPAL_EMAIL}). ${orderData.note || ''}`.trim()
+    observaciones: `Flujo acordado: cliente paga a PayPal principal (${NEXO_PAYPAL_EMAIL}); Agente 1 paga proveedores desde PayPal; margen neto NEXO se transfiere/liquida a Payoneer (${NEXO_PAYONEER_EMAIL}). ${orderData.note || ''}`.trim()
   };
   return await client.from('pedidos').insert([row]).select().single();
 };
@@ -971,12 +971,13 @@ function applyCheckoutLanguage(){
             { code: 'MD', name: 'Moldavia', area: '+373' },
         ];
 
-        // MÉTODOS DE PAGO (SIN CRIPTOMONEDAS)
+        // MÉTODOS DE PAGO CLIENTE
+        // Flujo acordado NEXO: el cliente paga a PayPal como cuenta principal.
+        // Payoneer NO es método de cobro al cliente; queda como cuenta interna para recibir la diferencia/margen NEXO.
         const paymentMethods = [
-            { id: 'payoneer', name: '💼 Payoneer', icon: '💼' },
-            { id: 'paypal', name: '🅿️ PayPal', icon: '🅿️' },
-            { id: 'card', name: '💳 Tarjeta de Crédito/Débito', icon: '💳' },
-            { id: 'bank', name: '🏦 Transferencia Bancaria', icon: '🏦' }
+            { id: 'paypal', name: 'PayPal — cuenta principal NEXO', icon: '🅿️' },
+            { id: 'card', name: 'Tarjeta vía PayPal', icon: '💳' },
+            { id: 'bank', name: 'Transferencia Bancaria', icon: '🏦' }
         ];
 
         let selectedPayment = null;
@@ -1057,9 +1058,7 @@ function selectPayment(methodId, btnEl=null) {
             } else if (methodId === 'bank') {
                 details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🏦 Transferencia seleccionada. Al confirmar se registrará el pedido y se emitirán instrucciones de pago internas.</p>`;
             } else if (methodId === 'paypal') {
-                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🅿️ PayPal seleccionado. Al confirmar se abrirá el procesador seguro.</p>`;
-            } else if (methodId === 'payoneer') {
-                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">💼 Payoneer seleccionado como método preferente.</p>`;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🅿️ PayPal seleccionado como cuenta principal NEXO. Al confirmar se abrirá el procesador seguro. Después el Agente 1 registra el pago a proveedor desde PayPal y calcula la diferencia para Payoneer.</p>`;
             }
         }
 
@@ -1209,16 +1208,34 @@ const t = ctt();
             const cancel = encodeURIComponent(`${window.location.origin}/nexo-checkout.html?pedido_id=${pedidoId}&pago=cancelado`);
             return `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=Pedido+nexo+${pedidoId}&amount=${amount}&currency_code=USD&return=${ret}&cancel_return=${cancel}`;
         }
-        function nexoPayoneerFallbackUrl(orderData){
-            const pedidoId = encodeURIComponent(orderData.supabase_id || orderData.id || ('NEXO-' + Date.now()));
-            localStorage.setItem('nexoPayoneerInstruction', JSON.stringify({
-                pedido_id: pedidoId,
-                email_cobro: NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com',
-                total: Number(orderData.total || 0).toFixed(2),
-                moneda: 'USD',
-                estado: 'pendiente_pago_payoneer'
-            }));
-            return `nexo-confirmacion.html?pedido_id=${pedidoId}&pago=payoneer&email=${encodeURIComponent(NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com')}`;
+        function buildNexoSettlementFlow(orderData){
+            const subtotalProveedores = Number(orderData.subtotal || 0) + Number(orderData.amazonShipping || 0) + Number(orderData.vendorFees || 0);
+            const totalCliente = Number(orderData.total || 0);
+            const margenBruto = Math.max(totalCliente - subtotalProveedores, 0);
+            const impuestos = Number(orderData.itf || 0) + Number(orderData.iue || 0);
+            const margenNetoPayoneer = Math.max(margenBruto - impuestos, 0);
+            return {
+                cobro_cliente: {
+                    cuenta_principal: 'PayPal',
+                    email: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
+                    monto_usd: +totalCliente.toFixed(2),
+                    estado: 'pendiente_confirmacion_paypal'
+                },
+                pago_proveedores: {
+                    agente: 'AGENTE 1',
+                    origen_fondos: 'PayPal NEXO',
+                    monto_estimado_usd: +subtotalProveedores.toFixed(2),
+                    estado: 'pendiente_pago_proveedor'
+                },
+                liquidacion_margen: {
+                    destino: 'Payoneer NEXO',
+                    email: NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com',
+                    margen_bruto_usd: +margenBruto.toFixed(2),
+                    impuestos_estimados_usd: +impuestos.toFixed(2),
+                    margen_neto_estimado_usd: +margenNetoPayoneer.toFixed(2),
+                    estado: 'pendiente_transferencia_paypal_a_payoneer'
+                }
+            };
         }
 
         async function startNexoPagoSeguro(orderData){
@@ -1258,6 +1275,9 @@ const t = ctt();
             orderData.id = orderData.id || ('NEXO-' + Date.now());
             orderData.payoneerEmail = NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com';
             orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
+            orderData.paymentMethod = ['card','paypal'].includes(orderData.paymentMethod) ? 'paypal' : orderData.paymentMethod;
+            orderData.paymentFlow = 'cliente_paypal__agente1_paga_proveedores__margen_a_payoneer';
+            orderData.settlementFlow = buildNexoSettlementFlow(orderData);
             orderData.currency = 'USD';
             orderData.company = 'NEXO';
             orderData.commissionRate = 0.30;
@@ -1329,7 +1349,8 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim()
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
-            orderData.providerFlow = { active:true, agent:'AGENTE 1', status:'activado', providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace'] };
+            orderData.providerFlow = { active:true, agent:'AGENTE 1', status:'activado', origenFondos:'PayPal NEXO', destinoMargen:'Payoneer NEXO', providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace'] };
+            orderData.settlementFlow = buildNexoSettlementFlow(orderData);
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             if (['paypal','card'].includes(orderData.paymentMethod)) {
                 try {
@@ -1347,11 +1368,11 @@ const t = ctt();
                 }
             }
             if (orderData.paymentMethod === 'payoneer') {
-                if(btnText) btnText.textContent = 'Abriendo Payoneer...';
-                orderData.payment_status = 'pendiente_pago_payoneer';
+                // Seguridad: Payoneer ya no cobra al cliente. Se fuerza PayPal como cuenta principal.
+                orderData.paymentMethod = 'paypal';
+                orderData.payment_status = 'redirigido_a_paypal_por_flujo_nexo';
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                localStorage.removeItem('nexoCart');
-                window.location.href = nexoPayoneerFallbackUrl(orderData);
+                window.location.href = nexoPaypalFallbackUrl(orderData);
                 return;
             }
             localStorage.removeItem('nexoCart');
@@ -1430,7 +1451,7 @@ function prefillClientData(){
         prefillClientData();
         refreshDeliveryEstimate();
         setTimeout(()=>{prefillClientData();},100);
-        setTimeout(()=>{ if(!selectedPayment) selectPayment('payoneer'); }, 50);
+        setTimeout(()=>{ if(!selectedPayment) selectPayment('paypal'); }, 50);
         const cpBtn=document.getElementById('completePurchaseBtn') || document.querySelector('.checkout-btn'); if(cpBtn){ cpBtn.onclick=function(e){ if(e) e.preventDefault(); openConfirmationModal(); return false; }; }
 window.addEventListener('DOMContentLoaded', ()=>{ try{ applyCheckoutLanguage(); refreshDeliveryEstimate(); }catch(e){} });
     
