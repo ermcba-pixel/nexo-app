@@ -711,7 +711,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
     comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
     moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
     fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
-    observaciones: `Cobro preferente: Payoneer (${NEXO_PAYONEER_EMAIL}). Respaldo: PayPal (${NEXO_PAYPAL_EMAIL}). ${orderData.note || ''}`.trim()
+    observaciones: `Pedido NEXO PRO. Agente 1 automático activado. ${orderData.note || ''}`.trim()
   };
   return await client.from('pedidos').insert([row]).select().single();
 };
@@ -1049,7 +1049,7 @@ function selectPayment(methodId, btnEl=null) {
                     <div class="form-group"><label class="form-label">Código SWIFT/BIC</label><input type="text" class="form-input" placeholder="ABCDEFGH" id="bankSwift"></div>
                 `;
             } else if (methodId === 'paypal') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo activado: cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong>.</p><p style="font-size:12px;font-weight:700;margin-top:8px;"><a href="https://www.paypal.com/paypalme/" target="_blank" rel="noopener">Abrir PayPal</a></p>`;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:700;">🅿️ PayPal disponible como método de pago.</p>`;
             } else if (methodId === 'payoneer') {
                 details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:700;">✅ Payoneer seleccionado.</p>`;
             }
@@ -1291,6 +1291,49 @@ const t = ctt();
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
             localStorage.removeItem('nexoCart');
+
+            // 🔥 NEXO PRO: activar AGENTE 1 automáticamente en Supabase Edge Function.
+            // El cliente no ve este proceso; queda registrado solo internamente.
+            try {
+                if (orderData.supabase_id) {
+                    const agenteResponse = await fetch(`${SUPABASE_URL}/functions/v1/agente1`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "apikey": SUPABASE_KEY,
+                            "Authorization": `Bearer ${SUPABASE_KEY}`
+                        },
+                        body: JSON.stringify({
+                            pedido_id: orderData.supabase_id,
+                            total_cliente_usd: orderData.total,
+                            costo_producto_usd: orderData.subtotal,
+                            costo_envio_usd: orderData.amazonShipping
+                        })
+                    });
+
+                    const agenteResult = await agenteResponse.json().catch(() => ({}));
+                    orderData.agente1_status = agenteResponse.ok ? "activado" : "error";
+                    orderData.agente1_result = agenteResult;
+                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+
+                    const updatedOrders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
+                    if (updatedOrders.length) {
+                        updatedOrders[updatedOrders.length - 1] = orderData;
+                        localStorage.setItem('nexoOrders', JSON.stringify(updatedOrders));
+                    }
+                    console.log("NEXO AGENTE 1:", agenteResult);
+                } else {
+                    orderData.agente1_status = "pendiente_sin_supabase_id";
+                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                    console.warn("NEXO: Agente 1 pendiente porque no existe supabase_id.");
+                }
+            } catch (agenteError) {
+                orderData.agente1_status = "pendiente_reintento";
+                orderData.agente1_error = (agenteError && agenteError.message) ? agenteError.message : String(agenteError || 'Error Agente 1');
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                console.warn("NEXO: Error activando Agente 1. La compra continúa.", agenteError);
+            }
+
             window.location.href = 'nexo-confirmacion.html';
         }
         function attachCardFormatters(){
