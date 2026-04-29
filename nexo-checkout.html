@@ -983,12 +983,11 @@ function applyCheckoutLanguage(){
         // Flujo acordado NEXO: el cliente paga a PayPal como cuenta principal.
         // Payoneer NO es método de cobro al cliente; queda como cuenta interna para recibir la diferencia/margen NEXO.
         const paymentMethods = [
-            { id: 'paypal', name: 'PayPal — cuenta principal NEXO', icon: '🅿️' },
-            { id: 'card', name: 'Tarjeta vía PayPal', icon: '💳' },
-            { id: 'bank', name: 'Transferencia PayPal / Cuenta: ermcba@hotmail.com', icon: '🏦' }
+            { id: 'paypal', name: 'PayPal (cuenta principal NEXO: ermcba@hotmail.com)', icon: '🅿️' },
+            { id: 'card', name: 'Tarjeta de Crédito/Débito (procesada por PayPal)', icon: '💳' }
         ];
 
-        let selectedPayment = null;
+        let selectedPayment = 'paypal';
         let orderData = null;
 
         // INICIALIZAR
@@ -1031,6 +1030,7 @@ function applyCheckoutLanguage(){
                     ${method.icon} ${method.name}
                 </button>
             `).join('');
+            setTimeout(() => selectPayment('paypal'), 0);
         }
 
         // SELECCIONAR MÉTODO DE PAGO
@@ -1063,8 +1063,7 @@ function selectPayment(methodId, btnEl=null) {
                     </div>
                 `;
                 attachCardFormatters();
-            } else if (methodId === 'bank') {
-                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🏦 Transferencia NEXO por PayPal: use la cuenta principal de cobro <strong>${NEXO_PAYPAL_EMAIL}</strong>. Al confirmar también se abrirá PayPal para completar el pago seguro.</p>`;
+                details.innerHTML += `<p style="color:#4A6B6D;font-size:12px;font-weight:800;margin-top:8px;">💳 La tarjeta se procesa en PayPal como pasarela segura. Al confirmar se abrirá PayPal para pagar.</p>`;
             } else if (methodId === 'paypal') {
                 details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🅿️ PayPal seleccionado como cuenta principal NEXO. Al confirmar se abrirá el procesador seguro. Después el Agente 1 registra el pago a proveedor desde PayPal y calcula la diferencia para Payoneer.</p>`;
             }
@@ -1094,7 +1093,7 @@ function selectPayment(methodId, btnEl=null) {
                 item.providerLogo = item.providerLogo || '🏪';
                 return `
                 <div class="cart-item">
-                    <div class="cart-item-icon">${item.image ? `<img class="cart-item-photo" src="${item.image}" alt="${item.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='${item.icon || '📦'}'">` : item.icon}</div>
+                    <div class="cart-item-icon">${item.image ? `<img class="cart-item-photo" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='${item.icon || '📦'}'">` : item.icon}</div>
                     <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
                     <div class="cart-item-name">${item.name}</div>
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
@@ -1174,7 +1173,7 @@ function openConfirmationModal() {
             const zipCode = document.getElementById('zipCode').value.trim() || '0000';
             const phoneCode = document.getElementById('phoneCode').value.trim() || '';
             const phoneNumber = document.getElementById('phoneNumber').value.trim() || '70000000';
-            if (!selectedPayment) selectedPayment = 'payoneer';
+            if (!selectedPayment) selectedPayment = 'paypal';
             if(country && !country.value) country.value='';
             const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
 
@@ -1248,31 +1247,12 @@ const t = ctt();
         }
 
         async function startNexoPagoSeguro(orderData){
-            window.location.href = nexoPaypalFallbackUrl(orderData);
-            return;
-            const pedidoId = orderData.supabase_id || orderData.id;
-            const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
-            const payload = {
-                pedido_id: pedidoId,
-                total_cliente_usd: Number(orderData.total || 0),
-                total: Number(orderData.total || 0),
-                moneda: 'USD',
-                descripcion: `Pedido nexo ${pedidoId}`,
-                cliente_email: orderData.email || '',
-                success_url: `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`,
-                cancel_url: `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado`
-            };
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json().catch(()=>({}));
-            if(!res.ok || !data.approval_url){ throw new Error(data.error || 'No se pudo abrir PayPal'); }
-            orderData.paypal_order_id = data.paypal_order_id || data.id || '';
+            orderData.payment_status = 'redirigiendo_a_paypal';
+            orderData.payment_gateway = 'PayPal';
+            orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             localStorage.setItem('nexoPendingOrder', JSON.stringify(orderData));
-            window.location.href = data.approval_url;
+            window.location.assign(nexoPaypalFallbackUrl(orderData));
         }
 
         async function submitPurchase(){
@@ -1286,7 +1266,7 @@ const t = ctt();
             orderData.id = orderData.id || ('NEXO-' + Date.now());
             orderData.payoneerEmail = NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com';
             orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
-            orderData.paymentMethod = ['card','paypal'].includes(orderData.paymentMethod) ? 'paypal' : orderData.paymentMethod;
+            orderData.paymentMethod = ['card','paypal'].includes(orderData.paymentMethod) ? orderData.paymentMethod : 'paypal';
             orderData.paymentFlow = 'cliente_paypal__agente1_paga_proveedores__margen_a_payoneer';
             orderData.settlementFlow = buildNexoSettlementFlow(orderData);
             orderData.currency = 'USD';
@@ -1363,7 +1343,7 @@ const t = ctt();
             orderData.providerFlow = { active:true, agent:'AGENTE 1', status:'activado', origenFondos:'PayPal NEXO', destinoMargen:'Payoneer NEXO', providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace'] };
             orderData.settlementFlow = buildNexoSettlementFlow(orderData);
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            if (['paypal','card','bank'].includes(orderData.paymentMethod)) {
+            if (['paypal','card'].includes(orderData.paymentMethod)) {
                 try {
                     if(btnText) btnText.textContent = 'Abriendo PayPal...';
                     await startNexoPagoSeguro(orderData);
