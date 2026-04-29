@@ -1,0 +1,9 @@
+body{font-family:Arial;background:#eaf2ef}
+/* LOGO GLOBAL NEXO */
+.logo img,
+img[src*="logo"] {
+  content: url('logo-nexo.png');
+  max-width: 140px;
+  height: auto;
+  object-fit: contain;
+}

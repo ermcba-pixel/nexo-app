@@ -1,0 +1,1 @@
+console.log('NEXO v15 FULL REAL');

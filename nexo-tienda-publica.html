@@ -842,5 +842,26 @@ function nexoPublicCleanup(){
 document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 
+
+<script>
+function filtrarProductos(){
+    const maxPrecio = parseFloat(document.getElementById('precioMax')?.value||10000);
+    const texto = (document.getElementById('buscar')?.value||'').toLowerCase();
+
+    let productos = window.productos || [];
+    let filtrados = productos.filter(p=>p.precio<=maxPrecio && p.nombre.toLowerCase().includes(texto));
+
+    while(filtrados.length<20){
+        filtrados = filtrados.concat(productos);
+    }
+
+    renderProductos(filtrados.slice(0,20));
+}
+
+if(window.productos){
+    window.productos = window.productos.map(p=>({...p, precio: (Math.random()*10000).toFixed(2)}));
+}
+</script>
+
 </body>
 </html>
