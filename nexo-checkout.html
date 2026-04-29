@@ -1051,7 +1051,7 @@ function selectPayment(methodId, btnEl=null) {
             } else if (methodId === 'paypal') {
                 details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo activado: cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong>.</p><p style="font-size:12px;font-weight:700;margin-top:8px;"><a href="https://www.paypal.com/paypalme/" target="_blank" rel="noopener">Abrir PayPal</a></p>`;
             } else if (methodId === 'payoneer') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Payoneer activado como método recomendado. Cobro operativo: <strong>${NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com'}</strong>. La comisión nexo queda controlada en el pedido.</p><p style="font-size:12px;font-weight:700;margin-top:8px;"><a href="https://www.payoneer.com/" target="_blank" rel="noopener">Abrir Payoneer</a></p>`;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:700;">✅ Payoneer seleccionado.</p>`;
             }
         }
 
