@@ -206,9 +206,10 @@
         .product-image {
             width: 100%;
             height: 180px;
-            background: #eef5f2;
+            background: #eef5f3;
             display: block;
             overflow: hidden;
+            position: relative;
         }
         .product-image img {
             width: 100%;
@@ -608,23 +609,41 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
 
 
-        function nexoProductPhoto(product) {
-            const text = normalizeText([product.name, product.aliases, product.category].join(' '));
-            let keyword = 'online shopping product';
-            if (text.includes('impresora')) keyword = 'printer';
-            else if (text.includes('laptop') || text.includes('notebook')) keyword = 'laptop computer';
-            else if (text.includes('perno') || text.includes('tornillo')) keyword = 'bolts screws hardware';
-            else if (text.includes('zapato') || text.includes('zapatilla') || text.includes('calzado')) keyword = 'shoes';
-            else if (text.includes('camisa') || text.includes('blusa') || text.includes('ropa')) keyword = 'clothes shirt';
-            else if (text.includes('reloj')) keyword = 'digital watch';
-            else if (text.includes('audifono') || text.includes('auricular')) keyword = 'headphones';
-            else if (text.includes('mochila')) keyword = 'backpack';
-            else if (text.includes('boligrafo')) keyword = 'pen';
-            else if (text.includes('cable')) keyword = 'cable electronics';
-            else if (text.includes('botella')) keyword = 'water bottle';
-            else if (text.includes('maquillaje') || text.includes('belleza')) keyword = 'makeup';
-            else if (text.includes('lampara')) keyword = 'desk lamp';
-            return product.image || `https://loremflickr.com/640/480/${encodeURIComponent(keyword)}?lock=${product.id || 1}`;
+        const nexoProductImages = {
+            laptop: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
+            notebook: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
+            computadora: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
+            impresora: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80',
+            printer: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80',
+            audifonos: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+            auriculares: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+            cable: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80',
+            cargador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
+            celular: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+            iphone: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+            reloj: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+            parlante: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80',
+            hdmi: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80',
+            adaptador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
+            soporte: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+            protector: 'https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80',
+            zapatos: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+            zapatillas: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+            cordones: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80',
+            camisa: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
+            camiseta: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80',
+            mochila: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
+            maquillaje: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
+            botella: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80',
+            default: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
+        };
+        function nexoProductImage(p){
+            if(p.image || p.imageUrl || p.photo) return p.image || p.imageUrl || p.photo;
+            const hay = normalizeText([p.name,p.aliases,p.category].join(' '));
+            for(const [k,url] of Object.entries(nexoProductImages)){
+                if(k !== 'default' && hay.includes(k)) return url;
+            }
+            return nexoProductImages.default;
         }
 
         function renderProducts(productsToShow = products) {
@@ -635,7 +654,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             }
             grid.innerHTML = productsToShow.slice(0,20).map(p => `
                 <div class="product-card">
-                    <div class="product-image"><img src="${nexoProductPhoto(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='https://picsum.photos/seed/nexo-${p.id}/640/480';"></div>
+                    <div class="product-image"><img src="${nexoProductImage(p)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoProductImages.default;"></div>
                     <div class="product-info">
                         <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
                         <div class="product-name">${p.name}</div>
@@ -683,12 +702,17 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
+            if(!product) return;
+            product.image = nexoProductImage(product);
+            product.sourceUrl = product.sourceUrl || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(product.name + ' ' + product.provider)}`;
             const existingItem = cart.find(c => c.id === productId);
 
             if (existingItem) {
                 existingItem.quantity += 1;
+                existingItem.image = product.image;
+                existingItem.sourceUrl = product.sourceUrl;
             } else {
-                cart.push({ ...product, quantity: 1 });
+                cart.push({ ...product, image: product.image, sourceUrl: product.sourceUrl, quantity: 1 });
             }
 
             localStorage.setItem('nexoCart', JSON.stringify(cart));

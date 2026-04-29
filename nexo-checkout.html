@@ -510,7 +510,11 @@
                 grid-template-columns: 80px 1fr;
             }
         }
-    </style>
+    
+        .cart-item-icon{background:#fff;overflow:hidden;font-size:0!important;}
+        .cart-item-icon img{width:100%;height:100%;object-fit:cover;display:block;border-radius:12px;}
+        .payment-btn.active{background:#7ac742!important;color:#0c2b2d!important;border-color:#7ac742!important;}
+</style>
 </head>
 <body>
 
@@ -684,7 +688,7 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        <span><strong>NEXO</strong> © 2026 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | <strong>NIT: 774651015</strong> | <strong>🔐 256-bit SSL</strong></span>
+        <span><strong>NEXO</strong> © 2024 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | <strong>NIT: </strong> | <strong>🔐 256-bit SSL</strong></span>
     </div>
 
     
@@ -722,7 +726,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
     comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
     moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
     fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
-    observaciones: `Cobro preferente: Payoneer (${NEXO_PAYONEER_EMAIL}). Respaldo: PayPal (${NEXO_PAYPAL_EMAIL}). ${orderData.note || ''}`.trim()
+    observaciones: `Cobro principal PayPal (${NEXO_PAYPAL_EMAIL}). Pago a proveedor desde PayPal; diferencia/margen registrada para Payoneer (${NEXO_PAYONEER_EMAIL}). ${orderData.note || ''}`.trim()
   };
   return await client.from('pedidos').insert([row]).select().single();
 };
@@ -1051,28 +1055,24 @@ function selectPayment(methodId, btnEl=null) {
                             <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
                         </div>
                     </div>
+                    <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con tarjeta vía PayPal</button>
                 `;
                 attachCardFormatters();
-            } else if (methodId === 'paypal') {
-                details.innerHTML = '';
+            } else {
+                details.innerHTML = `<button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con PayPal</button>`;
             }
         }
 
 
-        function nexoCheckoutPhoto(item) {
-            const raw = [item.name, item.aliases, item.category].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-            let keyword = 'online shopping product';
-            if (raw.includes('impresora')) keyword = 'printer';
-            else if (raw.includes('laptop') || raw.includes('notebook')) keyword = 'laptop computer';
-            else if (raw.includes('perno') || raw.includes('tornillo')) keyword = 'bolts screws hardware';
-            else if (raw.includes('zapato') || raw.includes('zapatilla') || raw.includes('calzado')) keyword = 'shoes';
-            else if (raw.includes('camisa') || raw.includes('blusa') || raw.includes('ropa')) keyword = 'clothes shirt';
-            else if (raw.includes('reloj')) keyword = 'digital watch';
-            else if (raw.includes('audifono') || raw.includes('auricular')) keyword = 'headphones';
-            else if (raw.includes('mochila')) keyword = 'backpack';
-            else if (raw.includes('boligrafo')) keyword = 'pen';
-            else if (raw.includes('cable')) keyword = 'cable electronics';
-            return item.image || `https://loremflickr.com/640/480/${encodeURIComponent(keyword)}?lock=${item.id || 1}`;
+        const nexoCheckoutImages = {
+            laptop: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80', notebook: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80', impresora: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80', printer: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80', audifonos: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', auriculares: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', cable: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80', cargador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80', celular: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', iphone: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', reloj: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80', parlante: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80', hdmi: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80', adaptador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80', soporte: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', protector: 'https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80', zapatos: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', zapatillas: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', cordones: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80', camisa: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80', mochila: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', default: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
+        };
+        function nexoText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+        function nexoCartImage(item){
+            if(item.image || item.imageUrl || item.photo) return item.image || item.imageUrl || item.photo;
+            const hay=nexoText([item.name,item.nombre,item.producto,item.aliases,item.category].join(' '));
+            for(const [k,url] of Object.entries(nexoCheckoutImages)){ if(k!=='default' && hay.includes(k)) return url; }
+            return nexoCheckoutImages.default;
         }
 
         // CARGAR CARRITO
@@ -1089,7 +1089,6 @@ function selectPayment(methodId, btnEl=null) {
                 const item = { ...rawItem };
                 item.id = item.id ?? idx;
                 item.icon = item.icon || item.emoji || '📦';
-                item.image = item.image || item.foto || item.photo || item.imagen || '';
                 item.name = item.name || item.nombre || item.producto || item.title || 'Producto NEXO';
                 item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? 0);
                 item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
@@ -1099,7 +1098,7 @@ function selectPayment(methodId, btnEl=null) {
                 item.providerLogo = item.providerLogo || '🏪';
                 return `
                 <div class="cart-item">
-                    <div class="cart-item-icon"><img src="${nexoCheckoutPhoto(item)}" alt="${item.name}" loading="lazy" onerror="this.onerror=null;this.src='https://picsum.photos/seed/nexo-cart-${item.id}/640/480';"></div>
+                    <div class="cart-item-icon"><img src="${nexoCartImage(item)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoCheckoutImages.default;"></div>
                     <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
                     <div class="cart-item-name">${item.name}</div>
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
@@ -1214,43 +1213,20 @@ const t = ctt();
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
-
-        function openPaypalDirect(orderData){
-            const total = Math.max(1, Number(orderData.total || orderData.totals?.total || 0)).toFixed(2);
-            const pedidoId = encodeURIComponent(orderData.supabase_id || orderData.id || ('NEXO-' + Date.now()));
-            const itemName = encodeURIComponent('Pedido nexo ' + pedidoId);
-            const returnUrl = encodeURIComponent(`${window.location.origin}/nexo-confirmacion.html?pedido_id=${pedidoId}&pago=aprobado`);
-            const cancelUrl = encodeURIComponent(`${window.location.origin}/nexo-checkout.html?pedido_id=${pedidoId}&pago=cancelado`);
-            const url = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${itemName}&amount=${total}&currency_code=USD&return=${returnUrl}&cancel_return=${cancelUrl}`;
-            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            localStorage.setItem('nexoPendingOrder', JSON.stringify(orderData));
-            window.location.href = url;
-        }
-
         async function startNexoPagoSeguro(orderData){
-            const pedidoId = orderData.supabase_id || orderData.id;
-            const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
-            const payload = {
-                pedido_id: pedidoId,
-                total_cliente_usd: Number(orderData.total || 0),
-                total: Number(orderData.total || 0),
-                moneda: 'USD',
-                descripcion: `Pedido nexo ${pedidoId}`,
-                cliente_email: orderData.email || '',
-                success_url: `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`,
-                cancel_url: `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado`
-            };
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json().catch(()=>({}));
-            if(!res.ok || !data.approval_url){ throw new Error(data.error || 'No se pudo abrir PayPal'); }
-            orderData.paypal_order_id = data.paypal_order_id || data.id || '';
-            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            localStorage.setItem('nexoPendingOrder', JSON.stringify(orderData));
-            window.location.href = data.approval_url;
+            const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
+            const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
+            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`;
+            const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado`;
+            const fallbackUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('Pedido nexo ' + pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
+            try{
+                const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
+                const payload = { pedido_id: pedidoId, total_cliente_usd: Number(amount), total: Number(amount), moneda: 'USD', descripcion: `Pedido nexo ${pedidoId}`, cliente_email: orderData.email || '', success_url: successUrl, cancel_url: cancelUrl };
+                const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, body: JSON.stringify(payload) });
+                const data = await res.json().catch(()=>({}));
+                if(res.ok && data.approval_url){ window.location.href = data.approval_url; return; }
+            }catch(e){ console.warn('Supabase/PayPal API no respondió, se abre PayPal estándar.', e); }
+            window.location.href = fallbackUrl;
         }
 
         async function submitPurchase(){
@@ -1343,16 +1319,14 @@ const t = ctt();
                     await startNexoPagoSeguro(orderData);
                     return;
                 } catch(payErr) {
-                    console.warn('La función Supabase de PayPal no respondió. Abriendo PayPal directo.', payErr);
-                    orderData.payment_status = 'pendiente_paypal_directo';
-                    orderData.payment_error = String(payErr && payErr.message ? payErr.message : payErr);
-                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                    openPaypalDirect(orderData);
+                    console.warn('PayPal no abrió por error inesperado.', payErr);
+                    alert('No se pudo abrir PayPal automáticamente. Revise que el navegador permita redirecciones y vuelva a confirmar.');
+                    if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
                     return;
                 }
             }
-            openPaypalDirect(orderData);
-            return;
+            localStorage.removeItem('nexoCart');
+            window.location.href = 'nexo-confirmacion.html';
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
@@ -1427,7 +1401,7 @@ function prefillClientData(){
         prefillClientData();
         refreshDeliveryEstimate();
         setTimeout(()=>{prefillClientData();},100);
-        setTimeout(()=>{ if(!selectedPayment) selectPayment('payoneer'); }, 50);
+        setTimeout(()=>{ selectPayment(selectedPayment || 'paypal'); }, 50);
         const cpBtn=document.getElementById('completePurchaseBtn') || document.querySelector('.checkout-btn'); if(cpBtn){ cpBtn.onclick=function(e){ if(e) e.preventDefault(); openConfirmationModal(); return false; }; }
 window.addEventListener('DOMContentLoaded', ()=>{ try{ applyCheckoutLanguage(); refreshDeliveryEstimate(); }catch(e){} });
     
