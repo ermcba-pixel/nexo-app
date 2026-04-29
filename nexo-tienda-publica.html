@@ -547,26 +547,46 @@
 
     <script>
         const products = [
-            { id: 1, name: 'Cable USB-C', price: 2.99, shippingAmazon: 1.20, vendorFee: 0.40, category: 'accesorios', emoji: '🔌', stock: 50, provider:'Amazon', providerLogo:'🟠', aliases:'cable cargador usb tipo c electronica accesorios' },
-            { id: 2, name: 'Funda iPhone', price: 3.95, shippingAmazon: 1.10, vendorFee: 0.35, category: 'accesorios', emoji: '📱', stock: 42, provider:'AliExpress', providerLogo:'🔴', aliases:'case carcasa protector iphone celular accesorios' },
-            { id: 3, name: 'Protector de pantalla', price: 1.49, shippingAmazon: 0.80, vendorFee: 0.20, category: 'accesorios', emoji: '🛡️', stock: 80, provider:'Temu', providerLogo:'🟧', aliases:'vidrio templado mica celular pantalla' },
-            { id: 4, name: 'Cordones deportivos', price: 1.99, shippingAmazon: 0.70, vendorFee: 0.20, category: 'calzados', emoji: '👟', stock: 60, provider:'Shein', providerLogo:'⚫', aliases:'calzado calzados zapatos zapatillas tenis cordones deportivo' },
-            { id: 5, name: 'Plantillas gel', price: 4.75, shippingAmazon: 1.30, vendorFee: 0.45, category: 'calzados', emoji: '👞', stock: 35, provider:'Amazon', providerLogo:'🟠', aliases:'calzado calzados zapatos plantillas gel comodidad' },
-            { id: 6, name: 'Llavero metálico', price: 2.50, shippingAmazon: 0.90, vendorFee: 0.25, category: 'accesorios', emoji: '🔑', stock: 70, provider:'Marketplace', providerLogo:'🏪', aliases:'llavero accesorios regalo' },
-            { id: 7, name: 'Bolígrafo premium', price: 1.20, shippingAmazon: 0.50, vendorFee: 0.15, category: 'oficina', emoji: '🖊️', stock: 100, provider:'CJ Dropshipping', providerLogo:'🔵', aliases:'lapicero boligrafo oficina escritura' },
-            { id: 8, name: 'Mouse pad', price: 4.99, shippingAmazon: 1.20, vendorFee: 0.40, category: 'oficina', emoji: '🖱️', stock: 45, provider:'Amazon', providerLogo:'🟠', aliases:'alfombrilla mouse escritorio oficina gamer' },
-            { id: 9, name: 'Calcetines deportivos', price: 3.49, shippingAmazon: 1.00, vendorFee: 0.30, category: 'moda', emoji: '🧦', stock: 55, provider:'Shein', providerLogo:'⚫', aliases:'calzado calzados medias calcetines deportes ropa' },
-            { id: 10, name: 'Cepillo de limpieza', price: 2.25, shippingAmazon: 0.90, vendorFee: 0.25, category: 'hogar', emoji: '🧹', stock: 65, provider:'Temu', providerLogo:'🟧', aliases:'hogar limpieza cocina bano cepillo' },
-            { id: 11, name: 'Organizador cables', price: 3.10, shippingAmazon: 0.90, vendorFee: 0.30, category: 'hogar', emoji: '🧰', stock: 40, provider:'AliExpress', providerLogo:'🔴', aliases:'cables organizador oficina hogar accesorios' },
-            { id: 12, name: 'Botella deportiva', price: 4.80, shippingAmazon: 1.40, vendorFee: 0.45, category: 'deportes', emoji: '🥤', stock: 32, provider:'Amazon', providerLogo:'🟠', aliases:'deporte botella agua gym gimnasio' },
-            { id: 13, name: 'Toalla microfibra', price: 4.60, shippingAmazon: 1.20, vendorFee: 0.40, category: 'deportes', emoji: '🏋️', stock: 30, provider:'CJ Dropshipping', providerLogo:'🔵', aliases:'toalla deporte gimnasio viaje' },
-            { id: 14, name: 'Sticker decorativo', price: 0.99, shippingAmazon: 0.35, vendorFee: 0.10, category: 'hogar', emoji: '🏷️', stock: 120, provider:'Temu', providerLogo:'🟧', aliases:'pegatina sticker decoracion hogar' },
-            { id: 15, name: 'Pulsera simple', price: 2.80, shippingAmazon: 0.90, vendorFee: 0.25, category: 'moda', emoji: '📿', stock: 48, provider:'Shein', providerLogo:'⚫', aliases:'pulsera moda accesorio bisuteria' },
-            { id: 16, name: 'Soporte celular', price: 4.30, shippingAmazon: 1.00, vendorFee: 0.35, category: 'electronica', emoji: '📲', stock: 38, provider:'AliExpress', providerLogo:'🔴', aliases:'soporte celular telefono auto escritorio' },
-            { id: 17, name: 'Cargador auto USB', price: 4.95, shippingAmazon: 1.20, vendorFee: 0.45, category: 'autos', emoji: '🚗', stock: 25, provider:'Amazon', providerLogo:'🟠', aliases:'auto carro cargador usb coche' },
-            { id: 18, name: 'Esponja maquillaje', price: 1.75, shippingAmazon: 0.60, vendorFee: 0.20, category: 'belleza', emoji: '💄', stock: 90, provider:'Shein', providerLogo:'⚫', aliases:'belleza maquillaje esponja cosmetico' },
-            { id: 19, name: 'Peine portátil', price: 1.10, shippingAmazon: 0.45, vendorFee: 0.10, category: 'belleza', emoji: '💇', stock: 85, provider:'Marketplace', providerLogo:'🏪', aliases:'peine belleza cabello pelo' },
-            { id: 20, name: 'Audífonos básicos', price: 4.99, shippingAmazon: 1.40, vendorFee: 0.45, category: 'electronica', emoji: '🎧', stock: 22, provider:'CJ Dropshipping', providerLogo:'🔵', aliases:'audifonos auriculares earphones musica electronica' }
+            {"id": 1, "name": "Cable USB-C reforzado", "price": 2.99, "shippingAmazon": 1.2, "vendorFee": 0.4, "category": "accesorios", "emoji": "🔌", "stock": 50, "provider": "Amazon", "providerLogo": "🟠", "aliases": "cable cargador usb tipo c electronica accesorios carga rapida"},
+            {"id": 2, "name": "Funda iPhone transparente", "price": 3.95, "shippingAmazon": 1.1, "vendorFee": 0.35, "category": "accesorios", "emoji": "📱", "stock": 42, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "case carcasa protector iphone celular accesorios"},
+            {"id": 3, "name": "Protector de pantalla vidrio", "price": 1.49, "shippingAmazon": 0.8, "vendorFee": 0.2, "category": "accesorios", "emoji": "🛡️", "stock": 80, "provider": "Temu", "providerLogo": "🟧", "aliases": "vidrio templado mica celular pantalla protector"},
+            {"id": 4, "name": "Cordones deportivos", "price": 1.99, "shippingAmazon": 0.7, "vendorFee": 0.2, "category": "calzados", "emoji": "👟", "stock": 60, "provider": "Shein", "providerLogo": "⚫", "aliases": "calzado calzados zapatos zapatillas tenis cordones deportivo"},
+            {"id": 5, "name": "Plantillas gel", "price": 4.75, "shippingAmazon": 1.3, "vendorFee": 0.45, "category": "calzados", "emoji": "👞", "stock": 35, "provider": "Amazon", "providerLogo": "🟠", "aliases": "calzado calzados zapatos plantillas gel comodidad"},
+            {"id": 6, "name": "Llavero metálico", "price": 2.5, "shippingAmazon": 0.9, "vendorFee": 0.25, "category": "accesorios", "emoji": "🔑", "stock": 70, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "llavero accesorios regalo"},
+            {"id": 7, "name": "Bolígrafo premium", "price": 1.2, "shippingAmazon": 0.5, "vendorFee": 0.15, "category": "oficina", "emoji": "🖊️", "stock": 100, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "lapicero boligrafo oficina escritura"},
+            {"id": 8, "name": "Mouse pad", "price": 4.99, "shippingAmazon": 1.2, "vendorFee": 0.4, "category": "oficina", "emoji": "🖱️", "stock": 45, "provider": "Amazon", "providerLogo": "🟠", "aliases": "alfombrilla mouse escritorio oficina gamer"},
+            {"id": 9, "name": "Calcetines deportivos", "price": 3.49, "shippingAmazon": 1.0, "vendorFee": 0.3, "category": "moda", "emoji": "🧦", "stock": 55, "provider": "Shein", "providerLogo": "⚫", "aliases": "calzado calzados medias calcetines deportes ropa"},
+            {"id": 10, "name": "Cepillo de limpieza", "price": 2.25, "shippingAmazon": 0.9, "vendorFee": 0.25, "category": "hogar", "emoji": "🧹", "stock": 65, "provider": "Temu", "providerLogo": "🟧", "aliases": "hogar limpieza cocina bano cepillo"},
+            {"id": 11, "name": "Organizador cables", "price": 3.1, "shippingAmazon": 0.9, "vendorFee": 0.3, "category": "hogar", "emoji": "🧰", "stock": 40, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "cables organizador oficina hogar accesorios"},
+            {"id": 12, "name": "Botella deportiva", "price": 4.8, "shippingAmazon": 1.4, "vendorFee": 0.45, "category": "deportes", "emoji": "🥤", "stock": 32, "provider": "Amazon", "providerLogo": "🟠", "aliases": "deporte botella agua gym gimnasio"},
+            {"id": 13, "name": "Toalla microfibra", "price": 4.6, "shippingAmazon": 1.2, "vendorFee": 0.4, "category": "deportes", "emoji": "🏋️", "stock": 30, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "toalla deporte gimnasio viaje"},
+            {"id": 14, "name": "Sticker decorativo", "price": 0.99, "shippingAmazon": 0.35, "vendorFee": 0.1, "category": "hogar", "emoji": "🏷️", "stock": 120, "provider": "Temu", "providerLogo": "🟧", "aliases": "pegatina sticker decoracion hogar"},
+            {"id": 15, "name": "Pulsera simple", "price": 2.8, "shippingAmazon": 0.9, "vendorFee": 0.25, "category": "moda", "emoji": "📿", "stock": 48, "provider": "Shein", "providerLogo": "⚫", "aliases": "pulsera moda accesorio bisuteria"},
+            {"id": 16, "name": "Soporte celular", "price": 4.3, "shippingAmazon": 1.0, "vendorFee": 0.35, "category": "electronica", "emoji": "📲", "stock": 38, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "soporte celular telefono auto escritorio"},
+            {"id": 17, "name": "Cargador auto USB", "price": 4.95, "shippingAmazon": 1.2, "vendorFee": 0.45, "category": "autos", "emoji": "🚗", "stock": 25, "provider": "Amazon", "providerLogo": "🟠", "aliases": "auto carro cargador usb coche"},
+            {"id": 18, "name": "Esponja maquillaje", "price": 1.75, "shippingAmazon": 0.6, "vendorFee": 0.2, "category": "belleza", "emoji": "💄", "stock": 90, "provider": "Shein", "providerLogo": "⚫", "aliases": "belleza maquillaje esponja cosmetico"},
+            {"id": 19, "name": "Peine portátil", "price": 1.1, "shippingAmazon": 0.45, "vendorFee": 0.1, "category": "belleza", "emoji": "💇", "stock": 85, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "peine belleza cabello pelo"},
+            {"id": 20, "name": "Audífonos básicos", "price": 4.99, "shippingAmazon": 1.4, "vendorFee": 0.45, "category": "electronica", "emoji": "🎧", "stock": 22, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "audifonos auriculares earphones musica electronica"},
+            {"id": 21, "name": "Camisa casual hombre", "price": 8.9, "shippingAmazon": 2.4, "vendorFee": 0.8, "category": "moda", "emoji": "👔", "stock": 45, "provider": "Shein", "providerLogo": "⚫", "aliases": "camisa camisas ropa hombre vestir casual moda"},
+            {"id": 22, "name": "Camisa blanca oficina", "price": 9.5, "shippingAmazon": 2.6, "vendorFee": 0.9, "category": "moda", "emoji": "👕", "stock": 40, "provider": "Amazon", "providerLogo": "🟠", "aliases": "camisa camisas blanca oficina vestir trabajo hombre mujer"},
+            {"id": 23, "name": "Camisa manga corta", "price": 7.8, "shippingAmazon": 2.2, "vendorFee": 0.7, "category": "moda", "emoji": "👚", "stock": 48, "provider": "Temu", "providerLogo": "🟧", "aliases": "camisa camisas manga corta verano ropa moda"},
+            {"id": 24, "name": "Camiseta básica algodón", "price": 5.9, "shippingAmazon": 1.8, "vendorFee": 0.55, "category": "moda", "emoji": "👕", "stock": 80, "provider": "Shein", "providerLogo": "⚫", "aliases": "camiseta polera playera remera camisa ropa algodon"},
+            {"id": 25, "name": "Blusa casual", "price": 6.7, "shippingAmazon": 2.0, "vendorFee": 0.65, "category": "moda", "emoji": "👚", "stock": 55, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "blusa camisa mujer moda ropa casual"},
+            {"id": 26, "name": "Zapatos casuales", "price": 18.9, "shippingAmazon": 4.8, "vendorFee": 1.5, "category": "calzados", "emoji": "👞", "stock": 28, "provider": "Amazon", "providerLogo": "🟠", "aliases": "calzado calzados zapatos casuales hombre"},
+            {"id": 27, "name": "Zapatillas deportivas", "price": 22.5, "shippingAmazon": 5.2, "vendorFee": 1.8, "category": "calzados", "emoji": "👟", "stock": 25, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "calzado calzados zapatillas tenis deportivo"},
+            {"id": 28, "name": "Sandalias verano", "price": 12.4, "shippingAmazon": 3.5, "vendorFee": 1.1, "category": "calzados", "emoji": "🩴", "stock": 30, "provider": "Shein", "providerLogo": "⚫", "aliases": "calzado sandalias verano playa"},
+            {"id": 29, "name": "Mochila urbana", "price": 15.9, "shippingAmazon": 4.2, "vendorFee": 1.3, "category": "accesorios", "emoji": "🎒", "stock": 35, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "mochila bolso cartera accesorios viaje escuela"},
+            {"id": 30, "name": "Reloj digital básico", "price": 9.99, "shippingAmazon": 2.8, "vendorFee": 0.9, "category": "electronica", "emoji": "⌚", "stock": 44, "provider": "Temu", "providerLogo": "🟧", "aliases": "reloj digital pulsera electronica smartwatch basico"},
+            {"id": 31, "name": "Lámpara LED USB", "price": 6.5, "shippingAmazon": 2.1, "vendorFee": 0.6, "category": "hogar", "emoji": "💡", "stock": 60, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "lampara led usb escritorio hogar oficina"},
+            {"id": 32, "name": "Mini parlante bluetooth", "price": 14.99, "shippingAmazon": 3.9, "vendorFee": 1.2, "category": "electronica", "emoji": "🔊", "stock": 33, "provider": "Amazon", "providerLogo": "🟠", "aliases": "parlante bocina bluetooth musica electronica"},
+            {"id": 33, "name": "Gafas de sol", "price": 5.5, "shippingAmazon": 1.9, "vendorFee": 0.5, "category": "moda", "emoji": "🕶️", "stock": 58, "provider": "Shein", "providerLogo": "⚫", "aliases": "gafas lentes sol moda accesorios"},
+            {"id": 34, "name": "Gorra deportiva", "price": 4.2, "shippingAmazon": 1.3, "vendorFee": 0.4, "category": "moda", "emoji": "🧢", "stock": 72, "provider": "Temu", "providerLogo": "🟧", "aliases": "gorra cap sombrero deporte moda"},
+            {"id": 35, "name": "Guantes limpieza", "price": 2.1, "shippingAmazon": 0.7, "vendorFee": 0.2, "category": "hogar", "emoji": "🧤", "stock": 90, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "guantes limpieza hogar cocina"},
+            {"id": 36, "name": "Cable HDMI", "price": 4.4, "shippingAmazon": 1.1, "vendorFee": 0.35, "category": "electronica", "emoji": "📺", "stock": 46, "provider": "Amazon", "providerLogo": "🟠", "aliases": "cable hdmi tv monitor electronica"},
+            {"id": 37, "name": "Adaptador universal", "price": 6.9, "shippingAmazon": 1.9, "vendorFee": 0.6, "category": "electronica", "emoji": "🔌", "stock": 39, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "adaptador viaje enchufe universal electronica"},
+            {"id": 38, "name": "Neceser viaje", "price": 3.8, "shippingAmazon": 1.2, "vendorFee": 0.35, "category": "belleza", "emoji": "🧴", "stock": 50, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "neceser viaje cosmeticos belleza"},
+            {"id": 39, "name": "Kit manicura", "price": 4.7, "shippingAmazon": 1.3, "vendorFee": 0.4, "category": "belleza", "emoji": "💅", "stock": 52, "provider": "Temu", "providerLogo": "🟧", "aliases": "manicura uñas belleza kit"},
+            {"id": 40, "name": "Portadocumentos", "price": 3.6, "shippingAmazon": 1.1, "vendorFee": 0.3, "category": "oficina", "emoji": "📁", "stock": 63, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "documentos carpeta oficina viaje"}
         ];
 
         
@@ -616,11 +636,11 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             const category = document.getElementById('categoryFilter').value;
             const priceValue = document.getElementById('priceFilter').value;
             const maxPrice = priceValue === '' ? Infinity : Number(priceValue);
-            const filtered = products
+            const base = products
               .filter(p => Number(p.price) >= 0.0001)
               .filter(p => category === '' || p.category === category)
-              .filter(p => Number(p.price) <= maxPrice)
-              .map(p => {
+              .filter(p => Number(p.price) <= maxPrice);
+            let filtered = base.map(p => {
                 const hay = normalizeText([p.name, p.category, p.provider, p.aliases].join(' '));
                 let score = 0;
                 if(!search) score = 1;
@@ -631,9 +651,11 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 return { ...p, _score: score };
               })
               .filter(p => !search || p._score > 0)
-              .sort((a,b)=> (b._score - a._score) || (a.price - b.price))
-              .slice(0,20);
-            renderProducts(filtered);
+              .sort((a,b)=> (b._score - a._score) || (a.price - b.price));
+            if(filtered.length === 0 && base.length > 0){
+                filtered = base.slice().sort((a,b)=> a.price - b.price);
+            }
+            renderProducts(filtered.slice(0,20));
         }
 
         function addToCart(productId) {

@@ -281,6 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('clientEmail').textContent = purchase.email || '-';
             document.getElementById('itemCount').textContent = ((purchase.itemsCount || (purchase.items ? purchase.items.reduce((n,i)=>n+(i.quantity||1),0) : 0)) || 0) + ' ' + t.itemsWord;
             document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
+            if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
+                const note = document.querySelector('.email-note');
+                if(note){ note.innerHTML += '<br><strong>Estado operativo:</strong> pedido registrado; confirmación de pago en proceso.'; }
+            }
             document.getElementById('deliveryInfo').textContent = purchase.deliveryLabel ? `${purchase.deliveryLabel} · ${purchase.deliveryEstimate || '-'}` : (purchase.deliveryEstimate || '-'); let amt = purchase.total || '0.00'; if(typeof amt==='string') amt = amt.replace(/^\$+/, ''); document.getElementById('totalPaid').textContent = amt;
         });
 

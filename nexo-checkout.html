@@ -165,6 +165,16 @@
             text-align: center;
         }
 
+        .cart-item-provider {
+            font-size: 10px;
+            color: var(--primary);
+            font-weight: 900;
+            background: rgba(122,199,66,0.12);
+            padding: 4px 6px;
+            border-radius: 999px;
+            width: fit-content;
+        }
+
         .cart-item-name {
             font-size: 12px;
             font-weight: 700;
@@ -678,7 +688,7 @@
     </div>
 
     
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
@@ -687,13 +697,14 @@ const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
 let nexoSupabase = null;
 function initNexoSupabase(){
   if (nexoSupabase) return nexoSupabase;
-  if (!window.supabase || !window.supabase.createClient) throw new Error('Librería Supabase no cargada. Revise conexión/CDN.');
+  if (!window.supabase || !window.supabase.createClient) { console.warn('Supabase no cargó. El pedido continuará con respaldo local.'); return null; }
   nexoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   window.nexoSupabase = nexoSupabase;
   return nexoSupabase;
 }
 window.nexoSavePedidoToSupabase = async function(orderData){
   const client = initNexoSupabase();
+  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
   const items = Array.isArray(orderData.items) ? orderData.items : [];
   const firstItem = items[0] || {};
   const customer = orderData.customer || {};
@@ -1044,14 +1055,11 @@ function selectPayment(methodId, btnEl=null) {
                 `;
                 attachCardFormatters();
             } else if (methodId === 'bank') {
-                details.innerHTML = `
-                    <div class="form-group"><label class="form-label">Número de Cuenta</label><input type="text" class="form-input" placeholder="000123456789" id="bankAccount"></div>
-                    <div class="form-group"><label class="form-label">Código SWIFT/BIC</label><input type="text" class="form-input" placeholder="ABCDEFGH" id="bankSwift"></div>
-                `;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🏦 Transferencia seleccionada. Al confirmar se registrará el pedido y se emitirán instrucciones de pago internas.</p>`;
             } else if (methodId === 'paypal') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">🅿️ PayPal respaldo: se registrará el cobro a <strong>${NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com'}</strong> si Payoneer no está disponible.</p>`;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">🅿️ PayPal seleccionado. Al confirmar se abrirá el procesador seguro.</p>`;
             } else if (methodId === 'payoneer') {
-                details.innerHTML = `<p style="color:#7AC742;font-size:12px;font-weight:700;">✅ Método recomendado: Payoneer. Cobro operativo: <strong>${NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com'}</strong>. La comisión NEXO queda controlada en el pedido.</p>`;
+                details.innerHTML = `<p style="color:#4A6B6D;font-size:12px;font-weight:800;">💼 Payoneer seleccionado como método preferente.</p>`;
             }
         }
 
@@ -1074,9 +1082,12 @@ function selectPayment(methodId, btnEl=null) {
                 item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
                 item.shippingAmazon = Number(item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
                 item.vendorFee = Number(item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
+                item.provider = item.provider || item.proveedor || item.vendor || 'Proveedor externo';
+                item.providerLogo = item.providerLogo || '🏪';
                 return `
                 <div class="cart-item">
                     <div class="cart-item-icon">${item.icon}</div>
+                    <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
                     <div class="cart-item-name">${item.name}</div>
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
                     <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
@@ -1178,7 +1189,9 @@ const t = ctt();
             const paymentMap = {
               paypal:{es:'PayPal',en:'PayPal',pt:'PayPal',it:'PayPal',fr:'PayPal'},
               payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'},
+              card:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
+              bank:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'},
               transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}
             };
             const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
@@ -1187,6 +1200,33 @@ const t = ctt();
             applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
+
+        async function startNexoPagoSeguro(orderData){
+            const pedidoId = orderData.supabase_id || orderData.id;
+            const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
+            const payload = {
+                pedido_id: pedidoId,
+                total_cliente_usd: Number(orderData.total || 0),
+                total: Number(orderData.total || 0),
+                moneda: 'USD',
+                descripcion: `Pedido nexo ${pedidoId}`,
+                cliente_email: orderData.email || '',
+                success_url: `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`,
+                cancel_url: `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado`
+            };
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(()=>({}));
+            if(!res.ok || !data.approval_url){ throw new Error(data.error || 'No se pudo abrir PayPal'); }
+            orderData.paypal_order_id = data.paypal_order_id || data.id || '';
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            localStorage.setItem('nexoPendingOrder', JSON.stringify(orderData));
+            window.location.href = data.approval_url;
+        }
+
         async function submitPurchase(){
             if(!orderData) return;
             const btnText = document.getElementById('confirmBuyText');
@@ -1235,17 +1275,18 @@ const t = ctt();
                 itFiscal: +orderData.itf.toFixed(2),
                 iueFiscal: +orderData.iue.toFixed(2)
             };
-
             try {
                 if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
                 const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
                 if (error) throw error;
-                orderData.supabase_id = data?.id || null;
-                orderData.estado = 'pendiente';
+                orderData.supabase_id = data?.id || orderData.id;
+                orderData.estado = 'pedido_registrado';
+                orderData.supabase_status = data?.local_only ? 'respaldo_local' : 'guardado';
             } catch (err) {
-                if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
-                alert('No se pudo guardar el pedido en Supabase: ' + (err.message || err));
-                return;
+                console.warn('Supabase no disponible. Pedido continúa con respaldo local.', err);
+                orderData.supabase_id = orderData.id;
+                orderData.estado = 'pedido_registrado_respaldo_local';
+                orderData.supabase_status = 'pendiente_sincronizacion';
             }
 
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
@@ -1268,6 +1309,20 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim()
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
+            orderData.providerFlow = { active:true, agent:'AGENTE 1', status:'activado', providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace'] };
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            if (['paypal','card'].includes(orderData.paymentMethod)) {
+                try {
+                    if(btnText) btnText.textContent = 'Abriendo pago seguro...';
+                    await startNexoPagoSeguro(orderData);
+                    return;
+                } catch(payErr) {
+                    console.warn('PayPal no abrió. Se mantiene pedido registrado y pasa a confirmación operativa.', payErr);
+                    orderData.payment_status = 'pendiente_confirmacion_operativa';
+                    orderData.payment_error = String(payErr && payErr.message ? payErr.message : payErr);
+                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                }
+            }
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html';
         }
