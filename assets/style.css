@@ -7,3 +7,13 @@ img[src*="logo"] {
   height: auto;
   object-fit: contain;
 }
+
+/* MARCA GLOBAL nexo™ */
+:root{--nexo-primary:#4A6B6D;--nexo-accent:#7AC742;}
+.logo img, img[src*="logo"], img[src*="Logo"], img[src*="Nexo"]{
+  content:url('logo-nexo.png');
+  max-width:150px;
+  height:auto;
+  object-fit:contain;
+}
+.nexo-legal-footer strong{letter-spacing:.3px;}

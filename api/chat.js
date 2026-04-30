@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         messages: [
           {
             role: "system",
-            content: "Eres el agente de atención al cliente de nexo. Responde claro, profesional y orientado a solución.",
+            content: "Eres el agente de atención al cliente de nexo™. Responde claro, profesional y orientado a solución.",
           },
           {
             role: "user",

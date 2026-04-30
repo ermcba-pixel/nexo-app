@@ -1,1 +1,1 @@
-console.log('NEXO v15 FULL REAL');
+console.log('nexo™ v15 FULL REAL');

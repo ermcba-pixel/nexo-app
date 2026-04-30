@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXO Admin - Panel de Control</title>
+    <title>nexo™ Admin - Panel de Control</title>
     <style>
         * {
             margin: 0;
@@ -661,7 +661,7 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">Nombre:</span>
-                            <span class="info-value" id="companyName">NEXO</span>
+                            <span class="info-value" id="companyName">nexo™</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Tipo de Régimen:</span>
@@ -669,7 +669,7 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Nombre comercial / Razón Social:</span>
-                            <span class="info-value" id="companySocialName">NEXO</span>
+                            <span class="info-value" id="companySocialName">nexo™</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">ITF:</span>
@@ -989,12 +989,12 @@
                     
                     <div class="form-group">
                         <label class="form-label">Nombre de la Empresa</label>
-                        <input type="text" class="form-input" id="editCompanyName" value="NEXO Servicios Empresariales">
+                        <input type="text" class="form-input" id="editCompanyName" value="Nexo Servicios Generales y Empresariales">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Nombre comercial / Razón Social</label>
-                        <input type="text" class="form-input" id="editCompanySocialName" value="NEXO Servicios Empresariales">
+                        <input type="text" class="form-input" id="editCompanySocialName" value="Nexo Servicios Generales y Empresariales">
                     </div>
 
                     <div class="form-group">
@@ -1420,6 +1420,15 @@ async function renderCustomers(){ const tbody=document.getElementById('customers
 async function renderPayments(){ const sec=document.getElementById('payments'); if(!sec)return; try{await fetchNexoAdminData();}catch(e){} const by={card:0,bank:0,paypal:0,payoneer:0}; nexoOrdersCache.forEach(o=>{const k=String(o.metodo_pago||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('transfer'))by.bank++; else if(k.includes('card')||k.includes('tarjeta'))by.card++;}); const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer;} }
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboard();}catch(e){}},500);});
 </script>
+
+
+<footer class="nexo-legal-footer" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
+  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  Nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
+  nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
+  © 2026 nexo™ – Todos los derechos reservados
+</footer>
+
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -1776,7 +1785,7 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
             const box = document.getElementById('ticketDetailBox');
             const content = document.getElementById('ticketDetailContent');
             const channel = getTicketChannel(t);
-            const subject = encodeURIComponent('Respuesta ticket NEXO - ' + (t.asunto || 'Soporte'));
+            const subject = encodeURIComponent('Respuesta ticket nexo™ - ' + (t.asunto || 'Soporte'));
             const body = encodeURIComponent('Estimado/a ' + (t.nombre_cliente || '') + ',\n\nEn atención a su ticket de soporte, le informamos lo siguiente:\n\n');
             const mailto = 'mailto:' + (t.email || '') + '?subject=' + subject + '&body=' + body;
 
@@ -1880,5 +1889,14 @@ async function renderCustomers(){ const tbody=document.getElementById('customers
 async function renderPayments(){ const sec=document.getElementById('payments'); if(!sec)return; try{await fetchNexoAdminData();}catch(e){} const by={card:0,bank:0,paypal:0,payoneer:0}; nexoOrdersCache.forEach(o=>{const k=String(o.metodo_pago||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('transfer'))by.bank++; else if(k.includes('card')||k.includes('tarjeta'))by.card++;}); const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer;} }
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboard();}catch(e){}},500);});
 </script>
+
+
+<footer class="nexo-legal-footer" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
+  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  Nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
+  nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
+  © 2026 nexo™ – Todos los derechos reservados
+</footer>
+
 </body>
 </html>
