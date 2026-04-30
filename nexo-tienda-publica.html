@@ -518,7 +518,8 @@
                 </div>
                 <div class="filter-group">
                     <label class="filter-label"><span id="priceLabel">💲 Precio Máximo</span></label>
-                    <input type="number" class="filter-input" id="priceFilter" placeholder="USD" min="0" onchange="filterProducts()">
+                    <input type="number" class="filter-input" id="priceFilter" placeholder="Sin límite si queda vacío" min="0" onchange="filterProducts()">
+                    <div id="nexoPriceFilterNote" style="font-size:11px;color:#6f8182;margin-top:6px;font-weight:700;">Si no coloca precio máximo, se muestran productos de todos los precios.</div>
                 </div>
             </div>
 
@@ -650,7 +651,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#6f8182;font-weight:900;padding:50px 10px;">🤖 Agente 1 no encontró coincidencias para ese filtro. Pruebe otro precio, categoría o nombre.</div>`;
                 return;
             }
-            grid.innerHTML = productsToShow.slice(0,20).map(p => `
+            grid.innerHTML = productsToShow.map(p => `
                 <div class="product-card">
                     <div class="product-image"><img src="${nexoProductImage(p)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoProductImages.default;"></div>
                     <div class="product-info">
@@ -692,11 +693,11 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 return { ...p, _score: score };
               })
               .filter(p => !search || p._score > 0)
-              .sort((a,b)=> (b._score - a._score) || (a.price - b.price));
+              .sort((a,b)=> (b._score - a._score) || (a.id - b.id));
             if(filtered.length === 0 && base.length > 0){
                 filtered = base.slice().sort((a,b)=> a.price - b.price);
             }
-            renderProducts(filtered.slice(0,20));
+            renderProducts(filtered);
         }
 
         function addToCart(productId) {

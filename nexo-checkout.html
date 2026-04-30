@@ -615,8 +615,12 @@
 
             <!-- DETALLES DE PAGO (según método) -->
             <div id="paymentDetails"></div>
+            
+            <div class="nexo-agent1-flow-note" style="margin:12px 0;padding:13px 15px;border-radius:14px;background:#eef7f1;border-left:4px solid #7AC742;color:#294446;font-size:13px;line-height:1.55;">
+              <strong>Flujo automático Agente 1:</strong> el cliente paga a la cuenta PayPal de nexo™. Luego el Agente 1 registra la orden interna para pago al proveedor mediante cuenta/tarjeta Payoneer y deja identificada la diferencia como comisión de intermediación de nexo™.
+            </div>
             <div class="nexo-paypal-test-note" style="margin:12px 0;padding:12px 14px;border-radius:14px;background:#fff8e1;border-left:4px solid #f39c12;color:#5b4300;font-size:13px;line-height:1.45;">
-              <strong>Prueba PayPal:</strong> no se puede pagar usando la misma cuenta vendedora de nexo™. Para probar, cierre sesión de PayPal vendedor o use otra cuenta compradora.
+              <strong>PayPal:</strong> la pantalla de PayPal es para que el cliente ingrese con su propia cuenta compradora. No debe pagarse usando la misma cuenta vendedora de nexo™.
             </div>
 
 
@@ -1235,7 +1239,7 @@ const t = ctt();
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`;
             const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado`;
-            const fallbackUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Intermediación comercial ' + pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
+            const fallbackUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Pedido gestionado por Agente 1 ' + pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             try{
                 const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
                 const payload = { pedido_id: pedidoId, total_cliente_usd: Number(amount), total: Number(amount), moneda: 'USD', descripcion: `Pedido nexo ${pedidoId}`, cliente_email: orderData.email || '', success_url: successUrl, cancel_url: cancelUrl };
@@ -1346,8 +1350,42 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim()
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
-            orderData.providerFlow = { active:true, agent:'AGENTE 1', status:'activado', providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace'] };
+            orderData.providerFlow = {
+                active:true,
+                agent:'AGENTE 1',
+                status:'cola_pago_proveedor',
+                cliente_cobra_en:'PayPal nexo™',
+                proveedor_pago_con:'Payoneer / tarjeta Payoneer',
+                margen_empresa:'Diferencia retenida en PayPal como comisión nexo™',
+                providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace']
+            };
+            try {
+                const queue = JSON.parse(localStorage.getItem('nexoProviderPaymentQueue') || '[]');
+                queue.push({
+                    pedido_id: orderData.id,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente_pago_proveedor',
+                    cobrar_cliente_en: 'PayPal',
+                    pagar_proveedor_con: 'Payoneer / tarjeta Payoneer',
+                    total_cliente_usd: orderData.total,
+                    subtotal_producto_usd: orderData.subtotal,
+                    comision_nexo_usd: orderData.commission,
+                    items: orderData.items || [],
+                    nota: 'Automatización real requiere webhook PayPal + API Payoneer/tarjeta + API del proveedor.'
+                });
+                localStorage.setItem('nexoProviderPaymentQueue', JSON.stringify(queue));
+            } catch(e) {}
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            try {
+                await fetch('/api/agente1-pagos', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(orderData)
+                });
+            } catch(e) {
+                console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
+            }
+
             if (['paypal','card'].includes(orderData.paymentMethod)) {
                 try {
                     if(btnText) btnText.textContent = 'Abriendo pago seguro...';
