@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     } = req.body || {};
 
     // Generar ID de ticket
-    const ticketId = "NEXO-" + Date.now();
+    const ticketId = "nexo™-" + Date.now();
 
     // Validación básica
     if (!nombre || !correo || !descripcion) {
