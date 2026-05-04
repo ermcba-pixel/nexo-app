@@ -617,10 +617,10 @@
             <div id="paymentDetails"></div>
             
             <div class="nexo-agent1-flow-note" style="margin:12px 0;padding:13px 15px;border-radius:14px;background:#eef7f1;border-left:4px solid #7AC742;color:#294446;font-size:13px;line-height:1.55;">
-              <strong>Flujo automático Agente 1:</strong> el cliente paga a la cuenta PayPal de nexo™. Luego el Agente 1 registra la orden interna para pago al proveedor mediante cuenta/tarjeta Payoneer y deja identificada la diferencia como comisión de intermediación de nexo™.
+              <strong>Flujo automático Agente 1:</strong> el cliente paga a la cuenta PayPal de nexo™ con PayPal, tarjeta o banco/ACH/Wire vinculado a su propia cuenta compradora. Después de la confirmación, el Agente 1 deja la orden en cola automática para pagar al proveedor con Payoneer/tarjeta Payoneer y la diferencia queda identificada como comisión de intermediación de nexo™.
             </div>
             <div class="nexo-paypal-test-note" style="margin:12px 0;padding:12px 14px;border-radius:14px;background:#fff8e1;border-left:4px solid #f39c12;color:#5b4300;font-size:13px;line-height:1.45;">
-              <strong>PayPal:</strong> la pantalla de PayPal es para que el cliente ingrese con su propia cuenta compradora. No debe pagarse usando la misma cuenta vendedora de nexo™.
+              <strong>PayPal:</strong> la pantalla de PayPal es para que el cliente ingrese con su propia cuenta compradora o banco vinculado. No debe pagarse usando la misma cuenta vendedora de nexo™.
             </div>
 
 
@@ -995,7 +995,8 @@ function applyCheckoutLanguage(){
         // MÉTODOS DE PAGO (SIN CRIPTOMONEDAS)
         const paymentMethods = [
             { id: 'paypal', name: 'PayPal', icon: '🅿️' },
-            { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' }
+            { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' },
+            { id: 'bank', name: 'Banco / ACH / Wire vía PayPal', icon: '🏦' }
         ];
 
         let selectedPayment = 'paypal';
@@ -1075,6 +1076,31 @@ function selectPayment(methodId, btnEl=null) {
                     <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con tarjeta vía PayPal</button>
                 `;
                 attachCardFormatters();
+            } else if (methodId === 'bank') {
+                details.innerHTML = `
+                    <div style="margin:10px 0 12px 0;padding:12px 14px;border-radius:14px;background:#f3faf7;border-left:4px solid #4A6B6D;color:#294446;font-size:13px;line-height:1.5;">
+                        <strong>Pago banco / ACH / Wire vía PayPal:</strong> el cliente paga desde su cuenta bancaria propia vinculada a PayPal. El dinero ingresa a la cuenta PayPal de nexo™; luego el Agente 1 registra el pago al proveedor con Payoneer/tarjeta Payoneer.
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Titular de la cuenta bancaria</label>
+                        <input type="text" class="form-input" id="bankHolder" placeholder="Nombre del titular">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Banco del cliente</label>
+                        <input type="text" class="form-input" id="bankName" placeholder="Nombre del banco">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div class="form-group">
+                            <label class="form-label">Routing / ABA / Ruta</label>
+                            <input type="text" class="form-input" id="bankRouting" placeholder="Número de ruta">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Número de cuenta</label>
+                            <input type="text" class="form-input" id="bankAccount" placeholder="Cuenta bancaria">
+                        </div>
+                    </div>
+                    <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con banco / ACH / Wire vía PayPal</button>
+                `;
             } else {
                 details.innerHTML = `<button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con PayPal (cuenta comprador)</button>`;
             }
@@ -1279,6 +1305,16 @@ const t = ctt();
             orderData.id = orderData.id || ('NEXO-' + Date.now());
             orderData.payoneerEmail = NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com';
             orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
+            if(orderData.paymentMethod === 'bank'){
+                orderData.bankPayment = {
+                    holder: (document.getElementById('bankHolder')?.value || '').trim(),
+                    bankName: (document.getElementById('bankName')?.value || '').trim(),
+                    routingNumber: (document.getElementById('bankRouting')?.value || '').trim(),
+                    accountNumberMasked: (document.getElementById('bankAccount')?.value || '').trim().replace(/.(?=.{4})/g,'•'),
+                    rail: 'ACH/Wire vía PayPal',
+                    destination: 'PayPal nexo™'
+                };
+            }
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;
@@ -1365,7 +1401,7 @@ const t = ctt();
                     pedido_id: orderData.id,
                     fecha: new Date().toISOString(),
                     estado: 'pendiente_pago_proveedor',
-                    cobrar_cliente_en: 'PayPal',
+                    cobrar_cliente_en: orderData.paymentMethod === 'bank' ? 'Banco/ACH/Wire vía PayPal' : 'PayPal',
                     pagar_proveedor_con: 'Payoneer / tarjeta Payoneer',
                     total_cliente_usd: orderData.total,
                     subtotal_producto_usd: orderData.subtotal,
@@ -1386,7 +1422,7 @@ const t = ctt();
                 console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
             }
 
-            if (['paypal','card'].includes(orderData.paymentMethod)) {
+            if (['paypal','card','bank'].includes(orderData.paymentMethod)) {
                 try {
                     if(btnText) btnText.textContent = 'Abriendo pago seguro...';
                     await startNexoPagoSeguro(orderData);
