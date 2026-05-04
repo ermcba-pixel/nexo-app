@@ -714,7 +714,7 @@
 const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
 const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
-// Operación actual: solo PayPal. PayPal queda deshabilitado hasta tener tarjeta habilitada.
+// Operación actual: solo PayPal. Payoneer queda fuera hasta que nexo™ tenga tarjeta habilitada.
 let nexoSupabase = null;
 function initNexoSupabase(){
   if (nexoSupabase) return nexoSupabase;
@@ -1066,7 +1066,7 @@ function selectPayment(methodId, btnEl=null) {
     details.innerHTML = `
       <div style="margin:10px 0 12px 0;padding:12px 14px;border-radius:14px;background:#f3faf7;border-left:4px solid #4A6B6D;color:#294446;font-size:13px;line-height:1.5;">
         <strong>Pago seguro PayPal:</strong> ${messages[methodId] || messages.paypal}<br>
-        <strong>Comisión nexo™:</strong> el sistema registra internamente el 30% como comisión de intermediación.
+        <strong>Comisión nexo™:</strong> 30% calculado sobre el precio del proveedor. PayPal cobra el total final: precio proveedor + comisión nexo™ + costos externos aplicables.
       </div>
       <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${btnText}</button>
     `;
@@ -1154,7 +1154,8 @@ function selectPayment(methodId, btnEl=null) {
             const amazonShipping = cart.reduce((total, item) => total + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
             const vendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
-            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
+            // Comisión fija nexo™: 30% calculada sobre el precio del proveedor, no sobre el total cobrado.
+            const commissionRate = 0.30;
             const commission = subtotal * commissionRate;
             const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
             const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
@@ -1195,7 +1196,8 @@ function openConfirmationModal() {
             const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
             const vendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
-            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
+            // Comisión fija nexo™: 30% calculada sobre el precio del proveedor, no sobre el total cobrado.
+            const commissionRate = 0.30;
             const commission = subtotal * commissionRate;
             const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
             const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
@@ -1225,6 +1227,8 @@ const t = ctt();
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
         async function startNexoPagoSeguro(orderData){
+            // PayPal debe cobrar el TOTAL CLIENTE: precio proveedor + 30% comisión nexo™ + costos externos aplicables.
+            // Ej.: proveedor 100 + comisión 30 = PayPal cobra 130.
             const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`;
@@ -1232,7 +1236,19 @@ const t = ctt();
             const fallbackUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Pedido nexo - Agente 1 ' + pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             try{
                 const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
-                const payload = { pedido_id: pedidoId, total_cliente_usd: Number(amount), total: Number(amount), moneda: 'USD', descripcion: `Pedido nexo ${pedidoId}`, cliente_email: orderData.email || '', success_url: successUrl, cancel_url: cancelUrl };
+                const payload = {
+                    pedido_id: pedidoId,
+                    total_cliente_usd: Number(amount),
+                    total: Number(amount),
+                    subtotal_proveedor_usd: Number(orderData.subtotal || 0),
+                    comision_nexo_usd: Number(orderData.commission || 0),
+                    comision_base: '30% sobre precio proveedor',
+                    moneda: 'USD',
+                    descripcion: `Pedido nexo ${pedidoId} - total incluye comisión 30% sobre proveedor`,
+                    cliente_email: orderData.email || '',
+                    success_url: successUrl,
+                    cancel_url: cancelUrl
+                };
                 const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, body: JSON.stringify(payload) });
                 const data = await res.json().catch(()=>({}));
                 if(res.ok && data.approval_url){ window.location.href = data.approval_url; return; }
@@ -1278,6 +1294,8 @@ const t = ctt();
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;
+            orderData.commissionBase = 'precio_proveedor';
+            orderData.totalPayPalUsd = +Number(orderData.total || 0).toFixed(2);
             orderData.taxRates = { it: 0.03, iue: 0.25 };
             orderData.netCommissionAfterTaxes = +(orderData.commission - orderData.itf - orderData.iue).toFixed(2);
             orderData.customer = {

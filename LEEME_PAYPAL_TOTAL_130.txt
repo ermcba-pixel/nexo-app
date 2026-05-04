@@ -1,0 +1,17 @@
+CAMBIO APLICADO - PAYPAL TOTAL CORRECTO
+
+1. Payoneer queda fuera por ahora. El flujo actual usa solo PayPal.
+2. La comisión nexo™ se calcula SIEMPRE como 30% sobre el precio del proveedor.
+3. PayPal cobra el total cliente:
+   total_cliente = precio_proveedor + comision_nexo_30% + costos_externos_aplicables
+
+Ejemplo base:
+- Precio proveedor: USD 100.00
+- Comisión nexo™ 30%: USD 30.00
+- PayPal cobra al cliente: USD 130.00
+
+Si existen costos externos (envío Amazon/Marketplace o cargos empresa vendedora), se suman al total cliente, pero la comisión sigue calculándose solo sobre el precio del proveedor.
+
+Archivos modificados:
+- nexo-checkout.html
+- api/agente1-pagos.js

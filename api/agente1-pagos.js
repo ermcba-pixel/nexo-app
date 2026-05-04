@@ -12,7 +12,9 @@ export default async function handler(req, res) {
   const pedidoId = order.id || order.supabase_id || ("NEXO-" + Date.now());
   const totalCliente = Number(order.total || 0);
   const subtotalProveedor = Number(order.subtotal || 0);
-  const comision = Number(order.commission || Math.max(0, totalCliente - subtotalProveedor));
+  // Comisión nexo™: SIEMPRE 30% sobre el precio del proveedor, no sobre el total cobrado.
+  // Ej.: proveedor 100 => comisión 30 => total cliente mínimo 130.
+  const comision = Number(order.commission || (subtotalProveedor * 0.30));
 
   // IMPORTANTE: operación actual solo con PayPal.
   // Este endpoint deja preparada la cola operativa del Agente 1 para confirmar el cobro PayPal,
@@ -27,6 +29,8 @@ export default async function handler(req, res) {
     totalClienteUsd: totalCliente,
     montoProveedorEstimadoUsd: subtotalProveedor,
     comisionNexoUsd: comision,
+    comisionBase: '30% sobre precio proveedor',
+    totalPayPalDebeCobrarUsd: totalCliente,
     requiereIntegracionesReales: ["PayPal Webhook", "PayPal Orders/Capture API", "Proveedor API o proceso autorizado"]
   });
 }
