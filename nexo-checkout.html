@@ -617,7 +617,7 @@
             <div id="paymentDetails"></div>
             
             <div class="nexo-agent1-flow-note" style="margin:12px 0;padding:13px 15px;border-radius:14px;background:#eef7f1;border-left:4px solid #7AC742;color:#294446;font-size:13px;line-height:1.55;">
-              <strong>Flujo automático Agente 1:</strong> el cliente paga a la cuenta PayPal empresarial de nexo™ mediante PayPal, tarjeta o cuenta bancaria habilitada por PayPal. Después de la confirmación, el Agente 1 registra la orden como pagada, deja la compra en cola operativa para el proveedor y separa internamente el 30% como comisión de intermediación de nexo™.
+              <strong>Flujo automático Agente 1:</strong> el cliente paga a la cuenta PayPal de nexo™ con PayPal, tarjeta o banco/ACH/Wire vinculado a su propia cuenta compradora. Después de la confirmación, el Agente 1 deja la orden en cola automática para pagar al proveedor con Payoneer/tarjeta Payoneer y la diferencia queda identificada como comisión de intermediación de nexo™.
             </div>
             <div class="nexo-paypal-test-note" style="margin:12px 0;padding:12px 14px;border-radius:14px;background:#fff8e1;border-left:4px solid #f39c12;color:#5b4300;font-size:13px;line-height:1.45;">
               <strong>PayPal:</strong> la pantalla de PayPal es para que el cliente ingrese con su propia cuenta compradora o banco vinculado. No debe pagarse usando la misma cuenta vendedora de nexo™.
@@ -689,7 +689,7 @@
             <div class="form-group"><label class="form-label" id="lblNote">Observación del cliente</label><textarea class="form-input" id="customerNote" rows="3" style="resize:vertical;padding-top:14px" placeholder="Ej.: entregar en horario de oficina, referencia de dirección, etc."></textarea></div>
             <div class="nexo-checkout-legal" style="margin:18px 0;padding:15px 16px;border:1px solid rgba(74,107,109,.28);border-radius:16px;background:#f6faf9;color:#2D3E3F;font-size:13px;line-height:1.55;">
                 <p style="margin:0 0 10px 0;"><strong>Declaración de intermediación:</strong> nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales. El pago incluye costos del proveedor, logística y comisión de intermediación.</p>
-                <p style="margin:0 0 10px 0;"><strong>Pagos y reembolsos:</strong> por ahora el procesamiento se realiza exclusivamente mediante PayPal, incluyendo PayPal, tarjeta o cuenta bancaria habilitada por PayPal. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor original y de la logística internacional.</p>
+                <p style="margin:0 0 10px 0;"><strong>Pagos y reembolsos:</strong> el procesamiento puede realizarse por PayPal, Payoneer, tarjeta o transferencia. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor original y de la logística internacional.</p>
                 <label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;">
                     <input type="checkbox" id="nexoLegalAccept" required style="margin-top:3px;min-width:18px;min-height:18px;">
                     <span>Acepto los términos y condiciones, la política de privacidad, la política de pagos y la condición de intermediación comercial internacional de nexo™.</span>
@@ -705,7 +705,7 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        <span><strong>nexo™</strong> © 2026 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | nexo Servicios Generales y Empresariales | <strong>NIT: 774651015</strong> | <strong>🔐 256-bit SSL</strong><br><small>nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</small></span>
+        <span><strong>nexo™</strong> © 2026 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | Nexo Servicios Generales y Empresariales | <strong>NIT: 774651015</strong> | <strong>🔐 256-bit SSL</strong><br><small>nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</small></span>
     </div>
 
     
@@ -713,8 +713,8 @@
 <script>
 const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
+const NEXO_PAYONEER_EMAIL = "ermcba@hotmail.com";
 const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
-// Operación actual: solo PayPal. Payoneer queda fuera hasta que nexo™ tenga tarjeta habilitada.
 let nexoSupabase = null;
 function initNexoSupabase(){
   if (nexoSupabase) return nexoSupabase;
@@ -732,7 +732,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
   const parts = String(orderData.fullName || '').trim().split(/\s+/);
   const clienteNombre = parts.shift() || '';
   const clienteApellido = parts.join(' ');
-  const metodo = orderData.paymentMethod || 'paypal';
+  const metodo = orderData.paymentMethod || 'payoneer';
   const row = {
     cliente_email: orderData.email || customer.email || '',
     cliente_nombre: clienteNombre, cliente_apellido: clienteApellido, cliente_documento: customer.documentId || '',
@@ -743,7 +743,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
     comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
     moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
     fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
-    observaciones: `Cobro principal PayPal (${NEXO_PAYPAL_EMAIL}). El cliente paga por PayPal, tarjeta o banco habilitado dentro de PayPal. La comisión nexo™ queda registrada internamente para conciliación. ${orderData.note || ''}`.trim()
+    observaciones: `Cobro principal PayPal (${NEXO_PAYPAL_EMAIL}). Cobro al cliente por PayPal; margen/comisión registrado para conciliación y posterior transferencia operativa a Payoneer (${NEXO_PAYONEER_EMAIL}). ${orderData.note || ''}`.trim()
   };
   return await client.from('pedidos').insert([row]).select().single();
 };
@@ -778,7 +778,7 @@ function applyCheckoutLanguage(){
    const raw=(btn.dataset.method||btn.getAttribute('data-method')||btn.textContent||'').toLowerCase();
    if(raw.includes('tarjeta')||raw.includes('card')||raw.includes('credito')) btn.innerHTML='💳 '+({es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'}[currentLang]||'Credit/Debit Card');
    else if(raw.includes('transfer')||raw.includes('bancaria')||raw.includes('bancário')||raw.includes('virement')) btn.innerHTML='🏦 '+({es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}[currentLang]||'Bank Transfer');
-   else if(raw.includes('paypal')) btn.innerHTML='💼 PayPal';
+   else if(raw.includes('payoneer')) btn.innerHTML='💼 Payoneer';
    else if(raw.includes('paypal')) btn.innerHTML='🅿️ PayPal';
  });
 }
@@ -1048,29 +1048,64 @@ function applyCheckoutLanguage(){
         // SELECCIONAR MÉTODO DE PAGO
         
 function selectPayment(methodId, btnEl=null) {
-    // Todos los métodos disponibles pasan por PayPal. nexo™ no almacena tarjetas, rutas ni cuentas bancarias.
-    selectedPayment = methodId || 'paypal';
+    selectedPayment = methodId;
     document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
     if(btnEl) btnEl.classList.add('active');
     else {
-      const found=[...document.querySelectorAll('.payment-btn')].find(b => (b.dataset.method||'')===selectedPayment || (b.getAttribute('onclick')||'').includes(`'${selectedPayment}'`));
+      const found=[...document.querySelectorAll('.payment-btn')].find(b => (b.dataset.method||'')===methodId || (b.getAttribute('onclick')||'').includes(`'${methodId}'`));
       if(found) found.classList.add('active');
     }
     const details = document.getElementById('paymentDetails');
-    const messages = {
-      paypal: 'El cliente ingresa a PayPal y paga con su propia cuenta compradora. El cobro entra a la cuenta PayPal empresarial de nexo™.',
-      card: 'El cliente paga con tarjeta de crédito o débito dentro de PayPal. nexo™ no almacena datos de tarjeta.',
-      bank: 'El cliente usa banco/ACH/Wire solo si PayPal lo habilita en su cuenta compradora. nexo™ no solicita ni almacena número de ruta ni cuenta bancaria.'
-    };
-    const btnText = methodId === 'card' ? 'Pagar con tarjeta vía PayPal' : (methodId === 'bank' ? 'Pagar con banco vía PayPal' : 'Pagar con PayPal');
-    details.innerHTML = `
-      <div style="margin:10px 0 12px 0;padding:12px 14px;border-radius:14px;background:#f3faf7;border-left:4px solid #4A6B6D;color:#294446;font-size:13px;line-height:1.5;">
-        <strong>Pago seguro PayPal:</strong> ${messages[methodId] || messages.paypal}<br>
-        <strong>Comisión nexo™:</strong> 30% calculado sobre el precio del proveedor. PayPal cobra el total final: precio proveedor + comisión nexo™ + costos externos aplicables.
-      </div>
-      <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${btnText}</button>
-    `;
-}
+
+            if (methodId === 'card') {
+                details.innerHTML = `
+                    <div class="form-group">
+                        <label class="form-label">Número de Tarjeta</label>
+                        <input type="text" class="form-input" placeholder="1234 5678 8765 4567" id="cardNumber" inputmode="numeric" maxlength="19">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">MM/AA</label>
+                            <input type="text" class="form-input" placeholder="11/32" id="cardExpiry" inputmode="numeric" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
+                        </div>
+                    </div>
+                    <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con tarjeta vía PayPal</button>
+                `;
+                attachCardFormatters();
+            } else if (methodId === 'bank') {
+                details.innerHTML = `
+                    <div style="margin:10px 0 12px 0;padding:12px 14px;border-radius:14px;background:#f3faf7;border-left:4px solid #4A6B6D;color:#294446;font-size:13px;line-height:1.5;">
+                        <strong>Pago banco / ACH / Wire vía PayPal:</strong> el cliente paga desde su cuenta bancaria propia vinculada a PayPal. El dinero ingresa a la cuenta PayPal de nexo™; luego el Agente 1 registra el pago al proveedor con Payoneer/tarjeta Payoneer.
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Titular de la cuenta bancaria</label>
+                        <input type="text" class="form-input" id="bankHolder" placeholder="Nombre del titular">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Banco del cliente</label>
+                        <input type="text" class="form-input" id="bankName" placeholder="Nombre del banco">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div class="form-group">
+                            <label class="form-label">Routing / ABA / Ruta</label>
+                            <input type="text" class="form-input" id="bankRouting" placeholder="Número de ruta">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Número de cuenta</label>
+                            <input type="text" class="form-input" id="bankAccount" placeholder="Cuenta bancaria">
+                        </div>
+                    </div>
+                    <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con banco / ACH / Wire vía PayPal</button>
+                `;
+            } else {
+                details.innerHTML = `<button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar ahora con PayPal (cuenta comprador)</button>`;
+            }
+        }
+
 
         const nexoCheckoutImages = {
             laptop: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80', notebook: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80', impresora: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80', printer: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80', audifonos: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', auriculares: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', cable: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80', cargador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80', celular: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', iphone: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', reloj: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80', parlante: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80', hdmi: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80', adaptador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80', soporte: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', protector: 'https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80', zapatos: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', zapatillas: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', cordones: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80', camisa: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80', mochila: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', default: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
@@ -1154,8 +1189,7 @@ function selectPayment(methodId, btnEl=null) {
             const amazonShipping = cart.reduce((total, item) => total + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
             const vendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
-            // Comisión fija nexo™: 30% calculada sobre el precio del proveedor, no sobre el total cobrado.
-            const commissionRate = 0.30;
+            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
             const commission = subtotal * commissionRate;
             const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
             const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
@@ -1187,7 +1221,7 @@ function openConfirmationModal() {
             const zipCode = document.getElementById('zipCode').value.trim() || '0000';
             const phoneCode = document.getElementById('phoneCode').value.trim() || '';
             const phoneNumber = document.getElementById('phoneNumber').value.trim() || '70000000';
-            if (!selectedPayment) selectedPayment = 'paypal';
+            if (!selectedPayment) selectedPayment = 'payoneer';
             if(country && !country.value) country.value='';
             const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
 
@@ -1196,8 +1230,7 @@ function openConfirmationModal() {
             const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
             const vendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
-            // Comisión fija nexo™: 30% calculada sobre el precio del proveedor, no sobre el total cobrado.
-            const commissionRate = 0.30;
+            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
             const commission = subtotal * commissionRate;
             const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
             const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
@@ -1210,6 +1243,7 @@ function openConfirmationModal() {
 const t = ctt();
             const paymentMap = {
               paypal:{es:'PayPal',en:'PayPal',pt:'PayPal',it:'PayPal',fr:'PayPal'},
+              payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'},
               card:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               bank:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'},
@@ -1227,28 +1261,14 @@ const t = ctt();
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
         async function startNexoPagoSeguro(orderData){
-            // PayPal debe cobrar el TOTAL CLIENTE: precio proveedor + 30% comisión nexo™ + costos externos aplicables.
-            // Ej.: proveedor 100 + comisión 30 = PayPal cobra 130.
             const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado`;
             const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado`;
-            const fallbackUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Pedido nexo - Agente 1 ' + pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
+            const fallbackUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Pedido gestionado por Agente 1 ' + pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             try{
                 const endpoint = `${SUPABASE_URL}/functions/v1/crear-pago-paypal`;
-                const payload = {
-                    pedido_id: pedidoId,
-                    total_cliente_usd: Number(amount),
-                    total: Number(amount),
-                    subtotal_proveedor_usd: Number(orderData.subtotal || 0),
-                    comision_nexo_usd: Number(orderData.commission || 0),
-                    comision_base: '30% sobre precio proveedor',
-                    moneda: 'USD',
-                    descripcion: `Pedido nexo ${pedidoId} - total incluye comisión 30% sobre proveedor`,
-                    cliente_email: orderData.email || '',
-                    success_url: successUrl,
-                    cancel_url: cancelUrl
-                };
+                const payload = { pedido_id: pedidoId, total_cliente_usd: Number(amount), total: Number(amount), moneda: 'USD', descripcion: `Pedido nexo ${pedidoId}`, cliente_email: orderData.email || '', success_url: successUrl, cancel_url: cancelUrl };
                 const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, body: JSON.stringify(payload) });
                 const data = await res.json().catch(()=>({}));
                 if(res.ok && data.approval_url){ window.location.href = data.approval_url; return; }
@@ -1283,19 +1303,21 @@ const t = ctt();
                 source: 'nexo-checkout.html'
             };
             orderData.id = orderData.id || ('NEXO-' + Date.now());
+            orderData.payoneerEmail = NEXO_PAYONEER_EMAIL || 'ermcba@hotmail.com';
             orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
             if(orderData.paymentMethod === 'bank'){
                 orderData.bankPayment = {
-                    rail: 'Banco/ACH/Wire habilitado por PayPal',
-                    destination: 'PayPal nexo™',
-                    note: 'nexo™ no solicita ni almacena routing, ABA ni número de cuenta bancaria del cliente.'
+                    holder: (document.getElementById('bankHolder')?.value || '').trim(),
+                    bankName: (document.getElementById('bankName')?.value || '').trim(),
+                    routingNumber: (document.getElementById('bankRouting')?.value || '').trim(),
+                    accountNumberMasked: (document.getElementById('bankAccount')?.value || '').trim().replace(/.(?=.{4})/g,'•'),
+                    rail: 'ACH/Wire vía PayPal',
+                    destination: 'PayPal nexo™'
                 };
             }
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;
-            orderData.commissionBase = 'precio_proveedor';
-            orderData.totalPayPalUsd = +Number(orderData.total || 0).toFixed(2);
             orderData.taxRates = { it: 0.03, iue: 0.25 };
             orderData.netCommissionAfterTaxes = +(orderData.commission - orderData.itf - orderData.iue).toFixed(2);
             orderData.customer = {
@@ -1324,7 +1346,7 @@ const t = ctt();
             orderData.reporting = {
                 periodo: new Date(orderData.timestamp).toISOString().slice(0,7),
                 nitEmpresa: '774651015',
-                razonSocial: 'nexo Servicios Generales y Empresariales',
+                razonSocial: 'Nexo Servicios Generales y Empresariales',
                 concepto: 'Servicios de Intermediación / Comercialización Internacional',
                 baseFiscal: +orderData.commission.toFixed(2),
                 itFiscal: +orderData.itf.toFixed(2),
@@ -1367,10 +1389,10 @@ const t = ctt();
             orderData.providerFlow = {
                 active:true,
                 agent:'AGENTE 1',
-                status:'cola_operativa_proveedor',
+                status:'cola_pago_proveedor',
                 cliente_cobra_en:'PayPal nexo™',
-                proveedor_pago_con:'PayPal / método aceptado por proveedor desde operación nexo™',
-                margen_empresa:'Comisión nexo™ del 30% registrada internamente dentro del pedido',
+                proveedor_pago_con:'Payoneer / tarjeta Payoneer',
+                margen_empresa:'Diferencia retenida en PayPal como comisión nexo™',
                 providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace']
             };
             try {
@@ -1380,12 +1402,12 @@ const t = ctt();
                     fecha: new Date().toISOString(),
                     estado: 'pendiente_pago_proveedor',
                     cobrar_cliente_en: orderData.paymentMethod === 'bank' ? 'Banco/ACH/Wire vía PayPal' : 'PayPal',
-                    pagar_proveedor_con: 'PayPal / método aceptado por proveedor',
+                    pagar_proveedor_con: 'Payoneer / tarjeta Payoneer',
                     total_cliente_usd: orderData.total,
                     subtotal_producto_usd: orderData.subtotal,
                     comision_nexo_usd: orderData.commission,
                     items: orderData.items || [],
-                    nota: 'Operación actual solo con PayPal: requiere confirmación PayPal + API/Webhook PayPal + API o proceso autorizado del proveedor.'
+                    nota: 'Automatización real requiere webhook PayPal + API Payoneer/tarjeta + API del proveedor.'
                 });
                 localStorage.setItem('nexoProviderPaymentQueue', JSON.stringify(queue));
             } catch(e) {}
@@ -1580,11 +1602,18 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 
-<footer class="nexo-legal-footer" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
+<footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
   <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
-  © 2026 nexo™ – Todos los derechos reservados
+  © 2026 nexo™ – Todos los derechos reservados<br>
+  <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+    <a href="aviso-legal.html">Aviso Legal</a><span>&nbsp;|&nbsp;</span>
+    <a href="terminos-condiciones.html">Términos y Condiciones</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-privacidad.html">Privacidad</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-cookies.html">Cookies</a><span>&nbsp;|&nbsp;</span>
+    <a href="reembolsos.html">Reembolsos</a>
+  </div>
 </footer>
 
 
@@ -1606,5 +1635,6 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 })();
 </script>
 
+<script src="nexo-legal-i18n.js"></script>
 </body>
 </html>

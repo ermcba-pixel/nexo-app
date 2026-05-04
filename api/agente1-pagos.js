@@ -12,25 +12,20 @@ export default async function handler(req, res) {
   const pedidoId = order.id || order.supabase_id || ("NEXO-" + Date.now());
   const totalCliente = Number(order.total || 0);
   const subtotalProveedor = Number(order.subtotal || 0);
-  // Comisión nexo™: SIEMPRE 30% sobre el precio del proveedor, no sobre el total cobrado.
-  // Ej.: proveedor 100 => comisión 30 => total cliente mínimo 130.
-  const comision = Number(order.commission || (subtotalProveedor * 0.30));
+  const comision = Number(order.commission || Math.max(0, totalCliente - subtotalProveedor));
 
-  // IMPORTANTE: operación actual solo con PayPal.
-  // Este endpoint deja preparada la cola operativa del Agente 1 para confirmar el cobro PayPal,
-  // registrar la comisión nexo™ y coordinar el pago al proveedor mediante PayPal o el método aceptado por el proveedor.
+  // IMPORTANTE: este endpoint deja preparada la cola de automatización.
+  // Para ejecutar pagos reales al proveedor se deben conectar: PayPal Webhooks/Orders API, Payoneer/issuer API o tarjeta empresarial, y API oficial del proveedor.
   return res.status(200).json({
     success: true,
     pedidoId,
     agent: "Agente 1",
     clientePagoDestino: "PayPal nexo™",
-    proveedorPagoOrigen: "PayPal / método aceptado por proveedor",
-    estado: "cola_operativa_proveedor_preparada",
+    proveedorPagoOrigen: "Payoneer / tarjeta Payoneer",
+    estado: "cola_pago_proveedor_preparada",
     totalClienteUsd: totalCliente,
     montoProveedorEstimadoUsd: subtotalProveedor,
     comisionNexoUsd: comision,
-    comisionBase: '30% sobre precio proveedor',
-    totalPayPalDebeCobrarUsd: totalCliente,
-    requiereIntegracionesReales: ["PayPal Webhook", "PayPal Orders/Capture API", "Proveedor API o proceso autorizado"]
+    requiereIntegracionesReales: ["PayPal Webhook", "Payoneer/Card API", "Proveedor API"]
   });
 }
