@@ -1,0 +1,11 @@
+CAMBIOS REALIZADOS - nexo / Agente 1 / PayPal solo
+
+1. Checkout corregido para operar por ahora únicamente con PayPal.
+2. Se eliminó el flujo Payoneer/tarjeta Payoneer del checkout y del endpoint api/agente1-pagos.js.
+3. El cliente puede elegir PayPal, tarjeta o banco/ACH/Wire, pero todo pasa por PayPal si PayPal habilita ese método al comprador.
+4. nexo™ no solicita ni almacena tarjeta, routing, ABA ni número de cuenta bancaria del cliente.
+5. La comisión nexo™ del 30% queda registrada internamente en el pedido para conciliación.
+6. El Agente 1 queda en cola operativa para confirmar pago PayPal y gestionar proveedor por PayPal o método aceptado por proveedor.
+
+Archivo principal modificado: nexo-checkout.html
+Endpoint modificado: api/agente1-pagos.js
