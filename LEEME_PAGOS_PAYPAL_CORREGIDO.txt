@@ -1,0 +1,21 @@
+CAMBIOS REALIZADOS - CHECKOUT / PAGOS nexo
+
+1. Se eliminaron los comentarios visibles debajo de métodos de pago.
+2. Se dejaron solo tres opciones limpias:
+   - Tarjeta de Crédito/Débito
+   - Transferencia ACH / Wire
+   - PayPal
+3. Al tocar Tarjeta se abren campos de tarjeta.
+4. Al tocar Transferencia se abren campos bancarios:
+   - titular de cuenta
+   - banco
+   - routing / ABA / ruta
+   - número de cuenta
+   - selector ACH sin costo o Wire con costo
+5. Al tocar PayPal aparece botón para continuar con PayPal.
+6. El flujo queda configurado para que el cobro principal entre por PayPal de nexo.
+7. Se eliminaron referencias operativas a Payoneer del checkout y del agente de pagos.
+8. La comisión nexo se mantiene como 30% sobre el precio del proveedor.
+
+IMPORTANTE:
+En producción, los datos sensibles de tarjeta/banco deben ser procesados por PayPal o un backend seguro. El HTML solo prepara el flujo visual y la orden; no debe almacenar datos sensibles completos.
