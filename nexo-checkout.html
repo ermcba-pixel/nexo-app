@@ -1216,6 +1216,11 @@ function selectPayment(methodId, btnEl=null) {
         // ABRIR MODAL DE CONFIRMACIÓN
         
 function openConfirmationModal() {
+            // Método elegido en pantalla. Se vuelve a leer para evitar que quede PayPal guardado por error.
+            const activePaymentBtn = document.querySelector('.payment-btn.active');
+            if (activePaymentBtn && activePaymentBtn.dataset && activePaymentBtn.dataset.method) {
+                selectedPayment = activePaymentBtn.dataset.method;
+            }
             prefillClientData();
             const fullName = document.getElementById('fullName').value.trim() || 'Cliente nexo™';
             const email = document.getElementById('email').value.trim() || '';
@@ -1261,7 +1266,12 @@ const t = ctt();
             const legalWarning = document.getElementById('nexoLegalWarning');
             if(legalAccept) legalAccept.checked = false;
             if(legalWarning) legalWarning.style.display = 'none';
-            applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
+            applyCheckoutLanguage();
+            const confirmBtn = document.getElementById('confirmBuyText');
+            if (confirmBtn) {
+                confirmBtn.textContent = selectedPayment === 'paypal' ? 'Abrir PayPal y pagar' : 'Finalizar pedido';
+            }
+            document.getElementById('confirmationModal').style.display = 'block';
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
@@ -1283,6 +1293,11 @@ const t = ctt();
 
         async function submitPurchase(){
             if(!orderData) return;
+            const activePaymentBtn = document.querySelector('.payment-btn.active');
+            if (activePaymentBtn && activePaymentBtn.dataset && activePaymentBtn.dataset.method) {
+                selectedPayment = activePaymentBtn.dataset.method;
+                orderData.paymentMethod = selectedPayment;
+            }
             const btnText = document.getElementById('confirmBuyText');
             const oldBtnText = btnText ? btnText.textContent : '';
             const legalAccept = document.getElementById('nexoLegalAccept');
@@ -1314,7 +1329,7 @@ const t = ctt();
                     holder: (document.getElementById('cardHolder')?.value || '').trim(),
                     cardNumberMasked: (document.getElementById('cardNumber')?.value || '').replace(/\s/g,'').replace(/.(?=.{4})/g,'•'),
                     expiry: (document.getElementById('cardExpiry')?.value || '').trim(),
-                    destination: 'PayPal nexo™'
+                    destination: 'Procesamiento interno nexo™'
                 };
             }
             if(orderData.paymentMethod === 'bank'){
@@ -1324,7 +1339,7 @@ const t = ctt();
                     routingNumber: (document.getElementById('bankRouting')?.value || '').trim(),
                     accountNumberMasked: (document.getElementById('bankAccount')?.value || '').trim().replace(/.(?=.{4})/g,'•'),
                     rail: (document.getElementById('transferType')?.value || 'ACH'),
-                    destination: 'PayPal nexo™'
+                    destination: 'Verificación interna nexo™'
                 };
             }
             orderData.currency = 'USD';
@@ -1401,10 +1416,10 @@ const t = ctt();
             orderData.providerFlow = {
                 active:true,
                 agent:'AGENTE 1',
-                status:'cola_pago_proveedor',
-                cliente_cobra_en:'PayPal nexo™',
+                status: orderData.paymentMethod === 'paypal' ? 'cola_pago_proveedor' : 'pendiente_confirmacion_manual',
+                cliente_cobra_en: orderData.paymentMethod === 'paypal' ? 'PayPal nexo™' : (orderData.paymentMethod === 'card' ? 'Tarjeta registrada para procesamiento manual/pendiente' : 'Transferencia ACH/Wire registrada para verificación'),
                 proveedor_pago_con:'PayPal (si el proveedor acepta PayPal)',
-                margen_empresa:'Diferencia retenida en PayPal como comisión nexo™',
+                margen_empresa:'Comisión nexo™ calculada sobre precio proveedor y registrada en el pedido',
                 providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace']
             };
             try {
@@ -1413,7 +1428,7 @@ const t = ctt();
                     pedido_id: orderData.id,
                     fecha: new Date().toISOString(),
                     estado: 'pendiente_pago_proveedor',
-                    cobrar_cliente_en: orderData.paymentMethod === 'bank' ? 'Banco/ACH/Wire vía PayPal' : 'PayPal',
+                    cobrar_cliente_en: orderData.paymentMethod === 'paypal' ? 'PayPal' : (orderData.paymentMethod === 'card' ? 'Tarjeta registrada - no redirige a PayPal' : 'ACH/Wire registrado - no redirige a PayPal'),
                     pagar_proveedor_con: 'PayPal (si el proveedor acepta PayPal)',
                     total_cliente_usd: orderData.total,
                     subtotal_producto_usd: orderData.subtotal,
@@ -1424,6 +1439,32 @@ const t = ctt();
                 localStorage.setItem('nexoProviderPaymentQueue', JSON.stringify(queue));
             } catch(e) {}
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+
+            // SOLO PayPal abre PayPal.
+            // Tarjeta y ACH/Wire NO redirigen a PayPal: finalizan el pedido y pasan a confirmación.
+            if (orderData.paymentMethod === 'paypal') {
+                try {
+                    if(btnText) btnText.textContent = 'Abriendo PayPal...';
+                    await fetch('/api/agente1-pagos', {
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify(orderData)
+                    }).catch(()=>{});
+                    await startNexoPagoSeguro(orderData);
+                    return;
+                } catch(payErr) {
+                    console.warn('PayPal no abrió por error inesperado.', payErr);
+                    alert('No se pudo abrir PayPal automáticamente. Revise que el navegador permita redirecciones y vuelva a confirmar.');
+                    if(btnText) btnText.textContent = oldBtnText || 'Abrir PayPal y pagar';
+                    return;
+                }
+            }
+
+            orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_pendiente_procesamiento' : 'transferencia_pendiente_verificacion';
+            orderData.estado_compra = 'pedido_finalizado_pendiente_agente_1';
+            orderData.confirmationNote = orderData.paymentMethod === 'card'
+                ? 'Pedido finalizado con tarjeta. No se abrió PayPal. Requiere procesador de tarjetas para cobro automático real.'
+                : 'Pedido finalizado con ACH/Wire. No se abrió PayPal. Requiere verificación bancaria/ACH/Wire para cobro automático real.';
             try {
                 await fetch('/api/agente1-pagos', {
                     method:'POST',
@@ -1433,21 +1474,9 @@ const t = ctt();
             } catch(e) {
                 console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
             }
-
-            if (['paypal','card','bank'].includes(orderData.paymentMethod)) {
-                try {
-                    if(btnText) btnText.textContent = 'Abriendo pago seguro...';
-                    await startNexoPagoSeguro(orderData);
-                    return;
-                } catch(payErr) {
-                    console.warn('PayPal no abrió por error inesperado.', payErr);
-                    alert('No se pudo abrir PayPal automáticamente. Revise que el navegador permita redirecciones y vuelva a confirmar.');
-                    if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
-                    return;
-                }
-            }
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             localStorage.removeItem('nexoCart');
-            window.location.href = 'nexo-confirmacion.html';
+            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago);
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
@@ -1628,24 +1657,6 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
   </div>
 </footer>
 
-
-<script>
-(function(){
-  function nexoCheckoutLegalOk(){
-    var cb=document.getElementById('nexoLegalAccept');
-    if(cb && !cb.checked){ alert('Debes aceptar los términos legales de nexo™ para continuar.'); return false; }
-    return true;
-  }
-  document.addEventListener('click', function(e){
-    var el=e.target;
-    if(!el) return;
-    var txt=(el.textContent||el.value||'').toLowerCase();
-    if((el.tagName==='BUTTON' || el.tagName==='A') && (txt.includes('pagar') || txt.includes('confirmar') || txt.includes('paypal'))){
-      if(!nexoCheckoutLegalOk()){ e.preventDefault(); e.stopPropagation(); }
-    }
-  }, true);
-})();
-</script>
 
 <script src="nexo-legal-i18n.js"></script>
 </body>
