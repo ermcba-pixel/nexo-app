@@ -1,0 +1,14 @@
+nexo - corrección PayPal LIVE
+
+Cambios aplicados:
+1. PayPal ahora redirige a www.paypal.com en modo LIVE, no sandbox.
+2. Se desactivó la llamada a Supabase Function crear-pago-paypal para evitar URLs sandbox.
+3. Solo el método PayPal abre PayPal.
+4. Tarjeta y ACH/Wire no redirigen a PayPal; quedan como registro interno/manual.
+5. El total enviado a PayPal es el total final: precio proveedor + 30% comisión nexo + costos externos.
+6. La cuenta receptora configurada es: ermcba@hotmail.com.
+
+Importante:
+- Para pruebas reales usa una cuenta PayPal compradora distinta de la cuenta empresarial receptora.
+- Si PayPal rechaza, revisar que la cuenta empresarial receptora esté habilitada para recibir pagos y sin restricciones.
+- Esta versión usa PayPal Standard por email. Para automatización total con webhook se debe crear backend/API PayPal Live.
