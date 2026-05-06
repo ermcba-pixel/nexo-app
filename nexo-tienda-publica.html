@@ -616,25 +616,56 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
 
         function nexoSvgProductImage(p){
-            const provider = (p.provider || 'Marketplace').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-            const name = (p.name || 'Producto').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-            const emoji = p.emoji || '🛍️';
+            const provider = (p.provider || 'Amazon Business').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+            const rawName = String(p.name || 'Producto Amazon');
+            const name = rawName.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+            const lower = rawName.toLowerCase();
+            let art = '';
+            if(lower.includes('iphone') || lower.includes('phone') || lower.includes('samsung')){
+                art = `<rect x="305" y="80" width="190" height="300" rx="32" fill="#111827" filter="url(#sh)"/>
+                       <rect x="322" y="105" width="156" height="238" rx="20" fill="url(#screen)"/>
+                       <circle cx="400" cy="358" r="11" fill="#374151"/>
+                       <circle cx="456" cy="130" r="17" fill="#0f172a"/><circle cx="456" cy="130" r="8" fill="#64748b"/>
+                       <circle cx="432" cy="130" r="12" fill="#0f172a"/><circle cx="432" cy="130" r="5" fill="#64748b"/>
+                       <rect x="338" y="130" width="70" height="10" rx="5" fill="#ffffff" opacity=".75"/>
+                       <rect x="338" y="154" width="95" height="10" rx="5" fill="#ffffff" opacity=".45"/>`;
+            } else if(lower.includes('laptop') || lower.includes('notebook') || lower.includes('macbook')){
+                art = `<rect x="210" y="110" width="380" height="230" rx="18" fill="#111827" filter="url(#sh)"/>
+                       <rect x="230" y="130" width="340" height="185" rx="8" fill="url(#screen)"/>
+                       <path d="M175 355h450l-42 55H217z" fill="#cbd5e1"/>
+                       <rect x="330" y="372" width="140" height="12" rx="6" fill="#94a3b8"/>`;
+            } else if(lower.includes('mouse')){
+                art = `<ellipse cx="400" cy="235" rx="110" ry="160" fill="#1f2937" filter="url(#sh)"/>
+                       <path d="M400 84v115" stroke="#64748b" stroke-width="7"/>
+                       <rect x="385" y="105" width="30" height="65" rx="15" fill="#94a3b8"/>
+                       <path d="M400 82c-55 28-88 78-99 148h198c-11-70-44-120-99-148z" fill="#374151"/>`;
+            } else if(lower.includes('battery') || lower.includes('batteries') || lower.includes('pilas')){
+                art = `<g filter="url(#sh)">${Array.from({length:8}).map((_,i)=>`<g transform="translate(${220+i*48},160) rotate(${i%2?'-6':'6'})"><rect width="34" height="150" rx="8" fill="#d97706"/><rect y="18" width="34" height="38" fill="#facc15" opacity=".8"/><rect x="8" y="-8" width="18" height="8" rx="3" fill="#94a3b8"/><text x="17" y="96" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" transform="rotate(90 17 96)">Amazon</text></g>`).join('')}</g>`;
+            } else if(lower.includes('cable') || lower.includes('usb') || lower.includes('hdmi') || lower.includes('charger')){
+                art = `<path d="M250 300c80-150 250-150 300 0" fill="none" stroke="#111827" stroke-width="26" stroke-linecap="round" filter="url(#sh)"/>
+                       <rect x="190" y="285" width="95" height="78" rx="12" fill="#374151"/><rect x="170" y="305" width="38" height="38" rx="7" fill="#9ca3af"/>
+                       <rect x="515" y="285" width="95" height="78" rx="12" fill="#374151"/><rect x="592" y="305" width="38" height="38" rx="7" fill="#9ca3af"/>`;
+            } else {
+                art = `<rect x="265" y="125" width="270" height="220" rx="36" fill="#4A6B6D" opacity=".95" filter="url(#sh)"/>
+                       <path d="M315 170h170l25 130H290z" fill="#ffffff" opacity=".85"/>
+                       <path d="M345 170c0-55 110-55 110 0" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>`;
+            }
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="560" viewBox="0 0 800 560">
               <defs>
-                <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef6f3"/><stop offset="1" stop-color="#dfecea"/></linearGradient>
-                <filter id="sh"><feDropShadow dx="0" dy="12" stdDeviation="18" flood-opacity=".20"/></filter>
+                <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fbfa"/><stop offset="1" stop-color="#dfecea"/></linearGradient>
+                <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset=".55" stop-color="#1d4ed8"/><stop offset="1" stop-color="#111827"/></linearGradient>
+                <filter id="sh"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-opacity=".23"/></filter>
               </defs>
               <rect width="800" height="560" rx="34" fill="url(#g)"/>
-              <rect x="64" y="54" width="672" height="452" rx="32" fill="#ffffff" opacity=".62"/>
-              <circle cx="400" cy="235" r="116" fill="#4A6B6D" opacity=".13"/>
-              <text x="400" y="260" text-anchor="middle" font-size="116" font-family="Arial, sans-serif" filter="url(#sh)">${emoji}</text>
-              <text x="400" y="383" text-anchor="middle" font-size="34" font-weight="800" fill="#2D3E3F" font-family="Arial, sans-serif">${name}</text>
-              <text x="400" y="430" text-anchor="middle" font-size="24" font-weight="700" fill="#4A6B6D" font-family="Arial, sans-serif">Proveedor: ${provider}</text>
-              <text x="400" y="480" text-anchor="middle" font-size="22" font-weight="900" fill="#7AC742" font-family="Arial, sans-serif">nexo™</text>
+              <rect x="64" y="54" width="672" height="452" rx="32" fill="#ffffff" opacity=".58"/>
+              ${art}
+              <text x="400" y="430" text-anchor="middle" font-size="27" font-weight="900" fill="#203435" font-family="Arial, sans-serif">${name}</text>
+              <text x="400" y="470" text-anchor="middle" font-size="21" font-weight="800" fill="#4A6B6D" font-family="Arial, sans-serif">Proveedor: ${provider}</text>
+              <text x="400" y="504" text-anchor="middle" font-size="19" font-weight="900" fill="#7AC742" font-family="Arial, sans-serif">nexo™</text>
             </svg>`;
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
-        function nexoSupplierUrl(p){
+                function nexoSupplierUrl(p){
             const q = encodeURIComponent(p.name || 'producto');
             const provider = String(p.provider || '').toLowerCase();
             if(provider.includes('amazon')) return `https://www.amazon.com/s?k=${q}`;
