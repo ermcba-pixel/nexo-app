@@ -694,6 +694,7 @@
                 return el && String(el.value || '').trim() !== '';
             });
             const password = document.getElementById('regPassword').value || '';
+            if (typeof renderLivePasswordRules === 'function') renderLivePasswordRules('regPassword', 'registerPasswordRules');
             const ok = allFilled && password.length >= 8;
             document.getElementById('registerBtn').disabled = !ok;
             return ok;
@@ -846,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => { applyLoginLanguage(); appl
 const registerTexts = {
   es:{title:'Crear Mi Cuenta', back:'← Volver al Portal', first:'👤 Nombre', last:'Apellido', doc:'🪪 Número Documento de Identidad / NIT', docPh:'CI, pasaporte o NIT', email:'📧 Correo Electrónico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Teléfono', zip:'📮 Código Postal', region:'🏙️ Región / Estado', city:'🏠 Ciudad', address:'📍 Dirección exacta de envío', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para crear la cuenta.', btn:'Crear Cuenta', have:'¿Ya tienes cuenta?', signin:'Inicia sesión aquí'},
   en:{title:'Create My Account', back:'← Back to Portal', first:'👤 First Name', last:'Last Name', doc:'🪪 Identity Document Number / Tax ID', docPh:'ID, passport or tax ID', email:'📧 Email Address', country:'🌎 Country', area:'☎️ Area Code', phone:'📱 Phone', zip:'📮 Postal Code', region:'🏙️ Region / State', city:'🏠 City', address:'📍 Exact Shipping Address', pass:'🔐 Password', passPh:'Minimum 8 characters', passHelp:'Minimum 8 characters to create the account.', btn:'Create Account', have:'Already have an account?', signin:'Sign in here'},
-  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres<div class="password-rules-panel">✔ Mayús<br>✔ minús<br>✔ Número<br>✔ Símbolo<br>✔ 8 carac</div> para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
+  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
   it:{title:'Crea Il Mio Account', back:'← Torna al Portale', first:'👤 Nome', last:'Cognome', doc:'🪪 Numero Documento d’Identità / Partita IVA', docPh:'CI, passaporto o P.IVA', email:'📧 Email', country:'🌎 Paese', area:'☎️ Prefisso', phone:'📱 Telefono', zip:'📮 Codice Postale', region:'🏙️ Regione / Stato', city:'🏠 Città', address:'📍 Indirizzo esatto di spedizione', pass:'🔐 Password', passPh:'Minimo 8 caratteri', passHelp:'Minimo 8 caratteri per creare l’account.', btn:'Crea Account', have:'Hai già un account?', signin:'Accedi qui'},
   fr:{title:'Créer Mon Compte', back:'← Retour au Portail', first:'👤 Prénom', last:'Nom', doc:'🪪 Numéro du document d’identité / NIF', docPh:'CI, passeport ou NIF', email:'📧 Adresse e-mail', country:'🌎 Pays', area:'☎️ Indicatif', phone:'📱 Téléphone', zip:'📮 Code Postal', region:'🏙️ Région / État', city:'🏠 Ville', address:'📍 Adresse exacte de livraison', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', passHelp:'Minimum 8 caractères pour créer le compte.', btn:'Créer le Compte', have:'Vous avez déjà un compte ?', signin:'Connectez-vous ici'}
 };
@@ -1191,26 +1192,14 @@ function renderLivePasswordRules(inputId, boxId){
   if(!input || !box) return;
 
   const val = input.value || '';
-  const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(val);
-  const hasLower = /[a-záéíóúñ]/.test(val);
-  const hasNumber = /[0-9]/.test(val);
-  const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(val);
   const hasLength = val.length >= 8;
-
-  let score = 0;
-  [hasUpper, hasLower, hasNumber, hasSymbol, hasLength].forEach(v => { if(v) score += 1; });
-
-  const title = score <= 1 ? 'Muy débil' : score <= 3 ? 'Media' : score === 4 ? 'Fuerte' : 'Muy fuerte';
-  const titleColor = score <= 1 ? '#a94442' : score <= 3 ? '#b37a00' : '#2f7d32';
+  const title = hasLength ? 'Clave válida' : 'Mínimo 8 caracteres';
+  const titleColor = hasLength ? '#2f7d32' : '#a94442';
 
   box.innerHTML = `
     <div class="password-rules-title" style="color:${titleColor}">${title}</div>
     <div class="password-rules-grid">
-      <div class="password-rule ${hasUpper ? 'ok' : 'no'}">${hasUpper ? '✔' : '✖'} Mayús</div>
-      <div class="password-rule ${hasLower ? 'ok' : 'no'}">${hasLower ? '✔' : '✖'} minús</div>
-      <div class="password-rule ${hasNumber ? 'ok' : 'no'}">${hasNumber ? '✔' : '✖'} Número</div>
-      <div class="password-rule ${hasSymbol ? 'ok' : 'no'}">${hasSymbol ? '✔' : '✖'} Símbolo</div>
-      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 carac</div>
+      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 caracteres</div>
     </div>
   `;
 }
