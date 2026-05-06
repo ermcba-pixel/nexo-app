@@ -530,13 +530,13 @@
             <div id="cartItems"></div>
             <div class="cart-summary">
                 <div class="summary-row"><span id="sumSubtotalLbl">Subtotal producto:</span><span>$<span id="subtotal">0.00</span></span></div>
-                <div class="summary-row"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío estimados (Amazon/Marketplace):</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
-                <div class="summary-row"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos proveedor/marketplace estimados:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
+                <div class="summary-row"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío Amazon/Marketplace:</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
+                <div class="summary-row"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos proveedor/marketplace Amazon:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
                 <div class="summary-row"><span id="sumComLbl">Comisión NEXO:</span><span>$<span id="commission">0.00</span></span></div>
                 <div class="summary-row"><span id="sumItLbl"></span><span>$<span id="taxAmount">0.00</span></span></div>
                 <div class="summary-row"><span id="sumIueLbl"></span><span>$<span id="retentionAmount">0.00</span></span></div>
                 <div class="summary-row total"><span id="sumTotalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
-                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">Los valores en naranja son estimados de Sandbox. El costo final debe calcularse con Amazon usando país, ciudad, código postal y dirección exacta del cliente al confirmar el pedido.</span></div>
+                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.</span></div>
             </div>
             <button class="checkout-btn" onclick="goToCheckout()"><span id="checkoutBtnText">Proceder al Pago</span></button>
         </div>
@@ -552,29 +552,8 @@ function nexoProductImageMarkup(product){
   return `<div class="nexo-img-fallback">${emoji}</div>`;
 }
 
-        const products = [
-            { id: 1, name: 'AirPods Pro', price: 249, shippingAmazon: 24, vendorFee: 12, category: 'electrónica', emoji: '🎧', stock: 8 },
-            { id: 2, name: 'iPad Air 5', price: 599, shippingAmazon: 35, vendorFee: 18, category: 'electrónica', emoji: '📱', stock: 5 },
-            { id: 3, name: 'MacBook Air', price: 1299, shippingAmazon: 48, vendorFee: 26, category: 'electrónica', emoji: '💻', stock: 3 },
-            { id: 4, name: 'Apple Watch', price: 399, shippingAmazon: 22, vendorFee: 9, category: 'electrónica', emoji: '⌚', stock: 12 },
-            { id: 5, name: 'iPhone 15', price: 999, shippingAmazon: 41, vendorFee: 21, category: 'electrónica', emoji: '📲', stock: 7 },
-            { id: 6, name: 'Mochila Gamer', price: 79, shippingAmazon: 11, vendorFee: 4, category: 'accesorios', emoji: '🎒', stock: 15 },
-            { id: 7, name: 'Cable USB-C', price: 29, shippingAmazon: 6, vendorFee: 2, category: 'accesorios', emoji: '🔌', stock: 50 },
-            { id: 8, name: 'Funda iPhone', price: 39, shippingAmazon: 7, vendorFee: 3, category: 'accesorios', emoji: '📦', stock: 25 },
-            { id: 9, name: 'Sudadera NEXO', price: 49, shippingAmazon: 9, vendorFee: 3, category: 'moda', emoji: '👕', stock: 20 },
-            { id: 10, name: 'Gafas de Sol', price: 149, shippingAmazon: 14, vendorFee: 5, category: 'moda', emoji: '😎', stock: 18 },
-            { id: 11, name: 'Reloj Deportivo', price: 189, shippingAmazon: 17, vendorFee: 7, category: 'electrónica', emoji: '⌚', stock: 10 },
-            { id: 12, name: 'Audífonos Inalámbricos', price: 129, shippingAmazon: 13, vendorFee: 5, category: 'electrónica', emoji: '🎧', stock: 14 }
-        ];
+        let products = [];
 
-        
-const storeI18n={
- es:{title:'Tienda NEXO',subtitle:'12 Productos Premium • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío estimados (Amazon/Marketplace):',sumVendor:'Gastos proveedor/marketplace estimados:',sumCom:'Comisión NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja son estimados de Sandbox. El costo final debe calcularse con Amazon usando país, ciudad, código postal y dirección exacta del cliente al confirmar el pedido.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
- en:{title:'NEXO Store',subtitle:'12 Premium Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
- pt:{title:'Loja NEXO',subtitle:'12 Produtos Premium • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
- it:{title:'Negozio NEXO',subtitle:'12 Prodotti Premium • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
- fr:{title:'Boutique NEXO',subtitle:'12 Produits Premium • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
-};
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
 function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=currentLang; document.getElementById('storeTitle').textContent=t.title; document.getElementById('storeSubtitle').textContent=t.subtitle; document.getElementById('cartTitle').textContent=t.cartTitle; document.getElementById('backText').textContent=t.back; document.getElementById('searchLabel').textContent=t.search; document.getElementById('catLabel').textContent=t.cat; document.getElementById('priceLabel').textContent=t.price; document.getElementById('searchInput').placeholder=t.searchPh; document.getElementById('catAll').textContent=t.catAll; document.getElementById('catElect').textContent=t.catElect; document.getElementById('catAcc').textContent=t.catAcc; document.getElementById('catFashion').textContent=t.catFashion; document.getElementById('sumSubtotalLbl').textContent=t.sumSubtotal; document.getElementById('sumShipLbl').textContent=t.sumShip; document.getElementById('sumVendorLbl').textContent=t.sumVendor; document.getElementById('sumComLbl').textContent=t.sumCom; document.getElementById('sumItLbl').textContent=t.sumIt; document.getElementById('sumIueLbl').textContent=t.sumIue; document.getElementById('sumTotalLbl').textContent=t.sumTotal; document.getElementById('sumNote').textContent=t.sumNote; document.getElementById('checkoutBtnText').textContent=t.checkout; document.getElementById('cartBadge').title=t.cartTitleAttr; }
@@ -598,6 +577,44 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                     </div>
                 </div>
             `).join('');
+        }
+
+
+        let nexoAmazonLoadTimer = null;
+        let nexoLastAmazonQuery = '';
+        async function loadAmazonProductsFromApi(search, maxPrice){
+            const q = String(search || '').trim();
+            if(q.length < 2) return false;
+            const key = q + '|' + String(maxPrice || '');
+            if(key === nexoLastAmazonQuery) return true;
+            nexoLastAmazonQuery = key;
+            const grid = document.getElementById('productsGrid');
+            if(grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:35px 10px;">🤖 Agente 1 consultando Amazon API para productos originales...</div>`;
+            try{
+                const url = `/api/amazon-products?q=${encodeURIComponent(q)}${Number.isFinite(maxPrice) && maxPrice !== Infinity ? `&maxPrice=${encodeURIComponent(maxPrice)}` : ''}`;
+                const r = await fetch(url, {headers:{'Accept':'application/json'}});
+                const data = await r.json();
+                if(data && data.ok && Array.isArray(data.products) && data.products.length){
+                    products = data.products.map((p, idx)=>({
+                        ...p,
+                        id: p.id || `amazon-api-${idx+1}`,
+                        name: p.name || p.title || 'Producto Amazon',
+                        provider: p.provider || 'Amazon',
+                        providerLogo: p.providerLogo || '🟠',
+                        category: p.category || 'general',
+                        stock: p.stock || 'Amazon',
+                        aliases: [p.name, p.title, p.asin, 'amazon original'].filter(Boolean).join(' ')
+                    })).sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+                    renderProducts(products);
+                    return true;
+                }
+                if(data && data.ok === false){
+                    products = [];
+                    if(grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:left;color:#2D3E3F;font-weight:800;padding:28px;border:1px solid #f39c12;border-radius:16px;background:#fffaf0;line-height:1.55;">⚠️ Amazon API real todavía no devuelve productos originales.<br><br><b>Motivo:</b> ${data.error || data.reason || 'credenciales incompletas'}<br><br><b>En Vercel faltan para productos originales:</b><br>AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG<br><br>Las variables AMAZON_CLIENT_ID / AMAZON_CLIENT_SECRET / AMAZON_REFRESH_TOKEN son de SP-API para órdenes/compras, pero no reemplazan Product Advertising API para buscar productos e imágenes originales.</div>`;
+                    return false;
+                }
+            }catch(e){ console.warn('Amazon API pendiente:', e); }
+            return false;
         }
 
         function filterProducts() {
@@ -683,8 +700,8 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         function updateCartSummary() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0);
-            const vendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
+            const amazonShipping = cart.reduce((sum, item) => sum + ((Number(item.shippingAmazon) || 0) * item.quantity), 0);
+            const vendorFees = cart.reduce((sum, item) => sum + ((Number(item.vendorFee) || 0) * item.quantity), 0);
             const tax = subtotal * 0.30 * 0.03;
             const retention = subtotal * 0.30 * 0.25;
             const commission = subtotal * 0.30;
@@ -900,7 +917,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
-  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  <strong>nexo™</strong> – Sistema de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
   © 2026 nexo™ – Todos los derechos reservados<br>

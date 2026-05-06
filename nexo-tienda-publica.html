@@ -540,13 +540,13 @@
             <div id="cartItems"></div>
             <div class="cart-summary">
                 <div class="summary-row"><span id="sumSubtotalLbl">Subtotal producto:</span><span>$<span id="subtotal">0.00</span></span></div>
-                <div class="summary-row"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío estimados (Amazon/Marketplace):</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
-                <div class="summary-row"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos proveedor/marketplace estimados:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
+                <div class="summary-row"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío Amazon/Marketplace:</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
+                <div class="summary-row"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos proveedor/marketplace Amazon:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
                 <div class="summary-row"><span id="sumComLbl">Comisión nexo™:</span><span>$<span id="commission">0.00</span></span></div>
                 <div class="summary-row"><span id="sumItLbl"></span><span>$<span id="taxAmount">0.00</span></span></div>
                 <div class="summary-row"><span id="sumIueLbl"></span><span>$<span id="retentionAmount">0.00</span></span></div>
                 <div class="summary-row total"><span id="sumTotalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
-                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">Los valores en naranja son estimados de Sandbox. El costo final debe calcularse con Amazon usando país, ciudad, código postal y dirección exacta del cliente al confirmar el pedido.</span></div>
+                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.</span></div>
             </div>
             <button class="checkout-btn" onclick="goToCheckout()"><span id="checkoutBtnText">Proceder al Pago</span></button>
         </div>
@@ -562,62 +562,8 @@ function nexoProductImageMarkup(product){
   return `<div class="nexo-img-fallback">${emoji}</div>`;
 }
 
-        const products = [
+        let products = [];
 
-            {"id": 901, "name": "Laptop Lenovo IdeaPad 15", "price": 389.00, "shippingAmazon": 24.00, "vendorFee": 8.50, "category": "electronica", "emoji": "💻", "stock": 18, "provider": "Amazon", "providerLogo": "🟠", "aliases": "laptop notebook computadora portatil lenovo ideapad pc"},
-            {"id": 902, "name": "Laptop HP 14 Ryzen", "price": 449.00, "shippingAmazon": 29.00, "vendorFee": 10.00, "category": "electronica", "emoji": "💻", "stock": 14, "provider": "Amazon", "providerLogo": "🟠", "aliases": "laptop notebook computadora portatil hp ryzen pc"},
-            {"id": 903, "name": "Laptop Dell Inspiron", "price": 529.00, "shippingAmazon": 34.00, "vendorFee": 12.00, "category": "electronica", "emoji": "💻", "stock": 11, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "laptop notebook computadora portatil dell inspiron pc"},
-            {"id": 904, "name": "Laptop Acer Aspire", "price": 319.00, "shippingAmazon": 22.00, "vendorFee": 7.50, "category": "electronica", "emoji": "💻", "stock": 20, "provider": "Amazon", "providerLogo": "🟠", "aliases": "laptop notebook computadora portatil acer aspire pc"},
-            {"id": 905, "name": "Notebook económica 11 pulgadas", "price": 189.00, "shippingAmazon": 18.00, "vendorFee": 6.00, "category": "electronica", "emoji": "💻", "stock": 16, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "laptop notebook computadora portatil economica 11 pulgadas pc"},            {"id": 1, "name": "Cable USB-C reforzado", "price": 2.99, "shippingAmazon": 1.2, "vendorFee": 0.4, "category": "accesorios", "emoji": "🔌", "stock": 50, "provider": "Amazon", "providerLogo": "🟠", "aliases": "cable cargador usb tipo c electronica accesorios carga rapida"},
-            {"id": 2, "name": "Funda iPhone transparente", "price": 3.95, "shippingAmazon": 1.1, "vendorFee": 0.35, "category": "accesorios", "emoji": "📱", "stock": 42, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "case carcasa protector iphone celular accesorios"},
-            {"id": 3, "name": "Protector de pantalla vidrio", "price": 1.49, "shippingAmazon": 0.8, "vendorFee": 0.2, "category": "accesorios", "emoji": "🛡️", "stock": 80, "provider": "Temu", "providerLogo": "🟧", "aliases": "vidrio templado mica celular pantalla protector"},
-            {"id": 4, "name": "Cordones deportivos", "price": 1.99, "shippingAmazon": 0.7, "vendorFee": 0.2, "category": "calzados", "emoji": "👟", "stock": 60, "provider": "Shein", "providerLogo": "⚫", "aliases": "calzado calzados zapatos zapatillas tenis cordones deportivo"},
-            {"id": 5, "name": "Plantillas gel", "price": 4.75, "shippingAmazon": 1.3, "vendorFee": 0.45, "category": "calzados", "emoji": "👞", "stock": 35, "provider": "Amazon", "providerLogo": "🟠", "aliases": "calzado calzados zapatos plantillas gel comodidad"},
-            {"id": 6, "name": "Llavero metálico", "price": 2.5, "shippingAmazon": 0.9, "vendorFee": 0.25, "category": "accesorios", "emoji": "🔑", "stock": 70, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "llavero accesorios regalo"},
-            {"id": 7, "name": "Bolígrafo premium", "price": 1.2, "shippingAmazon": 0.5, "vendorFee": 0.15, "category": "oficina", "emoji": "🖊️", "stock": 100, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "lapicero boligrafo oficina escritura"},
-            {"id": 8, "name": "Mouse pad", "price": 4.99, "shippingAmazon": 1.2, "vendorFee": 0.4, "category": "oficina", "emoji": "🖱️", "stock": 45, "provider": "Amazon", "providerLogo": "🟠", "aliases": "alfombrilla mouse escritorio oficina gamer"},
-            {"id": 9, "name": "Calcetines deportivos", "price": 3.49, "shippingAmazon": 1.0, "vendorFee": 0.3, "category": "moda", "emoji": "🧦", "stock": 55, "provider": "Shein", "providerLogo": "⚫", "aliases": "calzado calzados medias calcetines deportes ropa"},
-            {"id": 10, "name": "Cepillo de limpieza", "price": 2.25, "shippingAmazon": 0.9, "vendorFee": 0.25, "category": "hogar", "emoji": "🧹", "stock": 65, "provider": "Temu", "providerLogo": "🟧", "aliases": "hogar limpieza cocina bano cepillo"},
-            {"id": 11, "name": "Organizador cables", "price": 3.1, "shippingAmazon": 0.9, "vendorFee": 0.3, "category": "hogar", "emoji": "🧰", "stock": 40, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "cables organizador oficina hogar accesorios"},
-            {"id": 12, "name": "Botella deportiva", "price": 4.8, "shippingAmazon": 1.4, "vendorFee": 0.45, "category": "deportes", "emoji": "🥤", "stock": 32, "provider": "Amazon", "providerLogo": "🟠", "aliases": "deporte botella agua gym gimnasio"},
-            {"id": 13, "name": "Toalla microfibra", "price": 4.6, "shippingAmazon": 1.2, "vendorFee": 0.4, "category": "deportes", "emoji": "🏋️", "stock": 30, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "toalla deporte gimnasio viaje"},
-            {"id": 14, "name": "Sticker decorativo", "price": 0.99, "shippingAmazon": 0.35, "vendorFee": 0.1, "category": "hogar", "emoji": "🏷️", "stock": 120, "provider": "Temu", "providerLogo": "🟧", "aliases": "pegatina sticker decoracion hogar"},
-            {"id": 15, "name": "Pulsera simple", "price": 2.8, "shippingAmazon": 0.9, "vendorFee": 0.25, "category": "moda", "emoji": "📿", "stock": 48, "provider": "Shein", "providerLogo": "⚫", "aliases": "pulsera moda accesorio bisuteria"},
-            {"id": 16, "name": "Soporte celular", "price": 4.3, "shippingAmazon": 1.0, "vendorFee": 0.35, "category": "electronica", "emoji": "📲", "stock": 38, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "soporte celular telefono auto escritorio"},
-            {"id": 17, "name": "Cargador auto USB", "price": 4.95, "shippingAmazon": 1.2, "vendorFee": 0.45, "category": "autos", "emoji": "🚗", "stock": 25, "provider": "Amazon", "providerLogo": "🟠", "aliases": "auto carro cargador usb coche"},
-            {"id": 18, "name": "Esponja maquillaje", "price": 1.75, "shippingAmazon": 0.6, "vendorFee": 0.2, "category": "belleza", "emoji": "💄", "stock": 90, "provider": "Shein", "providerLogo": "⚫", "aliases": "belleza maquillaje esponja cosmetico"},
-            {"id": 19, "name": "Peine portátil", "price": 1.1, "shippingAmazon": 0.45, "vendorFee": 0.1, "category": "belleza", "emoji": "💇", "stock": 85, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "peine belleza cabello pelo"},
-            {"id": 20, "name": "Audífonos básicos", "price": 4.99, "shippingAmazon": 1.4, "vendorFee": 0.45, "category": "electronica", "emoji": "🎧", "stock": 22, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "audifonos auriculares earphones musica electronica"},
-            {"id": 21, "name": "Camisa casual hombre", "price": 8.9, "shippingAmazon": 2.4, "vendorFee": 0.8, "category": "moda", "emoji": "👔", "stock": 45, "provider": "Shein", "providerLogo": "⚫", "aliases": "camisa camisas ropa hombre vestir casual moda"},
-            {"id": 22, "name": "Camisa blanca oficina", "price": 9.5, "shippingAmazon": 2.6, "vendorFee": 0.9, "category": "moda", "emoji": "👕", "stock": 40, "provider": "Amazon", "providerLogo": "🟠", "aliases": "camisa camisas blanca oficina vestir trabajo hombre mujer"},
-            {"id": 23, "name": "Camisa manga corta", "price": 7.8, "shippingAmazon": 2.2, "vendorFee": 0.7, "category": "moda", "emoji": "👚", "stock": 48, "provider": "Temu", "providerLogo": "🟧", "aliases": "camisa camisas manga corta verano ropa moda"},
-            {"id": 24, "name": "Camiseta básica algodón", "price": 5.9, "shippingAmazon": 1.8, "vendorFee": 0.55, "category": "moda", "emoji": "👕", "stock": 80, "provider": "Shein", "providerLogo": "⚫", "aliases": "camiseta polera playera remera camisa ropa algodon"},
-            {"id": 25, "name": "Blusa casual", "price": 6.7, "shippingAmazon": 2.0, "vendorFee": 0.65, "category": "moda", "emoji": "👚", "stock": 55, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "blusa camisa mujer moda ropa casual"},
-            {"id": 26, "name": "Zapatos casuales", "price": 18.9, "shippingAmazon": 4.8, "vendorFee": 1.5, "category": "calzados", "emoji": "👞", "stock": 28, "provider": "Amazon", "providerLogo": "🟠", "aliases": "calzado calzados zapatos casuales hombre"},
-            {"id": 27, "name": "Zapatillas deportivas", "price": 22.5, "shippingAmazon": 5.2, "vendorFee": 1.8, "category": "calzados", "emoji": "👟", "stock": 25, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "calzado calzados zapatillas tenis deportivo"},
-            {"id": 28, "name": "Sandalias verano", "price": 12.4, "shippingAmazon": 3.5, "vendorFee": 1.1, "category": "calzados", "emoji": "🩴", "stock": 30, "provider": "Shein", "providerLogo": "⚫", "aliases": "calzado sandalias verano playa"},
-            {"id": 29, "name": "Mochila urbana", "price": 15.9, "shippingAmazon": 4.2, "vendorFee": 1.3, "category": "accesorios", "emoji": "🎒", "stock": 35, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "mochila bolso cartera accesorios viaje escuela"},
-            {"id": 30, "name": "Reloj digital básico", "price": 9.99, "shippingAmazon": 2.8, "vendorFee": 0.9, "category": "electronica", "emoji": "⌚", "stock": 44, "provider": "Temu", "providerLogo": "🟧", "aliases": "reloj digital pulsera electronica smartwatch basico"},
-            {"id": 31, "name": "Lámpara LED USB", "price": 6.5, "shippingAmazon": 2.1, "vendorFee": 0.6, "category": "hogar", "emoji": "💡", "stock": 60, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "lampara led usb escritorio hogar oficina"},
-            {"id": 32, "name": "Mini parlante bluetooth", "price": 14.99, "shippingAmazon": 3.9, "vendorFee": 1.2, "category": "electronica", "emoji": "🔊", "stock": 33, "provider": "Amazon", "providerLogo": "🟠", "aliases": "parlante bocina bluetooth musica electronica"},
-            {"id": 33, "name": "Gafas de sol", "price": 5.5, "shippingAmazon": 1.9, "vendorFee": 0.5, "category": "moda", "emoji": "🕶️", "stock": 58, "provider": "Shein", "providerLogo": "⚫", "aliases": "gafas lentes sol moda accesorios"},
-            {"id": 34, "name": "Gorra deportiva", "price": 4.2, "shippingAmazon": 1.3, "vendorFee": 0.4, "category": "moda", "emoji": "🧢", "stock": 72, "provider": "Temu", "providerLogo": "🟧", "aliases": "gorra cap sombrero deporte moda"},
-            {"id": 35, "name": "Guantes limpieza", "price": 2.1, "shippingAmazon": 0.7, "vendorFee": 0.2, "category": "hogar", "emoji": "🧤", "stock": 90, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "guantes limpieza hogar cocina"},
-            {"id": 36, "name": "Cable HDMI", "price": 4.4, "shippingAmazon": 1.1, "vendorFee": 0.35, "category": "electronica", "emoji": "📺", "stock": 46, "provider": "Amazon", "providerLogo": "🟠", "aliases": "cable hdmi tv monitor electronica"},
-            {"id": 37, "name": "Adaptador universal", "price": 6.9, "shippingAmazon": 1.9, "vendorFee": 0.6, "category": "electronica", "emoji": "🔌", "stock": 39, "provider": "AliExpress", "providerLogo": "🔴", "aliases": "adaptador viaje enchufe universal electronica"},
-            {"id": 38, "name": "Neceser viaje", "price": 3.8, "shippingAmazon": 1.2, "vendorFee": 0.35, "category": "belleza", "emoji": "🧴", "stock": 50, "provider": "CJ Dropshipping", "providerLogo": "🔵", "aliases": "neceser viaje cosmeticos belleza"},
-            {"id": 39, "name": "Kit manicura", "price": 4.7, "shippingAmazon": 1.3, "vendorFee": 0.4, "category": "belleza", "emoji": "💅", "stock": 52, "provider": "Temu", "providerLogo": "🟧", "aliases": "manicura uñas belleza kit"},
-            {"id": 40, "name": "Portadocumentos", "price": 3.6, "shippingAmazon": 1.1, "vendorFee": 0.3, "category": "oficina", "emoji": "📁", "stock": 63, "provider": "Marketplace", "providerLogo": "🏪", "aliases": "documentos carpeta oficina viaje"}
-        ];
-
-        
-const storeI18n={
- es:{title:'Tienda nexo™',subtitle:'20 Productos multi-proveedor • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío estimados (Amazon/Marketplace):',sumVendor:'Gastos proveedor/marketplace estimados:',sumCom:'Comisión nexo™:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja son estimados de Sandbox. El costo final debe calcularse con Amazon usando país, ciudad, código postal y dirección exacta del cliente al confirmar el pedido.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
- en:{title:'nexo™ Store',subtitle:'12 Premium Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'nexo™ commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
- pt:{title:'Loja nexo™',subtitle:'12 Produtos Premium • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
- it:{title:'Negozio nexo™',subtitle:'12 Prodotti Premium • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
- fr:{title:'Boutique nexo™',subtitle:'12 Produits Premium • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
-};
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
 function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=currentLang; document.getElementById('storeTitle').textContent=t.title; document.getElementById('storeSubtitle').textContent=t.subtitle; document.getElementById('cartTitle').textContent=t.cartTitle; document.getElementById('backText').textContent=t.back; document.getElementById('searchLabel').textContent=t.search; document.getElementById('catLabel').textContent=t.cat; document.getElementById('priceLabel').textContent=t.price; document.getElementById('searchInput').placeholder=t.searchPh; document.getElementById('catAll').textContent=t.catAll; document.getElementById('catElect').textContent=t.catElect; document.getElementById('catAcc').textContent=t.catAcc; document.getElementById('catFashion').textContent=t.catFashion; document.getElementById('sumSubtotalLbl').textContent=t.sumSubtotal; document.getElementById('sumShipLbl').textContent=t.sumShip; document.getElementById('sumVendorLbl').textContent=t.sumVendor; document.getElementById('sumComLbl').textContent=t.sumCom; document.getElementById('sumItLbl').textContent=t.sumIt; document.getElementById('sumIueLbl').textContent=t.sumIue; document.getElementById('sumTotalLbl').textContent=t.sumTotal; document.getElementById('sumNote').textContent=t.sumNote; document.getElementById('checkoutBtnText').textContent=t.checkout; document.getElementById('cartBadge').title=t.cartTitleAttr; }
@@ -656,20 +602,21 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             return `https://www.google.com/search?q=${q}+marketplace`;
         }
         function nexoProductImage(p){
-            // No usamos hotlinks externos: así no se rompen las fotos en Vercel.
-            // Para fotos reales de Amazon/marketplaces se requiere API oficial del proveedor.
+            // Si Amazon PA-API devuelve imagen original, se usa esa URL original.
+            // Si todavía no hay PA-API completa, se muestra respaldo visual local.
+            if(p && p.image && /^https?:\/\//i.test(p.image)) return p.image;
             return nexoSvgProductImage(p);
         }
 
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
             if(!productsToShow || productsToShow.length === 0){
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#6f8182;font-weight:900;padding:50px 10px;">🤖 Agente 1 no encontró coincidencias para ese filtro. Pruebe otro precio, categoría o nombre.</div>`;
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#6f8182;font-weight:900;padding:50px 10px;">Ingrese un producto para consultar Amazon API real. Si no aparecen productos, faltan credenciales Amazon PA-API/SP-API Catalog en Vercel.</div>`;
                 return;
             }
             grid.innerHTML = productsToShow.map(p => `
                 <div class="product-card">
-                    <div class="product-image"><img src="${nexoProductImage(p)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoProductImages.default;"></div>
+                    <div class="product-image">${nexoProductImageMarkup({...p, image:nexoProductImage(p)})}</div>
                     <div class="product-info">
                         <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
                         <a href="${nexoSupplierUrl(p)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
@@ -689,11 +636,54 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
         }
 
+
+        let nexoAmazonLoadTimer = null;
+        let nexoLastAmazonQuery = '';
+        async function loadAmazonProductsFromApi(search, maxPrice){
+            const q = String(search || '').trim();
+            if(q.length < 2) return false;
+            const key = q + '|' + String(maxPrice || '');
+            if(key === nexoLastAmazonQuery) return true;
+            nexoLastAmazonQuery = key;
+            const grid = document.getElementById('productsGrid');
+            if(grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:35px 10px;">🤖 Agente 1 consultando Amazon API para productos originales...</div>`;
+            try{
+                const url = `/api/amazon-products?q=${encodeURIComponent(q)}${Number.isFinite(maxPrice) && maxPrice !== Infinity ? `&maxPrice=${encodeURIComponent(maxPrice)}` : ''}`;
+                const r = await fetch(url, {headers:{'Accept':'application/json'}});
+                const data = await r.json();
+                if(data && data.ok && Array.isArray(data.products) && data.products.length){
+                    products = data.products.map((p, idx)=>({
+                        ...p,
+                        id: p.id || `amazon-api-${idx+1}`,
+                        name: p.name || p.title || 'Producto Amazon',
+                        provider: p.provider || 'Amazon',
+                        providerLogo: p.providerLogo || '🟠',
+                        category: p.category || 'general',
+                        stock: p.stock || 'Amazon',
+                        aliases: [p.name, p.title, p.asin, 'amazon original'].filter(Boolean).join(' ')
+                    })).sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+                    renderProducts(products);
+                    return true;
+                }
+                if(data && data.ok === false){
+                    products = [];
+                    if(grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:left;color:#2D3E3F;font-weight:800;padding:28px;border:1px solid #f39c12;border-radius:16px;background:#fffaf0;line-height:1.55;">⚠️ Amazon API real todavía no devuelve productos originales.<br><br><b>Motivo:</b> ${data.error || data.reason || 'credenciales incompletas'}<br><br><b>En Vercel faltan para productos originales:</b><br>AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG<br><br>Las variables AMAZON_CLIENT_ID / AMAZON_CLIENT_SECRET / AMAZON_REFRESH_TOKEN son de SP-API para órdenes/compras, pero no reemplazan Product Advertising API para buscar productos e imágenes originales.</div>`;
+                    return false;
+                }
+            }catch(e){ console.warn('Amazon API pendiente:', e); }
+            return false;
+        }
+
         function filterProducts() {
-            const search = normalizeText(document.getElementById('searchInput').value);
+            const rawSearch = document.getElementById('searchInput').value;
+            const search = normalizeText(rawSearch);
             const category = document.getElementById('categoryFilter').value;
             const priceValue = document.getElementById('priceFilter').value;
             const maxPrice = priceValue === '' ? Infinity : Number(priceValue);
+            clearTimeout(nexoAmazonLoadTimer);
+            if(rawSearch.trim().length >= 2){
+                nexoAmazonLoadTimer = setTimeout(()=>loadAmazonProductsFromApi(rawSearch, maxPrice), 350);
+            }
             const base = products
               .filter(p => Number(p.price) >= 0.0001)
               .filter(p => category === '' || p.category === category)
@@ -709,7 +699,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 return { ...p, _score: score };
               })
               .filter(p => !search || p._score > 0)
-              .sort((a,b)=> (b._score - a._score) || (a.id - b.id));
+              .sort((a,b)=> (b._score - a._score) || (Number(b.price)-Number(a.price)));
             if(filtered.length === 0 && base.length > 0){
                 // Sin coincidencia exacta: no forzamos productos baratos.
                 // Mostramos un mix de todos los precios respetando el precio máximo si el cliente lo puso.
@@ -722,7 +712,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             const product = products.find(p => p.id === productId);
             if(!product) return;
             product.image = nexoProductImage(product);
-            product.sourceUrl = product.sourceUrl || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(product.name + ' ' + product.provider)}`;
+            product.sourceUrl = product.sourceUrl || product.url || `https://www.amazon.com/s?k=${encodeURIComponent(product.name)}`;
             const existingItem = cart.find(c => c.id === productId);
 
             if (existingItem) {
@@ -792,8 +782,8 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         function updateCartSummary() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0);
-            const vendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
+            const amazonShipping = cart.reduce((sum, item) => sum + ((Number(item.shippingAmazon) || 0) * item.quantity), 0);
+            const vendorFees = cart.reduce((sum, item) => sum + ((Number(item.vendorFee) || 0) * item.quantity), 0);
             const tax = subtotal * 0.30 * 0.03;
             const retention = subtotal * 0.30 * 0.25;
             const commission = subtotal * 0.30;
@@ -910,7 +900,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
-  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  <strong>nexo™</strong> – Sistema de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
   © 2026 nexo™ – Todos los derechos reservados<br>

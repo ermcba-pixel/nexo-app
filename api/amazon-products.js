@@ -1,95 +1,125 @@
+// nexo – Amazon Product Search API
+// Producción: usa Amazon Product Advertising API 5.0 para devolver productos, precios e imágenes originales Amazon.
+// Requiere en Vercel: AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG.
+// Opcional: AMAZON_REGION=us-east-1, AMAZON_HOST=webservices.amazon.com, AMAZON_MARKETPLACE=www.amazon.com
 
-// nexo Amazon Business bridge
-// Sandbox usa catálogo controlado. Producción usará imágenes originales Amazon si el API devuelve URLs válidas.
+import crypto from 'crypto';
 
-const QUERY_CATALOGS = {
-  iphone: [
-    ['Apple iPhone 15 Pro Max 256GB Unlocked', 1099, 'phone'],
-    ['Apple iPhone 15 Pro 128GB Unlocked', 899, 'phone'],
-    ['Apple iPhone 14 Pro Max 256GB Renewed', 849, 'phone'],
-    ['Apple iPhone 15 256GB Unlocked', 799, 'phone'],
-    ['Apple iPhone 15 Plus 128GB Unlocked', 799, 'phone'],
-    ['Apple iPhone 14 Pro 128GB Renewed', 749, 'phone'],
-    ['Apple iPhone 15 128GB Unlocked', 699, 'phone'],
-    ['Apple iPhone 14 256GB Unlocked', 699, 'phone'],
-    ['Apple iPhone 13 Pro Max 256GB Renewed', 699, 'phone'],
-    ['Apple iPhone 14 Plus 128GB Unlocked', 679, 'phone'],
-    ['Apple iPhone 14 128GB Unlocked', 599, 'phone'],
-    ['Apple iPhone 13 256GB Unlocked', 579, 'phone'],
-    ['Apple iPhone 13 Pro 128GB Renewed', 579, 'phone'],
-    ['Apple iPhone 13 128GB Unlocked', 499, 'phone'],
-    ['Apple iPhone SE 128GB Unlocked', 479, 'phone'],
-    ['Apple iPhone 12 Pro 128GB Renewed', 459, 'phone'],
-    ['Apple iPhone SE 64GB Unlocked', 429, 'phone'],
-    ['Apple iPhone 12 128GB Unlocked Renewed', 359, 'phone'],
-    ['Apple iPhone 12 64GB Unlocked Renewed', 299, 'phone'],
-    ['Apple iPhone 11 64GB Unlocked Renewed', 249, 'phone']
-  ],
-  laptop: [
-    ['LG Gram 16 laptop',1199,'laptop'], ['Dell XPS 13 laptop',1199,'laptop'], ['HP EliteBook business laptop',1099,'laptop'],
-    ['MacBook Air 15 inch M3',1099,'laptop'], ['Microsoft Surface Laptop',999,'laptop'], ['MacBook Air 13 inch M3',999,'laptop'],
-    ['Dell Latitude Business Laptop',899,'laptop'], ['Lenovo Yoga 7 2-in-1',899,'laptop'], ['MacBook Air 13 inch M2',899,'laptop'],
-    ['ASUS Zenbook 14 OLED',849,'laptop'], ['Acer Nitro gaming laptop',799,'laptop'], ['Lenovo ThinkPad E16 Business Laptop',799,'laptop'],
-    ['Samsung Galaxy Book4',749,'laptop'], ['HP Pavilion 15 laptop',649,'laptop'], ['Dell Inspiron 15 laptop',529,'laptop'],
-    ['MSI Modern 14 laptop',499,'laptop'], ['ASUS Vivobook 15 laptop',479,'laptop'], ['HP 14 Ryzen laptop',449,'laptop'],
-    ['Lenovo IdeaPad 15.6 inch laptop',389,'laptop'], ['Acer Aspire 5 laptop',319,'laptop']
-  ]
-};
+const REGION = process.env.AMAZON_REGION || 'us-east-1';
+const HOST = process.env.AMAZON_HOST || 'webservices.amazon.com';
+const MARKETPLACE = process.env.AMAZON_MARKETPLACE || 'www.amazon.com';
+const SERVICE = 'ProductAdvertisingAPI';
+const PATH = '/paapi5/searchitems';
+const TARGET = 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems';
 
-function freeCatalog(q){
-  const s = String(q || 'producto').trim();
-  const type = /camisa|shirt/i.test(s) ? 'shirt' : /zapato|shoe/i.test(s) ? 'shoe' : /cable|usb/i.test(s) ? 'cable' : 'product';
-  return Array.from({length:20},(_,i)=>[`${s} - Amazon Business option ${i+1}`, +(29+i*18.75).toFixed(2), type]);
+function hmac(key, data, enc){ return crypto.createHmac('sha256', key).update(data, 'utf8').digest(enc); }
+function sha256(data, enc='hex'){ return crypto.createHash('sha256').update(data, 'utf8').digest(enc); }
+function amzDate(d=new Date()){
+  const iso=d.toISOString().replace(/[:-]|\.\d{3}/g,'');
+  return {amz: iso, short: iso.slice(0,8)};
 }
-
-function pickCatalog(q){
-  const s = String(q || '').toLowerCase();
-  if (s.includes('iphone')) return QUERY_CATALOGS.iphone;
-  if (s.includes('laptop') || s.includes('notebook') || s.includes('macbook')) return QUERY_CATALOGS.laptop;
-  return freeCatalog(q);
+function signingKey(secret, dateStamp, regionName, serviceName){
+  const kDate=hmac('AWS4'+secret, dateStamp);
+  const kRegion=hmac(kDate, regionName);
+  const kService=hmac(kRegion, serviceName);
+  return hmac(kService, 'aws4_request');
 }
-
-function normalize(row, idx){
-  const [title, price, imageType] = row;
-  const shipping = Math.max(4.99, +(Number(price)*0.07).toFixed(2));
+function signHeaders({payload}){
+  const accessKey=process.env.AMAZON_ACCESS_KEY;
+  const secretKey=process.env.AMAZON_SECRET_KEY;
+  if(!accessKey || !secretKey) throw new Error('missing_paapi_keys');
+  const {amz, short}=amzDate();
+  const headers={
+    'content-encoding':'amz-1.0',
+    'content-type':'application/json; charset=utf-8',
+    'host':HOST,
+    'x-amz-date':amz,
+    'x-amz-target':TARGET
+  };
+  const signedHeaders=Object.keys(headers).sort().join(';');
+  const canonicalHeaders=Object.keys(headers).sort().map(k=>`${k}:${headers[k]}\n`).join('');
+  const canonicalRequest=['POST', PATH, '', canonicalHeaders, signedHeaders, sha256(payload)].join('\n');
+  const credentialScope=`${short}/${REGION}/${SERVICE}/aws4_request`;
+  const stringToSign=['AWS4-HMAC-SHA256', amz, credentialScope, sha256(canonicalRequest)].join('\n');
+  const signature=hmac(signingKey(secretKey, short, REGION, SERVICE), stringToSign, 'hex');
   return {
-    id: `amazon-sandbox-${idx+1}`,
-    asin: `SANDBOX${String(idx+1).padStart(4,'0')}`,
-    name: title,
-    title,
-    provider: 'Amazon Business',
-    proveedor: 'Amazon Business',
-    vendor: 'Amazon Business',
-    providerLogo: '🟠',
-    price: Number(price),
-    shippingAmazon: shipping,
-    vendorFee: 0,
-    category: /iphone|laptop|macbook|notebook|usb|cable/i.test(title) ? 'electronica' : 'general',
-    image: null,
-    imageType,
-    imageOriginalRequired: true,
-    url: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
-    sourceUrl: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
-    stock: 8 + (idx % 18),
-    source: 'amazon-business-sandbox',
-    rating: 4.7,
-    reviews: 128,
-    sandbox: true
+    ...headers,
+    'authorization':`AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`
   };
 }
+function normalizePaapiItem(item, idx){
+  const listing=item?.Offers?.Listings?.[0] || {};
+  const price=Number(listing?.Price?.Amount || item?.Offers?.Summaries?.[0]?.LowestPrice?.Amount || 0);
+  const image=item?.Images?.Primary?.Large?.URL || item?.Images?.Primary?.Medium?.URL || item?.Images?.Primary?.Small?.URL || '';
+  const title=item?.ItemInfo?.Title?.DisplayValue || 'Producto Amazon';
+  const asin=item?.ASIN || `AMZ-${idx+1}`;
+  const url=item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`;
+  const availability=listing?.Availability?.Message || '';
+  return {
+    id:`amazon-${asin}`,
+    asin,
+    name:title,
+    title,
+    provider:'Amazon',
+    proveedor:'Amazon',
+    vendor:'Amazon',
+    providerLogo:'🟠',
+    price,
+    shippingAmazon:null,
+    vendorFee:null,
+    shippingQuoteStatus:'pending_amazon_checkout',
+    category:/laptop|notebook|iphone|phone|tablet|monitor|pc|computer|usb|cable/i.test(title) ? 'electronica' : 'general',
+    image,
+    imageType:/laptop|notebook|macbook/i.test(title) ? 'laptop' : /iphone|phone|cell/i.test(title) ? 'phone' : 'product',
+    url,
+    sourceUrl:url,
+    stock: availability ? availability : 'Amazon',
+    source:'amazon-paapi',
+    rating:4.7,
+    reviews: item?.CustomerReviews?.Count || 0,
+    sandbox:false,
+    originalAmazon:true
+  };
+}
+async function searchAmazonPaapi(q, maxPrice){
+  const partnerTag=process.env.AMAZON_ASSOCIATE_TAG;
+  if(!process.env.AMAZON_ACCESS_KEY || !process.env.AMAZON_SECRET_KEY || !partnerTag){
+    return {ok:false, reason:'missing_paapi_env'};
+  }
+  const payload=JSON.stringify({
+    Keywords:q || 'laptop',
+    SearchIndex:'All',
+    ItemCount:10,
+    PartnerTag:partnerTag,
+    PartnerType:'Associates',
+    Marketplace:MARKETPLACE,
+    Resources:[
+      'Images.Primary.Small','Images.Primary.Medium','Images.Primary.Large',
+      'ItemInfo.Title','Offers.Listings.Price','Offers.Listings.Availability.Message','Offers.Summaries.LowestPrice','CustomerReviews.Count'
+    ]
+  });
+  const r=await fetch(`https://${HOST}${PATH}`, {method:'POST', headers:signHeaders({payload}), body:payload});
+  const text=await r.text();
+  if(!r.ok) return {ok:false, reason:'paapi_rejected', status:r.status, detail:text.slice(0,500)};
+  const data=JSON.parse(text);
+  let products=(data?.SearchResult?.Items || []).map(normalizePaapiItem).filter(p=>p.price>0);
+  if(maxPrice) products=products.filter(p=>p.price<=maxPrice);
+  products=products.sort((a,b)=>Number(b.price)-Number(a.price));
+  return {ok:true, products};
+}
 
-async function getLwaAccessToken(){
-  const client_id = process.env.AMAZON_CLIENT_ID;
-  const client_secret = process.env.AMAZON_CLIENT_SECRET;
-  const refresh_token = process.env.AMAZON_REFRESH_TOKEN;
-  if(!client_id || !client_secret || !refresh_token) return {ok:false, reason:'missing_env'};
-  try{
-    const body = new URLSearchParams({grant_type:'refresh_token', refresh_token, client_id, client_secret});
-    const r = await fetch('https://api.amazon.com/auth/o2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-    if(!r.ok) return {ok:false,status:r.status,reason:'lwa_rejected'};
-    const d = await r.json();
-    return {ok:Boolean(d.access_token), expires_in:d.expires_in||null};
-  }catch(e){ return {ok:false,reason:'lwa_network_error'}; }
+function missingAmazonConfigResponse(reason){
+  return {
+    ok:false,
+    provider:'Amazon',
+    mode:'amazon_not_configured_for_product_search',
+    originalImages:false,
+    sort:'price_desc',
+    error:'Amazon real no devolvió productos originales. Falta configurar Product Advertising API o SP-API Catalog Items completo.',
+    requiredForPaapi:['AMAZON_ACCESS_KEY','AMAZON_SECRET_KEY','AMAZON_ASSOCIATE_TAG'],
+    requiredForSpApiCatalog:['AMAZON_CLIENT_ID','AMAZON_CLIENT_SECRET','AMAZON_REFRESH_TOKEN','AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY','AWS_REGION','AMAZON_MARKETPLACE_ID'],
+    reason
+  };
 }
 
 export default async function handler(req,res){
@@ -98,19 +128,15 @@ export default async function handler(req,res){
   res.setHeader('Access-Control-Allow-Headers','Content-Type');
   if(req.method==='OPTIONS') return res.status(200).end();
   if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
-  const q = String(req.query.q || req.query.search || '').trim();
-  const maxPrice = Number(req.query.maxPrice || req.query.max || 0);
-  const token = await getLwaAccessToken();
-  let products = pickCatalog(q).map(normalize).filter(p => !maxPrice || p.price <= maxPrice);
-  products = products.sort((a,b)=>Number(b.price)-Number(a.price));
-  return res.status(200).json({
-    ok:true,
-    provider:'Amazon Business',
-    mode:'sandbox',
-    credentialsDetected:Boolean(process.env.AMAZON_CLIENT_ID && process.env.AMAZON_CLIENT_SECRET && process.env.AMAZON_REFRESH_TOKEN),
-    lwaTokenOk:token.ok,
-    tokenStatus:token.ok ? 'LWA token generado' : token.reason,
-    notice: token.ok ? 'Sandbox activo. Imágenes originales se usarán automáticamente en Producción cuando Amazon entregue URLs válidas.' : 'Sandbox activo. Revise variables LWA.',
-    products
-  });
+  const q=String(req.query.q || req.query.search || '').trim();
+  const maxPrice=Number(req.query.maxPrice || req.query.max || 0);
+  try{
+    const real=await searchAmazonPaapi(q, maxPrice);
+    if(real.ok){
+      return res.status(200).json({ok:true, provider:'Amazon', mode:'production_paapi', originalImages:true, sort:'price_desc', products:real.products});
+    }
+    return res.status(200).json({...missingAmazonConfigResponse(real.reason || 'missing_paapi_env'), paapiStatus:real, products:[]});
+  }catch(e){
+    return res.status(200).json({...missingAmazonConfigResponse(String(e.message||e)), products:[]});
+  }
 }
