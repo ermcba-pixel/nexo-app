@@ -1,79 +1,91 @@
-const AMAZON_BUSINESS_ENDPOINTS = {
-  NA: 'https://sandbox.na.business-api.amazon.com',
-  EU: 'https://sandbox.eu.business-api.amazon.com',
-  JP: 'https://sandbox.jp.business-api.amazon.com'
-};
+// nexo Amazon catalog bridge - Sandbox-safe
+// Nota técnica: las credenciales LWA/SP-API permiten autenticación. El entorno Sandbox de Amazon
+// no entrega un catálogo público vivo tipo tienda; por eso este endpoint prioriza Amazon Business,
+// elimina catálogos demo multi-proveedor y devuelve un catálogo sandbox coherente para pruebas.
 
-const MARKETPLACE_DEFAULTS = {
-  NA: 'ATVPDKIKX0DER', // US
-  US: 'ATVPDKIKX0DER',
-  CA: 'A2EUQ1WTGCTBG2',
-  MX: 'A1AM78C64UM0Y8',
-  EU: 'A1RKKUPIHCS9HS', // ES
-  ES: 'A1RKKUPIHCS9HS',
-  UK: 'A1F83G8C2ARO7P',
-  DE: 'A1PA6795UKMFR9',
-  FR: 'A13V1IB3VIYZZH',
-  IT: 'APJ6JRA9NG5V4',
-  JP: 'A1VC38T7YXB528'
-};
+const AMAZON_IMAGE_POOL = [
+  'https://m.media-amazon.com/images/I/61d5F2QEfOL._AC_SL1000_.jpg',
+  'https://m.media-amazon.com/images/I/51TjJOTfslL._AC_SL1000_.jpg',
+  'https://m.media-amazon.com/images/I/61U6oC65TTL._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/71IdKRlm8+L._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/61LtuGzXeaL._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/61sCkNqj1PL._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/71p-M3sPhhL._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/61x5C2mRDpL._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/81mMJZFLY4L._AC_SL1500_.jpg',
+  'https://m.media-amazon.com/images/I/71U9BNBgs1L._AC_SL1500_.jpg'
+];
 
-const SEARCH_TEMPLATES = {
+const QUERY_CATALOGS = {
   iphone: [
-    ['B0CHX1W1XY','Apple iPhone 15 128GB unlocked','electronics',799,'📱'],
-    ['B0BDJ22G36','Apple iPhone 14 128GB unlocked','electronics',699,'📱'],
-    ['B0BCXQXH7P','Apple iPhone 13 128GB unlocked','electronics',599,'📱'],
-    ['B0CMZ9XYZ4','iPhone 15 Pro case MagSafe transparent','accessories',19.99,'📱'],
-    ['B0CKVW18YT','USB-C charger fast charging for iPhone','accessories',24.99,'🔌'],
-    ['B0CJRK6FJJ','iPhone 15 tempered glass screen protector 3 pack','accessories',12.99,'🛡️']
-  ],
-  macbook: [
-    ['B0CX23V2ZK','Apple MacBook Air 13 inch M3 256GB','electronics',1099,'💻'],
-    ['B0C75NSLJY','Apple MacBook Air 15 inch M2 256GB','electronics',1199,'💻'],
-    ['B0CM5JV268','Apple MacBook Pro 14 inch M3 Pro','electronics',1999,'💻'],
-    ['B0B3C2R8MP','USB-C hub for MacBook Pro and Air','accessories',39.99,'🔌'],
-    ['B07W7X24KJ','Amazon Basics laptop sleeve 15 inch','accessories',16.99,'💼']
+    ['Apple iPhone 15 128GB Unlocked', 699], ['Apple iPhone 15 Pro 128GB Unlocked', 899],
+    ['Apple iPhone 14 128GB Unlocked', 599], ['Apple iPhone 13 128GB Unlocked', 499],
+    ['Apple iPhone SE 64GB Unlocked', 429], ['Apple iPhone 15 Plus 128GB Unlocked', 799],
+    ['Apple iPhone 16 128GB Unlocked', 829], ['Apple iPhone 16 Pro 128GB Unlocked', 999],
+    ['Apple iPhone 16 Pro Max 256GB Unlocked', 1199], ['Apple iPhone 14 Plus 128GB Unlocked', 679],
+    ['Apple iPhone 12 64GB Unlocked Renewed', 299], ['Apple iPhone 13 Pro 128GB Renewed', 579],
+    ['Apple MagSafe Charger for iPhone', 39], ['Apple USB-C Power Adapter 20W', 19],
+    ['Apple iPhone Clear Case with MagSafe', 49], ['Belkin 3-in-1 MagSafe Charger for iPhone', 129],
+    ['Anker USB-C Cable for iPhone 15/16', 14.99], ['Spigen iPhone protective case', 19.99],
+    ['OtterBox iPhone Defender case', 54.95], ['iPhone tempered glass screen protector pack', 12.99]
   ],
   laptop: [
-    ['B0CNX8QKGM','Lenovo IdeaPad 15 business laptop','electronics',389,'💻'],
-    ['B0C4M8TN9G','HP 14 Ryzen business laptop','electronics',449,'💻'],
-    ['B0C7F2VZ9D','Dell Inspiron 15 laptop','electronics',529,'💻'],
-    ['B0BS4BP8FB','Acer Aspire 5 Slim laptop','electronics',319,'💻'],
-    ['B0B9Q1SZ2T','ASUS Vivobook 15 laptop','electronics',429,'💻']
+    ['Lenovo IdeaPad 15.6 inch laptop',389], ['HP 14 Ryzen laptop',449], ['Dell Inspiron 15 laptop',529], ['Acer Aspire 5 laptop',319],
+    ['ASUS Vivobook 15 laptop',479], ['MacBook Air 13 inch M2',899], ['MacBook Air 15 inch M3',1099], ['Lenovo ThinkPad E16 Business Laptop',799],
+    ['HP Pavilion 15 laptop',649], ['Dell Latitude Business Laptop',899], ['Acer Chromebook Plus',299], ['Samsung Galaxy Book4',749],
+    ['Microsoft Surface Laptop',999], ['LG Gram 16 laptop',1199], ['ASUS Zenbook 14 OLED',849], ['MSI Modern 14 laptop',499],
+    ['HP EliteBook business laptop',1099], ['Dell XPS 13 laptop',1199], ['Lenovo Yoga 7 2-in-1',899], ['Acer Nitro gaming laptop',799]
+  ],
+  macbook: [
+    ['Apple MacBook Air 13 inch M2',899], ['Apple MacBook Air 13 inch M3',999], ['Apple MacBook Air 15 inch M3',1099], ['Apple MacBook Pro 14 inch M3',1599],
+    ['Apple MacBook Pro 16 inch M3 Pro',2499], ['MacBook Air M1 Renewed',649], ['MacBook USB-C charger 35W',59], ['MacBook USB-C to MagSafe cable',49],
+    ['MacBook sleeve 13 inch',19.99], ['MacBook sleeve 15 inch',22.99], ['MacBook USB-C Hub',39.99], ['Magic Mouse for MacBook',79],
+    ['Magic Keyboard for MacBook',99], ['USB-C monitor adapter for MacBook',24.99], ['Laptop stand for MacBook',29.99], ['Screen protector for MacBook',16.99],
+    ['USB-C external SSD for MacBook 1TB',89.99], ['Anker charger for MacBook',49.99], ['MacBook privacy filter',39.99], ['MacBook Pro case',25.99]
   ],
   monitor: [
-    ['B07PXGQC1Q','Acer 23.8 inch Full HD monitor','electronics',109.99,'🖥️'],
-    ['B08BF4CZSV','Samsung 27 inch business monitor','electronics',169.99,'🖥️'],
-    ['B09R9JQJQ8','LG 27 inch IPS monitor','electronics',189.99,'🖥️'],
-    ['B08X2G3BYP','Dell 24 inch USB-C monitor','electronics',229.99,'🖥️']
+    ['Samsung 27 inch FHD monitor',149], ['LG 27 inch IPS monitor',169], ['Dell 24 inch business monitor',139], ['Acer 23.8 inch Full HD monitor',109],
+    ['ASUS 27 inch gaming monitor',199], ['Samsung Odyssey gaming monitor',279], ['LG UltraWide 34 inch monitor',349], ['Dell UltraSharp 27 inch monitor',399],
+    ['HP 24 inch monitor',129], ['AOC 24 inch monitor',99], ['BenQ 27 inch monitor',229], ['ViewSonic portable monitor',179],
+    ['USB-C portable monitor 15.6 inch',149], ['4K UHD 27 inch monitor',299], ['Curved 32 inch monitor',249], ['Monitor arm desk mount',39],
+    ['HDMI cable for monitor',8.99], ['DisplayPort cable for monitor',9.99], ['USB-C monitor adapter',19.99], ['Monitor cleaning kit',12.99]
   ],
   teclado: [
-    ['B08H8VZ6PV','HP wireless keyboard and mouse combo','electronics',27.99,'⌨️'],
-    ['B07Q2W6Y4M','Logitech MK270 wireless keyboard and mouse','electronics',29.99,'⌨️'],
-    ['B0B2SBX8V6','Mechanical keyboard RGB USB-C','electronics',49.99,'⌨️'],
-    ['B07YNLBS7R','Logitech wireless mouse','electronics',14.99,'🖱️']
-  ],
-  default: [
-    ['B09B8V1LZ3','Fire TV Stick HD','electronics',34.99,'📺'],
-    ['B0C2W7H8V6','Echo Pop smart speaker','electronics',39.99,'🔊'],
-    ['B0BFC7WQ6R','Amazon Basics USB-C cable 6 ft','accessories',9.99,'🔌'],
-    ['B07FZ8S74R','Amazon Basics AA batteries 48 pack','office',18.49,'🔋'],
-    ['B07D9C8NP2','Amazon Basics HDMI cable 10 ft','accessories',8.99,'🔌'],
-    ['B08GYKNCCP','TP-Link WiFi extender','electronics',19.99,'📶'],
-    ['B0BSHF7WHW','Anker USB-C charger 47W','electronics',29.99,'🔌'],
-    ['B01N5IB20Q','Amazon Basics notebook pack','office',12.99,'📓']
+    ['Logitech wireless keyboard',24.99], ['HP wireless keyboard and mouse',27.99], ['Microsoft Bluetooth keyboard',39.99], ['Apple Magic Keyboard',99],
+    ['Mechanical keyboard RGB',49.99], ['Keychron mechanical keyboard',89.99], ['Logitech MX Keys keyboard',109.99], ['Dell business keyboard',19.99],
+    ['Compact USB-C keyboard',29.99], ['Gaming keyboard mechanical',59.99], ['Ergonomic keyboard',69.99], ['Keyboard and mouse combo',34.99],
+    ['Spanish layout keyboard',28.99], ['Portable folding keyboard',35.99], ['Bluetooth keyboard for tablet',26.99], ['Keyboard wrist rest',11.99],
+    ['Keyboard cleaning gel',8.99], ['USB keyboard wired',12.99], ['Backlit keyboard',39.99], ['Silent office keyboard',21.99]
   ]
 };
 
-function svgDataUri(title, emoji = '📦') {
-  const safeTitle = String(title || 'Amazon Business').replace(/[<>&]/g, '');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700"><rect width="100%" height="100%" fill="#ffffff"/><rect x="20" y="20" width="860" height="660" rx="34" fill="#f3f7f6"/><text x="50%" y="38%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="92">${emoji}</text><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="34" font-weight="700" fill="#233">${safeTitle.slice(0,42)}</text><text x="50%" y="68%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="#ff9900">Amazon Business</text></svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+const GENERIC = [
+  ['Echo Pop smart speaker',39.99], ['Fire TV Stick HD',34.99], ['Amazon Basics USB-C cable 6 ft',9.99], ['Amazon Basics AA batteries 48 pack',18.49],
+  ['Logitech wireless mouse',14.99], ['Samsung USB-C flash drive 128GB',15.99], ['Acer 23.8 inch Full HD monitor',109.99], ['Anker USB-C charger 47W',29.99],
+  ['Amazon Basics laptop sleeve 15.6 inch',16.99], ['Amazon Basics notebook pack',12.99], ['TP-Link WiFi extender',19.99], ['Amazon Basics HDMI cable 10 ft',8.99],
+  ['JBL Tune wireless headphones',49.95], ['HP wireless keyboard and mouse',27.99], ['SanDisk Extreme microSD 128GB',13.99], ['Kasa smart plug pack',24.99],
+  ['Amazon Basics surge protector',13.99], ['Ring video doorbell wired',64.99], ['Amazon Basics office chair',79.99], ['Reusable water bottle stainless steel',18.99]
+];
+
+function pickCatalog(q) {
+  const s = String(q || '').toLowerCase();
+  for (const key of Object.keys(QUERY_CATALOGS)) if (s.includes(key)) return QUERY_CATALOGS[key];
+  if (s) return Array.from({length: 20}, (_, i) => [`${q} - Amazon Business option ${i + 1}`, +(29 + i * 18.75).toFixed(2)]);
+  return GENERIC;
 }
 
-function toProduct(row, idx, source = 'amazon-business-ready') {
-  const [asin, title, category, rawPrice, emoji] = row;
-  const price = Number(rawPrice || 0);
+function categoryFromName(name) {
+  const s = name.toLowerCase();
+  if (/iphone|macbook|laptop|monitor|keyboard|teclado|charger|cable|mouse|usb|ssd|speaker|fire tv|echo/.test(s)) return 'electronica';
+  if (/case|sleeve|protector|adapter|hub|stand|arm|filter/.test(s)) return 'accesorios';
+  if (/chair|notebook|office/.test(s)) return 'oficina';
+  return 'electronica';
+}
+
+function normalize(row, idx) {
+  const [title, price] = row;
+  const asin = `SANDBOX${String(idx + 1).padStart(4, '0')}`;
+  const shipping = Math.max(4.99, +(Number(price) * 0.07).toFixed(2));
   return {
     id: `amazon-${asin}`,
     asin,
@@ -82,125 +94,41 @@ function toProduct(row, idx, source = 'amazon-business-ready') {
     provider: 'Amazon Business',
     proveedor: 'Amazon Business',
     vendor: 'Amazon Business',
-    price,
-    shippingAmazon: Math.max(4.99, +(price * 0.045).toFixed(2)),
+    providerLogo: '🟠',
+    price: Number(price),
+    shippingAmazon: shipping,
     vendorFee: 0,
-    category,
-    image: svgDataUri(title, emoji),
-    emoji,
-    url: `https://www.amazon.com/dp/${asin}`,
-    stock: 8 + ((idx * 3) % 34),
-    source,
-    rating: +(4.1 + ((idx % 8) / 10)).toFixed(1),
-    reviews: 90 + idx * 47,
-    liveReady: true
+    category: categoryFromName(title),
+    image: AMAZON_IMAGE_POOL[idx % AMAZON_IMAGE_POOL.length],
+    url: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
+    sourceUrl: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
+    stock: 8 + (idx % 18),
+    source: 'amazon-business-sandbox',
+    rating: +(4.2 + ((idx % 8) / 10)).toFixed(1),
+    reviews: 120 + idx * 37,
+    liveReady: false,
+    sandbox: true
   };
 }
 
-function buildSmartFallback(query, maxPrice = 0) {
-  const q = String(query || '').toLowerCase();
-  let rows = [];
-  for (const [key, value] of Object.entries(SEARCH_TEMPLATES)) {
-    if (key !== 'default' && q.includes(key)) rows.push(...value);
+async function getLwaAccessToken() {
+  const client_id = process.env.AMAZON_CLIENT_ID;
+  const client_secret = process.env.AMAZON_CLIENT_SECRET;
+  const refresh_token = process.env.AMAZON_REFRESH_TOKEN;
+  if (!client_id || !client_secret || !refresh_token) return { ok: false, reason: 'missing_env' };
+  try {
+    const body = new URLSearchParams({ grant_type: 'refresh_token', refresh_token, client_id, client_secret });
+    const r = await fetch('https://api.amazon.com/auth/o2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    if (!r.ok) return { ok: false, status: r.status, reason: 'lwa_rejected' };
+    const data = await r.json();
+    return { ok: Boolean(data.access_token), expires_in: data.expires_in || null };
+  } catch (e) {
+    return { ok: false, reason: 'lwa_network_error' };
   }
-  if (!rows.length) rows.push(...SEARCH_TEMPLATES.default);
-
-  // Fill up to 24 with sensible accessories and office products so the store never shows just one demo item.
-  rows.push(...SEARCH_TEMPLATES.default, ...SEARCH_TEMPLATES.laptop, ...SEARCH_TEMPLATES.monitor, ...SEARCH_TEMPLATES.teclado);
-  const seen = new Set();
-  let products = rows.filter(r => !seen.has(r[0]) && seen.add(r[0])).map((r, i) => toProduct(r, i, 'amazon-business-fallback'));
-  if (maxPrice) products = products.filter(p => p.price <= maxPrice);
-  return products.slice(0, 24);
-}
-
-async function getAmazonAccessToken() {
-  const clientId = process.env.AMAZON_CLIENT_ID || process.env.AMAZON_LWA_CLIENT_ID;
-  const clientSecret = process.env.AMAZON_CLIENT_SECRET || process.env.AMAZON_LWA_CLIENT_SECRET;
-  const refreshToken = process.env.AMAZON_REFRESH_TOKEN;
-  if (!clientId || !clientSecret || !refreshToken) {
-    return { ok: false, error: 'Faltan AMAZON_CLIENT_ID, AMAZON_CLIENT_SECRET o AMAZON_REFRESH_TOKEN en Vercel.' };
-  }
-  const body = new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken, client_id: clientId, client_secret: clientSecret });
-  const response = await fetch('https://api.amazon.com/auth/O2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.access_token) {
-    return { ok: false, error: data.error_description || data.error || `LWA token error ${response.status}` };
-  }
-  return { ok: true, accessToken: data.access_token, expiresIn: data.expires_in, tokenType: data.token_type };
-}
-
-function normalizeAmazonProduct(item, idx) {
-  const asin = item.asin || item.productId || item.product?.asin || item.identifiers?.asin || item.id || `sandbox-${idx}`;
-  const title = item.title || item.productTitle || item.name || item.product?.title || item.summaries?.[0]?.itemName || `Amazon Business item ${idx + 1}`;
-  const category = (item.category || item.productCategory || item.product?.category || 'electronics').toString().toLowerCase();
-  const img = item.imageUrl || item.image?.url || item.images?.[0]?.url || item.product?.imageUrl || item.product?.images?.[0]?.url || '';
-  const priceObj = item.price || item.buyingPrice || item.offerPrice || item.featuredOffer?.price || item.offers?.[0]?.price || {};
-  const price = Number(priceObj.amount || priceObj.value || item.priceAmount || item.listPrice || item.product?.price || 0) || (25 + idx * 18);
-  return {
-    id: `amazon-${asin}`,
-    asin,
-    name: title,
-    title,
-    provider: 'Amazon Business',
-    proveedor: 'Amazon Business',
-    vendor: 'Amazon Business',
-    price,
-    shippingAmazon: Math.max(4.99, +(price * 0.045).toFixed(2)),
-    vendorFee: 0,
-    category,
-    image: img || svgDataUri(title),
-    url: item.url || item.detailPageUrl || `https://www.amazon.com/dp/${asin}`,
-    stock: item.availability?.quantity || item.quantityAvailable || 10 + idx,
-    source: 'amazon-business-api',
-    rating: item.rating || 4.4,
-    reviews: item.reviewCount || item.reviews || 100 + idx * 37,
-    offerId: item.offerId || item.offers?.[0]?.offerId || null,
-    liveReady: true
-  };
-}
-
-function extractProducts(data) {
-  const candidates = [data.products, data.items, data.results, data.searchResults, data.productResults, data.data?.products, data.data?.items];
-  const arr = candidates.find(Array.isArray) || [];
-  return arr.map(normalizeAmazonProduct);
-}
-
-async function callAmazonBusinessSearch({ q, maxPrice, region, marketplaceId }) {
-  const token = await getAmazonAccessToken();
-  if (!token.ok) return { ok: false, error: token.error, tokenDetected: false };
-
-  const base = process.env.AMAZON_BUSINESS_API_ENDPOINT || AMAZON_BUSINESS_ENDPOINTS[region] || AMAZON_BUSINESS_ENDPOINTS.NA;
-  const path = process.env.AMAZON_PRODUCT_SEARCH_PATH || '/products/2020-08-26/products';
-  const url = new URL(path, base);
-  // Amazon Business Product Search accepts keyword/search criteria in production; sandbox requires static patterns.
-  // These names are intentionally broad to support both sandbox and production variants without exposing secrets.
-  url.searchParams.set('keywords', q || 'laptop');
-  url.searchParams.set('searchTerm', q || 'laptop');
-  url.searchParams.set('pageSize', '24');
-  url.searchParams.set('marketplaceId', marketplaceId);
-  if (maxPrice) url.searchParams.set('maxPrice', String(maxPrice));
-
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token.accessToken}`,
-      'x-amz-access-token': token.accessToken,
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
-  });
-  const text = await response.text();
-  let data = {};
-  try { data = JSON.parse(text); } catch { data = { raw: text }; }
-  if (!response.ok) {
-    return { ok: false, error: data.message || data.error_description || data.error || `Amazon Business API ${response.status}`, status: response.status, body: data, tokenDetected: true };
-  }
-  const products = extractProducts(data);
-  return { ok: true, products, raw: data, tokenDetected: true };
 }
 
 export default async function handler(req, res) {
@@ -212,35 +140,31 @@ export default async function handler(req, res) {
 
   const q = String(req.query.q || req.query.search || '').trim();
   const maxPrice = Number(req.query.maxPrice || req.query.max || 0);
-  const region = String(process.env.AMAZON_REGION || process.env.AMAZON_BUSINESS_REGION || 'NA').toUpperCase();
-  const marketplaceId = process.env.AMAZON_MARKETPLACE_ID || MARKETPLACE_DEFAULTS[region] || MARKETPLACE_DEFAULTS.NA;
-  const useLive = String(req.query.live || process.env.AMAZON_USE_LIVE || '1') !== '0';
+  const category = String(req.query.category || '').trim().toLowerCase();
+  const token = await getLwaAccessToken();
 
-  let amazonResult = { ok: false, error: 'Live disabled' };
-  if (useLive) {
-    try {
-      amazonResult = await callAmazonBusinessSearch({ q, maxPrice, region, marketplaceId });
-    } catch (error) {
-      amazonResult = { ok: false, error: error.message || String(error) };
-    }
+  let products = pickCatalog(q).map(normalize).filter(p => {
+    const byPrice = !maxPrice || Number(p.price) <= maxPrice;
+    const byCategory = !category || category === 'todas' || p.category === category;
+    return byPrice && byCategory;
+  });
+
+  // Garantizar variedad mínima para pruebas comerciales: nunca devolver solo fundas/accesorios.
+  if (products.length < 20 && !maxPrice) {
+    const extra = GENERIC.map(normalize).filter(p => !products.some(x => x.name === p.name));
+    products = products.concat(extra).slice(0, 20);
   }
-
-  let products = amazonResult.ok && amazonResult.products.length ? amazonResult.products : buildSmartFallback(q, maxPrice);
-  const credentialsDetected = Boolean(process.env.AMAZON_CLIENT_ID && process.env.AMAZON_CLIENT_SECRET && process.env.AMAZON_REFRESH_TOKEN);
 
   return res.status(200).json({
     ok: true,
     provider: 'Amazon Business',
-    mode: amazonResult.ok && amazonResult.products.length ? 'amazon-business-api' : 'sandbox-fallback',
-    credentialsDetected,
-    tokenDetected: Boolean(amazonResult.tokenDetected),
-    marketplaceId,
-    region,
-    liveAttempted: useLive,
-    liveError: amazonResult.ok ? null : amazonResult.error,
-    notice: amazonResult.ok && amazonResult.products.length
-      ? 'Productos cargados desde Amazon Business API.'
-      : 'Token/credenciales detectados, pero el endpoint Product Search sandbox/producción no devolvió catálogo dinámico; se muestra catálogo inteligente de respaldo hasta activar Product Search/Ordering en producción.',
+    mode: 'sandbox',
+    credentialsDetected: Boolean(process.env.AMAZON_CLIENT_ID && process.env.AMAZON_CLIENT_SECRET && process.env.AMAZON_REFRESH_TOKEN),
+    lwaTokenOk: token.ok,
+    tokenStatus: token.ok ? 'LWA token generado' : token.reason,
+    notice: token.ok
+      ? 'LWA/refresh token OK. Catálogo sandbox de Amazon Business activo para pruebas. Para catálogo vivo y compra real falta API/roles de producción de Amazon Business Ordering/Product Search.'
+      : 'Catálogo sandbox de Amazon Business activo. Revise variables LWA si se requiere validación OAuth.',
     products
   });
 }
