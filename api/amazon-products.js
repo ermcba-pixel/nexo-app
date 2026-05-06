@@ -18,16 +18,17 @@ const AMAZON_IMAGE_POOL = [
 
 const QUERY_CATALOGS = {
   iphone: [
-    ['Apple iPhone 15 128GB Unlocked', 699], ['Apple iPhone 15 Pro 128GB Unlocked', 899],
-    ['Apple iPhone 14 128GB Unlocked', 599], ['Apple iPhone 13 128GB Unlocked', 499],
-    ['Apple iPhone SE 64GB Unlocked', 429], ['Apple iPhone 15 Plus 128GB Unlocked', 799],
-    ['Apple iPhone 16 128GB Unlocked', 829], ['Apple iPhone 16 Pro 128GB Unlocked', 999],
-    ['Apple iPhone 16 Pro Max 256GB Unlocked', 1199], ['Apple iPhone 14 Plus 128GB Unlocked', 679],
-    ['Apple iPhone 12 64GB Unlocked Renewed', 299], ['Apple iPhone 13 Pro 128GB Renewed', 579],
-    ['Apple MagSafe Charger for iPhone', 39], ['Apple USB-C Power Adapter 20W', 19],
-    ['Apple iPhone Clear Case with MagSafe', 49], ['Belkin 3-in-1 MagSafe Charger for iPhone', 129],
-    ['Anker USB-C Cable for iPhone 15/16', 14.99], ['Spigen iPhone protective case', 19.99],
-    ['OtterBox iPhone Defender case', 54.95], ['iPhone tempered glass screen protector pack', 12.99]
+    ['Apple iPhone 15 128GB Unlocked', 699], ['Apple iPhone 15 256GB Unlocked', 799],
+    ['Apple iPhone 15 Plus 128GB Unlocked', 799], ['Apple iPhone 15 Pro 128GB Unlocked', 899],
+    ['Apple iPhone 15 Pro Max 256GB Unlocked', 1099], ['Apple iPhone 14 128GB Unlocked', 599],
+    ['Apple iPhone 14 256GB Unlocked', 699], ['Apple iPhone 14 Plus 128GB Unlocked', 679],
+    ['Apple iPhone 14 Pro 128GB Renewed', 749], ['Apple iPhone 14 Pro Max 256GB Renewed', 849],
+    ['Apple iPhone 13 128GB Unlocked', 499], ['Apple iPhone 13 256GB Unlocked', 579],
+    ['Apple iPhone 13 Mini 128GB Renewed', 429], ['Apple iPhone 13 Pro 128GB Renewed', 579],
+    ['Apple iPhone 13 Pro Max 256GB Renewed', 699], ['Apple iPhone SE 64GB Unlocked', 429],
+    ['Apple iPhone SE 128GB Unlocked', 479], ['Apple iPhone 12 64GB Unlocked Renewed', 299],
+    ['Apple iPhone 12 128GB Unlocked Renewed', 359], ['Apple iPhone 12 Pro 128GB Renewed', 459],
+    ['Apple iPhone 11 64GB Unlocked Renewed', 249], ['Apple iPhone XR 64GB Unlocked Renewed', 199]
   ],
   laptop: [
     ['Lenovo IdeaPad 15.6 inch laptop',389], ['HP 14 Ryzen laptop',449], ['Dell Inspiron 15 laptop',529], ['Acer Aspire 5 laptop',319],
@@ -99,7 +100,7 @@ function normalize(row, idx) {
     shippingAmazon: shipping,
     vendorFee: 0,
     category: categoryFromName(title),
-    image: AMAZON_IMAGE_POOL[idx % AMAZON_IMAGE_POOL.length],
+    image: null, // sandbox: el frontend genera imagen segura sin errores 404
     url: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
     sourceUrl: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
     stock: 8 + (idx % 18),
@@ -143,14 +144,19 @@ export default async function handler(req, res) {
   const category = String(req.query.category || '').trim().toLowerCase();
   const token = await getLwaAccessToken();
 
+  const normalizedQuery = q.toLowerCase();
+  const isKnownStrictQuery = Object.keys(QUERY_CATALOGS).some(k => normalizedQuery.includes(k));
+
   let products = pickCatalog(q).map(normalize).filter(p => {
     const byPrice = !maxPrice || Number(p.price) <= maxPrice;
     const byCategory = !category || category === 'todas' || p.category === category;
-    return byPrice && byCategory;
+    const byStrictSearch = !normalizedQuery || !isKnownStrictQuery || String(p.name || '').toLowerCase().includes(Object.keys(QUERY_CATALOGS).find(k => normalizedQuery.includes(k)));
+    return byPrice && byCategory && byStrictSearch;
   });
 
-  // Garantizar variedad mínima para pruebas comerciales: nunca devolver solo fundas/accesorios.
-  if (products.length < 20 && !maxPrice) {
+  // Si la búsqueda es conocida (iphone, laptop, etc.), NO mezclar productos genéricos.
+  // Si es una búsqueda libre desconocida, completar hasta 20 opciones sandbox coherentes.
+  if (products.length < 20 && !maxPrice && !isKnownStrictQuery) {
     const extra = GENERIC.map(normalize).filter(p => !products.some(x => x.name === p.name));
     products = products.concat(extra).slice(0, 20);
   }
