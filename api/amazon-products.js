@@ -3,19 +3,6 @@
 // no entrega un catálogo público vivo tipo tienda; por eso este endpoint prioriza Amazon Business,
 // elimina catálogos demo multi-proveedor y devuelve un catálogo sandbox coherente para pruebas.
 
-const AMAZON_IMAGE_POOL = [
-  'https://m.media-amazon.com/images/I/61d5F2QEfOL._AC_SL1000_.jpg',
-  'https://m.media-amazon.com/images/I/51TjJOTfslL._AC_SL1000_.jpg',
-  'https://m.media-amazon.com/images/I/61U6oC65TTL._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/71IdKRlm8+L._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/61LtuGzXeaL._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/61sCkNqj1PL._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/71p-M3sPhhL._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/61x5C2mRDpL._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/81mMJZFLY4L._AC_SL1500_.jpg',
-  'https://m.media-amazon.com/images/I/71U9BNBgs1L._AC_SL1500_.jpg'
-];
-
 const QUERY_CATALOGS = {
   iphone: [
     ['Apple iPhone 15 128GB Unlocked', 699], ['Apple iPhone 15 256GB Unlocked', 799],
@@ -100,7 +87,7 @@ function normalize(row, idx) {
     shippingAmazon: shipping,
     vendorFee: 0,
     category: categoryFromName(title),
-    image: null, // sandbox: el frontend genera imagen segura sin errores 404
+    image: null, // sandbox estable: el frontend genera imagen segura sin errores 404
     url: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
     sourceUrl: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
     stock: 8 + (idx % 18),
@@ -169,7 +156,7 @@ export default async function handler(req, res) {
     lwaTokenOk: token.ok,
     tokenStatus: token.ok ? 'LWA token generado' : token.reason,
     notice: token.ok
-      ? 'LWA/refresh token OK. Catálogo sandbox de Amazon Business activo para pruebas. Para catálogo vivo y compra real falta API/roles de producción de Amazon Business Ordering/Product Search.'
+      ? 'LWA/refresh token OK. Catálogo sandbox estable de Amazon Business activo para pruebas. Para catálogo vivo y compra real falta API/roles de producción de Amazon Business Ordering/Product Search.'
       : 'Catálogo sandbox de Amazon Business activo. Revise variables LWA si se requiere validación OAuth.',
     products
   });

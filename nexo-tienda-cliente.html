@@ -569,9 +569,27 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         let cart = JSON.parse(localStorage.getItem('nexoCart')) || [];
 
 
+
+        function nexoSvgProductImage(p){
+            const title = String((p && (p.name || p.title)) || 'Producto Amazon').slice(0,48).replace(/[<>&]/g,'');
+            const provider = String((p && p.provider) || 'Amazon Business').slice(0,28).replace(/[<>&]/g,'');
+            const lower = title.toLowerCase();
+            let art = '';
+            if(lower.includes('iphone') || lower.includes('phone') || lower.includes('celular')){
+                art = `<rect x="315" y="82" width="170" height="300" rx="32" fill="#111827" filter="url(#sh)"/><rect x="332" y="106" width="136" height="228" rx="18" fill="url(#screen)"/><circle cx="400" cy="354" r="10" fill="#374151"/>`;
+            } else if(lower.includes('laptop') || lower.includes('notebook') || lower.includes('macbook')){
+                art = `<rect x="210" y="110" width="380" height="230" rx="18" fill="#111827" filter="url(#sh)"/><rect x="230" y="130" width="340" height="185" rx="8" fill="url(#screen)"/><path d="M175 355h450l-42 55H217z" fill="#cbd5e1"/>`;
+            } else {
+                art = `<rect x="265" y="125" width="270" height="220" rx="36" fill="#4A6B6D" opacity=".95" filter="url(#sh)"/><path d="M315 170h170l25 130H290z" fill="#ffffff" opacity=".85"/><path d="M345 170c0-55 110-55 110 0" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>`;
+            }
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="560" viewBox="0 0 800 560"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fbfa"/><stop offset="1" stop-color="#dfecea"/></linearGradient><linearGradient id="screen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset=".55" stop-color="#1d4ed8"/><stop offset="1" stop-color="#111827"/></linearGradient><filter id="sh"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-opacity=".23"/></filter></defs><rect width="800" height="560" rx="34" fill="url(#g)"/><rect x="64" y="54" width="672" height="452" rx="32" fill="#ffffff" opacity=".58"/>${art}<text x="400" y="430" text-anchor="middle" font-size="27" font-weight="900" fill="#203435" font-family="Arial, sans-serif">${title}</text><text x="400" y="470" text-anchor="middle" font-size="21" font-weight="800" fill="#4A6B6D" font-family="Arial, sans-serif">Proveedor: ${provider}</text><text x="400" y="504" text-anchor="middle" font-size="19" font-weight="900" fill="#7AC742" font-family="Arial, sans-serif">nexo™</text></svg>`;
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+
         function productImageMarkup(p){
-            if (p.image) return `<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.parentElement.textContent='${p.emoji || '📦'}'">`;
-            return p.emoji || '📦';
+            const safe = nexoSvgProductImage(p || {});
+            if (p && p.image) return `<img src="${p.image}" alt="${String(p.name || 'Producto Amazon').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" loading="lazy" onerror="this.onerror=null;this.src='${safe}'">`;
+            return `<img src="${safe}" alt="${String((p && p.name) || 'Producto Amazon').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" loading="lazy">`;
         }
 
         function renderProducts(productsToShow = products) {
