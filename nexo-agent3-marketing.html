@@ -647,5 +647,75 @@ async function consultarNexoAI(agent){
 </footer>
 
 <script src="nexo-legal-i18n.js"></script>
+
+<script>
+(function(){
+  const NEXO_LANG_TITLES = {
+    es: "nexo – Sistema de Intermediación Comercial Internacional",
+    en: "nexo – International Commercial Intermediation System",
+    pt: "nexo – Sistema de Intermediação Comercial Internacional",
+    fr: "nexo – Système d’Intermédiation Commerciale Internationale",
+    it: "nexo – Sistema di Intermediazione Commerciale Internazionale"
+  };
+  const NEXO_LANG_FOOTERS = {
+    es: "nexo – Plataforma Internacional de Intermediación Comercial",
+    en: "nexo – International Commercial Intermediation Platform",
+    pt: "nexo – Plataforma Internacional de Intermediação Comercial",
+    fr: "nexo – Plateforme Internationale d’Intermédiation Commerciale",
+    it: "nexo – Piattaforma Internazionale di Intermediazione Commerciale"
+  };
+  function langFromText(t){
+    t=(t||"").toLowerCase();
+    if(t.includes("english")) return "en";
+    if(t.includes("portugu")) return "pt";
+    if(t.includes("fran")) return "fr";
+    if(t.includes("ital")) return "it";
+    return "es";
+  }
+  function currentLang(){
+    const buttons = Array.from(document.querySelectorAll("button,.lang-btn,.language-btn"));
+    const active = buttons.find(b => {
+      const c=(b.className||"").toString().toLowerCase();
+      const a=(b.getAttribute("aria-pressed")||"").toLowerCase();
+      return c.includes("active") || c.includes("selected") || a==="true";
+    });
+    return langFromText(active ? active.textContent : document.documentElement.lang || "es");
+  }
+  function applyNexoTitle(lang){
+    const title = NEXO_LANG_TITLES[lang] || NEXO_LANG_TITLES.es;
+    const footerTitle = NEXO_LANG_FOOTERS[lang] || NEXO_LANG_FOOTERS.es;
+    document.querySelectorAll("h1,h2,.hero-title,.brand-title,.system-title,.main-title").forEach(el=>{
+      const txt = (el.textContent || "").trim();
+      if(/Digital Intermediation|Intermediaci[oó]n|Intermediaç|Intermédiation|Intermediazione|nexo-Sistema|nexo – Sistema|nexo – International/i.test(txt)){
+        el.textContent = title;
+      }
+    });
+    document.querySelectorAll("footer, .footer, .legal-footer, body").forEach(el=>{
+      if(!el || !el.innerHTML) return;
+      el.innerHTML = el.innerHTML
+        .replace(/nexo™?\s*[–-]\s*International commercial intermediation platform/gi, "nexo – International Commercial Intermediation Platform")
+        .replace(/nexo™?\s*[–-]\s*International Commercial Intermediation Platform/gi, footerTitle)
+        .replace(/nexo™?\s*[–-]\s*Plataforma de intermediación comercial internacional/gi, footerTitle)
+        .replace(/nexo\s*[–-]\s*Plataforma Internacional de Intermediación Comercial/gi, footerTitle)
+        .replace(/nexo™?\s*[–-]\s*Plateforme d’intermédiation commerciale internationale/gi, footerTitle)
+        .replace(/nexo\s*[–-]\s*Plateforme Internationale d’Intermédiation Commerciale/gi, footerTitle)
+        .replace(/nexo™?\s*[–-]\s*Piattaforma di intermediazione commerciale internazionale/gi, footerTitle)
+        .replace(/nexo\s*[–-]\s*Piattaforma Internazionale di Intermediazione Commerciale/gi, footerTitle)
+        .replace(/nexo-Sistema de Intermediación Comercial Internacional/g, "nexo – Sistema de Intermediación Comercial Internacional");
+    });
+  }
+  document.addEventListener("click", function(e){
+    const b = e.target.closest && e.target.closest("button");
+    if(!b) return;
+    const txt = (b.textContent || "").toLowerCase();
+    if(txt.includes("español") || txt.includes("english") || txt.includes("portugu") || txt.includes("fran") || txt.includes("ital")){
+      setTimeout(()=>applyNexoTitle(langFromText(txt)), 120);
+    }
+  });
+  document.addEventListener("DOMContentLoaded", ()=>applyNexoTitle(currentLang()));
+  setTimeout(()=>applyNexoTitle(currentLang()), 300);
+})();
+</script>
+
 </body>
 </html>
