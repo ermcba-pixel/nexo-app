@@ -548,19 +548,15 @@
     <script>
         let products = [];
 
-        const fallbackProducts = [
-            { id: 'local-1', name: 'Echo Pop smart speaker', price: 39.99, shippingAmazon: 5.99, vendorFee: 0, category: 'electronics', provider: 'Amazon Business', image: '', emoji: '🔊', stock: 12 },
-            { id: 'local-2', name: 'Fire TV Stick HD', price: 34.99, shippingAmazon: 5.99, vendorFee: 0, category: 'electronics', provider: 'Amazon Business', image: '', emoji: '📺', stock: 10 },
-            { id: 'local-3', name: 'Amazon Basics USB-C cable', price: 9.99, shippingAmazon: 4.99, vendorFee: 0, category: 'accessories', provider: 'Amazon Business', image: '', emoji: '🔌', stock: 25 }
-        ];
+        const fallbackProducts = [];
 
         
 const storeI18n={
  es:{title:'Tienda nexo',subtitle:'Productos Amazon Business • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío (Amazon/Marketplace):',sumVendor:'Gastos de la empresa vendedora:',sumCom:'Comisión nexo:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
- en:{title:'nexo Store',subtitle:'Amazon Business Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
+ en:{title:'nexo Store',subtitle:'Amazon Business Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'nexo commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
  pt:{title:'Loja nexo',subtitle:'Produtos Amazon Business • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
  it:{title:'Negozio nexo',subtitle:'Prodotti Amazon Business • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
- fr:{title:'Boutique nexo',subtitle:'Produits Amazon Business • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
+ fr:{title:'Boutique nexo',subtitle:'Produits Amazon Business • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission nexo :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
 };
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
@@ -569,27 +565,9 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         let cart = JSON.parse(localStorage.getItem('nexoCart')) || [];
 
 
-
-        function nexoSvgProductImage(p){
-            const title = String((p && (p.name || p.title)) || 'Producto Amazon').slice(0,48).replace(/[<>&]/g,'');
-            const provider = String((p && p.provider) || 'Amazon Business').slice(0,28).replace(/[<>&]/g,'');
-            const lower = title.toLowerCase();
-            let art = '';
-            if(lower.includes('iphone') || lower.includes('phone') || lower.includes('celular')){
-                art = `<rect x="315" y="82" width="170" height="300" rx="32" fill="#111827" filter="url(#sh)"/><rect x="332" y="106" width="136" height="228" rx="18" fill="url(#screen)"/><circle cx="400" cy="354" r="10" fill="#374151"/>`;
-            } else if(lower.includes('laptop') || lower.includes('notebook') || lower.includes('macbook')){
-                art = `<rect x="210" y="110" width="380" height="230" rx="18" fill="#111827" filter="url(#sh)"/><rect x="230" y="130" width="340" height="185" rx="8" fill="url(#screen)"/><path d="M175 355h450l-42 55H217z" fill="#cbd5e1"/>`;
-            } else {
-                art = `<rect x="265" y="125" width="270" height="220" rx="36" fill="#4A6B6D" opacity=".95" filter="url(#sh)"/><path d="M315 170h170l25 130H290z" fill="#ffffff" opacity=".85"/><path d="M345 170c0-55 110-55 110 0" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>`;
-            }
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="560" viewBox="0 0 800 560"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fbfa"/><stop offset="1" stop-color="#dfecea"/></linearGradient><linearGradient id="screen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset=".55" stop-color="#1d4ed8"/><stop offset="1" stop-color="#111827"/></linearGradient><filter id="sh"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-opacity=".23"/></filter></defs><rect width="800" height="560" rx="34" fill="url(#g)"/><rect x="64" y="54" width="672" height="452" rx="32" fill="#ffffff" opacity=".58"/>${art}<text x="400" y="430" text-anchor="middle" font-size="27" font-weight="900" fill="#203435" font-family="Arial, sans-serif">${title}</text><text x="400" y="470" text-anchor="middle" font-size="21" font-weight="800" fill="#4A6B6D" font-family="Arial, sans-serif">Proveedor: ${provider}</text><text x="400" y="504" text-anchor="middle" font-size="19" font-weight="900" fill="#7AC742" font-family="Arial, sans-serif">nexo™</text></svg>`;
-            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-        }
-
         function productImageMarkup(p){
-            const safe = nexoSvgProductImage(p || {});
-            if (p && p.image) return `<img src="${p.image}" alt="${String(p.name || 'Producto Amazon').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" loading="lazy" onerror="this.onerror=null;this.src='${safe}'">`;
-            return `<img src="${safe}" alt="${String((p && p.name) || 'Producto Amazon').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" loading="lazy">`;
+            if (p.image) return `<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.parentElement.textContent='${p.emoji || '📦'}'">`;
+            return p.emoji || '📦';
         }
 
         function renderProducts(productsToShow = products) {
@@ -630,11 +608,13 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 if(!json.ok) throw new Error(json.error || 'Amazon API no disponible');
                 products = (json.products || []).map((p, i)=>({ ...p, id: String(p.id || p.asin || ('amazon-'+i)), quantity: p.quantity || 1 }));
                 status.textContent = `${products.length} productos cargados desde ${json.provider} (${json.mode}). ${json.credentialsDetected ? 'Credenciales LWA detectadas.' : 'Credenciales no detectadas.'}`;
+                products = products.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
                 renderProducts(products);
             }catch(e){
                 console.warn('Amazon sandbox no disponible. Usando respaldo local.', e);
                 products = fallbackProducts;
-                status.textContent = 'Amazon Sandbox no respondió. Mostrando respaldo local temporal.';
+                status.textContent = 'Amazon Sandbox no respondió. No se muestran productos demo.';
+                products = products.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
                 renderProducts(products);
             }
         }

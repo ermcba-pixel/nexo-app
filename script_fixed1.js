@@ -285,7 +285,7 @@ function getClientProfile() {
                 ['Concepto tributario', 'Servicios de Intermediación / Comercialización Internacional'],
                 ['IT aplicado', '3% sobre comisión'],
                 ['IUE aplicado', '25% sobre utilidad'],
-                ['Comisión NEXO', '30%'],
+                ['Comisión nexo', '30%'],
                 ['Moneda operativa', 'USD'],
                 ['Tipo de cambio referencia', String(company.exchangeRate || 6.96)]
             ];

@@ -4,14 +4,14 @@
   };
   const T = {
     es:{
-      line1:'nexo™ – Plataforma de intermediación comercial internacional',
+      line1:'nexo – Plataforma Internacional de Intermediación Comercial',
       line2:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
       line3:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',
       line4:'© 2026 nexo™ – Todos los derechos reservados',
       legal:'Aviso Legal', terms:'Términos y Condiciones', privacy:'Privacidad', cookies:'Cookies', refunds:'Reembolsos'
     },
     en:{
-      line1:'nexo™ – International commercial intermediation platform',
+      line1:'nexo – International Commercial Intermediation Platform',
       line2:'nexo Servicios Generales y Empresariales – Tax ID/NIT: 774651015 – Bolivia',
       line3:'nexo™ acts exclusively as an intermediary between the customer and international providers.',
       line4:'© 2026 nexo™ – All rights reserved',
@@ -25,14 +25,14 @@
       legal:'Aviso Legal', terms:'Termos e Condições', privacy:'Privacidade', cookies:'Cookies', refunds:'Reembolsos'
     },
     it:{
-      line1:'nexo™ – Piattaforma di intermediazione commerciale internazionale',
+      line1:'nexo – Piattaforma Internazionale di Intermediazione Commerciale',
       line2:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
       line3:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',
       line4:'© 2026 nexo™ – Tutti i diritti riservati',
       legal:'Avviso Legale', terms:'Termini e Condizioni', privacy:'Privacy', cookies:'Cookie', refunds:'Rimborsi'
     },
     fr:{
-      line1:'nexo™ – Plateforme d’intermédiation commerciale internationale',
+      line1:'nexo – Plateforme Internationale d’Intermédiation Commerciale',
       line2:'nexo Servicios Generales y Empresariales – NIT : 774651015 – Bolivie',
       line3:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',
       line4:'© 2026 nexo™ – Tous droits réservés',

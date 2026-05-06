@@ -3,6 +3,10 @@
 // no entrega un catálogo público vivo tipo tienda; por eso este endpoint prioriza Amazon Business,
 // elimina catálogos demo multi-proveedor y devuelve un catálogo sandbox coherente para pruebas.
 
+// Las URLs reales de imágenes se usarán solo cuando Amazon Business Producción las entregue válidas.
+// En Sandbox no se fuerzan URLs de m.media-amazon.com para evitar errores 404.
+
+
 const QUERY_CATALOGS = {
   iphone: [
     ['Apple iPhone 15 128GB Unlocked', 699], ['Apple iPhone 15 256GB Unlocked', 799],
@@ -87,7 +91,7 @@ function normalize(row, idx) {
     shippingAmazon: shipping,
     vendorFee: 0,
     category: categoryFromName(title),
-    image: null, // sandbox estable: el frontend genera imagen segura sin errores 404
+    image: null, // sandbox sin URL original válida: frontend genera imagen segura; producción usará imagen original Amazon
     url: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
     sourceUrl: `https://www.amazon.com/s?k=${encodeURIComponent(title)}`,
     stock: 8 + (idx % 18),
@@ -148,6 +152,9 @@ export default async function handler(req, res) {
     products = products.concat(extra).slice(0, 20);
   }
 
+  // Orden comercial para cliente: precio mayor a menor.
+  products = products.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+
   return res.status(200).json({
     ok: true,
     provider: 'Amazon Business',
@@ -156,7 +163,7 @@ export default async function handler(req, res) {
     lwaTokenOk: token.ok,
     tokenStatus: token.ok ? 'LWA token generado' : token.reason,
     notice: token.ok
-      ? 'LWA/refresh token OK. Catálogo sandbox estable de Amazon Business activo para pruebas. Para catálogo vivo y compra real falta API/roles de producción de Amazon Business Ordering/Product Search.'
+      ? 'LWA/refresh token OK. Catálogo sandbox de Amazon Business activo para pruebas. Para catálogo vivo y compra real falta API/roles de producción de Amazon Business Ordering/Product Search.'
       : 'Catálogo sandbox de Amazon Business activo. Revise variables LWA si se requiere validación OAuth.',
     products
   });
