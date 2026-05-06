@@ -506,9 +506,9 @@
                     <label class="filter-label"><span id="catLabel">📁 Categoría</span></label>
                     <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
                         <option value="" id="catAll">Todas las categorías</option>
-                        <option value="" id="catElect">Electrónica</option>
-                        <option value="" id="catAcc">Accesorios</option>
-                        <option value="" id="catFashion">Moda</option>
+                        <option value="electronics" id="catElect">Electrónica</option>
+                        <option value="accessories" id="catAcc">Accesorios</option>
+                        <option value="fashion" id="catFashion">Moda</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -603,20 +603,23 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         async function loadAmazonProducts(){
             const search = document.getElementById('searchInput').value.trim();
             const maxPrice = document.getElementById('priceFilter').value;
+            const category = document.getElementById('categoryFilter').value;
             const status = document.getElementById('amazonStatus');
             try{
                 status.textContent = 'Buscando productos en Amazon Business Sandbox...';
-                const qs = new URLSearchParams({ q: search, maxPrice: maxPrice || '' });
+                const qs = new URLSearchParams({ q: search, maxPrice: maxPrice || '', category: category || '' });
                 const resp = await fetch('/api/amazon-products?' + qs.toString());
                 const json = await resp.json();
                 if(!json.ok) throw new Error(json.error || 'Amazon API no disponible');
                 products = (json.products || []).map((p, i)=>({ ...p, id: String(p.id || p.asin || ('amazon-'+i)), quantity: p.quantity || 1 }));
-                status.textContent = `${products.length} productos cargados desde ${json.provider} (${json.mode}). ${json.credentialsDetected ? 'Credenciales LWA detectadas.' : 'Credenciales no detectadas.'}`;
+                if (category) products = products.filter(p => String(p.category || '').toLowerCase().includes(category));
+                const liveMsg = json.mode === 'amazon-business-api' ? 'Amazon Business API activo' : 'Amazon Sandbox/respaldo inteligente activo';
+                status.textContent = `${products.length} productos cargados. ${liveMsg}. ${json.credentialsDetected ? 'Credenciales LWA detectadas.' : 'Credenciales no detectadas.'}${json.liveError ? ' | Aviso técnico: ' + json.liveError : ''}`;
                 renderProducts(products);
             }catch(e){
                 console.warn('Amazon sandbox no disponible. Usando respaldo local.', e);
                 products = fallbackProducts;
-                status.textContent = 'Amazon Sandbox no respondió. Mostrando respaldo local temporal.';
+                status.textContent = 'Amazon no respondió. Mostrando respaldo local temporal.';
                 renderProducts(products);
             }
         }
