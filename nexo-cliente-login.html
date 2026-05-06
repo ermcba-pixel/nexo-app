@@ -694,8 +694,13 @@
                 return el && String(el.value || '').trim() !== '';
             });
             const password = document.getElementById('regPassword').value || '';
+            const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(password);
+            const hasLower = /[a-záéíóúñ]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(password);
+            const hasLength = password.length >= 8;
             if (typeof renderLivePasswordRules === 'function') renderLivePasswordRules('regPassword', 'registerPasswordRules');
-            const ok = allFilled && password.length >= 8;
+            const ok = allFilled && hasUpper && hasLower && hasNumber && hasSymbol && hasLength;
             document.getElementById('registerBtn').disabled = !ok;
             return ok;
         }
@@ -847,7 +852,7 @@ document.addEventListener('DOMContentLoaded', () => { applyLoginLanguage(); appl
 const registerTexts = {
   es:{title:'Crear Mi Cuenta', back:'← Volver al Portal', first:'👤 Nombre', last:'Apellido', doc:'🪪 Número Documento de Identidad / NIT', docPh:'CI, pasaporte o NIT', email:'📧 Correo Electrónico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Teléfono', zip:'📮 Código Postal', region:'🏙️ Región / Estado', city:'🏠 Ciudad', address:'📍 Dirección exacta de envío', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para crear la cuenta.', btn:'Crear Cuenta', have:'¿Ya tienes cuenta?', signin:'Inicia sesión aquí'},
   en:{title:'Create My Account', back:'← Back to Portal', first:'👤 First Name', last:'Last Name', doc:'🪪 Identity Document Number / Tax ID', docPh:'ID, passport or tax ID', email:'📧 Email Address', country:'🌎 Country', area:'☎️ Area Code', phone:'📱 Phone', zip:'📮 Postal Code', region:'🏙️ Region / State', city:'🏠 City', address:'📍 Exact Shipping Address', pass:'🔐 Password', passPh:'Minimum 8 characters', passHelp:'Minimum 8 characters to create the account.', btn:'Create Account', have:'Already have an account?', signin:'Sign in here'},
-  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
+  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres<div class="password-rules-panel">✔ Mayús<br>✔ minús<br>✔ Número<br>✔ Símbolo<br>✔ 8 carac</div> para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
   it:{title:'Crea Il Mio Account', back:'← Torna al Portale', first:'👤 Nome', last:'Cognome', doc:'🪪 Numero Documento d’Identità / Partita IVA', docPh:'CI, passaporto o P.IVA', email:'📧 Email', country:'🌎 Paese', area:'☎️ Prefisso', phone:'📱 Telefono', zip:'📮 Codice Postale', region:'🏙️ Regione / Stato', city:'🏠 Città', address:'📍 Indirizzo esatto di spedizione', pass:'🔐 Password', passPh:'Minimo 8 caratteri', passHelp:'Minimo 8 caratteri per creare l’account.', btn:'Crea Account', have:'Hai già un account?', signin:'Accedi qui'},
   fr:{title:'Créer Mon Compte', back:'← Retour au Portail', first:'👤 Prénom', last:'Nom', doc:'🪪 Numéro du document d’identité / NIF', docPh:'CI, passeport ou NIF', email:'📧 Adresse e-mail', country:'🌎 Pays', area:'☎️ Indicatif', phone:'📱 Téléphone', zip:'📮 Code Postal', region:'🏙️ Région / État', city:'🏠 Ville', address:'📍 Adresse exacte de livraison', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', passHelp:'Minimum 8 caractères pour créer le compte.', btn:'Créer le Compte', have:'Vous avez déjà un compte ?', signin:'Connectez-vous ici'}
 };
@@ -1192,14 +1197,26 @@ function renderLivePasswordRules(inputId, boxId){
   if(!input || !box) return;
 
   const val = input.value || '';
+  const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(val);
+  const hasLower = /[a-záéíóúñ]/.test(val);
+  const hasNumber = /[0-9]/.test(val);
+  const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(val);
   const hasLength = val.length >= 8;
-  const title = hasLength ? 'Clave válida' : 'Mínimo 8 caracteres';
-  const titleColor = hasLength ? '#2f7d32' : '#a94442';
+
+  let score = 0;
+  [hasUpper, hasLower, hasNumber, hasSymbol, hasLength].forEach(v => { if(v) score += 1; });
+
+  const title = score <= 1 ? 'Muy débil' : score <= 3 ? 'Media' : score === 4 ? 'Fuerte' : 'Muy fuerte';
+  const titleColor = score <= 1 ? '#a94442' : score <= 3 ? '#b37a00' : '#2f7d32';
 
   box.innerHTML = `
     <div class="password-rules-title" style="color:${titleColor}">${title}</div>
     <div class="password-rules-grid">
-      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 caracteres</div>
+      <div class="password-rule ${hasUpper ? 'ok' : 'no'}">${hasUpper ? '✔' : '✖'} Mayús</div>
+      <div class="password-rule ${hasLower ? 'ok' : 'no'}">${hasLower ? '✔' : '✖'} minús</div>
+      <div class="password-rule ${hasNumber ? 'ok' : 'no'}">${hasNumber ? '✔' : '✖'} Número</div>
+      <div class="password-rule ${hasSymbol ? 'ok' : 'no'}">${hasSymbol ? '✔' : '✖'} Símbolo</div>
+      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 carac</div>
     </div>
   `;
 }
@@ -1229,75 +1246,5 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 <script src="nexo-legal-i18n.js"></script>
-
-<script>
-(function(){
-  const NEXO_LANG_TITLES = {
-    es: "nexo – Sistema de Intermediación Comercial Internacional",
-    en: "nexo – International Commercial Intermediation System",
-    pt: "nexo – Sistema de Intermediação Comercial Internacional",
-    fr: "nexo – Système d’Intermédiation Commerciale Internationale",
-    it: "nexo – Sistema di Intermediazione Commerciale Internazionale"
-  };
-  const NEXO_LANG_FOOTERS = {
-    es: "nexo – Plataforma Internacional de Intermediación Comercial",
-    en: "nexo – International Commercial Intermediation Platform",
-    pt: "nexo – Plataforma Internacional de Intermediação Comercial",
-    fr: "nexo – Plateforme Internationale d’Intermédiation Commerciale",
-    it: "nexo – Piattaforma Internazionale di Intermediazione Commerciale"
-  };
-  function langFromText(t){
-    t=(t||"").toLowerCase();
-    if(t.includes("english")) return "en";
-    if(t.includes("portugu")) return "pt";
-    if(t.includes("fran")) return "fr";
-    if(t.includes("ital")) return "it";
-    return "es";
-  }
-  function currentLang(){
-    const buttons = Array.from(document.querySelectorAll("button,.lang-btn,.language-btn"));
-    const active = buttons.find(b => {
-      const c=(b.className||"").toString().toLowerCase();
-      const a=(b.getAttribute("aria-pressed")||"").toLowerCase();
-      return c.includes("active") || c.includes("selected") || a==="true";
-    });
-    return langFromText(active ? active.textContent : document.documentElement.lang || "es");
-  }
-  function applyNexoTitle(lang){
-    const title = NEXO_LANG_TITLES[lang] || NEXO_LANG_TITLES.es;
-    const footerTitle = NEXO_LANG_FOOTERS[lang] || NEXO_LANG_FOOTERS.es;
-    document.querySelectorAll("h1,h2,.hero-title,.brand-title,.system-title,.main-title").forEach(el=>{
-      const txt = (el.textContent || "").trim();
-      if(/Digital Intermediation|Intermediaci[oó]n|Intermediaç|Intermédiation|Intermediazione|nexo-Sistema|nexo – Sistema|nexo – International/i.test(txt)){
-        el.textContent = title;
-      }
-    });
-    document.querySelectorAll("footer, .footer, .legal-footer, body").forEach(el=>{
-      if(!el || !el.innerHTML) return;
-      el.innerHTML = el.innerHTML
-        .replace(/nexo™?\s*[–-]\s*International commercial intermediation platform/gi, "nexo – International Commercial Intermediation Platform")
-        .replace(/nexo™?\s*[–-]\s*International Commercial Intermediation Platform/gi, footerTitle)
-        .replace(/nexo™?\s*[–-]\s*Plataforma de intermediación comercial internacional/gi, footerTitle)
-        .replace(/nexo\s*[–-]\s*Plataforma Internacional de Intermediación Comercial/gi, footerTitle)
-        .replace(/nexo™?\s*[–-]\s*Plateforme d’intermédiation commerciale internationale/gi, footerTitle)
-        .replace(/nexo\s*[–-]\s*Plateforme Internationale d’Intermédiation Commerciale/gi, footerTitle)
-        .replace(/nexo™?\s*[–-]\s*Piattaforma di intermediazione commerciale internazionale/gi, footerTitle)
-        .replace(/nexo\s*[–-]\s*Piattaforma Internazionale di Intermediazione Commerciale/gi, footerTitle)
-        .replace(/nexo-Sistema de Intermediación Comercial Internacional/g, "nexo – Sistema de Intermediación Comercial Internacional");
-    });
-  }
-  document.addEventListener("click", function(e){
-    const b = e.target.closest && e.target.closest("button");
-    if(!b) return;
-    const txt = (b.textContent || "").toLowerCase();
-    if(txt.includes("español") || txt.includes("english") || txt.includes("portugu") || txt.includes("fran") || txt.includes("ital")){
-      setTimeout(()=>applyNexoTitle(langFromText(txt)), 120);
-    }
-  });
-  document.addEventListener("DOMContentLoaded", ()=>applyNexoTitle(currentLang()));
-  setTimeout(()=>applyNexoTitle(currentLang()), 300);
-})();
-</script>
-
 </body>
 </html>

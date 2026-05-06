@@ -466,10 +466,8 @@
             }
         }
     
-        .product-image img{width:100%;height:100%;object-fit:contain;border-radius:14px;background:#fff;}
-        .product-provider{font-size:12px;font-weight:900;color:#ff9900;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px;}
-        .amazon-status{margin:12px 0 0 0;padding:10px 14px;border-radius:12px;background:#fff7e6;border:1px solid #ffd48a;color:#4f3b13;font-weight:800;font-size:13px;}
-</style>
+        .nexo-img-fallback{width:100%;height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(135deg,#eef6f5,#ffffff);border-radius:14px;filter:drop-shadow(0 8px 14px rgba(45,62,63,.18));}
+        </style>
 </head>
 <body>
     <div class="store-container">
@@ -481,8 +479,8 @@
                     <div class="logo-store-subtitle">Tienda</div>
                 </div>
                 <div class="header-title">
-                    <h1 id="storeTitle">Tienda nexo</h1>
-                    <p id="storeSubtitle">Productos Amazon Business • Envíos Internacionales</p>
+                    <h1 id="storeTitle">Tienda NEXO</h1>
+                    <p id="storeSubtitle">12 Productos Premium • Envíos Internacionales</p>
                 </div>
             </div>
             <div class="header-right">
@@ -516,7 +514,6 @@
                     <input type="number" class="filter-input" id="priceFilter" placeholder="USD" min="0" onchange="filterProducts()">
                 </div>
             </div>
-            <div id="amazonStatus" class="amazon-status">Conectando con Amazon Business Sandbox...</div>
 
             <!-- PRODUCTOS -->
             <div class="products-grid" id="productsGrid"></div>
@@ -533,30 +530,50 @@
             <div id="cartItems"></div>
             <div class="cart-summary">
                 <div class="summary-row"><span id="sumSubtotalLbl">Subtotal producto:</span><span>$<span id="subtotal">0.00</span></span></div>
-                <div class="summary-row"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío (Amazon/Marketplace):</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
-                <div class="summary-row"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos de la empresa vendedora:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
-                <div class="summary-row"><span id="sumComLbl">Comisión nexo:</span><span>$<span id="commission">0.00</span></span></div>
+                <div class="summary-row"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío estimados (Amazon/Marketplace):</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
+                <div class="summary-row"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos proveedor/marketplace estimados:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
+                <div class="summary-row"><span id="sumComLbl">Comisión NEXO:</span><span>$<span id="commission">0.00</span></span></div>
                 <div class="summary-row"><span id="sumItLbl"></span><span>$<span id="taxAmount">0.00</span></span></div>
                 <div class="summary-row"><span id="sumIueLbl"></span><span>$<span id="retentionAmount">0.00</span></span></div>
                 <div class="summary-row total"><span id="sumTotalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
-                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.</span></div>
+                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">Los valores en naranja son estimados de Sandbox. El costo final debe calcularse con Amazon usando país, ciudad, código postal y dirección exacta del cliente al confirmar el pedido.</span></div>
             </div>
             <button class="checkout-btn" onclick="goToCheckout()"><span id="checkoutBtnText">Proceder al Pago</span></button>
         </div>
     </div>
 
     <script>
-        let products = [];
 
-        const fallbackProducts = [];
+function nexoProductImageMarkup(product){
+  const safe = (product && product.image && /^https?:\/\//i.test(product.image)) ? product.image : '';
+  const type = (product && (product.imageType || '') || '').toLowerCase();
+  const emoji = type.includes('phone') ? '📱' : type.includes('laptop') ? '💻' : type.includes('shirt') ? '👕' : type.includes('shoe') ? '👟' : type.includes('cable') ? '🔌' : type.includes('monitor') ? '🖥️' : '🛍️';
+  if (safe) return `<img src="${safe}" alt="${product.name || product.title || 'Producto Amazon'}" onerror="this.outerHTML='<div class=&quot;nexo-img-fallback&quot;>${emoji}</div>'">`;
+  return `<div class="nexo-img-fallback">${emoji}</div>`;
+}
+
+        const products = [
+            { id: 1, name: 'AirPods Pro', price: 249, shippingAmazon: 24, vendorFee: 12, category: 'electrónica', emoji: '🎧', stock: 8 },
+            { id: 2, name: 'iPad Air 5', price: 599, shippingAmazon: 35, vendorFee: 18, category: 'electrónica', emoji: '📱', stock: 5 },
+            { id: 3, name: 'MacBook Air', price: 1299, shippingAmazon: 48, vendorFee: 26, category: 'electrónica', emoji: '💻', stock: 3 },
+            { id: 4, name: 'Apple Watch', price: 399, shippingAmazon: 22, vendorFee: 9, category: 'electrónica', emoji: '⌚', stock: 12 },
+            { id: 5, name: 'iPhone 15', price: 999, shippingAmazon: 41, vendorFee: 21, category: 'electrónica', emoji: '📲', stock: 7 },
+            { id: 6, name: 'Mochila Gamer', price: 79, shippingAmazon: 11, vendorFee: 4, category: 'accesorios', emoji: '🎒', stock: 15 },
+            { id: 7, name: 'Cable USB-C', price: 29, shippingAmazon: 6, vendorFee: 2, category: 'accesorios', emoji: '🔌', stock: 50 },
+            { id: 8, name: 'Funda iPhone', price: 39, shippingAmazon: 7, vendorFee: 3, category: 'accesorios', emoji: '📦', stock: 25 },
+            { id: 9, name: 'Sudadera NEXO', price: 49, shippingAmazon: 9, vendorFee: 3, category: 'moda', emoji: '👕', stock: 20 },
+            { id: 10, name: 'Gafas de Sol', price: 149, shippingAmazon: 14, vendorFee: 5, category: 'moda', emoji: '😎', stock: 18 },
+            { id: 11, name: 'Reloj Deportivo', price: 189, shippingAmazon: 17, vendorFee: 7, category: 'electrónica', emoji: '⌚', stock: 10 },
+            { id: 12, name: 'Audífonos Inalámbricos', price: 129, shippingAmazon: 13, vendorFee: 5, category: 'electrónica', emoji: '🎧', stock: 14 }
+        ];
 
         
 const storeI18n={
- es:{title:'Tienda nexo',subtitle:'Productos Amazon Business • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío (Amazon/Marketplace):',sumVendor:'Gastos de la empresa vendedora:',sumCom:'Comisión nexo:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
- en:{title:'nexo Store',subtitle:'Amazon Business Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'nexo commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
- pt:{title:'Loja nexo',subtitle:'Produtos Amazon Business • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
- it:{title:'Negozio nexo',subtitle:'Prodotti Amazon Business • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
- fr:{title:'Boutique nexo',subtitle:'Produits Amazon Business • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission nexo :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
+ es:{title:'Tienda NEXO',subtitle:'12 Productos Premium • Envíos Internacionales',cartTitle:'🛒 Tu Carrito',back:'← Volver',search:'🔍 Buscar',cat:'📁 Categoría',price:'💲 Precio Máximo',searchPh:'Nombre del producto...',catAll:'Todas las categorías',catElect:'Electrónica',catAcc:'Accesorios',catFashion:'Moda',sumSubtotal:'Subtotal producto:',sumShip:'Gastos de envío estimados (Amazon/Marketplace):',sumVendor:'Gastos proveedor/marketplace estimados:',sumCom:'Comisión NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a Pagar:',sumNote:'Los valores en naranja son estimados de Sandbox. El costo final debe calcularse con Amazon usando país, ciudad, código postal y dirección exacta del cliente al confirmar el pedido.',checkout:'Proceder al Pago',reviews:'reviews',stock:'Stock',available:'disponibles',soldOut:'Agotado',add:'+ Carrito',empty:'Tu carrito está vacío',cartTitleAttr:'Ver Carrito',notifAdded:'agregado al carrito'},
+ en:{title:'NEXO Store',subtitle:'12 Premium Products • International Shipping',cartTitle:'🛒 Your Cart',back:'← Back',search:'🔍 Search',cat:'📁 Category',price:'💲 Max Price',searchPh:'Product name...',catAll:'All categories',catElect:'Electronics',catAcc:'Accessories',catFashion:'Fashion',sumSubtotal:'Product subtotal:',sumShip:'Shipping costs (Amazon/Marketplace):',sumVendor:'Seller company charges:',sumCom:'NEXO commission :',sumIt:'',sumIue:'',sumTotal:'Total to Pay:',sumNote:'Orange values correspond to transport and external supplier or marketplace charges.',checkout:'Proceed to Payment',reviews:'reviews',stock:'Stock',available:'available',soldOut:'Sold out',add:'+ Cart',empty:'Your cart is empty',cartTitleAttr:'View Cart',notifAdded:'added to cart'},
+ pt:{title:'Loja NEXO',subtitle:'12 Produtos Premium • Envio Internacional',cartTitle:'🛒 Seu Carrinho',back:'← Voltar',search:'🔍 Buscar',cat:'📁 Categoria',price:'💲 Preço Máximo',searchPh:'Nome do produto...',catAll:'Todas as categorias',catElect:'Eletrônicos',catAcc:'Acessórios',catFashion:'Moda',sumSubtotal:'Subtotal do produto:',sumShip:'Custos de envio (Amazon/Marketplace):',sumVendor:'Encargos da empresa vendedora:',sumCom:'Comissão NEXO:',sumIt:'',sumIue:'',sumTotal:'Total a pagar:',sumNote:'Os valores em laranja correspondem a transporte e encargos externos do fornecedor ou marketplace.',checkout:'Prosseguir para o pagamento',reviews:'avaliações',stock:'Estoque',available:'disponíveis',soldOut:'Esgotado',add:'+ Carrinho',empty:'Seu carrinho está vazio',cartTitleAttr:'Ver carrinho',notifAdded:'adicionado ao carrinho'},
+ it:{title:'Negozio NEXO',subtitle:'12 Prodotti Premium • Spedizione Internazionale',cartTitle:'🛒 Il tuo carrello',back:'← Indietro',search:'🔍 Cerca',cat:'📁 Categoria',price:'💲 Prezzo massimo',searchPh:'Nome del prodotto...',catAll:'Tutte le categorie',catElect:'Elettronica',catAcc:'Accessori',catFashion:'Moda',sumSubtotal:'Subtotale prodotto:',sumShip:'Costi di spedizione (Amazon/Marketplace):',sumVendor:'Costi dell’azienda venditrice:',sumCom:'Commissione NEXO:',sumIt:'IT (3% sulla commissione):',sumIue:'IUE (25% sulla commissione):',sumTotal:'Totale da pagare:',sumNote:'I valori in arancione corrispondono a trasporto e costi esterni del fornitore o marketplace.',checkout:'Procedi al pagamento',reviews:'recensioni',stock:'Stock',available:'disponibili',soldOut:'Esaurito',add:'+ Carrello',empty:'Il tuo carrello è vuoto',cartTitleAttr:'Vedi carrello',notifAdded:'aggiunto al carrello'},
+ fr:{title:'Boutique NEXO',subtitle:'12 Produits Premium • Livraison Internationale',cartTitle:'🛒 Votre panier',back:'← Retour',search:'🔍 Rechercher',cat:'📁 Catégorie',price:'💲 Prix maximum',searchPh:'Nom du produit...',catAll:'Toutes les catégories',catElect:'Électronique',catAcc:'Accessoires',catFashion:'Mode',sumSubtotal:'Sous-total produit :',sumShip:'Frais de livraison (Amazon/Marketplace) :',sumVendor:'Frais de l’entreprise vendeuse :',sumCom:'Commission NEXO :',sumIt:'IT (3% sur commission) :',sumIue:'IUE (25% sur commission) :',sumTotal:'Total à payer :',sumNote:'Les valeurs en orange correspondent au transport et aux frais externes du fournisseur ou de la marketplace.',checkout:'Procéder au paiement',reviews:'avis',stock:'Stock',available:'disponibles',soldOut:'Épuisé',add:'+ Panier',empty:'Votre panier est vide',cartTitleAttr:'Voir le panier',notifAdded:'ajouté au panier'}
 };
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
@@ -565,64 +582,41 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         let cart = JSON.parse(localStorage.getItem('nexoCart')) || [];
 
 
-        function productImageMarkup(p){
-            if (p.image) return `<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.parentElement.textContent='${p.emoji || '📦'}'">`;
-            return p.emoji || '📦';
-        }
-
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
-            if(!productsToShow.length){ grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#607274;font-weight:800;">No se encontraron productos para ese filtro.</div>'; return; }
-            grid.innerHTML = productsToShow.map((p, idx) => `
+            grid.innerHTML = productsToShow.map(p => `
                 <div class="product-card">
-                    <div class="product-image">${productImageMarkup(p)}</div>
+                    <div class="product-image">${p.emoji}</div>
                     <div class="product-info">
-                        <div class="product-provider">${p.provider || p.proveedor || 'Amazon Business'}</div>
                         <div class="product-name">${p.name}</div>
-                        <div class="product-rating">★★★★★ (${p.reviews || 128} ${tt().reviews})</div>
-                        <div class="product-price">$${Number(p.price || 0).toFixed(2)}</div>
-                        <div class="product-stock">${tt().stock}: ${p.stock || 0} ${tt().available}</div>
-                        <button class="add-to-cart-btn" onclick="addToCart('${p.id}')" ${Number(p.stock || 0) === 0 ? 'disabled' : ''}>
-                            ${Number(p.stock || 0) === 0 ? tt().soldOut : tt().add}
+                        <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
+                        <div class="product-price">$${p.price.toFixed(2)}</div>
+                        <div class="product-stock">${tt().stock}: ${p.stock} ${tt().available}</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
+                            ${p.stock === 0 ? tt().soldOut : tt().add}
                         </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        let amazonSearchTimer = null;
         function filterProducts() {
-            clearTimeout(amazonSearchTimer);
-            amazonSearchTimer = setTimeout(loadAmazonProducts, 350);
-        }
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const maxPrice = parseFloat(document.getElementById('priceFilter').value) || Infinity;
 
-        async function loadAmazonProducts(){
-            const search = document.getElementById('searchInput').value.trim();
-            const maxPrice = document.getElementById('priceFilter').value;
-            const status = document.getElementById('amazonStatus');
-            try{
-                status.textContent = 'Buscando productos en Amazon Business Sandbox...';
-                const qs = new URLSearchParams({ q: search, maxPrice: maxPrice || '' });
-                const resp = await fetch('/api/amazon-products?' + qs.toString(), { cache: 'no-store' });
-                const json = await resp.json();
-                if(!json.ok) throw new Error(json.error || 'Amazon API no disponible');
-                products = (json.products || []).map((p, i)=>({ ...p, id: String(p.id || p.asin || ('amazon-'+i)), quantity: p.quantity || 1 }));
-                status.textContent = `${products.length} productos cargados desde ${json.provider} (${json.mode}). ${json.credentialsDetected ? 'Credenciales LWA detectadas.' : 'Credenciales no detectadas.'}`;
-                products = products.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
-                renderProducts(products);
-            }catch(e){
-                console.warn('Amazon sandbox no disponible. Usando respaldo local.', e);
-                products = fallbackProducts;
-                status.textContent = 'Amazon Sandbox no respondió. No se muestran productos demo.';
-                products = products.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
-                renderProducts(products);
-            }
+            const filtered = products.filter(p =>
+                (p.name.toLowerCase().includes(search)) &&
+                (category === '' || p.category === category) &&
+                (p.price <= maxPrice)
+            );
+
+            renderProducts(filtered);
         }
 
         function addToCart(productId) {
-            const product = products.find(p => String(p.id) === String(productId));
-            if(!product) return;
-            const existingItem = cart.find(c => String(c.id) === String(productId));
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(c => c.id === productId);
 
             if (existingItem) {
                 existingItem.quantity += 1;
@@ -660,11 +654,11 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
             container.innerHTML = cart.map(item => `
                 <div class="cart-item">
-                    <div class="cart-item-name">${item.provider || item.proveedor || 'Proveedor'} · ${item.name}</div>
+                    <div class="cart-item-name">${item.emoji} ${item.name}</div>
                     <div class="cart-item-qty">
-                        <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">−</button>
+                        <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
                         <span>${item.quantity}</span>
-                        <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                        <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
                     </div>
                     <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
                 </div>
@@ -675,7 +669,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         }
 
         function updateQuantity(productId, change) {
-            const item = cart.find(c => String(c.id) === String(productId));
+            const item = cart.find(c => c.id === productId);
             if (item) {
                 item.quantity += change;
                 if (item.quantity <= 0) {
@@ -736,7 +730,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         document.addEventListener('DOMContentLoaded', () => {
             applyStoreLanguage();
-            loadAmazonProducts();
+            renderProducts();
             updateCartCount();
         });
 
@@ -920,75 +914,5 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </footer>
 
 <script src="nexo-legal-i18n.js"></script>
-
-<script>
-(function(){
-  const NEXO_LANG_TITLES = {
-    es: "nexo – Sistema de Intermediación Comercial Internacional",
-    en: "nexo – International Commercial Intermediation System",
-    pt: "nexo – Sistema de Intermediação Comercial Internacional",
-    fr: "nexo – Système d’Intermédiation Commerciale Internationale",
-    it: "nexo – Sistema di Intermediazione Commerciale Internazionale"
-  };
-  const NEXO_LANG_FOOTERS = {
-    es: "nexo – Plataforma Internacional de Intermediación Comercial",
-    en: "nexo – International Commercial Intermediation Platform",
-    pt: "nexo – Plataforma Internacional de Intermediação Comercial",
-    fr: "nexo – Plateforme Internationale d’Intermédiation Commerciale",
-    it: "nexo – Piattaforma Internazionale di Intermediazione Commerciale"
-  };
-  function langFromText(t){
-    t=(t||"").toLowerCase();
-    if(t.includes("english")) return "en";
-    if(t.includes("portugu")) return "pt";
-    if(t.includes("fran")) return "fr";
-    if(t.includes("ital")) return "it";
-    return "es";
-  }
-  function currentLang(){
-    const buttons = Array.from(document.querySelectorAll("button,.lang-btn,.language-btn"));
-    const active = buttons.find(b => {
-      const c=(b.className||"").toString().toLowerCase();
-      const a=(b.getAttribute("aria-pressed")||"").toLowerCase();
-      return c.includes("active") || c.includes("selected") || a==="true";
-    });
-    return langFromText(active ? active.textContent : document.documentElement.lang || "es");
-  }
-  function applyNexoTitle(lang){
-    const title = NEXO_LANG_TITLES[lang] || NEXO_LANG_TITLES.es;
-    const footerTitle = NEXO_LANG_FOOTERS[lang] || NEXO_LANG_FOOTERS.es;
-    document.querySelectorAll("h1,h2,.hero-title,.brand-title,.system-title,.main-title").forEach(el=>{
-      const txt = (el.textContent || "").trim();
-      if(/Digital Intermediation|Intermediaci[oó]n|Intermediaç|Intermédiation|Intermediazione|nexo-Sistema|nexo – Sistema|nexo – International/i.test(txt)){
-        el.textContent = title;
-      }
-    });
-    document.querySelectorAll("footer, .footer, .legal-footer, body").forEach(el=>{
-      if(!el || !el.innerHTML) return;
-      el.innerHTML = el.innerHTML
-        .replace(/nexo™?\s*[–-]\s*International commercial intermediation platform/gi, "nexo – International Commercial Intermediation Platform")
-        .replace(/nexo™?\s*[–-]\s*International Commercial Intermediation Platform/gi, footerTitle)
-        .replace(/nexo™?\s*[–-]\s*Plataforma de intermediación comercial internacional/gi, footerTitle)
-        .replace(/nexo\s*[–-]\s*Plataforma Internacional de Intermediación Comercial/gi, footerTitle)
-        .replace(/nexo™?\s*[–-]\s*Plateforme d’intermédiation commerciale internationale/gi, footerTitle)
-        .replace(/nexo\s*[–-]\s*Plateforme Internationale d’Intermédiation Commerciale/gi, footerTitle)
-        .replace(/nexo™?\s*[–-]\s*Piattaforma di intermediazione commerciale internazionale/gi, footerTitle)
-        .replace(/nexo\s*[–-]\s*Piattaforma Internazionale di Intermediazione Commerciale/gi, footerTitle)
-        .replace(/nexo-Sistema de Intermediación Comercial Internacional/g, "nexo – Sistema de Intermediación Comercial Internacional");
-    });
-  }
-  document.addEventListener("click", function(e){
-    const b = e.target.closest && e.target.closest("button");
-    if(!b) return;
-    const txt = (b.textContent || "").toLowerCase();
-    if(txt.includes("español") || txt.includes("english") || txt.includes("portugu") || txt.includes("fran") || txt.includes("ital")){
-      setTimeout(()=>applyNexoTitle(langFromText(txt)), 120);
-    }
-  });
-  document.addEventListener("DOMContentLoaded", ()=>applyNexoTitle(currentLang()));
-  setTimeout(()=>applyNexoTitle(currentLang()), 300);
-})();
-</script>
-
 </body>
 </html>
