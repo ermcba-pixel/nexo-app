@@ -610,7 +610,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 }
                 if(data && data.ok === false){
                     products = [];
-                    if(grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:left;color:#2D3E3F;font-weight:800;padding:28px;border:1px solid #f39c12;border-radius:16px;background:#fffaf0;line-height:1.55;">⚠️ Amazon API real todavía no devuelve productos originales.<br><br><b>Motivo:</b> ${data.error || data.reason || 'credenciales incompletas'}<br><br><b>En Vercel faltan para productos originales:</b><br>AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG<br><br>Las variables AMAZON_CLIENT_ID / AMAZON_CLIENT_SECRET / AMAZON_REFRESH_TOKEN son de SP-API para órdenes/compras, pero no reemplazan Product Advertising API para buscar productos e imágenes originales.</div>`;
+                    if(grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:left;color:#2D3E3F;font-weight:800;padding:28px;border:1px solid #f39c12;border-radius:16px;background:#fffaf0;line-height:1.55;">⚠️ Catálogo Amazon temporal activo.<br><br>Amazon Associates/Creators API todavía no habilitó credenciales oficiales de catálogo para esta cuenta nueva. El sistema queda operativo hasta el pago PayPal y los productos se muestran con enlaces a Amazon mientras se aprueba la API.</div>`;
                     return false;
                 }
             }catch(e){ console.warn('Amazon API pendiente:', e); }
