@@ -985,19 +985,17 @@ function applyCheckoutLanguage(){
 
         // MÉTODOS DE PAGO
         const paymentMethods = [
-            { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' },
-            { id: 'bank', name: 'Transferencia ACH / Wire', icon: '🏦' },
             { id: 'paypal', name: 'PayPal', icon: '🅿️' }
         ];
 
-        let selectedPayment = 'card';
+        let selectedPayment = 'paypal';
         let orderData = null;
 
         // INICIALIZAR
         function init() {
             renderCountrySelect();
             renderPaymentMethods();
-            selectPayment('card');
+            selectPayment('paypal');
             loadCart();
             calculateTotals();
         }
@@ -1266,14 +1264,42 @@ const t = ctt();
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
         async function startNexoPagoSeguro(orderData){
-            // PAYPAL EN MODO REAL (LIVE) - SOLO PAYPAL DEBE REDIRIGIR A PAYPAL.
-            // Se desactiva temporalmente la función Supabase crear-pago-paypal porque puede devolver URLs sandbox.
-            // El cobro se envía directamente a la cuenta PayPal empresarial de nexo™: ermcba@hotmail.com.
+            // PAYPAL REAL: el cliente paga a PayPal Business de nexo.
+            // El Agente 1 espera confirmación/captura PayPal y luego deja preparada la compra Amazon.
             const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
-            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado&metodo=paypal`;
+            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&metodo=paypal&paypal=return`;
             const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=paypal`;
-            const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
+
+            try {
+                const r = await fetch('/api/paypal-create-order', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        amount,
+                        pedidoId,
+                        orderData,
+                        returnUrl: successUrl,
+                        cancelUrl
+                    })
+                });
+                const data = await r.json().catch(()=>({}));
+                if(r.ok && data.ok && data.approvalUrl){
+                    orderData.paypalOrderId = data.orderId;
+                    orderData.paypalEnvironment = data.env;
+                    orderData.estado_pago = 'paypal_redireccionado_cliente';
+                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                    window.location.href = data.approvalUrl;
+                    return;
+                }
+                console.warn('PayPal Orders API no disponible, se usará fallback PayPal Standard.', data);
+            } catch(e) {
+                console.warn('No se pudo crear orden PayPal API, se usará fallback PayPal Standard.', e);
+            }
+
+            // Fallback operativo: PayPal Standard directo a la cuenta empresarial de nexo.
+            const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
+            const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(fallbackSuccessUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             window.location.href = paypalLiveUrl;
         }
 
