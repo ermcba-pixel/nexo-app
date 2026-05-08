@@ -542,6 +542,13 @@
         .ticket-message{background:#f7faf8;border-left:4px solid var(--accent);border-radius:10px;padding:14px;line-height:1.6;font-size:13px;white-space:pre-wrap;}
         @media(max-width:900px){.ticket-detail-grid{grid-template-columns:1fr;}}
 
+.agente3-box{border:2px solid rgba(122,199,66,.18)}
+.agente3-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.agente3-step{background:#fff;border:1px solid #e3ece9;border-left:5px solid var(--accent);border-radius:12px;padding:16px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.agente3-step b{display:block;color:var(--primary);font-size:14px;margin-bottom:8px}
+.agente3-step p{font-size:12px;line-height:1.55;color:#566;margin:0}
+.mini-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e3ece9;line-height:1.55;color:#2D3E3F}
+
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -590,7 +597,7 @@
                     <span class="menu-icon">📈</span> Reportes
                 </div>
                 <div class="menu-item" onclick="switchSection('marketing', this)">
-                    <span class="menu-icon">📢</span> Agente Marketing IA
+                    <span class="menu-icon">📢</span> Agente 3 Comercial
                 </div>
                 <div class="menu-item" onclick="switchSection('tickets', this)">
                     <span class="menu-icon">🎫</span> Tickets soporte
@@ -852,96 +859,57 @@
 </div>
 
 <div class="section" id="marketing">
-                <h1 class="page-title">📢 AGENTE 3 COMERCIAL</h1>
-                <p class="page-subtitle">Plan operativo para captar clientes, registrar leads, ejecutar campañas y generar reportes comerciales.</p>
+  <h1 class="page-title">📢 AGENTE 3 COMERCIAL · CAPTACIÓN DE CLIENTES</h1>
+  <p class="page-subtitle">Plan comercial numerado incorporado desde las políticas adjuntas · uso exclusivo del Superadministrador</p>
 
-                <div class="agent-summary">
-                    <div class="section-box">
-                        <div class="section-box-title">🤖 MOTOR COMERCIAL DE CAPTACIÓN</div>
-                        <div class="info-grid">
-                            <div class="info-item"><span class="info-label">Estado del agente</span><span class="info-value highlight">Activo · Solo Superadministrador</span></div>
-                            <div class="info-item"><span class="info-label">Objetivo</span><span class="info-value">Captar clientes y convertirlos en operaciones</span></div>
-                            <div class="info-item"><span class="info-label">Canales</span><span class="info-value">WhatsApp, email, redes, referidos y alianzas</span></div>
-                            <div class="info-item"><span class="info-label">Control</span><span class="info-value">Leads, seguimiento, oportunidad, cierre y reporte</span></div>
-                        </div>
-                        <div class="button-group">
-                            <button class="btn btn-primary" onclick="openAgent3Commercial()">▶ Abrir Agente 3 completo</button>
-                            <button class="btn btn-secondary" onclick="runAgent3Report()">⬇ Ver reporte comercial</button>
-                        </div>
-                    </div>
-                    <div class="section-box">
-                        <div class="section-box-title">📋 RESULTADOS DEL AGENTE 3</div>
-                        <div class="mini-stats">
-                            <div class="mini-stat"><div class="mini-stat-label">Leads registrados</div><div class="mini-stat-value" id="adminA3Leads">0</div></div>
-                            <div class="mini-stat"><div class="mini-stat-label">Contactados</div><div class="mini-stat-value" id="adminA3Contacted">0</div></div>
-                            <div class="mini-stat"><div class="mini-stat-label">Oportunidades</div><div class="mini-stat-value" id="adminA3Opp">0</div></div>
-                            <div class="mini-stat"><div class="mini-stat-label">Cierres</div><div class="mini-stat-value" id="adminA3Closed">0</div></div>
-                        </div>
-                    </div>
-                </div>
+  <div class="section-box agente3-box">
+    <div class="section-box-title">🤖 Motor del Agente 3</div>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">Estado</span><span class="info-value highlight">Activo</span></div>
+      <div class="info-item"><span class="info-label">Objetivo</span><span class="info-value">Captar clientes y expandir ventas internacionales</span></div>
+      <div class="info-item"><span class="info-label">Método</span><span class="info-value">12 acciones comerciales numeradas</span></div>
+      <div class="info-item"><span class="info-label">Salida</span><span class="info-value">Reporte ejecutivo + tareas accionables</span></div>
+    </div>
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="agente3EjecutarPlan()">▶ Ejecutar plan comercial</button>
+      <button class="btn btn-secondary" onclick="agente3ExportarReporte()">⬇ Descargar reporte</button>
+      <a class="btn btn-secondary" href="nexo-agent3-marketing.html" target="_blank" style="text-decoration:none;display:inline-block;">Abrir Agente 3 completo</a>
+    </div>
+    <div id="agente3Resultado" class="mini-card" style="margin-top:18px;display:none;"></div>
+  </div>
 
-                <div class="section-box">
-                    <div class="section-box-title">🧭 PLAN COMERCIAL PASO A PASO</div>
-                    <table class="table">
-                        <thead><tr><th>N°</th><th>Acción</th><th>Objetivo operativo</th><th>Resultado esperado</th></tr></thead>
-                        <tbody>
-                            <tr><td>1</td><td>Dimensionamiento de mercado</td><td>Identificar rubros, zonas, volumen y potencial de compra internacional.</td><td>Mercado objetivo priorizado.</td></tr>
-                            <tr><td>2</td><td>Análisis competitivo</td><td>Comparar intermediarios, couriers, marketplaces y sustitutos.</td><td>Ventajas comerciales de nexo.</td></tr>
-                            <tr><td>3</td><td>Perfil de cliente ideal</td><td>Segmentar cliente final, PyME, importador frecuente y referido.</td><td>Lista de prospectos por segmento.</td></tr>
-                            <tr><td>4</td><td>Tendencias de industria</td><td>Detectar productos, temporadas y necesidades con demanda.</td><td>Campañas por categoría.</td></tr>
-                            <tr><td>5</td><td>SWOT + Cinco Fuerzas</td><td>Medir riesgos, oportunidades, competencia y poder de proveedores/clientes.</td><td>Mapa estratégico comercial.</td></tr>
-                            <tr><td>6</td><td>Go to Market</td><td>Definir oferta, mensaje, precio, canal y promoción.</td><td>Campaña lista para ejecutar.</td></tr>
-                            <tr><td>7</td><td>Recorrido del cliente</td><td>Diseñar flujo desde contacto hasta recompra y referido.</td><td>Embudo comercial controlado.</td></tr>
-                            <tr><td>8</td><td>Modelo financiero</td><td>Calcular costo por lead, margen, ROI y rentabilidad.</td><td>Indicadores para decisión.</td></tr>
-                            <tr><td>9</td><td>Riesgos y escenarios</td><td>Controlar pagos, proveedor, logística, reclamos y tiempos.</td><td>Plan preventivo.</td></tr>
-                            <tr><td>10</td><td>Expansión de mercado</td><td>Definir nuevos rubros, alianzas, países y proveedores.</td><td>Ruta de crecimiento.</td></tr>
-                            <tr><td>11</td><td>Acciones comerciales</td><td>Buscar, contactar, proponer, seguir y cerrar clientes.</td><td>Operación diaria del agente.</td></tr>
-                            <tr><td>12</td><td>Reporte final</td><td>Consolidar leads, conversiones, cierres y próximos pasos.</td><td>Informe para gerencia.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+  <div class="section-box agente3-box">
+    <div class="section-box-title">📋 Políticas y acciones numeradas del Agente 3</div>
+    <div class="agente3-steps">
+      <div class="agente3-step"><b>1. Dimensionamiento de mercado y análisis TAM</b><p>Calcula mercado global y local, enfoque top-down y bottom-up, TAM/SAM/SOM, supuestos, CAGR, fuentes y escenario a 5 años.</p></div>
+      <div class="agente3-step"><b>2. Análisis profundo del panorama competitivo</b><p>Identifica competidores directos e indirectos, precios, segmentos, fortalezas, debilidades, posicionamiento y brechas aprovechables.</p></div>
+      <div class="agente3-step"><b>3. Perfil de cliente y segmentación</b><p>Construye perfiles por demografía, psicografía, necesidades, objetivos, comportamiento de compra, ubicación, eventos detonantes y tamaño de segmento.</p></div>
+      <div class="agente3-step"><b>4. Análisis de tendencias de la industria</b><p>Detecta fuerzas económicas, regulatorias, tecnológicas, sociales y ambientales, microtendencias, disrupciones, señales de inversión y oportunidades.</p></div>
+      <div class="agente3-step"><b>5. SWOT + Cinco Fuerzas de Porter</b><p>Evalúa fortalezas, debilidades, oportunidades, amenazas y las cinco fuerzas: proveedores, clientes, rivalidad, sustitutos y nuevos entrantes.</p></div>
+      <div class="agente3-step"><b>6. Estrategia de salida al mercado</b><p>Define fases de prelanzamiento, lanzamiento y postlanzamiento, canales, mensajes, contenido, alianzas, presupuesto, KPI y riesgos.</p></div>
+      <div class="agente3-step"><b>7. Mapa del recorrido del cliente</b><p>Diseña awareness, consideration, decision, onboarding, engagement, retention, loyalty y referral, con puntos de dolor y oportunidades.</p></div>
+      <div class="agente3-step"><b>8. Modelado financiero y economía unitaria</b><p>Calcula CAC, LTV, ratio LTV:CAC, payback, margen bruto, margen de contribución, proyección financiera y análisis de escenarios.</p></div>
+      <div class="agente3-step"><b>9. Evaluación de riesgos y planificación de escenarios</b><p>Analiza riesgos de mercado, competencia, tecnología, finanzas, legal/regulatorio y reputación, con probabilidad, impacto y mitigación.</p></div>
+      <div class="agente3-step"><b>10. Estrategia de entrada y expansión de mercado</b><p>Evalúa tamaño, crecimiento, competencia, regulación e infraestructura, y compara entrada directa, alianza, adquisición, licencia o franquicia.</p></div>
+      <div class="agente3-step"><b>11. Plan operativo de captación</b><p>Convierte el análisis en campañas para Facebook, Instagram, WhatsApp, email, referidos, alianzas y prospección diaria.</p></div>
+      <div class="agente3-step"><b>12. Reporte ejecutivo final</b><p>Entrega resumen para dirección con prioridades, oportunidades, cronograma, responsables, presupuesto, KPI y próximos pasos.</p></div>
+    </div>
+  </div>
 
-                <div class="section-box">
-                    <div class="section-box-title">📝 REGISTRO RÁPIDO DE LEAD</div>
-                    <div class="form-grid">
-                        <div class="form-group"><label>Nombre / Empresa</label><input id="adminLeadName" type="text" placeholder="Cliente o empresa"></div>
-                        <div class="form-group"><label>Contacto</label><input id="adminLeadContact" type="text" placeholder="WhatsApp, teléfono o email"></div>
-                        <div class="form-group"><label>Segmento</label><select id="adminLeadSegment"><option>Cliente final</option><option>Empresa / PyME</option><option>Importador frecuente</option><option>Referido</option></select></div>
-                        <div class="form-group"><label>Estado</label><select id="adminLeadStatus"><option>Lead nuevo</option><option>Contactado</option><option>Oportunidad</option><option>Cerrado</option></select></div>
-                    </div>
-                    <div class="form-group"><label>Nota comercial</label><textarea id="adminLeadNote" rows="3" placeholder="Necesidad, producto, país, monto estimado, próxima acción"></textarea></div>
-                    <div class="button-group"><button class="btn btn-primary" onclick="saveAdminAgent3Lead()">Guardar lead</button><button class="btn btn-secondary" onclick="exportAdminAgent3Leads()">⬇ Exportar leads CSV</button></div>
-                </div>
+  <div class="section-box agente3-box">
+    <div class="section-box-title">🧭 Ejecución comercial diaria</div>
+    <table class="table">
+      <thead><tr><th>Área</th><th>Acción</th><th>Canal</th><th>Indicador</th></tr></thead>
+      <tbody>
+        <tr><td>Prospección</td><td>Buscar clientes con intención de compra internacional</td><td>Web / redes / referidos</td><td>Leads detectados</td></tr>
+        <tr><td>Segmentación</td><td>Clasificar clientes por país, rubro, presupuesto y urgencia</td><td>CRM</td><td>Leads validados</td></tr>
+        <tr><td>Campañas</td><td>Crear mensajes comerciales y ofertas por segmento</td><td>WhatsApp / email / redes</td><td>Conversión</td></tr>
+        <tr><td>Seguimiento</td><td>Registrar contacto, respuesta, objeción y próximo paso</td><td>Panel administrativo</td><td>Ventas cerradas</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-                <div class="section-box">
-                    <div class="section-box-title">📋 LEADS REGISTRADOS</div>
-                    <table class="table"><thead><tr><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Segmento</th><th>Estado</th><th>Nota</th></tr></thead><tbody id="adminA3LeadTable"><tr><td colspan="6">Sin leads registrados todavía.</td></tr></tbody></table>
-                </div>
-            </div>
-
-            <script>
-            function getAdminAgent3Leads(){try{return JSON.parse(localStorage.getItem('nexoAgent3Leads')||'[]')}catch(e){return[]}}
-            function setAdminAgent3Leads(a){localStorage.setItem('nexoAgent3Leads',JSON.stringify(a.slice(0,500)))}
-            function renderAdminAgent3Leads(){
-              const arr=getAdminAgent3Leads();
-              const set=(id,v)=>{const e=document.getElementById(id); if(e)e.textContent=v};
-              set('adminA3Leads',arr.length); set('adminA3Contacted',arr.filter(x=>x.status==='Contactado').length); set('adminA3Opp',arr.filter(x=>x.status==='Oportunidad').length); set('adminA3Closed',arr.filter(x=>x.status==='Cerrado').length);
-              const tb=document.getElementById('adminA3LeadTable'); if(!tb) return;
-              tb.innerHTML=arr.length?arr.map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.contact}</td><td>${x.segment}</td><td><strong>${x.status}</strong></td><td>${x.note||'-'}</td></tr>`).join(''):'<tr><td colspan="6">Sin leads registrados todavía.</td></tr>';
-            }
-            function saveAdminAgent3Lead(){
-              const lead={date:new Date().toLocaleString('es-BO'),name:document.getElementById('adminLeadName').value.trim(),contact:document.getElementById('adminLeadContact').value.trim(),segment:document.getElementById('adminLeadSegment').value,status:document.getElementById('adminLeadStatus').value,note:document.getElementById('adminLeadNote').value.trim()};
-              if(!lead.name||!lead.contact){alert('Completa nombre y contacto.');return}
-              const arr=getAdminAgent3Leads(); arr.unshift(lead); setAdminAgent3Leads(arr); ['adminLeadName','adminLeadContact','adminLeadNote'].forEach(id=>document.getElementById(id).value=''); renderAdminAgent3Leads();
-            }
-            function exportAdminAgent3Leads(){
-              const arr=getAdminAgent3Leads(); const rows=[['Fecha','Nombre','Contacto','Segmento','Estado','Nota'],...arr.map(x=>[x.date,x.name,x.contact,x.segment,x.status,x.note])];
-              const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(',')).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='nexo_agente3_leads.csv'; a.click();
-            }
-            function openAgent3Commercial(){window.open('nexo-agent3-marketing.html','_blank')}
-            function runAgent3Report(){const a=getAdminAgent3Leads(); alert('Reporte Agente 3\n\nLeads: '+a.length+'\nContactados: '+a.filter(x=>x.status==='Contactado').length+'\nOportunidades: '+a.filter(x=>x.status==='Oportunidad').length+'\nCierres: '+a.filter(x=>x.status==='Cerrado').length+'\n\nSiguiente paso: contactar leads nuevos y cerrar oportunidades con necesidad concreta.');}
-            document.addEventListener('DOMContentLoaded',renderAdminAgent3Leads);
-            </script>
 
             <!-- TICKETS SOPORTE -->
             <div class="section" id="tickets">
@@ -1226,8 +1194,6 @@
                 renderUsers();
             } else if (sectionId === 'reports') {
                 applyReportFilters();
-            } else if (sectionId === 'marketing') {
-                if (typeof renderAdminAgent3Leads === 'function') renderAdminAgent3Leads();
             } else if (sectionId === 'tickets') {
                 loadTickets();
             } else if (sectionId === 'clientdata') {
@@ -1455,6 +1421,38 @@ function getClientProfile() {
                 </table>
                 ${summaryHtml}
             
+<script>
+function agente3PlanComercial(){
+  return [
+    '1. Dimensionamiento de mercado y análisis TAM: medir mercado total, mercado disponible y mercado objetivo.',
+    '2. Análisis competitivo: comparar competidores directos e indirectos, precios, brechas y posicionamiento.',
+    '3. Perfil de cliente y segmentación: crear perfiles B2C/B2B por necesidad, presupuesto, ubicación y urgencia.',
+    '4. Tendencias de industria: detectar fuerzas económicas, sociales, tecnológicas, regulatorias y oportunidades.',
+    '5. SWOT + Porter: evaluar fortalezas, debilidades, oportunidades, amenazas y fuerzas competitivas.',
+    '6. Estrategia de salida al mercado: definir fases, canales, mensajes, presupuesto, KPI y cronograma.',
+    '7. Customer journey: mapear descubrimiento, comparación, decisión, compra, retención y referidos.',
+    '8. Economía unitaria: calcular CAC, LTV, margen, payback y escenarios financieros.',
+    '9. Riesgos y escenarios: clasificar riesgos de mercado, competencia, tecnología, finanzas, legal y reputación.',
+    '10. Entrada y expansión: evaluar países, segmentos, alianzas, entrada directa, licencia o franquicia.',
+    '11. Captación operativa: ejecutar campañas, prospección, referidos, WhatsApp, email y redes.',
+    '12. Reporte ejecutivo: priorizar acciones, presupuesto, responsables, KPI y próximos pasos.'
+  ];
+}
+function agente3EjecutarPlan(){
+  const box=document.getElementById('agente3Resultado');
+  if(!box) return;
+  const fecha=new Date().toLocaleString('es-BO');
+  box.style.display='block';
+  box.innerHTML='<b>Plan comercial ejecutado:</b><br>'+agente3PlanComercial().map(x=>'• '+x).join('<br>')+'<br><br><b>Fecha:</b> '+fecha+'<br><b>Estado:</b> listo para convertir en tareas del panel administrativo.';
+}
+function agente3ExportarReporte(){
+  const contenido='AGENTE 3 COMERCIAL - PLAN PARA CAPTAR CLIENTES\n\n'+agente3PlanComercial().join('\n')+'\n\nSalida esperada: estrategia comercial, campañas, leads, KPI y reporte ejecutivo.';
+  const blob=new Blob([contenido],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='agente3_plan_comercial_nexo.txt'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+</script>
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;

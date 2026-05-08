@@ -34,8 +34,6 @@
                 renderUsers();
             } else if (sectionId === 'reports') {
                 applyReportFilters();
-            } else if (sectionId === 'marketing') {
-                if (typeof renderAdminAgent3Leads === 'function') renderAdminAgent3Leads();
             } else if (sectionId === 'tickets') {
                 loadTickets();
             } else if (sectionId === 'clientdata') {
