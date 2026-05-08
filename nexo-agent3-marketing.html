@@ -349,8 +349,8 @@
     <div class="agent-container">
         <div class="agent-header">
             <div>
-                <h1>📊 Agente 3: Marketing & ROI Analytics</h1>
-                <p>Análisis inteligente de campañas • ROI 2,865% • Recomendaciones automáticas</p>
+                <h1>📢 Agente 3 Comercial: Captación de Clientes</h1>
+                <p>Plan comercial operativo paso a paso • Prospección • Campañas • Seguimiento • Reportes para panel administrativo</p>
             </div>
             <div class="agent-status">
                 <div class="status-dot"></div>
@@ -359,194 +359,118 @@
         </div>
 
         <div class="agent-content">
-            <!-- MÉTRICAS CLAVE -->
             <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-icon">💰</div>
-                    <div class="metric-value">$45.8K</div>
-                    <div class="metric-label">Ingresos Totales</div>
-                    <div class="metric-change positive">↑ 32.5% vs mes anterior</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon">📊</div>
-                    <div class="metric-value">2,865%</div>
-                    <div class="metric-label">ROI General</div>
-                    <div class="metric-change positive">↑ 12.3% vs mes anterior</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon">🎯</div>
-                    <div class="metric-value">4.8%</div>
-                    <div class="metric-label">Tasa Conversión</div>
-                    <div class="metric-change positive">↑ 0.8% vs mes anterior</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon">👥</div>
-                    <div class="metric-value">12.4K</div>
-                    <div class="metric-label">Visitantes Únicos</div>
-                    <div class="metric-change positive">↑ 28.6% vs mes anterior</div>
-                </div>
+                <div class="metric-card"><div class="metric-icon">🎯</div><div class="metric-value" id="leadsCount">0</div><div class="metric-label">Leads registrados</div><div class="metric-change positive">Base comercial local</div></div>
+                <div class="metric-card"><div class="metric-icon">📞</div><div class="metric-value" id="followCount">0</div><div class="metric-label">Seguimientos</div><div class="metric-change positive">WhatsApp / email / llamada</div></div>
+                <div class="metric-card"><div class="metric-icon">💼</div><div class="metric-value" id="opportunityCount">0</div><div class="metric-label">Oportunidades</div><div class="metric-change positive">Clientes con interés real</div></div>
+                <div class="metric-card"><div class="metric-icon">✅</div><div class="metric-value" id="closedCount">0</div><div class="metric-label">Cierres</div><div class="metric-change positive">Ventas o reuniones ganadas</div></div>
             </div>
 
-            <!-- GRÁFICOS -->
+            <div class="section-box" style="background:#f7faf8;border:2px solid rgba(74,107,109,.12);border-radius:18px;padding:26px;margin-bottom:30px;">
+                <h2 style="font-size:24px;font-weight:900;color:var(--primary);margin-bottom:12px;">🧭 Plan comercial numerado del Agente 3</h2>
+                <p style="font-size:14px;line-height:1.7;color:#455;">Este módulo convierte el archivo comercial adjunto en una ruta operativa para captar clientes. Cada acción se ejecuta, registra y luego puede incorporarse al panel administrativo como control de gestión.</p>
+            </div>
+
+            <div class="campaigns-list" id="planList" style="margin-bottom:34px;"></div>
+
             <div class="charts-grid">
                 <div class="chart-card">
-                    <div class="chart-title">
-                        <emoji>📈</emoji>
-                        Ingresos Semanales (USD)
-                    </div>
-                    <div class="chart" id="revenueChart">
-                        <div class="bar" style="height: 45%;">
-                            <span class="bar-value">$6.2K</span>
-                            <span class="bar-label">Sem 1</span>
-                        </div>
-                        <div class="bar" style="height: 68%;">
-                            <span class="bar-value">$9.4K</span>
-                            <span class="bar-label">Sem 2</span>
-                        </div>
-                        <div class="bar" style="height: 82%;">
-                            <span class="bar-value">$11.3K</span>
-                            <span class="bar-label">Sem 3</span>
-                        </div>
-                        <div class="bar" style="height: 100%;">
-                            <span class="bar-value">$13.8K</span>
-                            <span class="bar-label">Sem 4</span>
-                        </div>
-                        <div class="bar" style="height: 65%; margin-top:20px;">
-                            <span class="bar-value">$5.1K</span>
-                            <span class="bar-label">Sem 5</span>
-                        </div>
+                    <div class="chart-title">📝 Registrar nuevo cliente potencial</div>
+                    <div style="display:grid;gap:12px;">
+                        <input id="leadName" placeholder="Nombre / Empresa" style="padding:13px;border:1px solid #ccd;border-radius:10px;">
+                        <input id="leadContact" placeholder="Teléfono, WhatsApp o email" style="padding:13px;border:1px solid #ccd;border-radius:10px;">
+                        <select id="leadSegment" style="padding:13px;border:1px solid #ccd;border-radius:10px;">
+                            <option value="Cliente final">Cliente final</option>
+                            <option value="Empresa / PyME">Empresa / PyME</option>
+                            <option value="Importador frecuente">Importador frecuente</option>
+                            <option value="Referido">Referido</option>
+                        </select>
+                        <select id="leadStatus" style="padding:13px;border:1px solid #ccd;border-radius:10px;">
+                            <option value="Lead nuevo">Lead nuevo</option>
+                            <option value="Contactado">Contactado</option>
+                            <option value="Oportunidad">Oportunidad</option>
+                            <option value="Cerrado">Cerrado</option>
+                        </select>
+                        <textarea id="leadNote" placeholder="Necesidad, producto buscado, país, monto estimado, próxima acción" style="min-height:110px;padding:13px;border:1px solid #ccd;border-radius:10px;"></textarea>
+                        <button class="nexo-ai-button" onclick="saveLead()">Guardar lead comercial</button>
                     </div>
                 </div>
 
                 <div class="chart-card">
-                    <div class="chart-title">
-                        <emoji>🎯</emoji>
-                        Tasa Conversión por Canal
+                    <div class="chart-title">🤖 Consulta rápida al Agente 3</div>
+                    <div class="nexo-ai-subtitle">Pídele una campaña, mensaje de WhatsApp, email, guion de llamada, análisis de segmento o estrategia de cierre.</div>
+                    <textarea id="nexoAiQuestion" class="nexo-ai-textarea" placeholder="Ej.: Diseña una campaña para captar empresas que compran repuestos o tecnología desde Amazon."></textarea>
+                    <div class="nexo-ai-actions">
+                        <button type="button" id="nexoAiButton" class="nexo-ai-button" onclick="consultarNexoAI('marketing')">Consultar IA</button>
+                        <button type="button" class="nexo-ai-button" onclick="generateCommercialReport()">Generar reporte</button>
                     </div>
-                    <div class="chart" id="conversionChart">
-                        <div class="bar" style="height: 72%; background: linear-gradient(180deg, #7AC742 0%, #FF6B35 100%);">
-                            <span class="bar-value">5.2%</span>
-                            <span class="bar-label">Tienda Web</span>
-                        </div>
-                        <div class="bar" style="height: 45%; background: linear-gradient(180deg, #7AC742 0%, #F4C430 100%);">
-                            <span class="bar-value">3.1%</span>
-                            <span class="bar-label">Email</span>
-                        </div>
-                        <div class="bar" style="height: 58%; background: linear-gradient(180deg, #7AC742 0%, #003087 100%);">
-                            <span class="bar-value">4.2%</span>
-                            <span class="bar-label">Redes</span>
-                        </div>
-                        <div class="bar" style="height: 35%; background: linear-gradient(180deg, #7AC742 0%, #00A651 100%);">
-                            <span class="bar-value">2.5%</span>
-                            <span class="bar-label">Referidos</span>
-                        </div>
-                        <div class="bar" style="height: 65%; background: linear-gradient(180deg, #7AC742 0%, #EF2B2D 100%); margin-top:20px;">
-                            <span class="bar-value">4.8%</span>
-                            <span class="bar-label">Promedio</span>
-                        </div>
-                    </div>
+                    <div id="nexoAiAnswer" class="nexo-ai-answer" style="display:none;"></div>
                 </div>
             </div>
 
-            <!-- CAMPAÑAS -->
-            <div style="margin-top: 40px;">
-                <h2 style="font-size:22px; font-weight:900; color:var(--dark); margin-bottom:20px; letter-spacing:-0.5px;">
-                    📢 Desempeño de Campañas
-                </h2>
-
-                <div class="campaigns-list">
-                    <div style="padding:14px 18px; background:#f5f5f5; border-bottom:1px solid #eee; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:20px; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">
-                        <div>Campaña</div>
-                        <div>Clics</div>
-                        <div>Conversiones</div>
-                        <div>ROI</div>
-                    </div>
-
-                    <div class="campaign-item">
-                        <div class="campaign-name">Black Friday 2024</div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">8.4K</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">342</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">3,420%</span></div>
-                    </div>
-
-                    <div class="campaign-item">
-                        <div class="campaign-name">Cyber Monday</div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">6.2K</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">268</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">2,680%</span></div>
-                    </div>
-
-                    <div class="campaign-item">
-                        <div class="campaign-name">Aniversario NEXO</div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">7.1K</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">289</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">2,890%</span></div>
-                    </div>
-
-                    <div class="campaign-item">
-                        <div class="campaign-name">Email Descuentos</div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">4.5K</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">165</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">1,650%</span></div>
-                    </div>
-
-                    <div class="campaign-item">
-                        <div class="campaign-name">Referidos Activos</div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">2.8K</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">98</span></div>
-                        <div class="campaign-metric"><span class="campaign-metric-value">980%</span></div>
-                    </div>
+            <div class="section-box" style="background:#fff;border:2px solid rgba(74,107,109,.12);border-radius:18px;padding:26px;margin-top:20px;">
+                <h2 style="font-size:22px;font-weight:900;color:var(--primary);margin-bottom:16px;">📋 Base de leads del Agente 3</h2>
+                <div style="overflow:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead><tr style="background:#eef4ef;"><th style="padding:12px;text-align:left;">Fecha</th><th style="padding:12px;text-align:left;">Nombre</th><th style="padding:12px;text-align:left;">Contacto</th><th style="padding:12px;text-align:left;">Segmento</th><th style="padding:12px;text-align:left;">Estado</th><th style="padding:12px;text-align:left;">Nota</th></tr></thead>
+                        <tbody id="leadsTable"></tbody>
+                    </table>
                 </div>
-            </div>
-
-
-            <div class="nexo-ai-panel">
-                <div class="nexo-ai-title">🤖 Agente IA de Marketing nexo</div>
-                <div class="nexo-ai-subtitle">Consulta sobre campañas, ROI, conversión, posicionamiento, promociones y estrategia comercial. La IA responderá automáticamente con recomendaciones.</div>
-                <textarea id="nexoAiQuestion" class="nexo-ai-textarea" placeholder="Ej.: Quiero aumentar ventas internacionales con bajo presupuesto. ¿Qué campaña me recomiendas y cómo mido el ROI?"></textarea>
-                <div class="nexo-ai-actions">
-                    <button type="button" id="nexoAiButton" class="nexo-ai-button" onclick="consultarNexoAI('marketing')">Consultar IA</button>
-                    <span class="nexo-ai-note">Funciona con OpenAI al configurar OPENAI_API_KEY en Vercel.</span>
-                </div>
-                <div id="nexoAiAnswer" class="nexo-ai-answer" style="display:none;"></div>
-            </div>
-
-            <!-- RECOMENDACIONES -->
-            <div class="recommendations">
-                <div class="recommendations-title">
-                    <emoji>💡</emoji>
-                    Recomendaciones IA
-                </div>
-
-                <div class="recommendation-item">
-                    <strong>✓ Escala Campaña Black Friday:</strong> Esta campaña tiene ROI de 3,420%. Aumentar presupuesto en 25% podría generar $8.2K adicionales basado en proyecciones.
-                </div>
-
-                <div class="recommendation-item">
-                    <strong>✓ Optimiza Email Marketing:</strong> Email tiene CTR de 3.1%. Prueba nuevos sujetos y segmentación para alcanzar 5%+ como en otros canales.
-                </div>
-
-                <div class="recommendation-item">
-                    <strong>✓ Fortalece Programa de Referidos:</strong> Bajo desempeño (980% ROI). Implementa incentivos duales: cliente referidor + cliente nuevo reciben descuentos.
-                </div>
-
-                <div class="recommendation-item">
-                    <strong>✓ Expande a Redes Sociales:</strong> YouTube y TikTok generan 4.2% de conversión. Aumentar contenido podría captar 3K+ visitantes nuevos/mes.
-                </div>
-
-                <div class="recommendation-item">
-                    <strong>✓ Automatiza Retargeting:</strong> 67% usuarios abandonan sin compra. Implementar anuncios dinámicos podría recuperar 15-20% ($6.8K-$9K/mes).
+                <div class="nexo-ai-actions" style="margin-top:16px;">
+                    <button class="nexo-ai-button" onclick="exportLeadsCSV()">⬇ Exportar Excel/CSV</button>
+                    <button class="nexo-ai-button" onclick="clearLeads()">Limpiar prueba local</button>
                 </div>
             </div>
         </div>
 
         <div class="agent-footer">
-            🤖 Agent 3 - Marketing & ROI Analytics | IA Predictive • ROI Real-Time • Análisis 2,865% | Recomendaciones Automáticas
+            🤖 Agente 3 Comercial nexo | Captación de clientes • Prospección • Campañas • Seguimiento • Reportes
         </div>
     </div>
+
+<script>
+const NEXO_COMMERCIAL_PLAN = [
+  ['1','Dimensionamiento de mercado','Identificar tamaño del mercado objetivo, zonas, rubros, volumen de compra internacional y potencial de clientes para nexo.'],
+  ['2','Análisis competitivo','Comparar plataformas, couriers, intermediarios, marketplaces y servicios sustitutos; definir ventajas de nexo.'],
+  ['3','Perfil de cliente ideal','Crear segmentos: cliente final, PyME, importador frecuente, profesionales, empresas que requieren compras internacionales.'],
+  ['4','Tendencias de industria','Detectar productos de alta demanda, categorías con margen, temporadas comerciales y necesidades no atendidas.'],
+  ['5','SWOT + Cinco Fuerzas','Evaluar fortalezas, debilidades, oportunidades, amenazas, poder de proveedores, clientes, sustitutos, competencia y barreras.'],
+  ['6','Estrategia de salida al mercado','Definir oferta, canales, mensaje comercial, precios, referidos, redes, WhatsApp, email y campañas pagadas.'],
+  ['7','Recorrido del cliente','Diseñar flujo: descubrimiento, contacto, cotización, pago, compra internacional, envío, soporte, recompra y referido.'],
+  ['8','Modelo financiero','Calcular costo por lead, costo por cliente, margen por operación, comisión, ROI, punto de equilibrio y rentabilidad.'],
+  ['9','Riesgos y escenarios','Controlar riesgo de pago, proveedor, logística, reclamos, cambios de precio, tiempos de entrega y reputación.'],
+  ['10','Expansión de mercado','Priorizar nuevos rubros, alianzas, empresas, países, proveedores y campañas por segmento.'],
+  ['11','Acciones comerciales paso a paso','Ejecutar búsqueda de leads, contacto inicial, seguimiento, propuesta, cierre, registro y reporte diario.'],
+  ['12','Reporte final de captación','Entregar resultados: leads, conversiones, cierres, campañas, recomendaciones y próximos pasos.']
+];
+function renderPlan(){
+  const box=document.getElementById('planList'); if(!box) return;
+  box.innerHTML = NEXO_COMMERCIAL_PLAN.map(p=>`<div class="campaign-item" style="grid-template-columns:70px 1fr 2fr;"><div class="campaign-name" style="font-size:22px;color:var(--accent);">${p[0]}</div><div class="campaign-metric"><span class="campaign-metric-value" style="color:var(--primary);font-size:15px;">${p[1]}</span></div><div style="font-size:13px;line-height:1.55;color:#455;">${p[2]}</div></div>`).join('');
+}
+function getLeads(){try{return JSON.parse(localStorage.getItem('nexoAgent3Leads')||'[]')}catch(e){return[]}}
+function setLeads(a){localStorage.setItem('nexoAgent3Leads',JSON.stringify(a.slice(0,500)))}
+function saveLead(){
+  const lead={date:new Date().toLocaleString('es-BO'),name:leadName.value.trim(),contact:leadContact.value.trim(),segment:leadSegment.value,status:leadStatus.value,note:leadNote.value.trim()};
+  if(!lead.name || !lead.contact){alert('Completa nombre y contacto del cliente potencial.');return}
+  const arr=getLeads(); arr.unshift(lead); setLeads(arr); leadName.value=''; leadContact.value=''; leadNote.value=''; renderLeads();
+}
+function renderLeads(){
+  const arr=getLeads();
+  leadsCount.textContent=arr.length; followCount.textContent=arr.filter(x=>x.status==='Contactado').length; opportunityCount.textContent=arr.filter(x=>x.status==='Oportunidad').length; closedCount.textContent=arr.filter(x=>x.status==='Cerrado').length;
+  leadsTable.innerHTML = arr.length ? arr.map(x=>`<tr><td style="padding:10px;border-bottom:1px solid #eee;">${x.date}</td><td style="padding:10px;border-bottom:1px solid #eee;">${x.name}</td><td style="padding:10px;border-bottom:1px solid #eee;">${x.contact}</td><td style="padding:10px;border-bottom:1px solid #eee;">${x.segment}</td><td style="padding:10px;border-bottom:1px solid #eee;font-weight:800;">${x.status}</td><td style="padding:10px;border-bottom:1px solid #eee;">${x.note||'-'}</td></tr>`).join('') : '<tr><td colspan="6" style="padding:18px;color:#777;">Aún no hay leads registrados.</td></tr>';
+}
+function exportLeadsCSV(){
+  const arr=getLeads(); const rows=[['Fecha','Nombre','Contacto','Segmento','Estado','Nota'],...arr.map(x=>[x.date,x.name,x.contact,x.segment,x.status,x.note])];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='nexo_agente3_leads.csv'; a.click();
+}
+function clearLeads(){if(confirm('¿Limpiar leads de prueba guardados en este navegador?')){localStorage.removeItem('nexoAgent3Leads');renderLeads();}}
+function generateCommercialReport(){
+  const arr=getLeads(); const text=`Reporte Agente 3 Comercial nexo\n\nLeads registrados: ${arr.length}\nContactados: ${arr.filter(x=>x.status==='Contactado').length}\nOportunidades: ${arr.filter(x=>x.status==='Oportunidad').length}\nCierres: ${arr.filter(x=>x.status==='Cerrado').length}\n\nPróxima acción recomendada:\n1. Contactar leads nuevos en menos de 24 horas.\n2. Priorizar oportunidades con necesidad concreta y monto estimado.\n3. Enviar propuesta por WhatsApp/email.\n4. Registrar cierre o motivo de no compra.\n5. Pedir referido al cliente atendido.`;
+  nexoAiAnswer.textContent=text; nexoAiAnswer.style.display='block';
+}
+document.addEventListener('DOMContentLoaded',()=>{renderPlan();renderLeads();});
+</script>
 
 <script>
 function nexoPublicCleanup(){
