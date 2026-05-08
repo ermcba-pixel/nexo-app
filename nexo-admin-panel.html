@@ -627,7 +627,7 @@
         <!-- CONTENIDO PRINCIPAL -->
         <div class="content">
             <div class="top-actions">
-                <a class="back-link" href="index.html">← Volver al portal</a>
+                <a class="back-link" href="nexo-portal-principal.html" onclick="window.location.href='nexo-portal-principal.html'; return false;">← Volver al portal</a>
                 <span class="super-badge">Superadministrador</span>
             </div>
 
@@ -1421,38 +1421,7 @@ function getClientProfile() {
                 </table>
                 ${summaryHtml}
             
-<script>
-function agente3PlanComercial(){
-  return [
-    '1. Dimensionamiento de mercado y análisis TAM: medir mercado total, mercado disponible y mercado objetivo.',
-    '2. Análisis competitivo: comparar competidores directos e indirectos, precios, brechas y posicionamiento.',
-    '3. Perfil de cliente y segmentación: crear perfiles B2C/B2B por necesidad, presupuesto, ubicación y urgencia.',
-    '4. Tendencias de industria: detectar fuerzas económicas, sociales, tecnológicas, regulatorias y oportunidades.',
-    '5. SWOT + Porter: evaluar fortalezas, debilidades, oportunidades, amenazas y fuerzas competitivas.',
-    '6. Estrategia de salida al mercado: definir fases, canales, mensajes, presupuesto, KPI y cronograma.',
-    '7. Customer journey: mapear descubrimiento, comparación, decisión, compra, retención y referidos.',
-    '8. Economía unitaria: calcular CAC, LTV, margen, payback y escenarios financieros.',
-    '9. Riesgos y escenarios: clasificar riesgos de mercado, competencia, tecnología, finanzas, legal y reputación.',
-    '10. Entrada y expansión: evaluar países, segmentos, alianzas, entrada directa, licencia o franquicia.',
-    '11. Captación operativa: ejecutar campañas, prospección, referidos, WhatsApp, email y redes.',
-    '12. Reporte ejecutivo: priorizar acciones, presupuesto, responsables, KPI y próximos pasos.'
-  ];
-}
-function agente3EjecutarPlan(){
-  const box=document.getElementById('agente3Resultado');
-  if(!box) return;
-  const fecha=new Date().toLocaleString('es-BO');
-  box.style.display='block';
-  box.innerHTML='<b>Plan comercial ejecutado:</b><br>'+agente3PlanComercial().map(x=>'• '+x).join('<br>')+'<br><br><b>Fecha:</b> '+fecha+'<br><b>Estado:</b> listo para convertir en tareas del panel administrativo.';
-}
-function agente3ExportarReporte(){
-  const contenido='AGENTE 3 COMERCIAL - PLAN PARA CAPTAR CLIENTES\n\n'+agente3PlanComercial().join('\n')+'\n\nSalida esperada: estrategia comercial, campañas, leads, KPI y reporte ejecutivo.';
-  const blob=new Blob([contenido],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='agente3_plan_comercial_nexo.txt'; a.click(); URL.revokeObjectURL(a.href);
-}
 
-</script>
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -1460,6 +1429,36 @@ function agente3ExportarReporte(){
             w.document.close();
             w.focus();
             w.print();
+        }
+
+
+
+        // AGENTE 3 COMERCIAL - POLÍTICAS NUMERADAS INTEGRADAS SIN ROMPER EL PANEL
+        function agente3PlanComercial(){
+            return [
+                '1. Dimensionamiento de mercado y análisis TAM: medir mercado total, mercado disponible y mercado objetivo.',
+                '2. Análisis competitivo: comparar competidores directos e indirectos, precios, brechas y posicionamiento.',
+                '3. Perfil de cliente y segmentación: crear perfiles B2C/B2B por necesidad, presupuesto, ubicación y urgencia.',
+                '4. Tendencias de industria: detectar fuerzas económicas, sociales, tecnológicas, regulatorias y oportunidades.',
+                '5. SWOT + Porter: evaluar fortalezas, debilidades, oportunidades, amenazas y fuerzas competitivas.',
+                '6. Estrategia de salida al mercado: definir fases, canales, mensajes, presupuesto, KPI y cronograma.',
+                '7. Customer journey: mapear descubrimiento, comparación, decisión, compra, retención y referidos.',
+                '8. Economía unitaria: calcular CAC, LTV, margen, payback y escenarios financieros.',
+                '9. Riesgos y escenarios: clasificar riesgos de mercado, competencia, tecnología, finanzas, legal y reputación.',
+                '10. Entrada y expansión: evaluar países, segmentos, alianzas, entrada directa, licencia o franquicia.',
+                '11. Captación operativa: ejecutar campañas, prospección, referidos, WhatsApp, email y redes.',
+                '12. Reporte ejecutivo: priorizar acciones, presupuesto, responsables, KPI y próximos pasos.'
+            ];
+        }
+
+        function agente3ExportarReporte(){
+            const contenido = 'AGENTE 3 COMERCIAL - PLAN PARA CAPTAR CLIENTES\n\n' + agente3PlanComercial().join('\n') + '\n\nSalida esperada: estrategia comercial, campañas, leads, KPI y reporte ejecutivo.';
+            const blob = new Blob([contenido], {type:'text/plain;charset=utf-8'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'agente3_plan_comercial_nexo.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
 
         function getCompanyInfoForReports() {
