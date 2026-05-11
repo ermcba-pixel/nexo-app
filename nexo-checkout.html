@@ -984,8 +984,12 @@ function applyCheckoutLanguage(){
         ];
 
         // MÉTODOS DE PAGO
+        // Todos los métodos visibles. El Agente 1 centraliza la operación en PayPal Business nexo™.
         const paymentMethods = [
-            { id: 'paypal', name: 'PayPal', icon: '🅿️' }
+            { id: 'paypal', name: 'PayPal', icon: '🅿️' },
+            { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' },
+            { id: 'bank', name: 'ACH / Wire / Transferencia bancaria', icon: '🏦' },
+            { id: 'payoneer', name: 'Payoneer', icon: '📱' }
         ];
 
         let selectedPayment = 'paypal';
@@ -1102,9 +1106,21 @@ function selectPayment(methodId, btnEl=null) {
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con transferencia</button>
             </div>
         `;
+    } else if (methodId === 'payoneer') {
+        details.innerHTML = `
+            <div class="payment-fields-panel">
+                <div style="font-weight:900;color:#4A6B6D;line-height:1.6;">
+                    📱 Payoneer seleccionado. El Agente 1 registrará el pedido y centralizará el cobro operativo de nexo™.
+                </div>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con Payoneer</button>
+            </div>
+        `;
     } else {
         details.innerHTML = `
             <div class="payment-fields-panel">
+                <div style="font-weight:900;color:#4A6B6D;line-height:1.6;">
+                    🅿️ PayPal seleccionado. El pedido se cerrará en nexo™ y el Agente 1 procesará el cobro en PayPal Business.
+                </div>
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con PayPal</button>
             </div>
         `;
@@ -1250,7 +1266,8 @@ const t = ctt();
               card:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               bank:{es:'Transferencia ACH / Wire',en:'ACH / Wire Transfer',pt:'Transferência ACH / Wire',it:'Bonifico ACH / Wire',fr:'Virement ACH / Wire'},
-              transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}
+              transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'},
+              payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'}
             };
             const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
             document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br><strong style="color:#f39c12;">${t.confirmShip}:</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span><br><strong style="color:#f39c12;">${t.confirmVendor}:</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span><br><strong style="color:#f39c12;">${t.deliveryOrange}:</strong> <span style="color:#f39c12;">${deliveryInfo.label} · ${deliveryInfo.text.replace(/^.*?: /,'')}</span><br><strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
@@ -1456,29 +1473,44 @@ const t = ctt();
                 console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
             }
 
-            if (orderData.paymentMethod === 'paypal') {
-                try {
-                    if(btnText) btnText.textContent = 'Abriendo PayPal...';
-                    await startNexoPagoSeguro(orderData);
-                    return;
-                } catch(payErr) {
-                    console.warn('PayPal no abrió por error inesperado.', payErr);
-                    alert('No se pudo abrir PayPal automáticamente. Revise que el navegador permita redirecciones y vuelva a confirmar.');
-                    if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
-                    return;
-                }
-            }
-
-            // Tarjeta y ACH/Wire NO redirigen a PayPal.
-            // Quedan registrados como pedido finalizado pendiente de confirmación/procesamiento interno.
-            orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_pendiente_procesamiento' : 'transferencia_pendiente_verificacion';
-            orderData.estado_compra = 'pedido_finalizado_pendiente_agente_1';
-            orderData.confirmationNote = orderData.paymentMethod === 'card'
-                ? 'Pago con tarjeta registrado. Procesamiento interno pendiente.'
-                : 'Transferencia ACH/Wire registrada. Verificación interna pendiente.';
+            // CIERRE INTERNO NEXO: al confirmar compra se emite recibo interno.
+            // El cliente no es redirigido automáticamente a PayPal; el Agente 1 gestiona el cobro
+            // en PayPal Business y luego compra al proveedor/Amazon con la dirección del cliente.
+            orderData.estado_pago = orderData.paymentMethod === 'paypal'
+                ? 'pendiente_agente_1_paypal'
+                : (orderData.paymentMethod === 'card'
+                    ? 'tarjeta_pendiente_agente_1_paypal'
+                    : (orderData.paymentMethod === 'bank'
+                        ? 'transferencia_pendiente_agente_1_paypal'
+                        : 'payoneer_pendiente_agente_1_paypal'));
+            orderData.estado_compra = 'pedido_cerrado_agente_1_automatico';
+            orderData.agent1_mode = 'automatico_sin_aprobacion_manual';
+            orderData.paypal_destination = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
+            orderData.confirmationNote = 'Pedido cerrado en nexo™. El Agente 1 gestionará el cobro en PayPal Business, comprará al proveedor/Amazon con la dirección del cliente y registrará el tracking. La comisión queda en PayPal.';
+            try {
+                const agentQueue = JSON.parse(localStorage.getItem('nexoAgent1AutoQueue') || '[]');
+                agentQueue.push({
+                    pedido_id: orderData.supabase_id || orderData.id,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente_cobro_paypal_y_compra_amazon',
+                    automatico: true,
+                    sin_aprobacion_manual: true,
+                    cobrar_en: 'PayPal Business nexo™',
+                    paypal_email: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
+                    comprar_en: 'Amazon/proveedor original',
+                    destino_cliente: orderData.customer,
+                    total_cliente_usd: orderData.total,
+                    subtotal_producto_usd: orderData.subtotal,
+                    gastos_amazon_marketplace_usd: orderData.amazonShipping,
+                    gastos_proveedor_usd: orderData.vendorFees,
+                    comision_nexo_usd: orderData.commission,
+                    items: orderData.items || []
+                });
+                localStorage.setItem('nexoAgent1AutoQueue', JSON.stringify(agentQueue));
+            } catch(e) {}
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             localStorage.removeItem('nexoCart');
-            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago);
+            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
