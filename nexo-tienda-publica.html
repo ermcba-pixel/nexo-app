@@ -564,6 +564,17 @@ function nexoProductImageMarkup(product){
 
         let products = [];
 
+
+const storeI18n = window.storeI18n || {
+  es:{title:'Tienda nexo™', subtitle:'20 Productos multi-proveedor • Envíos Internacionales', cartTitle:'🛒 Tu Carrito', back:'← Volver', search:'🔍 Buscar', cat:'📁 Categoría', price:'💲 Precio Máximo', searchPh:'Nombre del producto...', catAll:'Todas las categorías', catElect:'Electrónica', catAcc:'Accesorios', catFashion:'Moda', sumSubtotal:'Subtotal producto:', sumShip:'Gastos de envío Amazon/Marketplace:', sumVendor:'Gastos proveedor/marketplace Amazon:', sumCom:'Comisión nexo™:', sumIt:'', sumIue:'', sumTotal:'Total a Pagar:', sumNote:'El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.', checkout:'Proceder al Pago', cartTitleAttr:'Carrito', reviews:'reseñas', stock:'Stock', available:'disponibles', soldOut:'Agotado', add:'+ Carrito', empty:'Tu carrito está vacío', notifAdded:'agregado al carrito'},
+  en:{title:'nexo™ Store', subtitle:'20 multi-provider products • International shipping', cartTitle:'🛒 Your Cart', back:'← Back', search:'🔍 Search', cat:'📁 Category', price:'💲 Max Price', searchPh:'Product name...', catAll:'All categories', catElect:'Electronics', catAcc:'Accessories', catFashion:'Fashion', sumSubtotal:'Product subtotal:', sumShip:'Amazon/Marketplace estimated shipping:', sumVendor:'Provider/marketplace estimated fees:', sumCom:'nexo™ commission:', sumIt:'', sumIue:'', sumTotal:'Total to Pay:', sumNote:'Agent 1 will calculate these costs with Amazon using the customer country, city, postal code and exact address before confirming the order.', checkout:'Proceed to Payment', cartTitleAttr:'Cart', reviews:'reviews', stock:'Stock', available:'available', soldOut:'Sold out', add:'+ Cart', empty:'Your cart is empty', notifAdded:'added to cart'},
+  pt:{title:'Loja nexo™', subtitle:'20 produtos multi-fornecedor • Envios internacionais', cartTitle:'🛒 Seu carrinho', back:'← Voltar', search:'🔍 Buscar', cat:'📁 Categoria', price:'💲 Preço máximo', searchPh:'Nome do produto...', catAll:'Todas as categorias', catElect:'Eletrônicos', catAcc:'Acessórios', catFashion:'Moda', sumSubtotal:'Subtotal do produto:', sumShip:'Envio Amazon/Marketplace:', sumVendor:'Custos do fornecedor/marketplace:', sumCom:'Comissão nexo™:', sumIt:'', sumIue:'', sumTotal:'Total a pagar:', sumNote:'O Agente 1 calculará estes custos com a Amazon usando país, cidade, CEP e endereço exato do cliente antes de confirmar o pedido.', checkout:'Ir ao pagamento', cartTitleAttr:'Carrinho', reviews:'avaliações', stock:'Estoque', available:'disponíveis', soldOut:'Esgotado', add:'+ Carrinho', empty:'Seu carrinho está vazio', notifAdded:'adicionado ao carrinho'},
+  it:{title:'Negozio nexo™', subtitle:'20 prodotti multi-fornitore • Spedizioni internazionali', cartTitle:'🛒 Carrello', back:'← Indietro', search:'🔍 Cerca', cat:'📁 Categoria', price:'💲 Prezzo massimo', searchPh:'Nome prodotto...', catAll:'Tutte le categorie', catElect:'Elettronica', catAcc:'Accessori', catFashion:'Moda', sumSubtotal:'Subtotale prodotto:', sumShip:'Spedizione Amazon/Marketplace:', sumVendor:'Costi fornitore/marketplace:', sumCom:'Commissione nexo™:', sumIt:'', sumIue:'', sumTotal:'Totale da pagare:', sumNote:'L’Agente 1 calcolerà questi costi con Amazon usando paese, città, CAP e indirizzo esatto del cliente prima di confermare l’ordine.', checkout:'Procedi al pagamento', cartTitleAttr:'Carrello', reviews:'recensioni', stock:'Stock', available:'disponibili', soldOut:'Esaurito', add:'+ Carrello', empty:'Il carrello è vuoto', notifAdded:'aggiunto al carrello'},
+  fr:{title:'Boutique nexo™', subtitle:'20 produits multi-fournisseurs • Expéditions internationales', cartTitle:'🛒 Panier', back:'← Retour', search:'🔍 Rechercher', cat:'📁 Catégorie', price:'💲 Prix maximum', searchPh:'Nom du produit...', catAll:'Toutes les catégories', catElect:'Électronique', catAcc:'Accessoires', catFashion:'Mode', sumSubtotal:'Sous-total produit:', sumShip:'Expédition Amazon/Marketplace:', sumVendor:'Frais fournisseur/marketplace:', sumCom:'Commission nexo™:', sumIt:'', sumIue:'', sumTotal:'Total à payer:', sumNote:'L’Agent 1 calculera ces coûts avec Amazon selon le pays, la ville, le code postal et l’adresse exacte du client avant confirmation.', checkout:'Procéder au paiement', cartTitleAttr:'Panier', reviews:'avis', stock:'Stock', available:'disponibles', soldOut:'Épuisé', add:'+ Panier', empty:'Votre panier est vide', notifAdded:'ajouté au panier'}
+};
+window.storeI18n = storeI18n;
+
+
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
 function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=currentLang; document.getElementById('storeTitle').textContent=t.title; document.getElementById('storeSubtitle').textContent=t.subtitle; document.getElementById('cartTitle').textContent=t.cartTitle; document.getElementById('backText').textContent=t.back; document.getElementById('searchLabel').textContent=t.search; document.getElementById('catLabel').textContent=t.cat; document.getElementById('priceLabel').textContent=t.price; document.getElementById('searchInput').placeholder=t.searchPh; document.getElementById('catAll').textContent=t.catAll; document.getElementById('catElect').textContent=t.catElect; document.getElementById('catAcc').textContent=t.catAcc; document.getElementById('catFashion').textContent=t.catFashion; document.getElementById('sumSubtotalLbl').textContent=t.sumSubtotal; document.getElementById('sumShipLbl').textContent=t.sumShip; document.getElementById('sumVendorLbl').textContent=t.sumVendor; document.getElementById('sumComLbl').textContent=t.sumCom; document.getElementById('sumItLbl').textContent=t.sumIt; document.getElementById('sumIueLbl').textContent=t.sumIue; document.getElementById('sumTotalLbl').textContent=t.sumTotal; document.getElementById('sumNote').textContent=t.sumNote; document.getElementById('checkoutBtnText').textContent=t.checkout; document.getElementById('cartBadge').title=t.cartTitleAttr; }
@@ -892,10 +903,17 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            applyStoreLanguage();
-            products = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
+            try { applyStoreLanguage(); } catch(e) { console.warn('Idioma tienda pendiente:', e); }
+            const currentSearch = (document.getElementById('searchInput')?.value || 'iphone').trim() || 'iphone';
+            products = nexoBuildTemporalAmazonCatalog(currentSearch, Infinity);
             renderProducts(products);
             updateCartCount();
+            const s = document.getElementById('searchInput');
+            const c = document.getElementById('categoryFilter');
+            const pr = document.getElementById('priceFilter');
+            if (s) { s.addEventListener('input', filterProducts); s.addEventListener('change', filterProducts); }
+            if (c) c.addEventListener('change', filterProducts);
+            if (pr) { pr.addEventListener('input', filterProducts); pr.addEventListener('change', filterProducts); }
         });
 
         window.onclick = function(e) {
