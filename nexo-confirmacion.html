@@ -382,26 +382,10 @@ async function nexoCapturePayPalReturn(){
     if(r.ok && data.ok){
       order.estado_pago = 'paypal_pagado_capturado';
       order.payment_status = 'paid';
-      order.estado_compra = 'agente_1_compra_automatica_iniciada';
-      if(note) note.innerHTML += '<br><strong>PayPal:</strong> pago recibido y capturado correctamente. Agente 1 inicia compra Amazon automáticamente, sin aprobación manual.';
+      order.estado_compra = 'pendiente_agente_1_compra_amazon';
+      if(note) note.innerHTML += '<br><strong>PayPal:</strong> pago recibido y capturado correctamente. Agente 1 queda listo para compra Amazon.';
       const title = document.getElementById('confTitle');
       if(title) title.textContent = '¡Pago PayPal Confirmado!';
-      try{
-        if(note) note.innerHTML += '<br><strong>Agente 1:</strong> ejecutando flujo automático de compra Amazon...';
-        const ar = await fetch('/api/agent1-auto-purchase', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({order, paypalCapture:data, paymentVerified:true})
-        });
-        const ad = await ar.json().catch(()=>({}));
-        order.agent1AutoPurchase = ad;
-        order.estado_compra = ad.estado || (ar.ok ? 'agente_1_compra_automatica_en_cola' : 'agente_1_revision_tecnica');
-        if(note) note.innerHTML += '<br><strong>Agente 1:</strong> ' + (ad.detalle || ad.estado || 'flujo automático registrado.');
-      }catch(agentErr){
-        console.warn('Agente 1 automático no respondió', agentErr);
-        order.estado_compra = 'agente_1_compra_automatica_en_cola_local';
-        if(note) note.innerHTML += '<br><strong>Agente 1:</strong> pedido pagado y dejado en cola automática local; no requiere aprobación manual.';
-      }
     } else {
       order.estado_pago = 'paypal_aprobado_pendiente_captura';
       order.payment_status = 'pending_capture';
@@ -415,33 +399,6 @@ async function nexoCapturePayPalReturn(){
 }
 window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(nexoCapturePayPalReturn, 250); });
 </script>
-
-<script>
-async function nexoAgent1FallbackStandardPayPal(){
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('metodo') !== 'paypal' || params.get('fallback') !== 'standard' || params.get('pago') !== 'aprobado') return;
-  const note = document.querySelector('.email-note');
-  try{
-    const order = JSON.parse(localStorage.getItem('nexoLastOrder') || '{}');
-    order.estado_pago = 'paypal_standard_retorno_aprobado';
-    order.payment_status = 'paid_return_unverified';
-    order.estado_compra = 'agente_1_compra_automatica_iniciada';
-    if(note) note.innerHTML += '<br><strong>PayPal:</strong> retorno aprobado recibido por PayPal Standard. Agente 1 continúa automático.';
-    const ar = await fetch('/api/agent1-auto-purchase', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({order, paymentVerified:true, source:'paypal_standard_return'})
-    });
-    const ad = await ar.json().catch(()=>({}));
-    order.agent1AutoPurchase = ad;
-    order.estado_compra = ad.estado || 'agente_1_compra_automatica_en_cola';
-    localStorage.setItem('nexoLastOrder', JSON.stringify(order));
-    if(note) note.innerHTML += '<br><strong>Agente 1:</strong> ' + (ad.detalle || 'flujo automático registrado.');
-  }catch(e){ console.warn('Fallback Agente 1 PayPal Standard', e); }
-}
-window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(nexoAgent1FallbackStandardPayPal, 500); });
-</script>
-
 <script>
 function nexoPublicCleanup(){
   try{
