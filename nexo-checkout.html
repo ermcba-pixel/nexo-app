@@ -1373,6 +1373,7 @@ const t = ctt();
                     destination: 'Verificación interna nexo™'
                 };
             }
+            orderData.factura_numero = orderData.id || ('NEXO-' + Date.now());
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;

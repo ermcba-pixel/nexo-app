@@ -249,21 +249,18 @@ function getClientProfile() {
 
         
         function openPrintableReport(title, subtitle, tableHeaders, tableRows, summaryRows = []) {
-            const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${c}</td>`).join('')}</tr>`).join('');
-            const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(s => `<div style="margin:4px 0;"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>` : '';
-            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title></head>
-            <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
-                <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${title}</h1>
-                <div style="margin-bottom:18px;color:#5A7C7E;">${subtitle}</div>
-                <table style="border-collapse:collapse;width:100%;font-size:12px;">
-                    <thead><tr>${tableHeaders.map(h => `<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">${h}</th>`).join('')}</tr></thead>
-                    <tbody>${rowsHtml}</tbody>
-                </table>
-                ${summaryHtml}
-            
-</body></html>`;
+            const rowsHtml = tableRows.map(r => '<tr>' + r.map(c => '<td style="padding:8px;border:1px solid #d9e2e1;">' + String(c ?? '') + '</td>').join('') + '</tr>').join('');
+            const summaryHtml = summaryRows.length ? '<div style="margin-top:16px;">' + summaryRows.map(s => '<div style="margin:4px 0;"><strong>' + String(s.label ?? '') + ':</strong> ' + String(s.value ?? '') + '</div>').join('') + '</div>' : '';
+            const headersHtml = tableHeaders.map(h => '<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">' + String(h ?? '') + '</th>').join('');
+            const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>' + String(title) + '</title></head>' +
+                '<body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">' +
+                '<h1 style="margin:0 0 6px 0;color:#4A6B6D;">' + String(title) + '</h1>' +
+                '<div style="margin-bottom:18px;color:#5A7C7E;">' + String(subtitle || '') + '</div>' +
+                '<table style="border-collapse:collapse;width:100%;font-size:12px;"><thead><tr>' + headersHtml + '</tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+                summaryHtml + '</body></html>';
             const w = window.open('', '_blank');
             if (!w) return;
+            w.document.open();
             w.document.write(html);
             w.document.close();
             w.focus();

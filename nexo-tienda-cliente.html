@@ -536,7 +536,7 @@
                 <div class="summary-row"><span id="sumItLbl"></span><span>$<span id="taxAmount">0.00</span></span></div>
                 <div class="summary-row"><span id="sumIueLbl"></span><span>$<span id="retentionAmount">0.00</span></span></div>
                 <div class="summary-row total"><span id="sumTotalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
-                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.</span></div>
+                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">Los costos externos pueden figurar en US$ 0.00 o con el valor real del proveedor/Amazon. La comisión nexo™ se calcula solo sobre el precio del producto.</span></div>
             </div>
             <button class="checkout-btn" onclick="goToCheckout()"><span id="checkoutBtnText">Proceder al Pago</span></button>
         </div>
@@ -844,8 +844,8 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             if(document.getElementById('taxAmount')) document.getElementById('taxAmount').textContent = '0.00';
             if(document.getElementById('retentionAmount')) document.getElementById('retentionAmount').textContent = '0.00';
             document.getElementById('totalPrice').textContent = total.toFixed(2);
-            const shipRow=document.getElementById('shipRow'); if(shipRow) shipRow.style.display = amazonShipping>0 ? 'flex' : 'none';
-            const vendorRow=document.getElementById('vendorRow'); if(vendorRow) vendorRow.style.display = vendorFees>0 ? 'flex' : 'none';
+            const shipRow=document.getElementById('shipRow'); if(shipRow) shipRow.style.display = 'flex';
+            const vendorRow=document.getElementById('vendorRow'); if(vendorRow) vendorRow.style.display = 'flex';
         }
 
         function goToCheckout() {

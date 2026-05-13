@@ -1409,74 +1409,22 @@ function getClientProfile() {
 
         
         function openPrintableReport(title, subtitle, tableHeaders, tableRows, summaryRows = []) {
-            const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${c}</td>`).join('')}</tr>`).join('');
-            const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(s => `<div style="margin:4px 0;"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>` : '';
-            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title></head>
-            <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
-                <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${title}</h1>
-                <div style="margin-bottom:18px;color:#5A7C7E;">${subtitle}</div>
-                <table style="border-collapse:collapse;width:100%;font-size:12px;">
-                    <thead><tr>${tableHeaders.map(h => `<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">${h}</th>`).join('')}</tr></thead>
-                    <tbody>${rowsHtml}</tbody>
-                </table>
-                ${summaryHtml}
-            
-
-
-<script>
-(function(){
-  function cleanRawAdminText(){
-    try{
-      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-      const bad=[]; let n;
-      while(n=walker.nextNode()){
-        const t=(n.nodeValue||'').trim();
-        if(t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
-      }
-      bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
-    }catch(e){}
-  }
-  document.addEventListener('DOMContentLoaded', cleanRawAdminText);
-  setTimeout(cleanRawAdminText,500); setTimeout(cleanRawAdminText,1500);
-})();
-</script>
-</body></html>`;
+            const rowsHtml = tableRows.map(r => '<tr>' + r.map(c => '<td style="padding:8px;border:1px solid #d9e2e1;">' + String(c ?? '') + '</td>').join('') + '</tr>').join('');
+            const summaryHtml = summaryRows.length ? '<div style="margin-top:16px;">' + summaryRows.map(s => '<div style="margin:4px 0;"><strong>' + String(s.label ?? '') + ':</strong> ' + String(s.value ?? '') + '</div>').join('') + '</div>' : '';
+            const headersHtml = tableHeaders.map(h => '<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">' + String(h ?? '') + '</th>').join('');
+            const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>' + String(title) + '</title></head>' +
+                '<body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">' +
+                '<h1 style="margin:0 0 6px 0;color:#4A6B6D;">' + String(title) + '</h1>' +
+                '<div style="margin-bottom:18px;color:#5A7C7E;">' + String(subtitle || '') + '</div>' +
+                '<table style="border-collapse:collapse;width:100%;font-size:12px;"><thead><tr>' + headersHtml + '</tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+                summaryHtml + '</body></html>';
             const w = window.open('', '_blank');
             if (!w) return;
+            w.document.open();
             w.document.write(html);
             w.document.close();
             w.focus();
             w.print();
-        }
-
-
-
-        // AGENTE 3 COMERCIAL - POLÍTICAS NUMERADAS INTEGRADAS SIN ROMPER EL PANEL
-        function agente3PlanComercial(){
-            return [
-                '1. Dimensionamiento de mercado y análisis TAM: medir mercado total, mercado disponible y mercado objetivo.',
-                '2. Análisis competitivo: comparar competidores directos e indirectos, precios, brechas y posicionamiento.',
-                '3. Perfil de cliente y segmentación: crear perfiles B2C/B2B por necesidad, presupuesto, ubicación y urgencia.',
-                '4. Tendencias de industria: detectar fuerzas económicas, sociales, tecnológicas, regulatorias y oportunidades.',
-                '5. SWOT + Porter: evaluar fortalezas, debilidades, oportunidades, amenazas y fuerzas competitivas.',
-                '6. Estrategia de salida al mercado: definir fases, canales, mensajes, presupuesto, KPI y cronograma.',
-                '7. Customer journey: mapear descubrimiento, comparación, decisión, compra, retención y referidos.',
-                '8. Economía unitaria: calcular CAC, LTV, margen, payback y escenarios financieros.',
-                '9. Riesgos y escenarios: clasificar riesgos de mercado, competencia, tecnología, finanzas, legal y reputación.',
-                '10. Entrada y expansión: evaluar países, segmentos, alianzas, entrada directa, licencia o franquicia.',
-                '11. Captación operativa: ejecutar campañas, prospección, referidos, WhatsApp, email y redes.',
-                '12. Reporte ejecutivo: priorizar acciones, presupuesto, responsables, KPI y próximos pasos.'
-            ];
-        }
-
-        function agente3ExportarReporte(){
-            const contenido = 'AGENTE 3 COMERCIAL - PLAN PARA CAPTAR CLIENTES\n\n' + agente3PlanComercial().join('\n') + '\n\nSalida esperada: estrategia comercial, campañas, leads, KPI y reporte ejecutivo.';
-            const blob = new Blob([contenido], {type:'text/plain;charset=utf-8'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'agente3_plan_comercial_nexo.txt';
-            a.click();
-            URL.revokeObjectURL(a.href);
         }
 
         function getCompanyInfoForReports() {
