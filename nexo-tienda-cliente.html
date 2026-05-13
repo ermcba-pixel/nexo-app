@@ -554,6 +554,45 @@ function nexoProductImageMarkup(product){
 
         let products = [];
 
+
+        const NEXO_AMAZON_ASSOCIATE_TAG = 'nexo08-20';
+        function nexoEnsureAmazonAffiliateUrl(rawUrl, fallbackName){
+            const tag = NEXO_AMAZON_ASSOCIATE_TAG;
+            let url = rawUrl || ('https://www.amazon.com/s?k=' + encodeURIComponent(fallbackName || 'producto'));
+            try{
+                const u = new URL(url, window.location.origin);
+                if(/amazon\./i.test(u.hostname)){
+                    u.searchParams.set('tag', tag);
+                    if(!u.searchParams.get('linkCode')) u.searchParams.set('linkCode','ll2');
+                    if(!u.searchParams.get('ref_')) u.searchParams.set('ref_','as_li_ss_tl');
+                    return u.toString();
+                }
+            }catch(e){}
+            if(String(url).includes('amazon.')){
+                const sep = String(url).includes('?') ? '&' : '?';
+                return String(url) + sep + 'tag=' + encodeURIComponent(tag);
+            }
+            return url;
+        }
+        function nexoAffiliateStoragePush(entry){
+            try{
+                const key='nexoAmazonAffiliateClicks';
+                const arr=JSON.parse(localStorage.getItem(key)||'[]');
+                arr.push(Object.assign({amazon_tag:NEXO_AMAZON_ASSOCIATE_TAG, evento:'click', creado_en:new Date().toISOString()}, entry || {}));
+                localStorage.setItem(key, JSON.stringify(arr.slice(-200)));
+            }catch(e){}
+        }
+        function nexoRecordAmazonAffiliateClickById(productId){
+            try{
+                const p = (products || []).find(x => String(x.id) === String(productId)) || {};
+                const amazonUrl = nexoEnsureAmazonAffiliateUrl(p.sourceUrl || p.url, p.name || p.title || 'producto');
+                nexoAffiliateStoragePush({producto_id:String(productId||''), producto_nombre:p.name||p.title||'', amazon_url:amazonUrl, amazon_asin:p.asin||''});
+                fetch('/api/amazon-affiliate-click', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({producto_id:String(productId||''), producto_nombre:p.name||p.title||'', amazon_url:amazonUrl, amazon_asin:p.asin||'', amazon_tag:NEXO_AMAZON_ASSOCIATE_TAG})}).catch(()=>{});
+            }catch(e){}
+            return true;
+        }
+
+
 let currentLang = localStorage.getItem('nexoLang') || 'es';
 function tt(){ return storeI18n[currentLang] || storeI18n.es; }
 function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=currentLang; document.getElementById('storeTitle').textContent=t.title; document.getElementById('storeSubtitle').textContent=t.subtitle; document.getElementById('cartTitle').textContent=t.cartTitle; document.getElementById('backText').textContent=t.back; document.getElementById('searchLabel').textContent=t.search; document.getElementById('catLabel').textContent=t.cat; document.getElementById('priceLabel').textContent=t.price; document.getElementById('searchInput').placeholder=t.searchPh; document.getElementById('catAll').textContent=t.catAll; document.getElementById('catElect').textContent=t.catElect; document.getElementById('catAcc').textContent=t.catAcc; document.getElementById('catFashion').textContent=t.catFashion; document.getElementById('sumSubtotalLbl').textContent=t.sumSubtotal; document.getElementById('sumShipLbl').textContent=t.sumShip; document.getElementById('sumVendorLbl').textContent=t.sumVendor; document.getElementById('sumComLbl').textContent=t.sumCom; document.getElementById('sumItLbl').textContent=t.sumIt; document.getElementById('sumIueLbl').textContent=t.sumIue; document.getElementById('sumTotalLbl').textContent=t.sumTotal; document.getElementById('sumNote').textContent=t.sumNote; document.getElementById('checkoutBtnText').textContent=t.checkout; document.getElementById('cartBadge').title=t.cartTitleAttr; }
@@ -572,7 +611,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                     <div class="product-image">${nexoProductImageMarkup({...p, image:(p.image || '')}) || p.emoji}</div>
                     <div class="product-info">
                         <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
-                        <a href="${p.sourceUrl || ('https://www.amazon.com/s?k=' + encodeURIComponent(p.name || 'producto') + '&tag=nexo08-20')}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
+                        <a href="${nexoEnsureAmazonAffiliateUrl(p.sourceUrl || p.url, p.name || p.title || 'producto')}" onclick="nexoRecordAmazonAffiliateClickById('${String(p.id).replace(/'/g,'')}')" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
                         <div class="product-name">${p.name}</div>
                         <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
                         <div class="product-price">$${Number(p.price).toFixed(2)}</div>
@@ -600,7 +639,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 38 - id),
                 shippingAmazon: Math.max(6, price * 0.045), vendorFee: Math.max(3, price * 0.018),
                 aliases: `${name} ${category} amazon original ${extra}`,
-                sourceUrl:`https://www.amazon.com/s?k=${encodeURIComponent(name)}&tag=${tag}`,
+                sourceUrl:nexoEnsureAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(name)}`, name),
                 imageType: category
             });
             let items=[];
@@ -676,7 +715,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                         providerLogo: p.providerLogo || '🟠',
                         category: p.category || 'accesorios',
                         stock: p.stock || 'Amazon',
-                        sourceUrl: p.sourceUrl || p.url || `https://www.amazon.com/s?k=${encodeURIComponent(p.name || p.title || q)}&tag=nexo08-20`,
+                        sourceUrl: nexoEnsureAmazonAffiliateUrl(p.sourceUrl || p.url || `https://www.amazon.com/s?k=${encodeURIComponent(p.name || p.title || q)}`, p.name || p.title || q),
                         aliases: [p.name, p.title, p.asin, 'amazon original'].filter(Boolean).join(' ')
                     })).sort((a,b)=>Number(b.price||0)-Number(a.price||0));
                     renderProducts(products);

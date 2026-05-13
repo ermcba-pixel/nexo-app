@@ -565,6 +565,45 @@ function nexoProductImageMarkup(product){
         let products = [];
 
 
+        const NEXO_AMAZON_ASSOCIATE_TAG = 'nexo08-20';
+        function nexoEnsureAmazonAffiliateUrl(rawUrl, fallbackName){
+            const tag = NEXO_AMAZON_ASSOCIATE_TAG;
+            let url = rawUrl || ('https://www.amazon.com/s?k=' + encodeURIComponent(fallbackName || 'producto'));
+            try{
+                const u = new URL(url, window.location.origin);
+                if(/amazon\./i.test(u.hostname)){
+                    u.searchParams.set('tag', tag);
+                    if(!u.searchParams.get('linkCode')) u.searchParams.set('linkCode','ll2');
+                    if(!u.searchParams.get('ref_')) u.searchParams.set('ref_','as_li_ss_tl');
+                    return u.toString();
+                }
+            }catch(e){}
+            if(String(url).includes('amazon.')){
+                const sep = String(url).includes('?') ? '&' : '?';
+                return String(url) + sep + 'tag=' + encodeURIComponent(tag);
+            }
+            return url;
+        }
+        function nexoAffiliateStoragePush(entry){
+            try{
+                const key='nexoAmazonAffiliateClicks';
+                const arr=JSON.parse(localStorage.getItem(key)||'[]');
+                arr.push(Object.assign({amazon_tag:NEXO_AMAZON_ASSOCIATE_TAG, evento:'click', creado_en:new Date().toISOString()}, entry || {}));
+                localStorage.setItem(key, JSON.stringify(arr.slice(-200)));
+            }catch(e){}
+        }
+        function nexoRecordAmazonAffiliateClickById(productId){
+            try{
+                const p = (products || []).find(x => String(x.id) === String(productId)) || {};
+                const amazonUrl = nexoEnsureAmazonAffiliateUrl(p.sourceUrl || p.url, p.name || p.title || 'producto');
+                nexoAffiliateStoragePush({producto_id:String(productId||''), producto_nombre:p.name||p.title||'', amazon_url:amazonUrl, amazon_asin:p.asin||''});
+                fetch('/api/amazon-affiliate-click', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({producto_id:String(productId||''), producto_nombre:p.name||p.title||'', amazon_url:amazonUrl, amazon_asin:p.asin||'', amazon_tag:NEXO_AMAZON_ASSOCIATE_TAG})}).catch(()=>{});
+            }catch(e){}
+            return true;
+        }
+
+
+
 const storeI18n = window.storeI18n || {
   es:{title:'Tienda nexo™', subtitle:'20 Productos multi-proveedor • Envíos Internacionales', cartTitle:'🛒 Tu Carrito', back:'← Volver', search:'🔍 Buscar', cat:'📁 Categoría', price:'💲 Precio Máximo', searchPh:'Nombre del producto...', catAll:'Todas las categorías', catElect:'Electrónica', catAcc:'Accesorios', catFashion:'Moda', sumSubtotal:'Subtotal producto:', sumShip:'Gastos de envío Amazon/Marketplace:', sumVendor:'Gastos proveedor/marketplace Amazon:', sumCom:'Comisión nexo™:', sumIt:'', sumIue:'', sumTotal:'Total a Pagar:', sumNote:'El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.', checkout:'Proceder al Pago', cartTitleAttr:'Carrito', reviews:'reseñas', stock:'Stock', available:'disponibles', soldOut:'Agotado', add:'+ Carrito', empty:'Tu carrito está vacío', notifAdded:'agregado al carrito'},
   en:{title:'nexo™ Store', subtitle:'20 multi-provider products • International shipping', cartTitle:'🛒 Your Cart', back:'← Back', search:'🔍 Search', cat:'📁 Category', price:'💲 Max Price', searchPh:'Product name...', catAll:'All categories', catElect:'Electronics', catAcc:'Accessories', catFashion:'Fashion', sumSubtotal:'Product subtotal:', sumShip:'Amazon/Marketplace estimated shipping:', sumVendor:'Provider/marketplace estimated fees:', sumCom:'nexo™ commission:', sumIt:'', sumIue:'', sumTotal:'Total to Pay:', sumNote:'Agent 1 will calculate these costs with Amazon using the customer country, city, postal code and exact address before confirming the order.', checkout:'Proceed to Payment', cartTitleAttr:'Cart', reviews:'reviews', stock:'Stock', available:'available', soldOut:'Sold out', add:'+ Cart', empty:'Your cart is empty', notifAdded:'added to cart'},
@@ -605,7 +644,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         function nexoSupplierUrl(p){
             const q = encodeURIComponent(p.name || 'producto');
             const provider = String(p.provider || '').toLowerCase();
-            if(provider.includes('amazon')) return `https://www.amazon.com/s?k=${q}`;
+            if(provider.includes('amazon')) return nexoEnsureAmazonAffiliateUrl(p.sourceUrl || p.url || `https://www.amazon.com/s?k=${q}`, p.name || 'producto');
             if(provider.includes('aliexpress')) return `https://www.aliexpress.com/wholesale?SearchText=${q}`;
             if(provider.includes('temu')) return `https://www.temu.com/search_result.html?search_key=${q}`;
             if(provider.includes('shein')) return `https://www.shein.com/pdsearch/${q}/`;
@@ -630,7 +669,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                     <div class="product-image">${nexoProductImageMarkup({...p, image:nexoProductImage(p)})}</div>
                     <div class="product-info">
                         <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
-                        <a href="${nexoSupplierUrl(p)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
+                        <a href="${nexoEnsureAmazonAffiliateUrl(nexoSupplierUrl(p), p.name || p.title || 'producto')}" onclick="nexoRecordAmazonAffiliateClickById('${String(p.id).replace(/'/g,'')}')" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
                         <div class="product-name">${p.name}</div>
                         <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
                         <div class="product-price">$${Number(p.price).toFixed(2)}</div>
@@ -659,7 +698,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                 provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 38 - id),
                 shippingAmazon: Math.max(6, price * 0.045), vendorFee: Math.max(3, price * 0.018),
                 aliases: `${name} ${category} amazon original ${extra}`,
-                sourceUrl:`https://www.amazon.com/s?k=${encodeURIComponent(name)}&tag=${tag}`,
+                sourceUrl:nexoEnsureAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(name)}`, name),
                 imageType: category
             });
             let items=[];
@@ -735,7 +774,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                         providerLogo: p.providerLogo || '🟠',
                         category: p.category || 'accesorios',
                         stock: p.stock || 'Amazon',
-                        sourceUrl: p.sourceUrl || p.url || `https://www.amazon.com/s?k=${encodeURIComponent(p.name || p.title || q)}&tag=nexo08-20`,
+                        sourceUrl: nexoEnsureAmazonAffiliateUrl(p.sourceUrl || p.url || `https://www.amazon.com/s?k=${encodeURIComponent(p.name || p.title || q)}`, p.name || p.title || q),
                         aliases: [p.name, p.title, p.asin, 'amazon original'].filter(Boolean).join(' ')
                     })).sort((a,b)=>Number(b.price||0)-Number(a.price||0));
                     renderProducts(products);
@@ -787,7 +826,9 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             const product = products.find(p => p.id === productId);
             if(!product) return;
             product.image = nexoProductImage(product);
-            product.sourceUrl = product.sourceUrl || product.url || `https://www.amazon.com/s?k=${encodeURIComponent(product.name)}`;
+            product.sourceUrl = nexoEnsureAmazonAffiliateUrl(product.sourceUrl || product.url || `https://www.amazon.com/s?k=${encodeURIComponent(product.name)}`, product.name || 'producto');
+            product.url = product.sourceUrl;
+            product.amazon_tag = NEXO_AMAZON_ASSOCIATE_TAG;
             const existingItem = cart.find(c => c.id === productId);
 
             if (existingItem) {

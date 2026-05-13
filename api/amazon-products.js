@@ -8,6 +8,24 @@ const REGION = process.env.AMAZON_REGION || 'us-east-1';
 const HOST = process.env.AMAZON_HOST || 'webservices.amazon.com';
 const MARKETPLACE = process.env.AMAZON_MARKETPLACE || 'www.amazon.com';
 const SERVICE = 'ProductAdvertisingAPI';
+
+const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
+function ensureAmazonAffiliateTag(url){
+  const tag = AMAZON_ASSOCIATE_TAG;
+  if(!url) return `https://${MARKETPLACE}/s?k=producto&tag=${encodeURIComponent(tag)}`;
+  try{
+    const u = new URL(url.startsWith('http') ? url : `https://${MARKETPLACE}${url}`);
+    if(/amazon\./i.test(u.hostname)){
+      u.searchParams.set('tag', tag);
+      if(!u.searchParams.get('linkCode')) u.searchParams.set('linkCode','ll2');
+      if(!u.searchParams.get('ref_')) u.searchParams.set('ref_','as_li_ss_tl');
+    }
+    return u.toString();
+  }catch(e){
+    const sep = String(url).includes('?') ? '&' : '?';
+    return `${url}${sep}tag=${encodeURIComponent(tag)}`;
+  }
+}
 const PATH = '/paapi5/searchitems';
 const TARGET = 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems';
 
@@ -49,7 +67,7 @@ function normalizePaapiItem(item, idx){
   const image=item?.Images?.Primary?.Large?.URL || item?.Images?.Primary?.Medium?.URL || item?.Images?.Primary?.Small?.URL || '';
   const title=item?.ItemInfo?.Title?.DisplayValue || 'Producto Amazon';
   const asin=item?.ASIN || `AMZ-${idx+1}`;
-  const url=item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`;
+  const url=ensureAmazonAffiliateTag(item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`);
   const availability=listing?.Availability?.Message || '';
   return {
     id:`amazon-${asin}`, asin, name:title, title, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🟠',
@@ -99,7 +117,7 @@ function temporaryCatalog(q, maxPrice){
     return {
       id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🟠',
       price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:'electronica',
-      image:'', imageType, url:`https://${MARKETPLACE}/s?k=${query}`, sourceUrl:`https://${MARKETPLACE}/s?k=${query}`,
+      image:'', imageType, url:ensureAmazonAffiliateTag(`https://${MARKETPLACE}/s?k=${query}`), sourceUrl:ensureAmazonAffiliateTag(`https://${MARKETPLACE}/s?k=${query}`),
       stock:'Verificar en Amazon', source:'amazon-temporal-catalog', rating:4.6, reviews:0,
       sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true
     };
