@@ -116,6 +116,9 @@
 
         .detail-value {
             color: #666;
+            text-align: right;
+            max-width: 58%;
+            overflow-wrap: anywhere;
         }
 
         .detail-value.total {
@@ -198,7 +201,7 @@
             }
         }
     
-@media print{body{background:#fff!important;padding:0!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important}.action-buttons,.email-note button,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}}
+@media print{body{background:#fff!important;padding:0!important;display:block!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important;padding:30px!important}.action-buttons,.email-note,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}.confirmation-card:after{content:none!important}}
 </style>
 </head>
 <body>
@@ -229,17 +232,18 @@
             </div>
 
             <div class="detail-row">
-                <span class="detail-label" id="nitLabel">NIT Factura nexo™:</span>
-                <span class="detail-value" id="clientNit">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label" id="clientDocLabel">NIT / Documento del cliente:</span>
-                <span class="detail-value" id="clientDocOnly">-</span>
+                <span class="detail-label" id="nitFacturaLabel">NIT Factura nexo™:</span>
+                <span class="detail-value" id="nexoFiscalNit">-</span>
             </div>
 
             <div class="detail-row">
-                <span class="detail-label" id="itemsLabel">Artículos:</span>
-                <span class="detail-value" id="itemCount">0</span>
+                <span class="detail-label" id="nitLabel">NIT / Documento del cliente:</span>
+                <span class="detail-value" id="clientNit">-</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label" id="itemsLabel">Producto comprado:</span>
+                <span class="detail-value" id="itemCount">-</span>
             </div>
 
             <div class="detail-row">
@@ -280,22 +284,23 @@ const confirmI18n={
 
 document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const invoiceId = params.get('invoice');
-            const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','itemsLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>{const el=document.getElementById(id); if(el && t[id]) el.textContent=t[id];});
+            const invoiceId = params.get('invoice') || params.get('pedido_id');
+            const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','itemsLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
 
-            const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
-            const finalInvoiceId = invoiceId || purchase.factura_numero || purchase.invoiceId || purchase.id || purchase.supabase_id || ('NEXO-' + Date.now());
-            document.getElementById('invoiceId').textContent = finalInvoiceId;
+            if (invoiceId) {
+                document.getElementById('invoiceId').textContent = invoiceId;
+            }
 
             document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
             document.getElementById('clientName').textContent = purchase.fullName || `${purchase.firstName || ''} ${purchase.lastName || ''}`.trim() || '-';
             document.getElementById('clientEmail').textContent = purchase.email || '-';
-            const countryTxt = String(purchase.country || purchase.cliente_pais || '').toLowerCase();
-            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || '';
-            const fiscalNit = countryTxt && !countryTxt.includes('bolivia') ? '99001' : (docRaw || '99001');
-            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = fiscalNit;
-            const docEl = document.getElementById('clientDocOnly'); if(docEl) docEl.textContent = docRaw || fiscalNit;
-            document.getElementById('itemCount').textContent = ((purchase.itemsCount || (purchase.items ? purchase.items.reduce((n,i)=>n+(i.quantity||1),0) : 0)) || 0) + ' ' + t.itemsWord;
+            const countryTxt = String(purchase.country || purchase.cliente_pais || purchase.customer?.country || '').toLowerCase();
+            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || purchase.customer?.documentId || '';
+            const nexoFiscalNit = countryTxt && !countryTxt.includes('bolivia') ? '99001' : (docRaw || '99001');
+            const nexoNitEl = document.getElementById('nexoFiscalNit'); if(nexoNitEl) nexoNitEl.textContent = nexoFiscalNit;
+            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || nexoFiscalNit;
+            const productNames = Array.isArray(purchase.items) && purchase.items.length ? purchase.items.map(i => i.name || i.nombre || i.producto || 'Producto').join(' | ') : (purchase.producto_nombre || purchase.producto || 'Producto nexo™');
+            document.getElementById('itemCount').textContent = productNames;
             document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
             if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
                 const note = document.querySelector('.email-note');
@@ -324,18 +329,15 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
 
 <script>
-function nexoBuildInvoicePrintHtml(){
-  const invoice=document.querySelector('.invoice-section');
-  const title=document.getElementById('confTitle')?.textContent||'Compra Confirmada';
-  if(!invoice) return '<html><body>Factura no disponible</body></html>';
-  return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Factura nexo</title><style>body{font-family:Segoe UI,Arial,sans-serif;background:#fff;color:#2D3E3F;padding:30px}.wrap{max-width:720px;margin:0 auto}.head{text-align:center;margin-bottom:22px}.ok{font-size:44px}.invoice-section{border:1px solid #d9e2e1;border-radius:16px;padding:22px;background:#fff}.invoice-id{font-weight:900;font-size:18px;background:#f5faf8;border-radius:8px;padding:12px;margin-bottom:14px}.detail-row{display:flex;justify-content:space-between;border-bottom:1px solid #e1eeee;padding:9px 0;gap:20px}.detail-label{font-weight:800}.total{font-size:20px;color:#67c63a;font-weight:900}@media print{body{padding:0}.invoice-section{border:1px solid #ccc}}</style></head><body><div class="wrap"><div class="head"><div class="ok">✅</div><h1>'+title+'</h1><p>Comprobante de operación nexo™</p></div>'+invoice.outerHTML+'</div></body></html>';
+function nexoPrintInvoice(){ window.print(); }
+
+function nexoDownloadPDF(){
+  try {
+    window.print();
+  } catch(e) {
+    alert('PDF listo para imprimir o guardar como PDF.');
+  }
 }
-function nexoPrintInvoice(){
-  const w=window.open('', '_blank');
-  if(!w){ window.print(); return; }
-  w.document.open(); w.document.write(nexoBuildInvoicePrintHtml()); w.document.close(); w.focus(); setTimeout(()=>w.print(),250);
-}
-function nexoDownloadPDF(){ nexoPrintInvoice(); }
 
 function nexoContinueShopping(){
   const candidates = ['nexo-tienda-publica.html','nexo-tienda.html','index.html'];
