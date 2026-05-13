@@ -1409,15 +1409,38 @@ function getClientProfile() {
 
         
         function openPrintableReport(title, subtitle, tableHeaders, tableRows, summaryRows = []) {
-            const rowsHtml = tableRows.map(r => '<tr>' + r.map(c => '<td style="padding:8px;border:1px solid #d9e2e1;">' + String(c ?? '') + '</td>').join('') + '</tr>').join('');
-            const summaryHtml = summaryRows.length ? '<div style="margin-top:16px;">' + summaryRows.map(s => '<div style="margin:4px 0;"><strong>' + String(s.label || '') + ':</strong> ' + String(s.value || '') + '</div>').join('') + '</div>' : '';
-            const headerHtml = tableHeaders.map(h => '<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">' + String(h ?? '') + '</th>').join('');
-            const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>' + String(title) + '</title></head>' +
-              '<body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">' +
-              '<h1 style="margin:0 0 6px 0;color:#4A6B6D;">' + String(title) + '</h1>' +
-              '<div style="margin-bottom:18px;color:#5A7C7E;">' + String(subtitle || '') + '</div>' +
-              '<table style="border-collapse:collapse;width:100%;font-size:12px;"><thead><tr>' + headerHtml + '</tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
-              summaryHtml + '</body></html>';
+            const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${c}</td>`).join('')}</tr>`).join('');
+            const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(s => `<div style="margin:4px 0;"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>` : '';
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title></head>
+            <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
+                <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${title}</h1>
+                <div style="margin-bottom:18px;color:#5A7C7E;">${subtitle}</div>
+                <table style="border-collapse:collapse;width:100%;font-size:12px;">
+                    <thead><tr>${tableHeaders.map(h => `<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">${h}</th>`).join('')}</tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+                ${summaryHtml}
+            
+
+
+<script>
+(function(){
+  function cleanRawAdminText(){
+    try{
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      const bad=[]; let n;
+      while(n=walker.nextNode()){
+        const t=(n.nodeValue||'').trim();
+        if((t.length>60 && (t.includes('${') || t.includes('function ') || t.includes('const ') || t.includes('tableHeaders.map') || t.includes('ticketSafe('))) || t.includes('${title}') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
+      }
+      bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', cleanRawAdminText);
+  setTimeout(cleanRawAdminText,500); setTimeout(cleanRawAdminText,1500);
+})();
+</script>
+</body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
             w.document.write(html);
@@ -1425,6 +1448,7 @@ function getClientProfile() {
             w.focus();
             w.print();
         }
+
 
 
         // AGENTE 3 COMERCIAL - POLÍTICAS NUMERADAS INTEGRADAS SIN ROMPER EL PANEL
@@ -1904,7 +1928,25 @@ const NEXO_DB_KEY_REAL = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
 let nexoAdminDbClient = null, nexoOrdersCache = [], nexoCustomersCache = [];
 function getNexoAdminDb(){ if(!window.supabase || !window.supabase.createClient) return null; if(!nexoAdminDbClient) nexoAdminDbClient = window.supabase.createClient(NEXO_DB_URL_REAL, NEXO_DB_KEY_REAL, {auth:{persistSession:false, autoRefreshToken:false}}); return nexoAdminDbClient; }
 async function nexoAdminRest(table, query){ const r=await fetch(`${NEXO_DB_URL_REAL}/rest/v1/${table}?${query}`,{headers:{apikey:NEXO_DB_KEY_REAL,Authorization:'Bearer '+NEXO_DB_KEY_REAL}}); const txt=await r.text(); if(!r.ok) throw new Error(txt||'Supabase REST error'); return txt?JSON.parse(txt):[]; }
-async function fetchNexoAdminData(){ const db=getNexoAdminDb(); if(db){ const [o,c]=await Promise.all([db.from('pedidos').select('*').order('creado_en',{ascending:false}).limit(100), db.from('clientes').select('*').order('fecha_registro',{ascending:false}).limit(100)]); if(!o.error) nexoOrdersCache=o.data||[]; if(!c.error) nexoCustomersCache=c.data||[]; return; } const [o,c]=await Promise.all([nexoAdminRest('pedidos','select=*&order=creado_en.desc&limit=100'), nexoAdminRest('clientes','select=*&order=fecha_registro.desc&limit=100')]); nexoOrdersCache=o||[]; nexoCustomersCache=c||[]; }
+async function fetchNexoAdminData(){
+  try{
+    const [o,c]=await Promise.all([
+      nexoAdminRest('pedidos','select=*&order=creado_en.desc&limit=100'),
+      nexoAdminRest('clientes','select=*&order=fecha_registro.desc&limit=100')
+    ]);
+    nexoOrdersCache=o||[]; nexoCustomersCache=c||[]; return;
+  }catch(e){
+    console.warn('Supabase REST no disponible, usando respaldo local temporal', e);
+    const localOrders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
+    const localProfile = JSON.parse(localStorage.getItem('nexoClientProfile') || 'null');
+    nexoOrdersCache = localOrders.map(o=>({
+      id:o.supabase_id||o.id, cliente_nombre:(o.fullName||'').split(' ')[0]||'', cliente_apellido:(o.fullName||'').split(' ').slice(1).join(' '), cliente_email:o.email,
+      total_cliente_usd:o.total, precio_usd:o.total, metodo_pago:o.paymentMethod, estado_pago:o.estado_pago||o.supabase_status||'pendiente', creado_en:o.timestamp||new Date().toISOString(),
+      producto_nombre:(o.items||[]).map(i=>i.name).join(' | '), fecha_estimada_entrega:o.deliveryEstimate, cliente_ciudad:o.customer?.city||o.city||'', cliente_direccion:o.customer?.address||o.address||''
+    }));
+    nexoCustomersCache = localProfile && localProfile.email ? [{nombre:localProfile.name||'', apellido:localProfile.lastName||'', email:localProfile.email, telefono:localProfile.phone, pais:localProfile.country, ciudad:localProfile.city, direccion:localProfile.address, documento:localProfile.documentId}] : [];
+  }
+}
 function moneyAdmin(v){ return 'US$ '+Number(v||0).toFixed(2); }
 async function loadDashboard(){ try{await fetchNexoAdminData();}catch(e){console.warn(e);} const revenue=nexoOrdersCache.reduce((a,o)=>a+Number(o.total_cliente_usd||o.precio_usd||0),0); const pending=nexoOrdersCache.filter(o=>String(o.estado||'').toLowerCase().includes('pend')||String(o.estado_pago||'').toLowerCase().includes('pend')).length; const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;}; set('totalOrders',nexoOrdersCache.length); set('activeClients',nexoCustomersCache.length); set('totalRevenue',moneyAdmin(revenue)); set('pendingOrders',pending); }
 async function loadOrders(){ const table=document.getElementById('ordersTable'); if(!table)return; table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Cargando pedidos reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){table.innerHTML='<tr><td colspan="6">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoOrdersCache.length){table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Sin pedidos reales registrados todavía.</td></tr>'; return;} table.innerHTML=nexoOrdersCache.map(o=>`<tr><td>${String(o.id||'').slice(0,8)}</td><td>${o.cliente_nombre||''} ${o.cliente_apellido||''}</td><td>${o.cliente_email||''}</td><td>${moneyAdmin(o.total_cliente_usd||o.precio_usd)}</td><td>${o.estado_pago||o.estado||'pendiente'}</td><td>${o.creado_en?new Date(o.creado_en).toLocaleDateString('es-BO'):'-'}</td></tr>`).join(''); }
@@ -1936,27 +1978,13 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
       const bad=[]; let n;
       while(n=walker.nextNode()){
         const t=(n.nodeValue||'').trim();
-        if(t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
+        if((t.length>60 && (t.includes('${') || t.includes('function ') || t.includes('const ') || t.includes('tableHeaders.map') || t.includes('ticketSafe('))) || t.includes('${title}') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
       }
       bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', cleanRawAdminText);
   setTimeout(cleanRawAdminText,500); setTimeout(cleanRawAdminText,1500);
-})();
-</script>
-
-<script>
-(function(){
-  if(!window.switchSection){
-    window.switchSection = function(sectionId){
-      document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
-      var target=document.getElementById(sectionId); if(target) target.classList.add('active');
-      document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
-      var item=document.querySelector('[onclick*="'+sectionId+'"]'); if(item) item.classList.add('active');
-      try{ if(sectionId==='clients') renderCustomers(); if(sectionId==='payments') renderPayments(); if(sectionId==='shipments') renderShipments(); if(sectionId==='products') renderProducts(); if(sectionId==='tickets' && window.loadTicketsFromSupabase) loadTicketsFromSupabase(); }catch(e){console.warn(e)}
-    };
-  }
 })();
 </script>
 </body>

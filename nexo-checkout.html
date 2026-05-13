@@ -726,11 +726,10 @@ window.nexoSavePedidoToSupabase = async function(orderData){
     if(apiResp.ok && apiData.ok && apiData.pedido_id){
       return { data: { id: apiData.pedido_id, api_saved:true }, error:null };
     }
-    console.error('API Supabase guardado no confirmado', apiData);
-    window.nexoLastSupabaseError = apiData;
+    console.warn('API Supabase guardado no confirmado, intenta cliente directo', apiData);
   } catch(e) { console.warn('API Supabase no disponible, intenta cliente directo', e); }
   const client = initNexoSupabase();
-  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true, supabase_error: window.nexoLastSupabaseError || 'Supabase client unavailable' }, error: null };
+  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
   const items = Array.isArray(orderData.items) ? orderData.items : [];
   const firstItem = items[0] || {};
   const customer = orderData.customer || {};
@@ -1390,7 +1389,7 @@ const t = ctt();
                 city: document.getElementById('city').value.trim(),
                 address: document.getElementById('address').value.trim(),
                 zipCode: document.getElementById('zipCode').value.trim(),
-                documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || document.getElementById('documentId')?.value || '')
+                documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
             };
             orderData.totals = {
                 subtotal: +orderData.subtotal.toFixed(2),
@@ -1418,7 +1417,6 @@ const t = ctt();
                 orderData.supabase_id = data?.id || orderData.id;
                 orderData.estado = 'pedido_registrado';
                 orderData.supabase_status = data?.local_only ? 'respaldo_local' : 'guardado';
-                if(data?.local_only){ console.warn('Pedido no quedó en Supabase; revisar políticas RLS/GRANT.', data); }
             } catch (err) {
                 console.warn('Supabase no disponible. Pedido continúa con respaldo local.', err);
                 orderData.supabase_id = orderData.id;

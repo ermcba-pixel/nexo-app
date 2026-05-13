@@ -116,9 +116,6 @@
 
         .detail-value {
             color: #666;
-            text-align: right;
-            max-width: 58%;
-            overflow-wrap: anywhere;
         }
 
         .detail-value.total {
@@ -201,7 +198,7 @@
             }
         }
     
-@media print{body{background:#fff!important;padding:0!important;display:block!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important;padding:30px!important}.action-buttons,.email-note,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}.confirmation-card:after{content:none!important}}
+@media print{body{background:#fff!important;padding:0!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important}.action-buttons,.email-note button,footer,.nexo-legal-footer,[data-nexo-legal-footer],.footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}}
 </style>
 </head>
 <body>
@@ -231,9 +228,9 @@
                 <span class="detail-value" id="clientEmail">-</span>
             </div>
 
-            <div class="detail-row">
-                <span class="detail-label" id="nitFacturaLabel">NIT Factura nexo™:</span>
-                <span class="detail-value" id="nexoFiscalNit">-</span>
+            <div class="detail-row" id="nexoInternationalNitRow">
+                <span class="detail-label" id="internationalNitLabel">NIT / Documento del cliente internacional:</span>
+                <span class="detail-value" id="internationalNit">-</span>
             </div>
 
             <div class="detail-row">
@@ -284,7 +281,7 @@ const confirmI18n={
 
 document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const invoiceId = params.get('invoice') || params.get('pedido_id');
+            const invoiceId = params.get('invoice');
             const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','itemsLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
 
             if (invoiceId) {
@@ -296,11 +293,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('clientEmail').textContent = purchase.email || '-';
             const countryTxt = String(purchase.country || purchase.cliente_pais || purchase.customer?.country || '').toLowerCase();
             const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || purchase.customer?.documentId || '';
-            const nexoFiscalNit = countryTxt && !countryTxt.includes('bolivia') ? '99001' : (docRaw || '99001');
-            const nexoNitEl = document.getElementById('nexoFiscalNit'); if(nexoNitEl) nexoNitEl.textContent = nexoFiscalNit;
-            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || nexoFiscalNit;
-            const productNames = Array.isArray(purchase.items) && purchase.items.length ? purchase.items.map(i => i.name || i.nombre || i.producto || 'Producto').join(' | ') : (purchase.producto_nombre || purchase.producto || 'Producto nexo™');
-            document.getElementById('itemCount').textContent = productNames;
+            const isBolivia = countryTxt.includes('bolivia');
+            const internationalRow = document.getElementById('nexoInternationalNitRow');
+            const internationalNit = document.getElementById('internationalNit');
+            if(internationalRow){ internationalRow.style.display = isBolivia ? 'none' : 'flex'; }
+            if(internationalNit){ internationalNit.textContent = isBolivia ? '' : '99001'; }
+            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || '-';
+            const productText = (purchase.items && purchase.items.length)
+                ? purchase.items.map(i => `${i.name || i.nombre || i.producto || 'Producto'}${(i.quantity||1)>1 ? ' x'+(i.quantity||1) : ''}`).join(' | ')
+                : (purchase.producto_nombre || purchase.producto || purchase.product || '-');
+            document.getElementById('itemCount').textContent = productText;
             document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
             if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
                 const note = document.querySelector('.email-note');

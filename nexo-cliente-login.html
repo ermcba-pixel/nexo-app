@@ -735,11 +735,13 @@
             sessionStorage.setItem('clientEmail', profile.email);
             sessionStorage.setItem('clientName', profile.fullName);
             try {
-                await fetch('/api/nexo-save-client', {
+                const r = await fetch('/api/nexo-save-client', {
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify(profile)
                 });
+                const j = await r.json().catch(()=>({}));
+                if(!r.ok || !j.ok) console.warn('Supabase cliente no confirmó guardado:', j);
             } catch(e) { console.warn('Cliente guardado local; sincronización Supabase pendiente', e); }
             showAlert('✅ Cuenta creada correctamente. Abriendo tienda...', 'success');
             setTimeout(() => {
