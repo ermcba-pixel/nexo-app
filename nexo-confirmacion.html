@@ -198,6 +198,15 @@
             }
         }
     </style>
+
+<style>
+@media print{
+  body{background:#fff!important;}
+  .action-buttons,.footer,button,a[href]:after{display:none!important;}
+  .confirmation-card{box-shadow:none!important;margin:0 auto!important;width:100%!important;max-width:720px!important;}
+  @page{size:A4;margin:14mm;}
+}
+</style>
 </head>
 <body>
     <div class="confirmation-card">
@@ -274,6 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (invoiceId) {
                 document.getElementById('invoiceId').textContent = invoiceId;
+            } else if (purchase.factura_numero || purchase.invoiceId || purchase.supabase_id || purchase.id) {
+                document.getElementById('invoiceId').textContent = purchase.factura_numero || purchase.invoiceId || purchase.supabase_id || purchase.id;
             }
 
             document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
