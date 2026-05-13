@@ -184,17 +184,6 @@
             margin-top: 20px;
         }
 
-
-        @media print {
-            body { background:#fff !important; display:block !important; padding:0 !important; min-height:auto !important; }
-            .confirmation-card { box-shadow:none !important; border-radius:0 !important; max-width:760px !important; margin:0 auto !important; padding:20px 28px !important; }
-            .success-icon { font-size:42px !important; margin-bottom:8px !important; }
-            .confirmation-card h1 { font-size:24px !important; }
-            .action-buttons, footer, .nexo-legal-footer { display:none !important; }
-            .email-note { border-left:2px solid #7AC742 !important; }
-            @page { size:A4 portrait; margin:14mm; }
-        }
-
         @media (max-width: 600px) {
             .confirmation-card {
                 padding: 40px 25px;
@@ -208,7 +197,9 @@
                 grid-template-columns: 1fr;
             }
         }
-    </style>
+    
+@media print{body{background:#fff!important;padding:0!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important}.action-buttons,.email-note button,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}}
+</style>
 </head>
 <body>
     <div class="confirmation-card">
@@ -238,12 +229,8 @@
             </div>
 
             <div class="detail-row">
-                <span class="detail-label">Documento / NIT:</span>
-                <span class="detail-value" id="clientDocument">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Dirección:</span>
-                <span class="detail-value" id="clientAddress">-</span>
+                <span class="detail-label" id="nitLabel">NIT / Documento fiscal:</span>
+                <span class="detail-value" id="clientNit">-</span>
             </div>
 
             <div class="detail-row">
@@ -299,17 +286,17 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
             document.getElementById('clientName').textContent = purchase.fullName || `${purchase.firstName || ''} ${purchase.lastName || ''}`.trim() || '-';
             document.getElementById('clientEmail').textContent = purchase.email || '-';
-            const doc = purchase.customer?.documentId || purchase.documentId || JSON.parse(localStorage.getItem('nexoClientProfile') || '{}').documentId || '-';
-            const addr = purchase.customer?.address || purchase.address || JSON.parse(localStorage.getItem('nexoClientProfile') || '{}').address || '-';
-            const docEl = document.getElementById('clientDocument'); if(docEl) docEl.textContent = doc || '-';
-            const addrEl = document.getElementById('clientAddress'); if(addrEl) addrEl.textContent = addr || '-';
+            const countryTxt = String(purchase.country || purchase.cliente_pais || '').toLowerCase();
+            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || '';
+            const fiscalNit = countryTxt && !countryTxt.includes('bolivia') ? '99001' : (docRaw || '99001');
+            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = fiscalNit;
             document.getElementById('itemCount').textContent = ((purchase.itemsCount || (purchase.items ? purchase.items.reduce((n,i)=>n+(i.quantity||1),0) : 0)) || 0) + ' ' + t.itemsWord;
             document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
             if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
                 const note = document.querySelector('.email-note');
                 if(note){ note.innerHTML += '<br><strong>Estado operativo:</strong> pedido registrado; confirmación de pago en proceso.'; }
             }
-            document.getElementById('deliveryInfo').textContent = purchase.deliveryLabel ? `${purchase.deliveryLabel} · ${purchase.deliveryEstimate || '-'}` : (purchase.deliveryEstimate || '-'); let amt = purchase.total || '0.00'; if(typeof amt==='string') amt = amt.replace(/^\$+/, ''); document.getElementById('totalPaid').textContent = amt;
+            document.getElementById('deliveryInfo').textContent = purchase.deliveryLabel ? `${purchase.deliveryLabel} · ${purchase.deliveryEstimate || '-'}` : (purchase.deliveryEstimate || '-'); let amt = purchase.total || '0.00'; if(typeof amt==='string') amt = amt.replace(/^\$+/, ''); document.getElementById('totalPaid').textContent = Number(amt || 0).toFixed(2);
         });
 
         function goToStore() {
@@ -381,6 +368,48 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
+
+
+<script>
+async function nexoCapturePayPalReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token') || params.get('paypal_order_id');
+  const metodo = params.get('metodo');
+  const fallback = params.get('fallback');
+  if(metodo !== 'paypal' || fallback === 'standard' || !token) return;
+  const note = document.querySelector('.email-note');
+  try{
+    if(note) note.innerHTML += '<br><strong>PayPal:</strong> confirmando cobro aprobado...';
+    const r = await fetch('/api/paypal-capture-order', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({orderId: token})
+    });
+    const data = await r.json().catch(()=>({}));
+    const order = JSON.parse(localStorage.getItem('nexoLastOrder') || '{}');
+    order.paypalOrderId = token;
+    order.paypalCapture = data;
+    order.paymentMethod = 'paypal';
+    if(r.ok && data.ok){
+      order.estado_pago = 'paypal_pagado_capturado';
+      order.payment_status = 'paid';
+      order.estado_compra = 'pendiente_agente_1_compra_amazon';
+      if(note) note.innerHTML += '<br><strong>PayPal:</strong> pago recibido y capturado correctamente. Agente 1 queda listo para compra Amazon.';
+      const title = document.getElementById('confTitle');
+      if(title) title.textContent = '¡Pago PayPal Confirmado!';
+    } else {
+      order.estado_pago = 'paypal_aprobado_pendiente_captura';
+      order.payment_status = 'pending_capture';
+      if(note) note.innerHTML += '<br><strong>PayPal:</strong> aprobación recibida; captura pendiente de verificación.';
+    }
+    localStorage.setItem('nexoLastOrder', JSON.stringify(order));
+  }catch(e){
+    console.warn('No se pudo capturar PayPal automáticamente', e);
+    if(note) note.innerHTML += '<br><strong>PayPal:</strong> retorno recibido; captura pendiente de verificación técnica.';
+  }
+}
+window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(nexoCapturePayPalReturn, 250); });
+</script>
 <script>
 function nexoPublicCleanup(){
   try{
@@ -403,7 +432,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
-  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
   © 2026 nexo™ – Todos los derechos reservados<br>

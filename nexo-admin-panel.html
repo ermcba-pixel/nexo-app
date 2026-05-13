@@ -542,43 +542,22 @@
         .ticket-message{background:#f7faf8;border-left:4px solid var(--accent);border-radius:10px;padding:14px;line-height:1.6;font-size:13px;white-space:pre-wrap;}
         @media(max-width:900px){.ticket-detail-grid{grid-template-columns:1fr;}}
 
+.agente3-box{border:2px solid rgba(122,199,66,.18)}
+.agente3-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px}
+.agente3-step{background:#fff;border:1px solid #e3ece9;border-left:5px solid var(--accent);border-radius:12px;padding:16px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.agente3-step b{display:block;color:var(--primary);font-size:14px;margin-bottom:8px}
+.agente3-step p{font-size:12px;line-height:1.55;color:#566;margin:0}
+.mini-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e3ece9;line-height:1.55;color:#2D3E3F}
+
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-<script id="nexo-supabase-core">
-window.NEXO_SUPABASE_URL = window.NEXO_SUPABASE_URL || "https://ujqbbnipftlzytdankwp.supabase.co";
-window.NEXO_SUPABASE_KEY = window.NEXO_SUPABASE_KEY || "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-window.nexoDbRest = window.nexoDbRest || async function(table, row) {
-  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: {
-      'apikey': window.NEXO_SUPABASE_KEY,
-      'Authorization': 'Bearer ' + window.NEXO_SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify(row)
-  });
-  const txt = await res.text();
-  if(!res.ok) throw new Error(txt || ('Supabase REST error ' + res.status));
-  try { return JSON.parse(txt)[0] || null; } catch(e) { return null; }
-};
-window.nexoDbGet = window.nexoDbGet || async function(table, query) {
-  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table + (query || ''), {
-    headers: { 'apikey': window.NEXO_SUPABASE_KEY, 'Authorization': 'Bearer ' + window.NEXO_SUPABASE_KEY }
-  });
-  const txt = await res.text();
-  if(!res.ok) throw new Error(txt || ('Supabase REST error ' + res.status));
-  return JSON.parse(txt || '[]');
-};
-</script>
 </head>
 <body>
     <!-- HEADER -->
     <div class="header">
         <div class="header-left">
             <span class="logo-icon">🏢</span>
-            <span class="logo-admin">NEXO Admin</span>
+            <span class="logo-admin">nexo Admin</span>
         </div>
         <div class="header-right">
             <button class="logout-btn" onclick="logout()">SALIR</button>
@@ -618,7 +597,7 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
                     <span class="menu-icon">📈</span> Reportes
                 </div>
                 <div class="menu-item" onclick="switchSection('marketing', this)">
-                    <span class="menu-icon">📢</span> Agente Marketing IA
+                    <span class="menu-icon">📢</span> Agente 3 Comercial
                 </div>
                 <div class="menu-item" onclick="switchSection('tickets', this)">
                     <span class="menu-icon">🎫</span> Tickets soporte
@@ -648,7 +627,7 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
         <!-- CONTENIDO PRINCIPAL -->
         <div class="content">
             <div class="top-actions">
-                <a class="back-link" href="index.html">← Volver al portal</a>
+                <a class="back-link" href="nexo-portal-principal.html" onclick="window.location.href='nexo-portal-principal.html'; return false;">← Volver al portal</a>
                 <span class="super-badge">Superadministrador</span>
             </div>
 
@@ -693,7 +672,7 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Tipo de Régimen:</span>
-                            <span class="info-value" id="companyRegimen">Intermediación Digital Internacional</span>
+                            <span class="info-value" id="companyRegimen">Plataforma de Intermediación Comercial Internacional</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Nombre comercial / Razón Social:</span>
@@ -880,49 +859,57 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
 </div>
 
 <div class="section" id="marketing">
-                <h1 class="page-title">📢 AGENTE MARKETING IA</h1>
-                <p class="page-subtitle">Uso exclusivo de Superadministrador para búsqueda automática de clientes, referidos, redes y campañas</p>
+  <h1 class="page-title">📢 AGENTE 3 COMERCIAL · CAPTACIÓN DE CLIENTES</h1>
+  <p class="page-subtitle">Plan comercial numerado incorporado desde las políticas adjuntas · uso exclusivo del Superadministrador</p>
 
-                <div class="agent-summary">
-                    <div class="section-box">
-                        <div class="section-box-title">🤖 MOTOR DE PROSPECCIÓN Y CRECIMIENTO</div>
-                        <div class="info-grid">
-                            <div class="info-item"><span class="info-label">Estado del agente</span><span class="info-value highlight">Activo · Solo Superadministrador</span></div>
-                            <div class="info-item"><span class="info-label">Objetivo</span><span class="info-value">Captar clientes, referidos y oportunidades</span></div>
-                            <div class="info-item"><span class="info-label">Canales</span><span class="info-value">Facebook, Instagram, WhatsApp, email y referidos</span></div>
-                            <div class="info-item"><span class="info-label">Ejecución</span><span class="info-value">Automática con seguimiento diario</span></div>
-                        </div>
-                        <div class="button-group">
-                            <button class="btn btn-primary" onclick="alert('Agente Marketing IA ejecutándose')">▶ Ejecutar agente</button>
-                            <button class="btn btn-secondary" onclick="alert('Reporte de marketing generado')">⬇ Ver resultados</button>
-                        </div>
-                    </div>
-                    <div class="section-box">
-                        <div class="section-box-title">📋 RESULTADOS DEL AGENTE</div>
-                        <div class="mini-stats">
-                            <div class="mini-stat"><div class="mini-stat-label">Clientes detectados</div><div class="mini-stat-value">128</div></div>
-                            <div class="mini-stat"><div class="mini-stat-label">Referidos potenciales</div><div class="mini-stat-value">42</div></div>
-                            <div class="mini-stat"><div class="mini-stat-label">Campañas activas</div><div class="mini-stat-value">7</div></div>
-                            <div class="mini-stat"><div class="mini-stat-label">Leads validados</div><div class="mini-stat-value">31</div></div>
-                        </div>
-                    </div>
-                </div>
+  <div class="section-box agente3-box">
+    <div class="section-box-title">🤖 Motor del Agente 3</div>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">Estado</span><span class="info-value highlight">Activo</span></div>
+      <div class="info-item"><span class="info-label">Objetivo</span><span class="info-value">Captar clientes y expandir ventas internacionales</span></div>
+      <div class="info-item"><span class="info-label">Método</span><span class="info-value">12 acciones comerciales numeradas</span></div>
+      <div class="info-item"><span class="info-label">Salida</span><span class="info-value">Reporte ejecutivo + tareas accionables</span></div>
+    </div>
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="agente3EjecutarPlan()">▶ Ejecutar plan comercial</button>
+      <button class="btn btn-secondary" onclick="agente3ExportarReporte()">⬇ Descargar reporte</button>
+      <a class="btn btn-secondary" href="nexo-agent3-marketing.html" target="_blank" style="text-decoration:none;display:inline-block;">Abrir Agente 3 completo</a>
+    </div>
+    <div id="agente3Resultado" class="mini-card" style="margin-top:18px;display:none;"></div>
+  </div>
 
-                <div class="section-box">
-                    <div class="section-box-title">🧭 TAREAS AUTOMÁTICAS DEL AGENTE</div>
-                    <table class="table">
-                        <thead>
-                            <tr><th>Tarea</th><th>Descripción</th><th>Canal</th><th>Estado</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Búsqueda de clientes</td><td>Identifica perfiles B2C y necesidades de compra internacional</td><td>Redes / Web</td><td>Activo</td></tr>
-                            <tr><td>Búsqueda de referidos</td><td>Rastrea referidos y conexiones de clientes existentes</td><td>CRM / Contactos</td><td>Activo</td></tr>
-                            <tr><td>Uso de redes</td><td>Publica y mide alcance en campañas orgánicas y pagadas</td><td>Instagram / Facebook</td><td>Activo</td></tr>
-                            <tr><td>Seguimiento automático</td><td>Da continuidad a leads y oportunidades detectadas</td><td>Email / WhatsApp</td><td>Activo</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  <div class="section-box agente3-box">
+    <div class="section-box-title">📋 Políticas y acciones numeradas del Agente 3</div>
+    <div class="agente3-steps">
+      <div class="agente3-step"><b>1. Dimensionamiento de mercado y análisis TAM</b><p>Calcula mercado global y local, enfoque top-down y bottom-up, TAM/SAM/SOM, supuestos, CAGR, fuentes y escenario a 5 años.</p></div>
+      <div class="agente3-step"><b>2. Análisis profundo del panorama competitivo</b><p>Identifica competidores directos e indirectos, precios, segmentos, fortalezas, debilidades, posicionamiento y brechas aprovechables.</p></div>
+      <div class="agente3-step"><b>3. Perfil de cliente y segmentación</b><p>Construye perfiles por demografía, psicografía, necesidades, objetivos, comportamiento de compra, ubicación, eventos detonantes y tamaño de segmento.</p></div>
+      <div class="agente3-step"><b>4. Análisis de tendencias de la industria</b><p>Detecta fuerzas económicas, regulatorias, tecnológicas, sociales y ambientales, microtendencias, disrupciones, señales de inversión y oportunidades.</p></div>
+      <div class="agente3-step"><b>5. SWOT + Cinco Fuerzas de Porter</b><p>Evalúa fortalezas, debilidades, oportunidades, amenazas y las cinco fuerzas: proveedores, clientes, rivalidad, sustitutos y nuevos entrantes.</p></div>
+      <div class="agente3-step"><b>6. Estrategia de salida al mercado</b><p>Define fases de prelanzamiento, lanzamiento y postlanzamiento, canales, mensajes, contenido, alianzas, presupuesto, KPI y riesgos.</p></div>
+      <div class="agente3-step"><b>7. Mapa del recorrido del cliente</b><p>Diseña awareness, consideration, decision, onboarding, engagement, retention, loyalty y referral, con puntos de dolor y oportunidades.</p></div>
+      <div class="agente3-step"><b>8. Modelado financiero y economía unitaria</b><p>Calcula CAC, LTV, ratio LTV:CAC, payback, margen bruto, margen de contribución, proyección financiera y análisis de escenarios.</p></div>
+      <div class="agente3-step"><b>9. Evaluación de riesgos y planificación de escenarios</b><p>Analiza riesgos de mercado, competencia, tecnología, finanzas, legal/regulatorio y reputación, con probabilidad, impacto y mitigación.</p></div>
+      <div class="agente3-step"><b>10. Estrategia de entrada y expansión de mercado</b><p>Evalúa tamaño, crecimiento, competencia, regulación e infraestructura, y compara entrada directa, alianza, adquisición, licencia o franquicia.</p></div>
+      <div class="agente3-step"><b>11. Plan operativo de captación</b><p>Convierte el análisis en campañas para Facebook, Instagram, WhatsApp, email, referidos, alianzas y prospección diaria.</p></div>
+      <div class="agente3-step"><b>12. Reporte ejecutivo final</b><p>Entrega resumen para dirección con prioridades, oportunidades, cronograma, responsables, presupuesto, KPI y próximos pasos.</p></div>
+    </div>
+  </div>
+
+  <div class="section-box agente3-box">
+    <div class="section-box-title">🧭 Ejecución comercial diaria</div>
+    <table class="table">
+      <thead><tr><th>Área</th><th>Acción</th><th>Canal</th><th>Indicador</th></tr></thead>
+      <tbody>
+        <tr><td>Prospección</td><td>Buscar clientes con intención de compra internacional</td><td>Web / redes / referidos</td><td>Leads detectados</td></tr>
+        <tr><td>Segmentación</td><td>Clasificar clientes por país, rubro, presupuesto y urgencia</td><td>CRM</td><td>Leads validados</td></tr>
+        <tr><td>Campañas</td><td>Crear mensajes comerciales y ofertas por segmento</td><td>WhatsApp / email / redes</td><td>Conversión</td></tr>
+        <tr><td>Seguimiento</td><td>Registrar contacto, respuesta, objeción y próximo paso</td><td>Panel administrativo</td><td>Ventas cerradas</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
             <!-- TICKETS SOPORTE -->
             <div class="section" id="tickets">
@@ -1057,7 +1044,7 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
 
                     <div class="form-group">
                         <label class="form-label">Tipo de Régimen</label>
-                        <input type="text" class="form-input" id="editCompanyRegimen" value="Intermediación Digital Internacional">
+                        <input type="text" class="form-input" id="editCompanyRegimen" value="Plataforma de Intermediación Comercial Internacional">
                     </div>
 
                     <div class="form-group">
@@ -1133,7 +1120,7 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
             <!-- AJUSTES -->
             <div class="section" id="settings">
                 <h1 class="page-title">⚙️ AJUSTES DEL SISTEMA</h1>
-                <p class="page-subtitle">Configuración general de NEXO Admin</p>
+                <p class="page-subtitle">Configuración general de nexo Admin</p>
 
                 <div class="section-box">
                     <div class="section-box-title">🔐 SEGURIDAD</div>
@@ -1424,35 +1411,7 @@ function getClientProfile() {
         function openPrintableReport(title, subtitle, tableHeaders, tableRows, summaryRows = []) {
             const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${c}</td>`).join('')}</tr>`).join('');
             const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(s => `<div style="margin:4px 0;"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>` : '';
-            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title>
-<script id="nexo-supabase-core">
-window.NEXO_SUPABASE_URL = window.NEXO_SUPABASE_URL || "https://ujqbbnipftlzytdankwp.supabase.co";
-window.NEXO_SUPABASE_KEY = window.NEXO_SUPABASE_KEY || "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-window.nexoDbRest = window.nexoDbRest || async function(table, row) {
-  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: {
-      'apikey': window.NEXO_SUPABASE_KEY,
-      'Authorization': 'Bearer ' + window.NEXO_SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify(row)
-  });
-  const txt = await res.text();
-  if(!res.ok) throw new Error(txt || ('Supabase REST error ' + res.status));
-  try { return JSON.parse(txt)[0] || null; } catch(e) { return null; }
-};
-window.nexoDbGet = window.nexoDbGet || async function(table, query) {
-  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table + (query || ''), {
-    headers: { 'apikey': window.NEXO_SUPABASE_KEY, 'Authorization': 'Bearer ' + window.NEXO_SUPABASE_KEY }
-  });
-  const txt = await res.text();
-  if(!res.ok) throw new Error(txt || ('Supabase REST error ' + res.status));
-  return JSON.parse(txt || '[]');
-};
-</script>
-</head>
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${title}</title></head>
             <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
                 <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${title}</h1>
                 <div style="margin-bottom:18px;color:#5A7C7E;">${subtitle}</div>
@@ -1462,7 +1421,25 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
                 </table>
                 ${summaryHtml}
             
-<script src="nexo-legal-i18n.js"></script>
+
+
+<script>
+(function(){
+  function cleanRawAdminText(){
+    try{
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      const bad=[]; let n;
+      while(n=walker.nextNode()){
+        const t=(n.nodeValue||'').trim();
+        if(t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
+      }
+      bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', cleanRawAdminText);
+  setTimeout(cleanRawAdminText,500); setTimeout(cleanRawAdminText,1500);
+})();
+</script>
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -1470,6 +1447,36 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
             w.document.close();
             w.focus();
             w.print();
+        }
+
+
+
+        // AGENTE 3 COMERCIAL - POLÍTICAS NUMERADAS INTEGRADAS SIN ROMPER EL PANEL
+        function agente3PlanComercial(){
+            return [
+                '1. Dimensionamiento de mercado y análisis TAM: medir mercado total, mercado disponible y mercado objetivo.',
+                '2. Análisis competitivo: comparar competidores directos e indirectos, precios, brechas y posicionamiento.',
+                '3. Perfil de cliente y segmentación: crear perfiles B2C/B2B por necesidad, presupuesto, ubicación y urgencia.',
+                '4. Tendencias de industria: detectar fuerzas económicas, sociales, tecnológicas, regulatorias y oportunidades.',
+                '5. SWOT + Porter: evaluar fortalezas, debilidades, oportunidades, amenazas y fuerzas competitivas.',
+                '6. Estrategia de salida al mercado: definir fases, canales, mensajes, presupuesto, KPI y cronograma.',
+                '7. Customer journey: mapear descubrimiento, comparación, decisión, compra, retención y referidos.',
+                '8. Economía unitaria: calcular CAC, LTV, margen, payback y escenarios financieros.',
+                '9. Riesgos y escenarios: clasificar riesgos de mercado, competencia, tecnología, finanzas, legal y reputación.',
+                '10. Entrada y expansión: evaluar países, segmentos, alianzas, entrada directa, licencia o franquicia.',
+                '11. Captación operativa: ejecutar campañas, prospección, referidos, WhatsApp, email y redes.',
+                '12. Reporte ejecutivo: priorizar acciones, presupuesto, responsables, KPI y próximos pasos.'
+            ];
+        }
+
+        function agente3ExportarReporte(){
+            const contenido = 'AGENTE 3 COMERCIAL - PLAN PARA CAPTAR CLIENTES\n\n' + agente3PlanComercial().join('\n') + '\n\nSalida esperada: estrategia comercial, campañas, leads, KPI y reporte ejecutivo.';
+            const blob = new Blob([contenido], {type:'text/plain;charset=utf-8'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'agente3_plan_comercial_nexo.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
 
         function getCompanyInfoForReports() {
@@ -1730,6 +1737,14 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
             }
             return nexoSupabaseClient;
         }
+        async function nexoRestSelect(table, query='select=*'){
+            const r = await fetch(`${NEXO_SUPABASE_URL}/rest/v1/${table}?${query}`, {
+                headers:{apikey:NEXO_SUPABASE_KEY, Authorization:'Bearer '+NEXO_SUPABASE_KEY}
+            });
+            const txt = await r.text();
+            if(!r.ok) throw new Error(txt || 'Error Supabase REST');
+            return txt ? JSON.parse(txt) : [];
+        }
 
         function ticketSafe(v){
             return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
@@ -1755,15 +1770,12 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
 
             try {
                 const client = getNexoSupabaseClient();
-                if (client) {
-                    const { data, error } = await client
-                        .from('tickets')
-                        .select('*')
-                        .order('fecha_creacion', { ascending: false });
+                if(client){
+                    const { data, error } = await client.from('tickets').select('*').order('fecha_creacion', { ascending: false });
                     if (error) throw error;
                     nexoTicketsCache = data || [];
                 } else {
-                    nexoTicketsCache = await window.nexoDbGet('tickets','?select=*&order=fecha_creacion.desc');
+                    nexoTicketsCache = await nexoRestSelect('tickets','select=*&order=fecha_creacion.desc');
                 }
                 renderTicketsTable();
             } catch (err) {
@@ -1914,8 +1926,9 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
 const NEXO_DB_URL_REAL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const NEXO_DB_KEY_REAL = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
 let nexoAdminDbClient = null, nexoOrdersCache = [], nexoCustomersCache = [];
-function getNexoAdminDb(){ if(window.supabase && window.supabase.createClient){ if(!nexoAdminDbClient) nexoAdminDbClient = window.supabase.createClient(NEXO_DB_URL_REAL, NEXO_DB_KEY_REAL, {auth:{persistSession:false, autoRefreshToken:false}}); return nexoAdminDbClient; } return null; }
-async function fetchNexoAdminData(){ const db=getNexoAdminDb(); if(db){ const [o,c]=await Promise.all([db.from('pedidos').select('*').order('creado_en',{ascending:false}).limit(100), db.from('clientes').select('*').order('fecha_registro',{ascending:false}).limit(100)]); if(!o.error) nexoOrdersCache=o.data||[]; if(!c.error) nexoCustomersCache=c.data||[]; return; } nexoOrdersCache = await window.nexoDbGet('pedidos','?select=*&order=creado_en.desc&limit=100'); nexoCustomersCache = await window.nexoDbGet('clientes','?select=*&order=fecha_registro.desc&limit=100'); }
+function getNexoAdminDb(){ if(!window.supabase || !window.supabase.createClient) return null; if(!nexoAdminDbClient) nexoAdminDbClient = window.supabase.createClient(NEXO_DB_URL_REAL, NEXO_DB_KEY_REAL, {auth:{persistSession:false, autoRefreshToken:false}}); return nexoAdminDbClient; }
+async function nexoAdminRest(table, query){ const r=await fetch(`${NEXO_DB_URL_REAL}/rest/v1/${table}?${query}`,{headers:{apikey:NEXO_DB_KEY_REAL,Authorization:'Bearer '+NEXO_DB_KEY_REAL}}); const txt=await r.text(); if(!r.ok) throw new Error(txt||'Supabase REST error'); return txt?JSON.parse(txt):[]; }
+async function fetchNexoAdminData(){ const db=getNexoAdminDb(); if(db){ const [o,c]=await Promise.all([db.from('pedidos').select('*').order('creado_en',{ascending:false}).limit(100), db.from('clientes').select('*').order('fecha_registro',{ascending:false}).limit(100)]); if(!o.error) nexoOrdersCache=o.data||[]; if(!c.error) nexoCustomersCache=c.data||[]; return; } const [o,c]=await Promise.all([nexoAdminRest('pedidos','select=*&order=creado_en.desc&limit=100'), nexoAdminRest('clientes','select=*&order=fecha_registro.desc&limit=100')]); nexoOrdersCache=o||[]; nexoCustomersCache=c||[]; }
 function moneyAdmin(v){ return 'US$ '+Number(v||0).toFixed(2); }
 async function loadDashboard(){ try{await fetchNexoAdminData();}catch(e){console.warn(e);} const revenue=nexoOrdersCache.reduce((a,o)=>a+Number(o.total_cliente_usd||o.precio_usd||0),0); const pending=nexoOrdersCache.filter(o=>String(o.estado||'').toLowerCase().includes('pend')||String(o.estado_pago||'').toLowerCase().includes('pend')).length; const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;}; set('totalOrders',nexoOrdersCache.length); set('activeClients',nexoCustomersCache.length); set('totalRevenue',moneyAdmin(revenue)); set('pendingOrders',pending); }
 async function loadOrders(){ const table=document.getElementById('ordersTable'); if(!table)return; table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Cargando pedidos reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){table.innerHTML='<tr><td colspan="6">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoOrdersCache.length){table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Sin pedidos reales registrados todavía.</td></tr>'; return;} table.innerHTML=nexoOrdersCache.map(o=>`<tr><td>${String(o.id||'').slice(0,8)}</td><td>${o.cliente_nombre||''} ${o.cliente_apellido||''}</td><td>${o.cliente_email||''}</td><td>${moneyAdmin(o.total_cliente_usd||o.precio_usd)}</td><td>${o.estado_pago||o.estado||'pendiente'}</td><td>${o.creado_en?new Date(o.creado_en).toLocaleDateString('es-BO'):'-'}</td></tr>`).join(''); }
@@ -1925,7 +1938,7 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
 </script>
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
-  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
   © 2026 nexo™ – Todos los derechos reservados<br>
@@ -1938,5 +1951,23 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
   </div>
 </footer>
 <script src="nexo-legal-i18n.js"></script>
+
+<script>
+(function(){
+  function cleanRawAdminText(){
+    try{
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      const bad=[]; let n;
+      while(n=walker.nextNode()){
+        const t=(n.nodeValue||'').trim();
+        if(t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
+      }
+      bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', cleanRawAdminText);
+  setTimeout(cleanRawAdminText,500); setTimeout(cleanRawAdminText,1500);
+})();
+</script>
 </body>
 </html>

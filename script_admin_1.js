@@ -520,15 +520,21 @@ function getClientProfile() {
         let nexoSupabaseClient = null;
 
         function getNexoSupabaseClient(){
-            if (!window.supabase || !window.supabase.createClient) {
-                throw new Error("No cargó la librería Supabase JS. Revise conexión a internet o CDN.");
-            }
+            if (!window.supabase || !window.supabase.createClient) return null;
             if (!nexoSupabaseClient) {
                 nexoSupabaseClient = window.supabase.createClient(NEXO_SUPABASE_URL, NEXO_SUPABASE_KEY, {
                     auth: { persistSession: false, autoRefreshToken: false }
                 });
             }
             return nexoSupabaseClient;
+        }
+        async function nexoRestSelect(table, query='select=*'){
+            const r = await fetch(`${NEXO_SUPABASE_URL}/rest/v1/${table}?${query}`, {
+                headers:{apikey:NEXO_SUPABASE_KEY, Authorization:'Bearer '+NEXO_SUPABASE_KEY}
+            });
+            const txt = await r.text();
+            if(!r.ok) throw new Error(txt || 'Error Supabase REST');
+            return txt ? JSON.parse(txt) : [];
         }
 
         function ticketSafe(v){
@@ -555,14 +561,13 @@ function getClientProfile() {
 
             try {
                 const client = getNexoSupabaseClient();
-                const { data, error } = await client
-                    .from('tickets')
-                    .select('*')
-                    .order('fecha_creacion', { ascending: false });
-
-                if (error) throw error;
-
-                nexoTicketsCache = data || [];
+                if(client){
+                    const { data, error } = await client.from('tickets').select('*').order('fecha_creacion', { ascending: false });
+                    if (error) throw error;
+                    nexoTicketsCache = data || [];
+                } else {
+                    nexoTicketsCache = await nexoRestSelect('tickets','select=*&order=fecha_creacion.desc');
+                }
                 renderTicketsTable();
             } catch (err) {
                 table.innerHTML =

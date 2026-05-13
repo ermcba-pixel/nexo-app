@@ -515,27 +515,6 @@
         .cart-item-icon img{width:100%;height:100%;object-fit:cover;display:block;border-radius:12px;}
         .payment-btn.active{background:#7ac742!important;color:#0c2b2d!important;border-color:#7ac742!important;}
 </style>
-
-<script id="nexo-supabase-core">
-window.NEXO_SUPABASE_URL = window.NEXO_SUPABASE_URL || "https://ujqbbnipftlzytdankwp.supabase.co";
-window.NEXO_SUPABASE_KEY = window.NEXO_SUPABASE_KEY || "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-window.nexoDbRest = window.nexoDbRest || async function(table, row) {
-  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: {'apikey': window.NEXO_SUPABASE_KEY,'Authorization':'Bearer '+window.NEXO_SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
-    body: JSON.stringify(row)
-  });
-  const txt = await res.text();
-  if(!res.ok) throw new Error(txt || ('Supabase REST error '+res.status));
-  try { return JSON.parse(txt)[0] || null; } catch(e) { return null; }
-};
-window.nexoDbGet = window.nexoDbGet || async function(table, query) {
-  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table + (query || ''), {headers: {'apikey': window.NEXO_SUPABASE_KEY,'Authorization':'Bearer '+window.NEXO_SUPABASE_KEY}});
-  const txt = await res.text();
-  if(!res.ok) throw new Error(txt || ('Supabase REST error '+res.status));
-  return JSON.parse(txt || '[]');
-};
-</script>
 </head>
 <body>
 
@@ -723,7 +702,7 @@ window.nexoDbGet = window.nexoDbGet || async function(table, query) {
     </div>
 
     
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
@@ -737,8 +716,20 @@ function initNexoSupabase(){
   return nexoSupabase;
 }
 window.nexoSavePedidoToSupabase = async function(orderData){
+  try {
+    const apiResp = await fetch('/api/nexo-save-order', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(orderData)
+    });
+    const apiData = await apiResp.json().catch(()=>({}));
+    if(apiResp.ok && apiData.ok && apiData.pedido_id){
+      return { data: { id: apiData.pedido_id, api_saved:true }, error:null };
+    }
+    console.warn('API Supabase guardado no confirmado, intenta cliente directo', apiData);
+  } catch(e) { console.warn('API Supabase no disponible, intenta cliente directo', e); }
   const client = initNexoSupabase();
-  const useRestOnly = !client;
+  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
   const items = Array.isArray(orderData.items) ? orderData.items : [];
   const firstItem = items[0] || {};
   const customer = orderData.customer || {};
@@ -746,46 +737,19 @@ window.nexoSavePedidoToSupabase = async function(orderData){
   const clienteNombre = parts.shift() || '';
   const clienteApellido = parts.join(' ');
   const metodo = orderData.paymentMethod || 'card';
-  let clienteId = customer.supabase_id || null;
-  try {
-    if(!client) throw new Error('Usando REST directo para pedido; cliente se guardará desde perfil si RLS lo permite.');
-    const cRow = {
-      nombre: clienteNombre,
-      apellido: clienteApellido,
-      documento: customer.documentId || '',
-      email: orderData.email || customer.email || '',
-      telefono: customer.phone || orderData.phone || '',
-      pais: customer.country || orderData.country || '',
-      ciudad: customer.city || orderData.city || '',
-      region: customer.region || orderData.region || '',
-      codigo_postal: customer.zipCode || orderData.zipCode || '',
-      direccion: customer.address || orderData.address || '',
-      codigo_area: customer.areaCode || ''
-    };
-    const existing = await client.from('clientes').select('id').eq('email', cRow.email).maybeSingle();
-    if(existing && existing.data && existing.data.id){ clienteId = existing.data.id; await client.from('clientes').update(cRow).eq('id', clienteId); }
-    else { const inserted = await client.from('clientes').insert([cRow]).select('id').single(); if(inserted && inserted.data) clienteId = inserted.data.id; }
-  } catch(e) { console.warn('No se pudo actualizar cliente en Supabase:', e); }
   const row = {
-    cliente_id: clienteId,
     cliente_email: orderData.email || customer.email || '',
     cliente_nombre: clienteNombre, cliente_apellido: clienteApellido, cliente_documento: customer.documentId || '',
     cliente_telefono: customer.phone || orderData.phone || '', cliente_pais: customer.country || orderData.country || '', cliente_ciudad: customer.city || orderData.city || '', cliente_direccion: customer.address || orderData.address || '',
     producto: items.map(i => `${i.name || i.nombre || i.producto || 'Producto nexo™'} x${i.quantity || i.cantidad || 1}`).join(' | '),
-    producto_url: firstItem.url || firstItem.link || '', amazon_tag: 'nexo08-20', amazon_asin: firstItem.asin || '', producto_nombre: firstItem.name || firstItem.nombre || firstItem.producto || 'Pedido nexo™', proveedor: firstItem.provider || firstItem.vendor || firstItem.proveedor || 'Marketplace externo',
+    producto_url: firstItem.url || firstItem.link || '', producto_nombre: firstItem.name || firstItem.nombre || firstItem.producto || 'Pedido nexo™', proveedor: firstItem.provider || firstItem.vendor || firstItem.proveedor || 'Marketplace externo',
     cantidad: items.reduce((n,i)=>n+Number(i.quantity || i.cantidad || 1),0) || 1, precio_usd: Number(orderData.total || 0), costo_producto_usd: Number(orderData.subtotal || 0), costo_envio_usd: Number(orderData.amazonShipping || 0),
     comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
     moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
     fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
     observaciones: `Cobro principal PayPal (${NEXO_PAYPAL_EMAIL}). El total cobrado incluye precio proveedor + comisión nexo™ sobre precio proveedor + costos externos aplicables. ${orderData.note || ''}`.trim()
   };
-  if (client) return await client.from('pedidos').insert([row]).select().single();
-  try {
-    const saved = await window.nexoDbRest('pedidos', row);
-    return { data: saved || { id: orderData.id || ('REST-' + Date.now()) }, error: null };
-  } catch(e) {
-    return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
-  }
+  return await client.from('pedidos').insert([row]).select().single();
 };
 window.nexoPrefillCheckoutFromSupabase = async function(){
   try{ const client=initNexoSupabase(); const email=(sessionStorage.getItem('clientEmail')||document.getElementById('email')?.value||'').trim(); if(!email)return; const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle(); if(error||!data)return; const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!==undefined&&v!==null)el.value=v;}; const full=`${data.nombre||''} ${data.apellido||''}`.trim(); set('fullName',full); set('email',data.email||email); set('phoneCode',data.codigo_area||''); set('phoneNumber',data.telefono||''); set('region',data.region||''); set('city',data.ciudad||''); set('address',data.direccion||''); set('zipCode',data.codigo_postal||''); sessionStorage.setItem('nexoActiveClient', JSON.stringify({fullName:full,name:data.nombre||'',lastName:data.apellido||'',documentId:data.documento||'',email:data.email||email,country:data.pais||'',areaCode:data.codigo_area||'',phone:data.telefono||'',postalCode:data.codigo_postal||'',region:data.region||'',city:data.ciudad||'',address:data.direccion||''})); }catch(e){console.warn(e);}
@@ -1032,20 +996,22 @@ function applyCheckoutLanguage(){
         ];
 
         // MÉTODOS DE PAGO
+        // Todos los métodos visibles. El Agente 1 centraliza la operación en PayPal Business nexo™.
         const paymentMethods = [
+            { id: 'paypal', name: 'PayPal', icon: '🅿️' },
             { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' },
-            { id: 'bank', name: 'Transferencia ACH / Wire', icon: '🏦' },
-            { id: 'paypal', name: 'PayPal', icon: '🅿️' }
+            { id: 'bank', name: 'ACH / Wire / Transferencia bancaria', icon: '🏦' },
+            { id: 'payoneer', name: 'Payoneer', icon: '📱' }
         ];
 
-        let selectedPayment = 'card';
+        let selectedPayment = 'paypal';
         let orderData = null;
 
         // INICIALIZAR
         function init() {
             renderCountrySelect();
             renderPaymentMethods();
-            selectPayment('card');
+            selectPayment('paypal');
             loadCart();
             calculateTotals();
         }
@@ -1150,6 +1116,12 @@ function selectPayment(methodId, btnEl=null) {
                     </select>
                 </div>
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con transferencia</button>
+            </div>
+        `;
+    } else if (methodId === 'payoneer') {
+        details.innerHTML = `
+            <div class="payment-fields-panel">
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con Payoneer</button>
             </div>
         `;
     } else {
@@ -1292,7 +1264,7 @@ function openConfirmationModal() {
             const iue = commission * iueRate;
             const total = subtotal + amazonShipping + vendorFees + commission;
             const deliveryInfo = getDeliveryInfo(shippingPriority);
-            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal, amazonShipping, vendorFees, commission, itf, iue, total };
+            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal:Number(subtotal.toFixed(2)), amazonShipping:Number(amazonShipping.toFixed(2)), vendorFees:Number(vendorFees.toFixed(2)), commission:Number(commission.toFixed(2)), itf:Number(itf.toFixed(2)), iue:Number(iue.toFixed(2)), total:Number(total.toFixed(2)) };
             
 const t = ctt();
             const paymentMap = {
@@ -1300,13 +1272,12 @@ const t = ctt();
               card:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
               bank:{es:'Transferencia ACH / Wire',en:'ACH / Wire Transfer',pt:'Transferência ACH / Wire',it:'Bonifico ACH / Wire',fr:'Virement ACH / Wire'},
-              transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}
+              transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'},
+              payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'}
             };
             const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
-            const extraRows = [];
-            if (amazonShipping > 0) extraRows.push(`<strong style="color:#f39c12;">${t.confirmShip}:</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span>`);
-            if (vendorFees > 0) extraRows.push(`<strong style="color:#f39c12;">${t.confirmVendor}:</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span>`);
-            document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br>${extraRows.length ? extraRows.join('<br>') + '<br>' : ''}<strong>Entrega estimada:</strong> ${deliveryInfo.label} · ${deliveryInfo.text.replace(/^.*?: /,'')}<br><strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
+            const extraRows = `${amazonShipping>0 ? `<strong style="color:#f39c12;">${t.confirmShip}:</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span><br>` : ''}${vendorFees>0 ? `<strong style="color:#f39c12;">${t.confirmVendor}:</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span><br>` : ''}<strong style="color:#f39c12;">${t.deliveryOrange}:</strong> <span style="color:#f39c12;">${deliveryInfo.label} · ${deliveryInfo.text.replace(/^.*?: /,'')}</span><br>`;
+            document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br>${extraRows}<strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
 
             const legalAccept = document.getElementById('nexoLegalAccept');
             const legalWarning = document.getElementById('nexoLegalWarning');
@@ -1317,14 +1288,42 @@ const t = ctt();
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
         async function startNexoPagoSeguro(orderData){
-            // PAYPAL EN MODO REAL (LIVE) - SOLO PAYPAL DEBE REDIRIGIR A PAYPAL.
-            // Se desactiva temporalmente la función Supabase crear-pago-paypal porque puede devolver URLs sandbox.
-            // El cobro se envía directamente a la cuenta PayPal empresarial de nexo™: ermcba@hotmail.com.
+            // PAYPAL REAL: el cliente paga a PayPal Business de nexo.
+            // El Agente 1 espera confirmación/captura PayPal y luego deja preparada la compra Amazon.
             const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
-            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado&metodo=paypal`;
+            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&metodo=paypal&paypal=return`;
             const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=paypal`;
-            const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo™ - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(successUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
+
+            try {
+                const r = await fetch('/api/paypal-create-order', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        amount,
+                        pedidoId,
+                        orderData,
+                        returnUrl: successUrl,
+                        cancelUrl
+                    })
+                });
+                const data = await r.json().catch(()=>({}));
+                if(r.ok && data.ok && data.approvalUrl){
+                    orderData.paypalOrderId = data.orderId;
+                    orderData.paypalEnvironment = data.env;
+                    orderData.estado_pago = 'paypal_redireccionado_cliente';
+                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                    window.location.href = data.approvalUrl;
+                    return;
+                }
+                console.warn('PayPal Orders API no disponible, se usará fallback PayPal Standard.', data);
+            } catch(e) {
+                console.warn('No se pudo crear orden PayPal API, se usará fallback PayPal Standard.', e);
+            }
+
+            // Fallback operativo: PayPal Standard directo a la cuenta empresarial de nexo.
+            const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
+            const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(fallbackSuccessUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             window.location.href = paypalLiveUrl;
         }
 
@@ -1376,7 +1375,7 @@ const t = ctt();
             }
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
-            orderData.commissionRate = 0.30; // Comisión nexo™ = 30% SOLO sobre costo_producto_usd, no sobre envío/gastos externos.
+            orderData.commissionRate = 0.30;
             orderData.taxRates = { it: 0.03, iue: 0.25 };
             orderData.netCommissionAfterTaxes = +(orderData.commission - orderData.itf - orderData.iue).toFixed(2);
             orderData.customer = {
@@ -1418,14 +1417,6 @@ const t = ctt();
                 orderData.supabase_id = data?.id || orderData.id;
                 orderData.estado = 'pedido_registrado';
                 orderData.supabase_status = data?.local_only ? 'respaldo_local' : 'guardado';
-                try {
-                    const client = initNexoSupabase();
-                    if(client && data && data.id && !data.local_only){
-                        await client.from('pagos').insert([{ pedido_id:data.id, metodo: orderData.paymentMethod, estado:'pendiente_confirmacion', monto_usd: orderData.total, moneda:'USD' }]);
-                        await client.from('facturas').insert([{ pedido_id:data.id, numero_factura: orderData.id, numero_fiscal: orderData.customer.documentId || '', cliente_nombre: orderData.fullName, cliente_documento: orderData.customer.documentId || '', total_usd: orderData.total, metodo_pago: orderData.paymentMethod }]);
-                        await client.from('logs_agente1').insert([{ pedido_id:data.id, accion:'pedido_registrado', estado:'pendiente_agente1', detalle:'Pedido registrado desde checkout nexo™. Comisión calculada solo sobre precio producto.' }]);
-                    }
-                } catch(e) { console.warn('No se pudieron crear tablas complementarias:', e); }
             } catch (err) {
                 console.warn('Supabase no disponible. Pedido continúa con respaldo local.', err);
                 orderData.supabase_id = orderData.id;
@@ -1489,29 +1480,44 @@ const t = ctt();
                 console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
             }
 
-            if (orderData.paymentMethod === 'paypal') {
-                try {
-                    if(btnText) btnText.textContent = 'Abriendo PayPal...';
-                    await startNexoPagoSeguro(orderData);
-                    return;
-                } catch(payErr) {
-                    console.warn('PayPal no abrió por error inesperado.', payErr);
-                    alert('No se pudo abrir PayPal automáticamente. Revise que el navegador permita redirecciones y vuelva a confirmar.');
-                    if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
-                    return;
-                }
-            }
-
-            // Tarjeta y ACH/Wire NO redirigen a PayPal.
-            // Quedan registrados como pedido finalizado pendiente de confirmación/procesamiento interno.
-            orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_pendiente_procesamiento' : 'transferencia_pendiente_verificacion';
-            orderData.estado_compra = 'pedido_finalizado_pendiente_agente_1';
-            orderData.confirmationNote = orderData.paymentMethod === 'card'
-                ? 'Pago con tarjeta registrado. Procesamiento interno pendiente.'
-                : 'Transferencia ACH/Wire registrada. Verificación interna pendiente.';
+            // CIERRE INTERNO NEXO: al confirmar compra se emite recibo interno.
+            // El cliente no es redirigido automáticamente a PayPal; el Agente 1 gestiona el cobro
+            // en PayPal Business y luego compra al proveedor/Amazon con la dirección del cliente.
+            orderData.estado_pago = orderData.paymentMethod === 'paypal'
+                ? 'pendiente_agente_1_paypal'
+                : (orderData.paymentMethod === 'card'
+                    ? 'tarjeta_pendiente_agente_1_paypal'
+                    : (orderData.paymentMethod === 'bank'
+                        ? 'transferencia_pendiente_agente_1_paypal'
+                        : 'payoneer_pendiente_agente_1_paypal'));
+            orderData.estado_compra = 'pedido_cerrado_agente_1_automatico';
+            orderData.agent1_mode = 'automatico_sin_aprobacion_manual';
+            orderData.paypal_destination = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
+            orderData.confirmationNote = 'Pedido cerrado en nexo™. El Agente 1 gestionará el cobro en PayPal Business, comprará al proveedor/Amazon con la dirección del cliente y registrará el tracking. La comisión queda en PayPal.';
+            try {
+                const agentQueue = JSON.parse(localStorage.getItem('nexoAgent1AutoQueue') || '[]');
+                agentQueue.push({
+                    pedido_id: orderData.supabase_id || orderData.id,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente_cobro_paypal_y_compra_amazon',
+                    automatico: true,
+                    sin_aprobacion_manual: true,
+                    cobrar_en: 'PayPal Business nexo™',
+                    paypal_email: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
+                    comprar_en: 'Amazon/proveedor original',
+                    destino_cliente: orderData.customer,
+                    total_cliente_usd: orderData.total,
+                    subtotal_producto_usd: orderData.subtotal,
+                    gastos_amazon_marketplace_usd: orderData.amazonShipping,
+                    gastos_proveedor_usd: orderData.vendorFees,
+                    comision_nexo_usd: orderData.commission,
+                    items: orderData.items || []
+                });
+                localStorage.setItem('nexoAgent1AutoQueue', JSON.stringify(agentQueue));
+            } catch(e) {}
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             localStorage.removeItem('nexoCart');
-            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago);
+            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
@@ -1679,7 +1685,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
-  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
   © 2026 nexo™ – Todos los derechos reservados<br>
