@@ -274,6 +274,34 @@
             .form-row { grid-template-columns: 1fr; }
         }
     </style>
+
+<script id="nexo-supabase-core">
+window.NEXO_SUPABASE_URL = window.NEXO_SUPABASE_URL || "https://ujqbbnipftlzytdankwp.supabase.co";
+window.NEXO_SUPABASE_KEY = window.NEXO_SUPABASE_KEY || "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
+window.nexoDbRest = window.nexoDbRest || async function(table, row) {
+  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: {
+      'apikey': window.NEXO_SUPABASE_KEY,
+      'Authorization': 'Bearer ' + window.NEXO_SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(row)
+  });
+  const txt = await res.text();
+  if(!res.ok) throw new Error(txt || ('Supabase REST error ' + res.status));
+  try { return JSON.parse(txt)[0] || null; } catch(e) { return null; }
+};
+window.nexoDbGet = window.nexoDbGet || async function(table, query) {
+  const res = await fetch(window.NEXO_SUPABASE_URL + '/rest/v1/' + table + (query || ''), {
+    headers: { 'apikey': window.NEXO_SUPABASE_KEY, 'Authorization': 'Bearer ' + window.NEXO_SUPABASE_KEY }
+  });
+  const txt = await res.text();
+  if(!res.ok) throw new Error(txt || ('Supabase REST error ' + res.status));
+  return JSON.parse(txt || '[]');
+};
+</script>
 </head>
 <body>
     <div class="login-container">
@@ -287,7 +315,7 @@
                 <h1>nexo™</h1>
                 <p>Tienda Digital - Acceso Cliente Directo</p>
 <div class="nexo-left-legal" data-nexo-legal-footer="1">
-  <strong>nexo™</strong> – Sistema de Intermediación Comercial Internacional<br>
+  <strong>nexo™</strong> – Plataforma de intermediación comercial internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
   © 2026 nexo™ – Todos los derechos reservados<br>
@@ -723,7 +751,7 @@
             };
         }
 
-        function registerClient(e) {
+        async function registerClient(e) {
             if (e) e.preventDefault();
             if (!validateRegisterForm()) {
                 showAlert('Completa todos los campos y usa una contraseña de mínimo 8 caracteres.', 'error');
@@ -734,6 +762,24 @@
             sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile));
             sessionStorage.setItem('clientEmail', profile.email);
             sessionStorage.setItem('clientName', profile.fullName);
+            try {
+                const row = {
+                    nombre: profile.name || '',
+                    apellido: profile.lastName || '',
+                    documento: profile.documentId || '',
+                    email: profile.email || '',
+                    pais: profile.country || '',
+                    codigo_area: profile.areaCode || '',
+                    telefono: profile.phone || '',
+                    codigo_postal: profile.postalCode || '',
+                    region: profile.region || '',
+                    ciudad: profile.city || '',
+                    direccion: profile.address || '',
+                    password: profile.password || ''
+                };
+                const saved = await window.nexoDbRest('clientes', row);
+                if(saved && saved.id){ profile.supabase_id = saved.id; localStorage.setItem('nexoClientProfile', JSON.stringify(profile)); sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile)); }
+            } catch(err) { console.warn('Cliente no se guardó en Supabase todavía:', err); }
             showAlert('✅ Cuenta creada correctamente. Abriendo tienda...', 'success');
             setTimeout(() => {
                 window.location.href = 'nexo-tienda-publica.html';
