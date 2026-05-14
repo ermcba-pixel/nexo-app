@@ -514,7 +514,7 @@ function getClientProfile() {
 
 
         // ===== TICKETS SOPORTE · SUPABASE JS UMD CORREGIDO =====
-        const NEXO_SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
+        const NEXO_SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
         const NEXO_SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
         let nexoTicketsCache = [];
         let nexoSupabaseClient = null;

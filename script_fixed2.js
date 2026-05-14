@@ -1,6 +1,6 @@
 
 // ===== NEXO ADMIN · DATOS REALES SUPABASE (clientes y pedidos) =====
-const NEXO_DB_URL_REAL = "https://ujqbbniptflzytdankwp.supabase.co";
+const NEXO_DB_URL_REAL = "https://ujqbbnipftlzytdankwp.supabase.co";
 const NEXO_DB_KEY_REAL = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
 let nexoAdminDbClient = null, nexoOrdersCache = [], nexoCustomersCache = [];
 function getNexoAdminDb(){ if(!window.supabase || !window.supabase.createClient) throw new Error('Supabase JS no cargó'); if(!nexoAdminDbClient) nexoAdminDbClient = window.supabase.createClient(NEXO_DB_URL_REAL, NEXO_DB_KEY_REAL, {auth:{persistSession:false, autoRefreshToken:false}}); return nexoAdminDbClient; }
