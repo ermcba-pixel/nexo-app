@@ -198,7 +198,7 @@
             }
         }
     
-@media print{body{background:#fff!important;padding:0!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important}.action-buttons,.email-note button,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}}
+@page{size:auto;margin:10mm;}@media print{html,body{background:#fff!important;padding:0!important;margin:0!important;display:block!important;min-height:auto!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important;padding:20px 24px!important}.action-buttons,.email-note,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}.confirmation-card p{margin-bottom:12px!important}}
 </style>
 </head>
 <body>
@@ -228,13 +228,18 @@
                 <span class="detail-value" id="clientEmail">-</span>
             </div>
 
+            <div class="detail-row" id="intlNitRow">
+                <span class="detail-label" id="intlNitLabel">NIT / Documento del cliente internacional:</span>
+                <span class="detail-value" id="intlNitValue">99001</span>
+            </div>
+
             <div class="detail-row">
-                <span class="detail-label" id="nitLabel">NIT / Documento fiscal:</span>
+                <span class="detail-label" id="nitLabel">NIT / Documento del cliente:</span>
                 <span class="detail-value" id="clientNit">-</span>
             </div>
 
             <div class="detail-row">
-                <span class="detail-label" id="itemsLabel">Artículos:</span>
+                <span class="detail-label" id="itemsLabel">Producto comprado:</span>
                 <span class="detail-value" id="itemCount">0</span>
             </div>
 
@@ -267,7 +272,7 @@
     <script>
         
 const confirmI18n={
- es:{confTitle:'¡Compra Confirmada!',confDesc:'Tu pedido ha sido procesado correctamente. Recibirás un email con los detalles de tu compra.',invoiceLabel:'Número de Factura',purchaseLabel:'Fecha de Compra:',clientLabel:'Cliente:',emailLabel:'Correo:',itemsLabel:'Artículos:',paymentLabel:'Método de Pago:',deliveryLabel:'Entrega:',totalLabel:'Total Pagado:',emailNote1:'📧 Revisa tu correo (incluyendo spam) para la factura y detalles de envío.',emailNote2:'📱 Puedes rastrear tu pedido usando el número de factura.',btnContinue:'🛒 Continuar Comprando',btnPortal:'🏠 Ir al Portal',itemsWord:'artículos',pay:{credit:'💳 Tarjeta de Crédito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Transferencia Bancaria'}},
+ es:{confTitle:'¡Compra Confirmada!',confDesc:'Tu pedido ha sido procesado correctamente. Recibirás un email con los detalles de tu compra.',invoiceLabel:'Número de Factura',purchaseLabel:'Fecha de Compra:',clientLabel:'Cliente:',emailLabel:'Correo:',itemsLabel:'Producto comprado:',paymentLabel:'Método de Pago:',deliveryLabel:'Entrega:',totalLabel:'Total Pagado:',emailNote1:'📧 Revisa tu correo (incluyendo spam) para la factura y detalles de envío.',emailNote2:'📱 Puedes rastrear tu pedido usando el número de factura.',btnContinue:'🛒 Continuar Comprando',btnPortal:'🏠 Ir al Portal',itemsWord:'artículos',pay:{credit:'💳 Tarjeta de Crédito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Transferencia Bancaria'}},
  en:{confTitle:'Purchase Confirmed!',confDesc:'Your order has been processed successfully. You will receive an email with your purchase details.',invoiceLabel:'Invoice Number',purchaseLabel:'Purchase Date:',clientLabel:'Client:',emailLabel:'Email:',itemsLabel:'Items:',paymentLabel:'Payment Method:',deliveryLabel:'Delivery:',totalLabel:'Total Paid:',emailNote1:'📧 Check your email (including spam) for the invoice and shipping details.',emailNote2:'📱 You can track your order using the invoice number.',btnContinue:'🛒 Continue Shopping',btnPortal:'🏠 Go to Portal',itemsWord:'items',pay:{credit:'💳 Credit Card',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Bank Transfer'}},
  pt:{confTitle:'Compra Confirmada!',confDesc:'Seu pedido foi processado com sucesso. Você receberá um e-mail com os detalhes da compra.',invoiceLabel:'Número da Fatura',purchaseLabel:'Data da Compra:',clientLabel:'Cliente:',emailLabel:'E-mail:',itemsLabel:'Itens:',paymentLabel:'Método de Pagamento:',deliveryLabel:'Entrega:',totalLabel:'Total Pago:',emailNote1:'📧 Verifique seu e-mail (inclusive spam) para a fatura e detalhes do envio.',emailNote2:'📱 Você pode rastrear seu pedido usando o número da fatura.',btnContinue:'🛒 Continuar Comprando',btnPortal:'🏠 Ir ao Portal',itemsWord:'itens',pay:{credit:'💳 Cartão de Crédito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Transferência Bancária'}},
  it:{confTitle:'Acquisto Confermato!',confDesc:'Il tuo ordine è stato elaborato correttamente. Riceverai un’email con i dettagli dell’acquisto.',invoiceLabel:'Numero Fattura',purchaseLabel:'Data di Acquisto:',clientLabel:'Cliente:',emailLabel:'Email:',itemsLabel:'Articoli:',paymentLabel:'Metodo di Pagamento:',deliveryLabel:'Consegna:',totalLabel:'Totale Pagato:',emailNote1:'📧 Controlla la tua email (anche spam) per fattura e dettagli di spedizione.',emailNote2:'📱 Puoi tracciare il tuo ordine usando il numero di fattura.',btnContinue:'🛒 Continua gli Acquisti',btnPortal:'🏠 Vai al Portale',itemsWord:'articoli',pay:{credit:'💳 Carta di Credito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Bonifico Bancario'}},
@@ -276,21 +281,29 @@ const confirmI18n={
 
 document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const invoiceId = params.get('invoice');
-            const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','itemsLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
-
+            const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
+            const invoiceId = params.get('invoice') || purchase.factura_numero || purchase.invoice || purchase.id || params.get('pedido_id');
             if (invoiceId) {
                 document.getElementById('invoiceId').textContent = invoiceId;
+                document.title = 'nexo™ - Factura ' + invoiceId;
             }
 
             document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
             document.getElementById('clientName').textContent = purchase.fullName || `${purchase.firstName || ''} ${purchase.lastName || ''}`.trim() || '-';
             document.getElementById('clientEmail').textContent = purchase.email || '-';
-            const countryTxt = String(purchase.country || purchase.cliente_pais || '').toLowerCase();
-            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || '';
-            const fiscalNit = countryTxt && !countryTxt.includes('bolivia') ? '99001' : (docRaw || '99001');
-            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = fiscalNit;
-            document.getElementById('itemCount').textContent = ((purchase.itemsCount || (purchase.items ? purchase.items.reduce((n,i)=>n+(i.quantity||1),0) : 0)) || 0) + ' ' + t.itemsWord;
+            const countryTxt = String(purchase.country || purchase.cliente_pais || (purchase.customer && purchase.customer.country) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').country || '')).toLowerCase();
+            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || (purchase.customer && (purchase.customer.documentId || purchase.customer.documento)) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '') || '';
+            const isBolivia = countryTxt.includes('bolivia');
+            const intlRow = document.getElementById('intlNitRow');
+            const intlValue = document.getElementById('intlNitValue');
+            if (intlRow) { intlRow.style.display = isBolivia ? 'none' : 'flex'; }
+            const intlLabel = document.getElementById('intlNitLabel');
+            if (intlLabel) intlLabel.textContent = 'NIT / Documento del cliente internacional:';
+            if (intlValue) intlValue.textContent = isBolivia ? '' : '99001';
+            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || '-';
+            const firstItem = (purchase.items && purchase.items[0]) || {};
+            const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';
+            document.getElementById('itemCount').textContent = productName;
             document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
             if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
                 const note = document.querySelector('.email-note');
@@ -312,22 +325,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if(card){ card.style.display='block'; card.style.visibility='visible'; card.style.opacity='1'; }
             const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
             const t = confirmI18n[lang] || confirmI18n.es;
-            const ids = ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','itemsLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'];
+            const ids = ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'];
             ids.forEach(id=>{ const el=document.getElementById(id); if(el && t[id]) el.textContent=t[id]; });
         }
         window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(keepConfirmationStable, 100); setTimeout(keepConfirmationStable, 600); setTimeout(keepConfirmationStable, 1200); });
     </script>
 
 <script>
-function nexoPrintInvoice(){ window.print(); }
-
-function nexoDownloadPDF(){
-  try {
-    window.print();
-  } catch(e) {
-    alert('PDF listo para imprimir o guardar como PDF.');
-  }
+function nexoBuildInvoicePrintHtml(){
+  const invoice = document.querySelector('.invoice-section');
+  const title = document.getElementById('confTitle')?.outerHTML || '<h1>¡Compra Confirmada!</h1>';
+  const desc = document.getElementById('confDesc')?.parentElement?.outerHTML || '';
+  const id = document.getElementById('invoiceId')?.textContent || 'Factura nexo';
+  return `<!doctype html><html><head><meta charset="utf-8"><title> </title><style>
+    @page{size:auto;margin:6mm}*{box-sizing:border-box}html,body{font-family:Segoe UI,Tahoma,sans-serif;background:#fff;color:#2D3E3F;margin:0;padding:0;text-align:center}.wrap{max-width:720px;margin:0 auto;padding:4px 10px}.invoice-section{background:#f4faf7;border:1px solid #dbe9e6;border-radius:14px;padding:22px;text-align:left;margin-top:0}.invoice-id{font-family:Courier New,monospace;font-size:18px;font-weight:900;color:#4A6B6D;padding:10px 12px;background:#fff;border-radius:8px;margin:10px 0 16px}.detail-row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid #dbe9e6;font-size:14px}.detail-label{font-weight:800}.detail-value{color:#465b5d;text-align:right}.detail-value.total{font-weight:900;color:#65bd35;font-size:18px}@media print{button,.success-icon,h1,p,.email-note,.action-buttons,footer,.nexo-legal-footer{display:none!important}}
+  </style></head><body><div class="wrap">${invoice?invoice.outerHTML:''}</div><script>window.onload=()=>{document.title=' ';setTimeout(()=>window.print(),150)}<\/script></body></html>`;
 }
+function nexoPrintInvoice(){
+  const w = window.open('', '_blank', 'width=850,height=900');
+  if(!w){ window.print(); return; }
+  w.document.open(); w.document.write(nexoBuildInvoicePrintHtml()); w.document.close();
+}
+function nexoDownloadPDF(){ nexoPrintInvoice(); }
 
 function nexoContinueShopping(){
   const candidates = ['nexo-tienda-publica.html','nexo-tienda.html','index.html'];
