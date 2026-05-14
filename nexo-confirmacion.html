@@ -281,7 +281,7 @@ const confirmI18n={
 
 document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const invoiceId = params.get('invoice');
+            const invoiceId = params.get('invoice') || params.get('pedido_id');
             const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
 
             if (invoiceId) {
@@ -291,13 +291,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
             document.getElementById('clientName').textContent = purchase.fullName || `${purchase.firstName || ''} ${purchase.lastName || ''}`.trim() || '-';
             document.getElementById('clientEmail').textContent = purchase.email || '-';
-            const countryTxt = String(purchase.country || purchase.cliente_pais || '').toLowerCase();
-            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || '';
+            const countryTxt = String(purchase.country || purchase.cliente_pais || (purchase.customer && purchase.customer.country) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').country || '')).toLowerCase();
+            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || (purchase.customer && (purchase.customer.documentId || purchase.customer.documento)) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '') || '';
             const isBolivia = countryTxt.includes('bolivia');
             const intlRow = document.getElementById('intlNitRow');
             const intlValue = document.getElementById('intlNitValue');
-            if (intlRow) intlRow.style.display = isBolivia ? 'none' : 'flex';
-            if (intlValue) intlValue.textContent = '99001';
+            if (intlRow) { intlRow.style.display = isBolivia ? 'none' : 'flex'; }
+            const intlLabel = document.getElementById('intlNitLabel');
+            if (intlLabel) intlLabel.textContent = 'NIT / Documento del cliente internacional:';
+            if (intlValue) intlValue.textContent = isBolivia ? '' : '99001';
             const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || '-';
             const firstItem = (purchase.items && purchase.items[0]) || {};
             const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';

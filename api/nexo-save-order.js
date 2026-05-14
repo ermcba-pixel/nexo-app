@@ -1,5 +1,5 @@
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ujqbbnipftlzytdankwp.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ujqbbniptflzytdankwp.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
 async function rest(path, options={}){
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...options, headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', Prefer:'return=representation', ...(options.headers||{}) }});
@@ -31,7 +31,7 @@ export default async function handler(req,res){
     };
     const pedido=await rest('pedidos', {method:'POST', body:JSON.stringify([pedidoRow])}); const pedido_id=pedido?.[0]?.id;
     await rest('pagos', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, metodo:pedidoRow.metodo_pago, estado:pedidoRow.estado_pago, monto_usd:total, moneda:'USD'}])}).catch(()=>{});
-    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: clienteRow.pais && !String(clienteRow.pais).toLowerCase().includes('bolivia')?'99001':(clienteRow.documento||'99001'), cliente_nombre:String(o.fullName||c.fullName||'').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
+    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: clienteRow.pais && !String(clienteRow.pais).toLowerCase().includes('bolivia') ? '99001' : '', cliente_nombre:String(o.fullName||c.fullName||'').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
     await rest('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id, courier:'Amazon / Marketplace', tracking:'', estado_envio:'En preparación', fecha_estimada_entrega:pedidoRow.fecha_estimada_entrega}])}).catch(()=>{});
     await rest('logs_agente1', {method:'POST', body:JSON.stringify([{pedido_id, accion:'pedido_registrado', estado:'pendiente', detalle:'Pedido registrado desde checkout nexo™'}])}).catch(()=>{});
     if(first.name) await rest('productos', {method:'POST', body:JSON.stringify([{nombre:first.name, proveedor:first.provider||'Amazon', amazon_url:first.sourceUrl||first.url||'', amazon_tag:'nexo08-20', imagen_url:first.image||'', precio_usd:num(first.price), stock:String(first.stock||'Verificar en Amazon'), categoria:first.category||''}])}).catch(()=>{});

@@ -1274,7 +1274,7 @@ window.NEXO_COUNTRY_DIAL_CODES = {"Afganistán": "+93", "Albania": "+355", "Alem
 
 <script>
 async function nexoDirectSaveClientToSupabase(profile){
-  const URL='https://ujqbbnipftlzytdankwp.supabase.co';
+  const URL='https://ujqbbniptflzytdankwp.supabase.co';
   const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
   const row={nombre:profile.name||'',apellido:profile.lastName||'',email:profile.email||'',telefono:profile.phone||'',pais:profile.country||'',direccion:profile.address||'',documento:profile.documentId||'',codigo_area:profile.areaCode||'',codigo_postal:profile.postalCode||'',region:profile.region||'',ciudad:profile.city||'',password:profile.password||null};
   const r=await fetch(URL+'/rest/v1/clientes',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify([row])});

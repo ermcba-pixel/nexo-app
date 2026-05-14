@@ -1,5 +1,5 @@
 
-const SUPABASE_URL = "https://ujqbbnipftlzytdankwp.supabase.co";
+const SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
 const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
 let nexoSupabase = null;
