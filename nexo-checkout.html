@@ -1214,7 +1214,7 @@ function selectPayment(methodId, btnEl=null) {
             const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
             const amazonShipping = cart.reduce((total, item) => total + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
             const baseVendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
-            const priorityVendorFee = priority === 'priority' ? Math.max(1, subtotal * 0.10) : 0;
+            const priorityVendorFee = priority === 'priority' ? Math.max(1.50, subtotal * 0.10) : 0;
             const vendorFees = baseVendorFees + priorityVendorFee;
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
             const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
@@ -1257,7 +1257,7 @@ function openConfirmationModal() {
             const shippingFactor = shippingPriority === 'priority' ? 1.15 : 1;
             const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
             const baseVendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
-            const priorityVendorFee = shippingPriority === 'priority' ? Math.max(1, subtotal * 0.10) : 0;
+            const priorityVendorFee = shippingPriority === 'priority' ? Math.max(1.50, subtotal * 0.10) : 0;
             const vendorFees = baseVendorFees + priorityVendorFee;
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
             const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
