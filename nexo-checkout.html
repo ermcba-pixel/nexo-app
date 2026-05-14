@@ -1213,7 +1213,9 @@ function selectPayment(methodId, btnEl=null) {
             const shippingFactor = priority === 'priority' ? 1.15 : 1;
             const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
             const amazonShipping = cart.reduce((total, item) => total + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
-            const vendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
+            const baseVendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
+            const priorityVendorFee = priority === 'priority' ? Math.max(1, subtotal * 0.10) : 0;
+            const vendorFees = baseVendorFees + priorityVendorFee;
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
             const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
             const commission = subtotal * commissionRate;
@@ -1254,7 +1256,9 @@ function openConfirmationModal() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const shippingFactor = shippingPriority === 'priority' ? 1.15 : 1;
             const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
-            const vendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
+            const baseVendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
+            const priorityVendorFee = shippingPriority === 'priority' ? Math.max(1, subtotal * 0.10) : 0;
+            const vendorFees = baseVendorFees + priorityVendorFee;
             const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
             const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
             const commission = subtotal * commissionRate;
@@ -1264,7 +1268,7 @@ function openConfirmationModal() {
             const iue = commission * iueRate;
             const total = subtotal + amazonShipping + vendorFees + commission;
             const deliveryInfo = getDeliveryInfo(shippingPriority);
-            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal:Number(subtotal.toFixed(2)), amazonShipping:Number(amazonShipping.toFixed(2)), vendorFees:Number(vendorFees.toFixed(2)), commission:Number(commission.toFixed(2)), itf:Number(itf.toFixed(2)), iue:Number(iue.toFixed(2)), total:Number(total.toFixed(2)) };
+            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal:Number(subtotal.toFixed(2)), amazonShipping:Number(amazonShipping.toFixed(2)), vendorFees:Number(vendorFees.toFixed(2)), commission:Number(commission.toFixed(2)), itf:Number(itf.toFixed(2)), iue:Number(iue.toFixed(2)), total:Number(total.toFixed(2)), customer:{fullName,email,country:country.options[country.selectedIndex].text, areaCode:phoneCode, phone:phoneNumber, region, city, address, zipCode, documentId:(JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documento || '')} };
             
 const t = ctt();
             const paymentMap = {

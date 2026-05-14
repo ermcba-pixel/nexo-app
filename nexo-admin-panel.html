@@ -1919,6 +1919,87 @@ async function renderPayments(){ const sec=document.getElementById('payments'); 
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboard();}catch(e){}},500);});
 </script>
 
+
+<script>
+// ===== NEXO ADMIN · LECTURA REAL BACKEND SUPABASE v10 =====
+(function(){
+  let cache = {clientes:[], pedidos:[], pagos:[], productos:[], facturas:[], tracking_envios:[], tickets:[], afiliados_amazon:[], logs_agente1:[]};
+  const money = v => 'US$ ' + Number(v || 0).toFixed(2);
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  async function fetchAdmin(){
+    const r = await fetch('/api/nexo-admin-data?ts=' + Date.now(), {cache:'no-store'});
+    const data = await r.json().catch(()=>({ok:false,error:'Respuesta inválida'}));
+    if(!r.ok || !data.ok) throw new Error(data.error || 'No se pudo leer Supabase');
+    cache = {...cache, ...data};
+    window.nexoAdminRealCache = cache;
+    return cache;
+  }
+  window.fetchNexoAdminData = async function(){ await fetchAdmin(); window.nexoOrdersCache = cache.pedidos || []; window.nexoCustomersCache = cache.clientes || []; };
+  window.loadDashboard = async function(){
+    try{ await fetchAdmin(); }catch(e){ console.warn(e); }
+    const orders = cache.pedidos || [];
+    const clients = cache.clientes || [];
+    const revenue = orders.reduce((a,o)=>a+Number(o.total_cliente_usd || o.precio_usd || 0),0);
+    const pending = orders.filter(o => String(o.estado_pago || o.estado || '').toLowerCase().includes('pend')).length;
+    const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+    set('totalOrders', orders.length); set('activeClients', clients.length); set('totalRevenue', money(revenue)); set('pendingOrders', pending);
+  };
+  window.loadOrders = async function(){
+    const table=document.getElementById('ordersTable'); if(!table) return;
+    table.innerHTML='<tr><td colspan="6" style="text-align:center;color:#6f8284;font-weight:800;">Cargando pedidos desde Supabase...</td></tr>';
+    try{ await fetchAdmin(); }catch(e){ table.innerHTML='<tr><td colspan="6" style="color:#e74c3c;text-align:center;font-weight:800;">Error cargando Supabase: '+esc(e.message)+'</td></tr>'; return; }
+    const orders=cache.pedidos || [];
+    if(!orders.length){ table.innerHTML='<tr><td colspan="6" style="text-align:center;color:#6f8284;">Sin pedidos reales registrados todavía.</td></tr>'; return; }
+    table.innerHTML = orders.map(o => `<tr><td>${esc(o.factura_numero || String(o.id||'').slice(0,8))}</td><td>${esc((o.cliente_nombre||'')+' '+(o.cliente_apellido||''))}</td><td>${esc(o.cliente_email||'')}</td><td>${money(o.total_cliente_usd || o.precio_usd)}</td><td>${esc(o.estado_pago || o.estado || 'pendiente')}</td><td>${o.creado_en ? new Date(o.creado_en).toLocaleString('es-BO') : '-'}</td></tr>`).join('');
+  };
+  window.renderCustomers = async function(){
+    const tbody=document.getElementById('customersTable'); if(!tbody) return;
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6f8284;font-weight:800;">Cargando clientes desde Supabase...</td></tr>';
+    try{ await fetchAdmin(); }catch(e){ tbody.innerHTML='<tr><td colspan="8" style="color:#e74c3c;text-align:center;font-weight:800;">Error cargando Supabase: '+esc(e.message)+'</td></tr>'; return; }
+    const clients=cache.clientes || [], orders=cache.pedidos || [];
+    if(!clients.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6f8284;">No hay clientes registrados</td></tr>'; return; }
+    const counts={}; orders.forEach(o=>{ const k=String(o.cliente_id || o.cliente_email || '').toLowerCase(); if(k) counts[k]=(counts[k]||0)+1; });
+    tbody.innerHTML = clients.map(c => { const k1=String(c.id||'').toLowerCase(), k2=String(c.email||'').toLowerCase(); return `<tr><td>${esc((c.nombre||'')+' '+(c.apellido||''))}</td><td>${esc(c.email||'')}</td><td>${esc((c.codigo_area||'')+' '+(c.telefono||''))}</td><td>${esc(c.pais||'')}</td><td>${esc(c.ciudad||'')}</td><td>${esc(c.direccion||'')}</td><td>${esc(c.documento||'')}</td><td>${counts[k1]||counts[k2]||0}</td></tr>`; }).join('');
+  };
+  window.renderPayments = async function(){
+    const sec=document.getElementById('payments'); if(!sec) return;
+    try{ await fetchAdmin(); }catch(e){ console.warn(e); }
+    const pagos = cache.pagos || [];
+    const orders = cache.pedidos || [];
+    const rows = pagos.length ? pagos : orders.map(o=>({pedido_id:o.id, metodo:o.metodo_pago, monto_usd:o.total_cliente_usd || o.precio_usd, estado:o.estado_pago, cliente_nombre:o.cliente_nombre, factura:o.factura_numero}));
+    const by={card:0, bank:0, paypal:0, payoneer:0}; rows.forEach(p=>{ const k=String(p.metodo||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer'))by.bank++; else by.card++; });
+    const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){ cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer; }
+    let box=document.getElementById('paymentsTableWrap'); if(!box){ box=document.createElement('div'); box.id='paymentsTableWrap'; box.className='section-box'; sec.appendChild(box); }
+    box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>' + (rows.length ? rows.map(p=>`<tr><td>${esc(p.factura || p.pedido_id || '')}</td><td>${esc(p.cliente_nombre || '')}</td><td>${esc(String(p.metodo||'').toUpperCase())}</td><td>${money(p.monto_usd)}</td><td>${esc(p.estado||'')}</td></tr>`).join('') : '<tr><td colspan="5">Sin pagos registrados</td></tr>') + '</tbody></table></div>';
+  };
+  window.renderShipments = async function(){
+    const box=document.getElementById('shipmentsPanel'); if(!box) return;
+    try{ await fetchAdmin(); }catch(e){ box.innerHTML='<p style="color:#e74c3c;font-weight:800;">Error cargando Supabase: '+esc(e.message)+'</p>'; return; }
+    const rows = (cache.tracking_envios && cache.tracking_envios.length) ? cache.tracking_envios : (cache.pedidos || []).map(o=>({pedido_id:o.factura_numero||o.id, cliente:o.cliente_nombre, destino:o.cliente_ciudad, fecha_estimada_entrega:o.fecha_estimada_entrega, estado_envio:o.estado_envio}));
+    box.innerHTML='<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th></tr></thead><tbody>' + (rows.length ? rows.map(r=>`<tr><td>${esc(r.pedido_id||'')}</td><td>${esc(r.cliente||'')}</td><td>${esc(r.destino||'')}</td><td>${esc(r.fecha_estimada_entrega||'')}</td><td>${esc(r.estado_envio||'En preparación')}</td></tr>`).join('') : '<tr><td colspan="5">Sin envíos registrados</td></tr>') + '</tbody></table>';
+  };
+  window.renderProducts = async function(){
+    const box=document.getElementById('productsPanel'); if(!box) return;
+    try{ await fetchAdmin(); }catch(e){ box.innerHTML='<p style="color:#e74c3c;font-weight:800;">Error cargando Supabase: '+esc(e.message)+'</p>'; return; }
+    const rows = cache.productos || [];
+    box.innerHTML='<table class="table"><thead><tr><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Stock</th></tr></thead><tbody>' + (rows.length ? rows.map(p=>`<tr><td>${esc(p.nombre||'')}</td><td>${esc(p.proveedor||'')}</td><td>${money(p.precio_usd)}</td><td>${esc(p.stock||'')}</td></tr>`).join('') : '<tr><td colspan="4">Sin productos registrados</td></tr>') + '</tbody></table>';
+  };
+  window.loadTickets = async function(){
+    const table=document.getElementById('ticketsTable'); if(!table) return;
+    table.innerHTML='<tr><td colspan="7" style="text-align:center;color:#6f8284;font-weight:800;">Cargando tickets desde Supabase...</td></tr>';
+    try{ await fetchAdmin(); }catch(e){ table.innerHTML='<tr><td colspan="7" style="color:#e74c3c;text-align:center;font-weight:800;">Error cargando Supabase: '+esc(e.message)+'</td></tr>'; return; }
+    window.nexoTicketsCache = cache.tickets || [];
+    if(!window.nexoTicketsCache.length){ table.innerHTML='<tr><td colspan="7" style="text-align:center;color:#6f8284;">No hay tickets para mostrar.</td></tr>'; return; }
+    table.innerHTML = window.nexoTicketsCache.map((t,idx)=>`<tr><td>${t.fecha_creacion?new Date(t.fecha_creacion).toLocaleString('es-BO'):''}</td><td>${esc(t.nombre_cliente||'')}</td><td>${esc(t.asunto||'')}</td><td>${esc(t.tipo_reclamo||'')}</td><td>${esc(t.estado||'Nuevo')}</td><td>${esc(t.prioridad||'Media')}</td><td><button class="ticket-response-btn" onclick="openTicketDetail(${idx})">Responder</button></td></tr>`).join('');
+  };
+  function cleanRaw(){
+    try{ document.querySelectorAll('body *').forEach(el=>{ if(el.children.length) return; const t=(el.textContent||'').trim(); if(t.includes('${ticketSafe') || t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('document.write(html)')){ el.remove(); } }); }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{ cleanRaw(); setTimeout(()=>{loadDashboard(); cleanRaw();},400); });
+  setTimeout(cleanRaw,1500); setTimeout(cleanRaw,3000);
+})();
+</script>
+
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
   <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
