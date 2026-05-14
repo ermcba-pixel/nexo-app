@@ -724,7 +724,7 @@ window.nexoSavePedidoToSupabase = async function(orderData){
     });
     const apiData = await apiResp.json().catch(()=>({}));
     if(apiResp.ok && apiData.ok && apiData.pedido_id){
-      return { data: { id: apiData.pedido_id, api_saved:true }, error:null };
+      return { data: { id: apiData.pedido_id, factura_numero: apiData.factura_numero, api_saved:true }, error:null };
     }
     console.warn('API Supabase guardado no confirmado, intenta cliente directo', apiData);
   } catch(e) { console.warn('API Supabase no disponible, intenta cliente directo', e); }
@@ -1296,7 +1296,7 @@ const t = ctt();
             // El Agente 1 espera confirmación/captura PayPal y luego deja preparada la compra Amazon.
             const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
-            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&metodo=paypal&paypal=return`;
+            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&metodo=paypal&paypal=return`;
             const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=paypal`;
 
             try {
@@ -1326,7 +1326,7 @@ const t = ctt();
             }
 
             // Fallback operativo: PayPal Standard directo a la cuenta empresarial de nexo.
-            const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
+            const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
             const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(fallbackSuccessUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             window.location.href = paypalLiveUrl;
         }
@@ -1419,6 +1419,7 @@ const t = ctt();
                 const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
                 if (error) throw error;
                 orderData.supabase_id = data?.id || orderData.id;
+                orderData.factura_numero = data?.factura_numero || orderData.factura_numero || orderData.id;
                 orderData.estado = 'pedido_registrado';
                 orderData.supabase_status = data?.local_only ? 'respaldo_local' : 'guardado';
             } catch (err) {
@@ -1521,7 +1522,7 @@ const t = ctt();
             } catch(e) {}
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             localStorage.removeItem('nexoCart');
-            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
+            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
