@@ -1423,32 +1423,6 @@ function getClientProfile() {
                 </table>
                 ${summaryHtml}
             
-<script>
-(function(){
-  async function nexoResponderTicketReal(index){
-    const t = (window.nexoTicketsCache || [])[index];
-    if(!t){ alert('No se encontró el ticket seleccionado.'); return; }
-    const msg = prompt('Escribe la respuesta para el cliente ' + (t.nombre_cliente || '') + ':');
-    if(!msg || !msg.trim()) return;
-    try{
-      const r = await fetch('/api/nexo-ticket-response',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ticket_id:t.id,mensaje:msg.trim(),estado:'Respondido',usuario_admin:'Superadmin nexo'})});
-      const data = await r.json().catch(()=>({ok:false,error:'Respuesta inválida'}));
-      if(!data.ok) throw new Error(data.error || 'No se pudo guardar la respuesta');
-      alert('Respuesta guardada en Supabase.');
-      if(typeof loadTickets === 'function') loadTickets();
-    }catch(e){ alert('Error guardando respuesta: ' + (e.message || e)); }
-  }
-  window.nexoResponderTicketReal = nexoResponderTicketReal;
-  const oldLoad = window.loadTickets;
-  window.loadTickets = async function(){
-    if(typeof oldLoad === 'function') await oldLoad();
-    const table=document.getElementById('ticketsTable');
-    if(!table || !(window.nexoTicketsCache||[]).length) return;
-    table.innerHTML = window.nexoTicketsCache.map((t,idx)=>`<tr><td>${t.fecha_creacion?new Date(t.fecha_creacion).toLocaleString('es-BO'):''}</td><td>${t.nombre_cliente||''}</td><td>${t.asunto||''}</td><td>${t.tipo_reclamo||''}</td><td>${t.estado||'Nuevo'}</td><td>${t.prioridad||'Media'}</td><td><button class="ticket-response-btn" onclick="nexoResponderTicketReal(${idx})">Responder</button></td></tr>`).join('');
-  };
-})();
-</script>
-
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
