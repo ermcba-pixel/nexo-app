@@ -1,3 +1,4 @@
+import { sb, logAgent } from './_nexo-supabase.js';
 // nexo – PayPal Orders API: crear cobro real del cliente
 // Requiere en Vercel: PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET
 // Opcional: PAYPAL_ENV=live|sandbox. Por defecto: live.
@@ -97,6 +98,13 @@ export default async function handler(req,res){
       return res.status(r.status).json({ok:false,error:'paypal_create_order_failed',detail:data,env:PAYPAL_ENV});
     }
     const approvalUrl = (data.links || []).find(l=>l.rel==='approve')?.href;
+    try{
+      await sb(`pedidos?id=eq.${encodeURIComponent(pedidoId)}`, {
+        method:'PATCH',
+        body:JSON.stringify({estado_pago:'paypal_orden_creada', estado_agente:'esperando_pago_paypal', estado_compra:'pendiente_pago_paypal'})
+      });
+      await logAgent(pedidoId,'paypal_order_creada','esperando_pago',`Orden PayPal ${data.id} creada. Cliente redirigido a PayPal Business.`);
+    }catch(e){ /* no rompe redirección PayPal */ }
     return res.status(200).json({
       ok:true,
       env:PAYPAL_ENV,

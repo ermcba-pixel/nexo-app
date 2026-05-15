@@ -402,7 +402,7 @@ async function nexoCapturePayPalReturn(){
     const r = await fetch('/api/paypal-capture-order', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({orderId: token})
+      body:JSON.stringify({orderId: token, pedidoId: params.get('pedido_id') || params.get('invoice') || ''})
     });
     const data = await r.json().catch(()=>({}));
     const order = JSON.parse(localStorage.getItem('nexoLastOrder') || '{}');

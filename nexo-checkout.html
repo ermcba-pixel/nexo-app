@@ -1485,7 +1485,20 @@ const t = ctt();
                 console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
             }
 
-            // CIERRE INTERNO NEXO: al confirmar compra se emite recibo interno.
+            // PAYPAL REAL: si el cliente eligió PayPal, se envía a PayPal Business.
+            // Al volver de PayPal, /api/paypal-capture-order confirma el cobro,
+            // actualiza Supabase y activa /api/agent1-procesar automáticamente.
+            if(orderData.paymentMethod === 'paypal'){
+                orderData.estado_pago = 'paypal_redireccionado_cliente';
+                orderData.estado_compra = 'pendiente_pago_paypal';
+                orderData.estado_agente = 'esperando_pago_paypal';
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                if(btnText) btnText.textContent = 'Abriendo PayPal seguro...';
+                await startNexoPagoSeguro(orderData);
+                return;
+            }
+
+            // CIERRE INTERNO NEXO: para tarjetas, ACH/Wire y Payoneer se emite recibo interno.
             // El cliente no es redirigido automáticamente a PayPal; el Agente 1 gestiona el cobro
             // en PayPal Business y luego compra al proveedor/Amazon con la dirección del cliente.
             orderData.estado_pago = orderData.paymentMethod === 'paypal'

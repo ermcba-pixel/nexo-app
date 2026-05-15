@@ -1,3 +1,4 @@
+import { sb, logAgent, getPedidoIdFromPayPalCapture, getCaptureInfo } from './_nexo-supabase.js';
 // nexo – PayPal Orders API: capturar cobro aprobado por el cliente
 // Requiere PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET. PAYPAL_ENV=live|sandbox.
 
@@ -51,7 +52,54 @@ export default async function handler(req,res){
     if(!r.ok){
       return res.status(r.status).json({ok:false,error:'paypal_capture_failed',detail:data,env:PAYPAL_ENV});
     }
-    return res.status(200).json({ok:true,env:PAYPAL_ENV,orderId,status:data.status,capture:data});
+
+    // Actualización real en Supabase: pedido pagado -> Agente 1 toma la cola.
+    const pedidoIdFromPaypal = getPedidoIdFromPayPalCapture(data);
+    const pedidoId = String(req.body?.pedidoId || req.body?.pedido_id || pedidoIdFromPaypal || '').trim();
+    const info = getCaptureInfo(data);
+    let supabaseUpdate = null;
+    if(pedidoId){
+      try{
+        await sb(`pedidos?id=eq.${encodeURIComponent(pedidoId)}`, {
+          method:'PATCH',
+          body:JSON.stringify({
+            estado:'pagado',
+            estado_pago:'paypal_pagado_capturado',
+            estado_compra:'pendiente_agente_1',
+            estado_agente:'pago_confirmado',
+            estado_envio:'En preparación'
+          })
+        });
+        await sb('pagos', {
+          method:'POST',
+          body:JSON.stringify([{
+            pedido_id:pedidoId,
+            metodo:'paypal',
+            estado:'capturado',
+            monto_usd:info.amount,
+            moneda:info.currency,
+            paypal_order_id:orderId,
+            paypal_capture_id:info.captureId,
+            fecha_pago:new Date().toISOString()
+          }])
+        }).catch(()=>{});
+        await logAgent(pedidoId,'paypal_capture_confirmado','pago_confirmado',`PayPal capturado: ${info.captureId || orderId} por ${info.amount} ${info.currency}`);
+        supabaseUpdate = {ok:true,pedidoId,estado_pago:'paypal_pagado_capturado'};
+      }catch(e){
+        supabaseUpdate = {ok:false,pedidoId,error:e.message||String(e)};
+      }
+    }
+
+    // Llamada al Agente 1 para procesar la cola de pagos confirmados.
+    let agent1 = null;
+    try{
+      const proto = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers.host;
+      const ar = await fetch(`${proto}://${host}/api/agent1-procesar`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({limit:5})});
+      agent1 = await ar.json().catch(()=>({ok:false,error:'agent1_json_failed'}));
+    }catch(e){ agent1 = {ok:false,error:e.message||String(e)}; }
+
+    return res.status(200).json({ok:true,env:PAYPAL_ENV,orderId,status:data.status,capture:data,pedidoId,supabaseUpdate,agent1});
   }catch(e){
     return res.status(e.statusCode || 500).json({ok:false,error:e.message || String(e),detail:e.detail || null,env:PAYPAL_ENV});
   }
