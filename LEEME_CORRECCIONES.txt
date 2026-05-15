@@ -1,0 +1,13 @@
+
+CORRECCIONES APLICADAS
+
+- Eliminado mensaje visual de fallback IA.
+- Ajustado mailto oficial de reclamos.
+- Preparada base para conexión OpenAI real en Vercel.
+- Ajustes visuales iniciales admin/clientes.
+
+IMPORTANTE:
+En Vercel debe existir:
+OPENAI_API_KEY=sk-...
+
+Redeploy obligatorio después de subir.

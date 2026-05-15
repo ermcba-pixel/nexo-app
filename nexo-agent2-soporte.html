@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>nexo™ - Atención al Cliente</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">nexo™</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
 <div style="font-size:13px; line-height:1.7; font-weight:700;">
-  <a href="mailto:ermcba@hotmail.com?subject=RECLAMO" class="nexo-official-email"
+  <a href="mailto:ermcba@hotmail.com?subject=RECLAMO%20NEXO?subject=RECLAMO"
      style="color:white; text-decoration:none;">
      ermcba@hotmail.com
   </a>
@@ -1170,7 +1170,7 @@ function nexoPublicCleanup(){
       nexo_language: localStorage.getItem('nexo_language')
     };
     const removeKeys = [
-      'nexoLastPurchase','nexoLastOrder','lastPurchase',
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
       'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
     ];
     removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
@@ -1283,176 +1283,6 @@ document.addEventListener('DOMContentLoaded',function(){
   oldBtn.parentNode.replaceChild(btn,oldBtn);
   btn.onclick=function(){ consultarNexoAI('soporte'); };
 });
-</script>
-
-
-<script id="nexo-support-hotfix-20260515">
-(function(){
-  const OFICIAL = 'ermcba@hotmail.com';
-
-  function $(id){ return document.getElementById(id); }
-  function safeJson(v){ try{return JSON.parse(v||'null')}catch(e){return null} }
-  function getClienteLocal(){
-    return safeJson(sessionStorage.getItem('nexoActiveClient')) ||
-           safeJson(localStorage.getItem('nexoClientProfile')) ||
-           safeJson(localStorage.getItem('nexoCliente')) || {};
-  }
-  function clienteIdFrom(profile){
-    return profile.id || profile.cliente_id || profile.uuid || profile.user_id || profile.clienteId || null;
-  }
-  function ticketActual(){ return ($('ticketCode')?.textContent || '').trim() || ('NEXO-R-'+new Date().toISOString().slice(0,10).replaceAll('-','')+'-'+Math.floor(100000+Math.random()*900000)); }
-  function getTicketBox(){
-    let box=$('nexoTicketResultBox');
-    if(!box){
-      box=document.createElement('div');
-      box.id='nexoTicketResultBox';
-      box.style.cssText='grid-column:1/-1;margin-top:10px;background:#effff0;border:1px solid #9be28b;border-left:5px solid #62c848;border-radius:12px;padding:14px;color:#07162f;font-size:14px;line-height:1.45;';
-      const form=$('supportForm');
-      form && form.appendChild(box);
-    }
-    return box;
-  }
-  function ticketPayload(ticket){
-    const profile=getClienteLocal();
-    const nombre=($('fullName')?.value||profile.fullName||profile.nombre||profile.name||'').trim();
-    const email=($('email')?.value||profile.email||'').trim();
-    const telefono=(($('phoneCode')?.value||profile.areaCode||profile.codigo_area||'')+' '+($('phone')?.value||profile.phone||profile.telefono||'')).trim();
-    const pais=$('country')?.selectedOptions?.[0]?.textContent || profile.country || profile.pais || '';
-    const pedido=($('orderNumber')?.value||'').trim();
-    const producto=($('product')?.value||'').trim();
-    const tipo=$('requestType')?.value || 'Soporte';
-    const prioridad=$('priority')?.value || 'Media';
-    const canal=$('preferredChannel')?.value || 'Correo electrónico';
-    const detalles=($('details')?.value||'').trim();
-    const asunto=ticket+' - '+tipo+(pedido?' - Pedido '+pedido:'');
-    const mensaje=[
-      'Ticket: '+ticket,
-      'Nombre: '+nombre,
-      'Correo: '+email,
-      'Teléfono / WhatsApp: '+telefono,
-      'País: '+pais,
-      'Pedido: '+(pedido||'No informado'),
-      'Producto: '+(producto||'No informado'),
-      'Canal preferido: '+canal,
-      '',
-      'Descripción:',
-      detalles
-    ].join('\n');
-    return {ticket,nombre,email,telefono,pais,pedido,producto,tipo,prioridad,canal,descripcion:detalles,asunto,mensaje,cliente_id:clienteIdFrom(profile)};
-  }
-  function renderTicket(ticket, payload){
-    const box=getTicketBox();
-    const subject=encodeURIComponent((payload?.asunto||ticket+' - Reclamo nexo™'));
-    const body=encodeURIComponent(payload?.mensaje||('Ticket: '+ticket));
-    box.innerHTML='<div style="font-weight:700;">✅ Reclamo registrado correctamente.</div>'+
-      '<div style="font-size:20px;font-weight:900;margin-top:4px;">Ticket: <span id="nexoTicketCodeSaved">'+ticket+'</span></div>'+
-      '<div>Guarda este número como respaldo para seguimiento.</div>'+
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">'+
-        '<button type="button" id="nexoCopyTicketBtn" style="background:#09152e;color:white;border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer;">Copiar ticket</button>'+
-        '<button type="button" id="nexoSendOfficialMailBtn" style="background:#09152e;color:white;border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer;">Enviar correo oficial</button>'+
-      '</div>';
-    $('nexoCopyTicketBtn').onclick=function(){ copyTicket(ticket); };
-    $('nexoSendOfficialMailBtn').onclick=function(){ openOfficialMail(subject, body); };
-  }
-  async function copyTicket(ticket){
-    try{ await navigator.clipboard.writeText(ticket); }catch(e){
-      const ta=document.createElement('textarea'); ta.value=ticket; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-    }
-    const btn=$('nexoCopyTicketBtn'); if(btn){ const old=btn.textContent; btn.textContent='Ticket copiado'; setTimeout(()=>btn.textContent=old,1600); }
-  }
-  function openOfficialMail(subject, body){
-    const gmail='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(OFICIAL)+'&su='+subject+'&body='+body;
-    const w=window.open(gmail,'_blank','noopener,noreferrer');
-    if(!w){ window.location.href='mailto:'+OFICIAL+'?subject='+subject+'&body='+body; }
-  }
-  async function guardarTicketReal(payload){
-    // Primero intenta endpoint de Vercel, que puede asociar cliente_id usando Supabase en servidor.
-    try{
-      const r=await fetch('/api/ticket',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const j=await r.json().catch(()=>null);
-      if(r.ok && j && (j.ok || j.success)) return j;
-    }catch(e){}
-    // Respaldo directo si el endpoint no responde.
-    if(typeof nexoSupabaseRequest==='function'){
-      return await nexoSupabaseRequest('/rest/v1/tickets',{method:'POST',body:JSON.stringify({
-        cliente_id:payload.cliente_id,
-        nombre_cliente:payload.nombre,
-        email:payload.email,
-        asunto:payload.asunto,
-        tipo_reclamo:payload.tipo,
-        mensaje:payload.mensaje,
-        estado:'Nuevo',
-        prioridad:payload.prioridad,
-        fecha_creacion:new Date().toISOString(),
-        fecha_actualizacion:new Date().toISOString()
-      })});
-    }
-  }
-  function prefillSupportFromClient(){
-    const p=getClienteLocal();
-    if(!p || !Object.keys(p).length) return;
-    if($('fullName') && !$('fullName').value) $('fullName').value=p.fullName || [p.nombre||p.name,p.apellido||p.lastName].filter(Boolean).join(' ');
-    if($('email') && !$('email').value) $('email').value=p.email || '';
-    if($('phoneCode') && !$('phoneCode').value) $('phoneCode').value=p.areaCode || p.codigo_area || '';
-    if($('phone') && !$('phone').value) $('phone').value=p.phone || p.telefono || '';
-    const country=$('country');
-    if(country && (p.country || p.pais)){
-      const val=String(p.country||p.pais).toLowerCase();
-      Array.from(country.options).some(o=>{ if(String(o.textContent).toLowerCase().includes(val) || String(o.value).toLowerCase().includes(val)){ country.value=o.value; return true; } });
-      if(typeof updatePhoneCode==='function') updatePhoneCode();
-    }
-  }
-  async function supportSubmitCapture(e){
-    const form=$('supportForm');
-    if(!form || e.target!==form) return;
-    e.preventDefault(); e.stopImmediatePropagation();
-    const ticket=ticketActual();
-    const payload=ticketPayload(ticket);
-    if(!payload.nombre || !payload.email || !payload.descripcion){
-      const box=getTicketBox(); box.innerHTML='⚠️ Completa nombre, correo y descripción del reclamo.'; return;
-    }
-    const btn=$('sendBtn'); const old=btn?.textContent||'Enviar reclamo';
-    try{
-      if(btn){btn.disabled=true;btn.textContent='Guardando reclamo...';}
-      await guardarTicketReal(payload);
-      renderTicket(ticket,payload);
-      const tEl=$('ticketCode'); if(tEl && typeof nextSupportTicket==='function') tEl.textContent=nextSupportTicket();
-    }catch(err){
-      const box=getTicketBox(); box.innerHTML='❌ No se pudo guardar el reclamo en Supabase.<br><strong>Detalle:</strong> '+(err?.message||err);
-    }finally{
-      if(btn){btn.disabled=false;btn.textContent=old;}
-    }
-  }
-  async function consultarNexoAIReal(){
-    const input=$('virtualQuestion'), answer=$('virtualAnswer'), btn=$('consultBtn');
-    const question=(input?.value||'').trim();
-    if(!question){ if(answer){answer.style.display='block';answer.textContent='Escribe tu consulta para que el Agente 2 pueda responder.';} return; }
-    if(answer){answer.style.display='block';answer.textContent='Consultando IA real de OpenAI...';}
-    if(btn) btn.disabled=true;
-    try{
-      const r=await fetch('/api/nexo-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:'soporte',question,page:location.pathname})});
-      const j=await r.json().catch(()=>({}));
-      let txt=j.answer || j.message || '';
-      if(!txt) throw new Error('Sin respuesta de IA');
-      if(j.mode && j.mode!=='openai') txt += '\n\n[Modo: respaldo local. Para activar OpenAI real, revisar OPENAI_API_KEY en Vercel.]';
-      answer.textContent=txt;
-    }catch(err){
-      answer.textContent='Agente IA Soporte nexo™\n\nNo pude conectar con OpenAI. Revisa en Vercel que OPENAI_API_KEY esté cargada en Production y vuelve a desplegar. Mientras tanto, registra el caso con el formulario.';
-    }finally{ if(btn) btn.disabled=false; }
-  }
-  window.consultarNexoAI=consultarNexoAIReal;
-  document.addEventListener('submit',supportSubmitCapture,true);
-  document.addEventListener('DOMContentLoaded',function(){
-    setTimeout(prefillSupportFromClient,300);
-    const c=$('consultBtn'); if(c){ c.onclick=function(){consultarNexoAIReal();}; }
-    document.querySelectorAll('a.nexo-official-email, a[href^="mailto:ermcba@hotmail.com"]').forEach(a=>{
-      a.addEventListener('click',function(e){
-        e.preventDefault();
-        openOfficialMail(encodeURIComponent('RECLAMO nexo™'), encodeURIComponent('Escriba aquí su reclamo.'));
-      },true);
-    });
-  });
-})();
 </script>
 
 
