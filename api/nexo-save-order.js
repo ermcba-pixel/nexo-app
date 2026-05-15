@@ -39,8 +39,8 @@ export default async function handler(req,res){
     };
     const pedido=await rest('pedidos', {method:'POST', body:JSON.stringify([pedidoRow])}); const pedido_id=pedido?.[0]?.id;
     await rest('pagos', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, metodo:pedidoRow.metodo_pago, estado:pedidoRow.estado_pago, monto_usd:total, moneda:'USD'}])}).catch(()=>{});
-    const numeroFiscal = '99001';
-    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: numeroFiscal, cliente_nombre:String(o.fullName||c.fullName||`${nombre} ${apellido}`||'Cliente nexo™').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
+    const numeroFiscal = clienteRow.pais && String(clienteRow.pais).toLowerCase().includes('bolivia') ? (clienteRow.documento || '') : '99001';
+    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: numeroFiscal, cliente_nombre:String(o.fullName||c.fullName||'').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
     await rest('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id, courier:'Amazon / Marketplace', tracking:'PENDIENTE_AMAZON', tracking_url:firstUrl, estado_envio:'En preparación', fecha_estimada_entrega:pedidoRow.fecha_estimada_entrega}])}).catch(()=>{});
     await rest('logs_agente1', {method:'POST', body:JSON.stringify([{pedido_id, accion:'pedido_registrado', estado:'pendiente', detalle:'Pedido registrado desde checkout nexo™'}])}).catch(()=>{});
     // Vincular clicks de afiliado Amazon previos con el pedido y cliente reales.
