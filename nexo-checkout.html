@@ -1080,7 +1080,8 @@ function selectPayment(methodId, btnEl=null) {
                     </div>
                     <div class="form-group">
                         <label class="form-label">CVV</label>
-                        <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
+                        <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4" autocomplete="off">
+                        <small style="display:block;margin-top:6px;color:#5f7283;font-weight:700;">Por seguridad, nexo no guarda el CVV ni el número completo de tarjeta.</small>
                     </div>
                 </div>
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con tarjeta</button>
@@ -1377,6 +1378,7 @@ const t = ctt();
                     destination: 'Verificación interna nexo™'
                 };
             }
+            nexoSavePaymentProfile(orderData);
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;
@@ -1536,6 +1538,15 @@ const t = ctt();
             localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
+        }
+
+        function nexoSavePaymentProfile(orderData){
+            try{
+                const profile = { updatedAt:new Date().toISOString(), method: orderData.paymentMethod || selectedPayment };
+                if(orderData.cardPayment){ profile.card = orderData.cardPayment; }
+                if(orderData.bankPayment){ profile.bank = orderData.bankPayment; }
+                localStorage.setItem('nexoPaymentProfile', JSON.stringify(profile));
+            }catch(e){}
         }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');

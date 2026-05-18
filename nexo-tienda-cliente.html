@@ -633,59 +633,30 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         function nexoBuildTemporalAmazonCatalog(search, maxPrice){
             const q = normalizeText(search || 'producto');
-            const tag = 'nexo08-20';
+            const clean = (search || 'producto').trim() || 'producto';
             const mk = (id,name,price,category,emoji,extra='') => ({
-                id, name, price, category, emoji,
-                provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 38 - id),
-                shippingAmazon: Math.max(6, price * 0.045), vendorFee: Math.max(3, price * 0.018),
+                id, name, price:Number(price), category, emoji,
+                provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 40 - (id%30)),
+                shippingAmazon: Math.max(0.35, Number(price) * 0.045), vendorFee: Math.max(0.15, Number(price) * 0.018),
                 aliases: `${name} ${category} amazon original ${extra}`,
                 sourceUrl:nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(name)}`),
                 imageType: category
             });
-            let items=[];
-            if(q.includes('iphone') || q.includes('celular') || q.includes('phone')){
-                items=[
-                  mk(101,'Apple iPhone 15 Pro Max desbloqueado',999,'electronica','📱','iphone celular apple'),
-                  mk(102,'Apple iPhone 15 Plus desbloqueado',829,'electronica','📱','iphone celular apple'),
-                  mk(103,'Apple iPhone 15 desbloqueado',729,'electronica','📱','iphone celular apple'),
-                  mk(104,'Apple iPhone 14 Pro Max renovado',699,'electronica','📱','iphone celular apple'),
-                  mk(105,'Apple iPhone 14 desbloqueado',599,'electronica','📱','iphone celular apple'),
-                  mk(106,'Apple iPhone 13 Pro renovado',529,'electronica','📱','iphone celular apple'),
-                  mk(107,'Apple iPhone 13 desbloqueado',449,'electronica','📱','iphone celular apple'),
-                  mk(108,'Apple iPhone SE 3ra generación',279,'electronica','📱','iphone celular apple'),
-                  mk(109,'Cargador USB-C para iPhone',22.9,'accesorios','🔌','iphone cable'),
-                  mk(110,'Funda MagSafe transparente iPhone',18.5,'accesorios','📱','iphone funda')
-                ];
-            } else if(q.includes('laptop') || q.includes('notebook') || q.includes('computadora')){
-                items=[
-                  mk(201,'Apple MacBook Pro 14 M3',1699,'electronica','💻','laptop notebook'),
-                  mk(202,'Dell XPS 13 Plus',1299,'electronica','💻','laptop notebook'),
-                  mk(203,'HP Spectre x360 14',1199,'electronica','💻','laptop notebook'),
-                  mk(204,'Lenovo ThinkPad X1 Carbon',1149,'electronica','💻','laptop notebook'),
-                  mk(205,'ASUS ZenBook 14 OLED',899,'electronica','💻','laptop notebook'),
-                  mk(206,'Acer Aspire 5',549,'electronica','💻','laptop notebook'),
-                  mk(207,'Lenovo IdeaPad 15',429,'electronica','💻','laptop notebook'),
-                  mk(208,'HP 14 Ryzen',399,'electronica','💻','laptop notebook')
-                ];
-            } else if(q.includes('zapato') || q.includes('tenis') || q.includes('shoe') || q.includes('sneaker')){
-                items=[
-                  mk(301,'Nike Air Max zapatillas deportivas',129,'moda','👟','zapatillas tenis'),
-                  mk(302,'Adidas Ultraboost running shoes',119,'moda','👟','zapatillas tenis'),
-                  mk(303,'New Balance 574 sneakers',89,'moda','👟','zapatillas tenis'),
-                  mk(304,'Puma Smash v2 casual sneakers',54,'moda','👟','zapatillas tenis')
-                ];
-            } else {
-                const clean = (search || 'producto').trim();
-                items=[
-                  mk(401,`${clean} premium Amazon opción alta`,299,'accesorios','🛍️',clean),
-                  mk(402,`${clean} profesional seleccionado`,189,'accesorios','🛍️',clean),
-                  mk(403,`${clean} recomendado calidad/precio`,129,'accesorios','🛍️',clean),
-                  mk(404,`${clean} versión estándar`,79,'accesorios','🛍️',clean),
-                  mk(405,`${clean} accesorio compatible`,35,'accesorios','🔧',clean)
-                ];
-            }
-            items = items.filter(p => !Number.isFinite(maxPrice) || p.price <= maxPrice);
-            return items.sort((a,b)=>Number(b.price)-Number(a.price));
+            let baseName = clean;
+            let category = 'accesorios', emoji='🛍️';
+            if(q.includes('camisa') || q.includes('shirt') || q.includes('polera')){ category='moda'; emoji='👕'; baseName='camisa'; }
+            else if(q.includes('calcetin') || q.includes('sock') || q.includes('media')){ category='moda'; emoji='🧦'; baseName='calcetines'; }
+            else if(q.includes('iphone') || q.includes('celular') || q.includes('phone')){ category='electronica'; emoji='📱'; baseName='iPhone'; }
+            else if(q.includes('mochila') || q.includes('bag') || q.includes('backpack')){ category='accesorios'; emoji='🎒'; baseName='mochila'; }
+            else if(q.includes('zapato') || q.includes('tenis') || q.includes('shoe') || q.includes('sneaker')){ category='moda'; emoji='👟'; baseName='zapatos'; }
+
+            const cheapPrices = [0.49,0.59,0.75,0.89,0.99,1.00,1.25,1.49,1.75,1.99,2.00,2.49,2.99,3.49,3.99,4.99,5.99,7.99,9.99,12.99];
+            const normalPrices = [15,18.5,22.9,35,49,79,99,129,159,189,249,279,349,449,529,599,699,729,829,999];
+            const useCheap = Number.isFinite(maxPrice) && maxPrice <= 20;
+            const prices = useCheap ? cheapPrices : normalPrices;
+            const items = prices.map((price, idx)=> mk(500+idx+1, `${baseName} Amazon opción ${idx+1}`, price, category, emoji, clean));
+            const filtered = items.filter(p => !Number.isFinite(maxPrice) || p.price <= maxPrice);
+            return filtered.sort((a,b)=>Number(b.price)-Number(a.price)).slice(0, 20);
         }
 
         async function loadAmazonProductsFromApi(search, maxPrice){

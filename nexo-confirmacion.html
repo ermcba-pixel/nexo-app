@@ -293,13 +293,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('clientEmail').textContent = purchase.email || '-';
             const countryTxt = String(purchase.country || purchase.cliente_pais || (purchase.customer && purchase.customer.country) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').country || '')).toLowerCase();
             const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || (purchase.customer && (purchase.customer.documentId || purchase.customer.documento)) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '') || '';
-            const isBolivia = countryTxt.includes('bolivia');
             const intlRow = document.getElementById('intlNitRow');
             const intlValue = document.getElementById('intlNitValue');
-            if (intlRow) { intlRow.style.display = isBolivia ? 'none' : 'flex'; }
+            if (intlRow) { intlRow.style.display = 'flex'; }
             const intlLabel = document.getElementById('intlNitLabel');
             if (intlLabel) intlLabel.textContent = 'NIT / Documento del cliente internacional:';
-            if (intlValue) intlValue.textContent = isBolivia ? '' : '99001';
+            if (intlValue) intlValue.textContent = '99001';
             const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || '-';
             const firstItem = (purchase.items && purchase.items[0]) || {};
             const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';
