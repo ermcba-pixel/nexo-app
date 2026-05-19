@@ -752,7 +752,31 @@ window.nexoSavePedidoToSupabase = async function(orderData){
   return await client.from('pedidos').insert([row]).select().single();
 };
 window.nexoPrefillCheckoutFromSupabase = async function(){
-  try{ const client=initNexoSupabase(); const email=(sessionStorage.getItem('clientEmail')||document.getElementById('email')?.value||'').trim(); if(!email)return; const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle(); if(error||!data)return; const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!==undefined&&v!==null)el.value=v;}; const full=`${data.nombre||''} ${data.apellido||''}`.trim(); set('fullName',full); set('email',data.email||email); set('phoneCode',data.codigo_area||''); set('phoneNumber',data.telefono||''); set('region',data.region||''); set('city',data.ciudad||''); set('address',data.direccion||''); set('zipCode',data.codigo_postal||''); sessionStorage.setItem('nexoActiveClient', JSON.stringify({fullName:full,name:data.nombre||'',lastName:data.apellido||'',documentId:data.documento||'',email:data.email||email,country:data.pais||'',areaCode:data.codigo_area||'',phone:data.telefono||'',postalCode:data.codigo_postal||'',region:data.region||'',city:data.ciudad||'',address:data.direccion||''})); }catch(e){console.warn(e);}
+  try{
+    const client=initNexoSupabase();
+    let saved={};
+    try{ saved=JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}'); }catch(e){ saved={}; }
+    const email=(sessionStorage.getItem('clientEmail')||saved.email||document.getElementById('email')?.value||'').trim();
+    const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!==undefined&&v!==null&&String(v).trim()!=='')el.value=v;};
+    const applyProfile=(profile)=>{
+      if(!profile) return;
+      const full=profile.fullName || `${profile.name||profile.nombre||''} ${profile.lastName||profile.apellido||''}`.trim();
+      set('fullName',full); set('email',profile.email||email); set('phoneCode',profile.areaCode||profile.codigo_area||'');
+      set('phoneNumber',profile.phone||profile.telefono||''); set('region',profile.region||''); set('city',profile.city||profile.ciudad||'');
+      set('address',profile.address||profile.direccion||''); set('zipCode',profile.postalCode||profile.zipCode||profile.codigo_postal||'');
+      const sel=document.getElementById('countrySelect'); const pais=(profile.country||profile.pais||'').toString().toLowerCase();
+      if(sel && pais){ const opt=[...sel.options].find(o=>o.value.toLowerCase()===pais || o.textContent.toLowerCase().includes(pais)); if(opt) sel.value=opt.value; }
+      const normalized={fullName:full,name:profile.name||profile.nombre||'',lastName:profile.lastName||profile.apellido||'',documentId:profile.documentId||profile.documento||'',email:profile.email||email,country:profile.country||profile.pais||'',areaCode:profile.areaCode||profile.codigo_area||'',phone:profile.phone||profile.telefono||'',postalCode:profile.postalCode||profile.zipCode||profile.codigo_postal||'',region:profile.region||'',city:profile.city||profile.ciudad||'',address:profile.address||profile.direccion||'',password:profile.password||''};
+      sessionStorage.setItem('nexoActiveClient', JSON.stringify(normalized));
+      localStorage.setItem('nexoClientProfile', JSON.stringify(normalized));
+      sessionStorage.setItem('clientEmail', normalized.email||''); sessionStorage.setItem('clientName', normalized.fullName||'');
+    };
+    applyProfile(saved);
+    if(!client||!email)return;
+    const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle();
+    if(error||!data)return;
+    applyProfile(data);
+  }catch(e){console.warn(e);}
 };
 window.addEventListener('DOMContentLoaded',()=>{try{initNexoSupabase();}catch(e){console.warn(e)} setTimeout(()=>window.nexoPrefillCheckoutFromSupabase?.(),400);});
 </script>
@@ -1080,8 +1104,7 @@ function selectPayment(methodId, btnEl=null) {
                     </div>
                     <div class="form-group">
                         <label class="form-label">CVV</label>
-                        <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4" autocomplete="off">
-                        <small style="display:block;margin-top:6px;color:#5f7283;font-weight:700;">Por seguridad, nexo no guarda el CVV ni el número completo de tarjeta.</small>
+                        <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
                     </div>
                 </div>
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con tarjeta</button>
@@ -1240,8 +1263,9 @@ function selectPayment(methodId, btnEl=null) {
         
 function openConfirmationModal() {
             prefillClientData();
-            const fullName = document.getElementById('fullName').value.trim() || 'Cliente nexo™';
-            const email = document.getElementById('email').value.trim() || '';
+            const activeProfile = JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}');
+            const fullName = document.getElementById('fullName').value.trim() || activeProfile.fullName || `${activeProfile.name || ''} ${activeProfile.lastName || ''}`.trim() || 'Cliente nexo™';
+            const email = document.getElementById('email').value.trim() || activeProfile.email || '';
             const country = document.getElementById('countrySelect');
             const shippingPriority = document.getElementById('shippingPriority').value;
             const region = document.getElementById('region').value.trim() || '';
@@ -1269,7 +1293,7 @@ function openConfirmationModal() {
             const iue = commission * iueRate;
             const total = subtotal + amazonShipping + vendorFees + commission;
             const deliveryInfo = getDeliveryInfo(shippingPriority);
-            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal:Number(subtotal.toFixed(2)), amazonShipping:Number(amazonShipping.toFixed(2)), vendorFees:Number(vendorFees.toFixed(2)), commission:Number(commission.toFixed(2)), itf:Number(itf.toFixed(2)), iue:Number(iue.toFixed(2)), total:Number(total.toFixed(2)), customer:{fullName,email,country:country.options[country.selectedIndex].text, areaCode:phoneCode, phone:phoneNumber, region, city, address, zipCode, documentId:(JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documento || '')} };
+            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal:Number(subtotal.toFixed(2)), amazonShipping:Number(amazonShipping.toFixed(2)), vendorFees:Number(vendorFees.toFixed(2)), commission:Number(commission.toFixed(2)), itf:Number(itf.toFixed(2)), iue:Number(iue.toFixed(2)), total:Number(total.toFixed(2)), customer:{fullName,email,country:country.options[country.selectedIndex].text, areaCode:phoneCode, phone:phoneNumber, region, city, address, zipCode, documentId:(activeProfile.documentId || activeProfile.documento || '')} };
             
 const t = ctt();
             const paymentMap = {
@@ -1378,7 +1402,6 @@ const t = ctt();
                     destination: 'Verificación interna nexo™'
                 };
             }
-            nexoSavePaymentProfile(orderData);
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;
@@ -1539,15 +1562,6 @@ const t = ctt();
             localStorage.removeItem('nexoCart');
             window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
         }
-
-        function nexoSavePaymentProfile(orderData){
-            try{
-                const profile = { updatedAt:new Date().toISOString(), method: orderData.paymentMethod || selectedPayment };
-                if(orderData.cardPayment){ profile.card = orderData.cardPayment; }
-                if(orderData.bankPayment){ profile.bank = orderData.bankPayment; }
-                localStorage.setItem('nexoPaymentProfile', JSON.stringify(profile));
-            }catch(e){}
-        }
         function attachCardFormatters(){
             const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
             if(num){ num.addEventListener('input', ()=>{ let v=num.value.replace(/\D/g,'').slice(0,16); num.value=v.replace(/(.{4})/g,'$1 ').trim(); }); }
@@ -1586,33 +1600,26 @@ const t = ctt();
         
 function prefillClientData(){
     let profile = null;
-    try{
-      profile = JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || 'null');
-    }catch(e){ profile = null; }
+    try{ profile = JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || 'null'); }catch(e){ profile = null; }
     if(!profile) return;
-
-    const setVal = (id, value) => {
-      const el = document.getElementById(id);
-      if(el) el.value = value || '';
-    };
-
-    setVal('fullName', profile.fullName || profile.name || '');
+    const setVal = (id, value) => { const el = document.getElementById(id); if(el && value !== undefined && value !== null && String(value).trim() !== '') el.value = value; };
+    const full = profile.fullName || `${profile.name||profile.nombre||''} ${profile.lastName||profile.apellido||''}`.trim();
+    setVal('fullName', full);
     setVal('email', profile.email || '');
-    setVal('phoneCode', profile.areaCode || '');
-    setVal('phoneNumber', profile.phone || '');
+    setVal('phoneCode', profile.areaCode || profile.codigo_area || '');
+    setVal('phoneNumber', profile.phone || profile.telefono || '');
     setVal('region', profile.region || '');
-    setVal('city', profile.city || '');
-    setVal('address', profile.address || '');
-    setVal('zipCode', profile.zipCode || profile.postalCode || '0000');
-
+    setVal('city', profile.city || profile.ciudad || '');
+    setVal('address', profile.address || profile.direccion || '');
+    setVal('zipCode', profile.zipCode || profile.postalCode || profile.codigo_postal || '0000');
     const sel = document.getElementById('countrySelect');
     if(sel){
-      const pCountry = (profile.countryCode || profile.country || '').toString().toLowerCase();
+      const pCountry = (profile.countryCode || profile.country || profile.pais || '').toString().toLowerCase();
       const opt = [...sel.options].find(o => o.value.toLowerCase() === pCountry || o.textContent.toLowerCase().includes(pCountry));
       if(opt) sel.value = opt.value;
     }
-    updatePhoneCode();
-    if(profile.areaCode) setVal('phoneCode', profile.areaCode);
+    if(typeof updatePhoneCode==='function') updatePhoneCode();
+    if(profile.areaCode || profile.codigo_area) setVal('phoneCode', profile.areaCode || profile.codigo_area);
 }
 
 
@@ -1701,7 +1708,7 @@ function nexoPublicCleanup(){
       nexo_language: localStorage.getItem('nexo_language')
     };
     const removeKeys = [
-      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
     ];
     removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);

@@ -603,8 +603,8 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
             if(!productsToShow || productsToShow.length === 0){
-                productsToShow = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
-                products = productsToShow.slice();
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:30px;">Ingrese un producto para buscar en Amazon real.</div>`;
+                return;
             }
             grid.innerHTML = productsToShow.map(p => `
                 <div class="product-card">
@@ -614,11 +614,9 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                         <a href="${nexoAmazonAffiliateUrl(p.sourceUrl || ('https://www.amazon.com/s?k=' + encodeURIComponent(p.name || 'producto')))}" onclick="nexoTrackAffiliateClick(event, ${p.id})" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
                         <div class="product-name">${p.name}</div>
                         <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
-                        <div class="product-price">$${Number(p.price).toFixed(2)}</div>
-                        <div class="product-stock">${tt().stock}: ${p.stock} ${tt().available}</div>
-                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
-                            ${p.stock === 0 ? tt().soldOut : tt().add}
-                        </button>
+                        <div class="product-price">${p.displayPrice || (Number(p.price)>0 ? `$${Number(p.price).toFixed(2)}` : "Ver precio real")}</div>
+                        <div class="product-stock">${tt().stock}: ${p.stock}${typeof p.stock === "number" ? " " + tt().available : ""}</div>
+                        ${p.redirectOnly ? `<a class="add-to-cart-btn" href="${nexoAmazonAffiliateUrl(p.sourceUrl || p.url)}" onclick="nexoTrackAffiliateClick(event, '${p.id}')" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;">Ver en Amazon real</a>` : `<button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? tt().soldOut : tt().add}</button>`}
                     </div>
                 </div>
             `).join('');
@@ -632,31 +630,23 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         let nexoLastAmazonQuery = '';
 
         function nexoBuildTemporalAmazonCatalog(search, maxPrice){
-            const q = normalizeText(search || 'producto');
-            const clean = (search || 'producto').trim() || 'producto';
-            const mk = (id,name,price,category,emoji,extra='') => ({
-                id, name, price:Number(price), category, emoji,
-                provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 40 - (id%30)),
-                shippingAmazon: Math.max(0.35, Number(price) * 0.045), vendorFee: Math.max(0.15, Number(price) * 0.018),
-                aliases: `${name} ${category} amazon original ${extra}`,
-                sourceUrl:nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(name)}`),
-                imageType: category
-            });
-            let baseName = clean;
-            let category = 'accesorios', emoji='🛍️';
-            if(q.includes('camisa') || q.includes('shirt') || q.includes('polera')){ category='moda'; emoji='👕'; baseName='camisa'; }
-            else if(q.includes('calcetin') || q.includes('sock') || q.includes('media')){ category='moda'; emoji='🧦'; baseName='calcetines'; }
-            else if(q.includes('iphone') || q.includes('celular') || q.includes('phone')){ category='electronica'; emoji='📱'; baseName='iPhone'; }
-            else if(q.includes('mochila') || q.includes('bag') || q.includes('backpack')){ category='accesorios'; emoji='🎒'; baseName='mochila'; }
-            else if(q.includes('zapato') || q.includes('tenis') || q.includes('shoe') || q.includes('sneaker')){ category='moda'; emoji='👟'; baseName='zapatos'; }
-
-            const cheapPrices = [0.49,0.59,0.75,0.89,0.99,1.00,1.25,1.49,1.75,1.99,2.00,2.49,2.99,3.49,3.99,4.99,5.99,7.99,9.99,12.99];
-            const normalPrices = [15,18.5,22.9,35,49,79,99,129,159,189,249,279,349,449,529,599,699,729,829,999];
-            const useCheap = Number.isFinite(maxPrice) && maxPrice <= 20;
-            const prices = useCheap ? cheapPrices : normalPrices;
-            const items = prices.map((price, idx)=> mk(500+idx+1, `${baseName} Amazon opción ${idx+1}`, price, category, emoji, clean));
-            const filtered = items.filter(p => !Number.isFinite(maxPrice) || p.price <= maxPrice);
-            return filtered.sort((a,b)=>Number(b.price)-Number(a.price)).slice(0, 20);
+            const q = String(search || '').trim() || 'productos amazon';
+            const max = Number(maxPrice || 0);
+            const url = nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(q)}`);
+            return Array.from({length:6}).map((_,idx)=>({
+                id:`amazon-real-${idx+1}`,
+                name: max > 0 ? `${q} hasta USD ${max}` : q,
+                price: max > 0 ? max : 0,
+                displayPrice: max > 0 ? `Ver en Amazon hasta USD ${max}` : 'Ver precio real en Amazon',
+                category:'amazon-real',
+                emoji:'🛍️',
+                provider:'Amazon', providerLogo:'🟠', stock:'Verificar precio y disponibilidad en Amazon',
+                shippingAmazon:null, vendorFee:null,
+                aliases:`${q} amazon real`,
+                sourceUrl:url,
+                imageType:'product',
+                redirectOnly:true
+            }));
         }
 
         async function loadAmazonProductsFromApi(search, maxPrice){
@@ -850,7 +840,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         document.addEventListener('DOMContentLoaded', () => {
             applyStoreLanguage();
-            products = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
+            products = [];
             renderProducts(products);
             updateCartCount();
         });
