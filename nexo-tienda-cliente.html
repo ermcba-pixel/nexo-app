@@ -603,8 +603,8 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
             if(!productsToShow || productsToShow.length === 0){
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:30px;">Ingrese un producto para buscar en Amazon real.</div>`;
-                return;
+                productsToShow = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
+                products = productsToShow.slice();
             }
             grid.innerHTML = productsToShow.map(p => `
                 <div class="product-card">
@@ -614,9 +614,11 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                         <a href="${nexoAmazonAffiliateUrl(p.sourceUrl || ('https://www.amazon.com/s?k=' + encodeURIComponent(p.name || 'producto')))}" onclick="nexoTrackAffiliateClick(event, ${p.id})" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
                         <div class="product-name">${p.name}</div>
                         <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
-                        <div class="product-price">${p.displayPrice || (Number(p.price)>0 ? `$${Number(p.price).toFixed(2)}` : "Ver precio real")}</div>
-                        <div class="product-stock">${tt().stock}: ${p.stock}${typeof p.stock === "number" ? " " + tt().available : ""}</div>
-                        ${p.redirectOnly ? `<a class="add-to-cart-btn" href="${nexoAmazonAffiliateUrl(p.sourceUrl || p.url)}" onclick="nexoTrackAffiliateClick(event, '${p.id}')" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;">Ver en Amazon real</a>` : `<button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? tt().soldOut : tt().add}</button>`}
+                        <div class="product-price">$${Number(p.price).toFixed(2)}</div>
+                        <div class="product-stock">${tt().stock}: ${p.stock} ${tt().available}</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
+                            ${p.stock === 0 ? tt().soldOut : tt().add}
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -630,23 +632,60 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         let nexoLastAmazonQuery = '';
 
         function nexoBuildTemporalAmazonCatalog(search, maxPrice){
-            const q = String(search || '').trim() || 'productos amazon';
-            const max = Number(maxPrice || 0);
-            const url = nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(q)}`);
-            return Array.from({length:6}).map((_,idx)=>({
-                id:`amazon-real-${idx+1}`,
-                name: max > 0 ? `${q} hasta USD ${max}` : q,
-                price: max > 0 ? max : 0,
-                displayPrice: max > 0 ? `Ver en Amazon hasta USD ${max}` : 'Ver precio real en Amazon',
-                category:'amazon-real',
-                emoji:'🛍️',
-                provider:'Amazon', providerLogo:'🟠', stock:'Verificar precio y disponibilidad en Amazon',
-                shippingAmazon:null, vendorFee:null,
-                aliases:`${q} amazon real`,
-                sourceUrl:url,
-                imageType:'product',
-                redirectOnly:true
-            }));
+            const q = normalizeText(search || 'producto');
+            const tag = 'nexo08-20';
+            const mk = (id,name,price,category,emoji,extra='') => ({
+                id, name, price, category, emoji,
+                provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 38 - id),
+                shippingAmazon: Math.max(6, price * 0.045), vendorFee: Math.max(3, price * 0.018),
+                aliases: `${name} ${category} amazon original ${extra}`,
+                sourceUrl:nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(name)}`),
+                imageType: category
+            });
+            let items=[];
+            if(q.includes('iphone') || q.includes('celular') || q.includes('phone')){
+                items=[
+                  mk(101,'Apple iPhone 15 Pro Max desbloqueado',999,'electronica','📱','iphone celular apple'),
+                  mk(102,'Apple iPhone 15 Plus desbloqueado',829,'electronica','📱','iphone celular apple'),
+                  mk(103,'Apple iPhone 15 desbloqueado',729,'electronica','📱','iphone celular apple'),
+                  mk(104,'Apple iPhone 14 Pro Max renovado',699,'electronica','📱','iphone celular apple'),
+                  mk(105,'Apple iPhone 14 desbloqueado',599,'electronica','📱','iphone celular apple'),
+                  mk(106,'Apple iPhone 13 Pro renovado',529,'electronica','📱','iphone celular apple'),
+                  mk(107,'Apple iPhone 13 desbloqueado',449,'electronica','📱','iphone celular apple'),
+                  mk(108,'Apple iPhone SE 3ra generación',279,'electronica','📱','iphone celular apple'),
+                  mk(109,'Cargador USB-C para iPhone',22.9,'accesorios','🔌','iphone cable'),
+                  mk(110,'Funda MagSafe transparente iPhone',18.5,'accesorios','📱','iphone funda')
+                ];
+            } else if(q.includes('laptop') || q.includes('notebook') || q.includes('computadora')){
+                items=[
+                  mk(201,'Apple MacBook Pro 14 M3',1699,'electronica','💻','laptop notebook'),
+                  mk(202,'Dell XPS 13 Plus',1299,'electronica','💻','laptop notebook'),
+                  mk(203,'HP Spectre x360 14',1199,'electronica','💻','laptop notebook'),
+                  mk(204,'Lenovo ThinkPad X1 Carbon',1149,'electronica','💻','laptop notebook'),
+                  mk(205,'ASUS ZenBook 14 OLED',899,'electronica','💻','laptop notebook'),
+                  mk(206,'Acer Aspire 5',549,'electronica','💻','laptop notebook'),
+                  mk(207,'Lenovo IdeaPad 15',429,'electronica','💻','laptop notebook'),
+                  mk(208,'HP 14 Ryzen',399,'electronica','💻','laptop notebook')
+                ];
+            } else if(q.includes('zapato') || q.includes('tenis') || q.includes('shoe') || q.includes('sneaker')){
+                items=[
+                  mk(301,'Nike Air Max zapatillas deportivas',129,'moda','👟','zapatillas tenis'),
+                  mk(302,'Adidas Ultraboost running shoes',119,'moda','👟','zapatillas tenis'),
+                  mk(303,'New Balance 574 sneakers',89,'moda','👟','zapatillas tenis'),
+                  mk(304,'Puma Smash v2 casual sneakers',54,'moda','👟','zapatillas tenis')
+                ];
+            } else {
+                const clean = (search || 'producto').trim();
+                items=[
+                  mk(401,`${clean} premium Amazon opción alta`,299,'accesorios','🛍️',clean),
+                  mk(402,`${clean} profesional seleccionado`,189,'accesorios','🛍️',clean),
+                  mk(403,`${clean} recomendado calidad/precio`,129,'accesorios','🛍️',clean),
+                  mk(404,`${clean} versión estándar`,79,'accesorios','🛍️',clean),
+                  mk(405,`${clean} accesorio compatible`,35,'accesorios','🔧',clean)
+                ];
+            }
+            items = items.filter(p => !Number.isFinite(maxPrice) || p.price <= maxPrice);
+            return items.sort((a,b)=>Number(b.price)-Number(a.price));
         }
 
         async function loadAmazonProductsFromApi(search, maxPrice){
@@ -840,7 +879,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
 
         document.addEventListener('DOMContentLoaded', () => {
             applyStoreLanguage();
-            products = [];
+            products = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
             renderProducts(products);
             updateCartCount();
         });
@@ -891,21 +930,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
-function nexoPublicCleanup(){
-  try{
-    const keep = {
-      nexoLang: localStorage.getItem('nexoLang'),
-      nexo_language: localStorage.getItem('nexo_language')
-    };
-    const removeKeys = [
-      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
-      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
-    ];
-    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
-    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
-    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
-  }catch(e){}
-}
+function nexoPublicCleanup(){ /* Se conserva sesión y datos del cliente para autocompletar checkout/soporte. */ }
 document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 

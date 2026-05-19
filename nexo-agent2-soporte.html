@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>nexo™ - Atención al Cliente</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ticket-receipt{margin-top:12px;background:#eef8ef;border:1px solid #bfe3be;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;color:#102038;line-height:1.5}.ticket-receipt strong{font-size:17px;color:#09152e}.ticket-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ticket-actions button,.ticket-actions a{border:0;border-radius:9px;background:#09152e;color:#fff;text-decoration:none;padding:9px 12px;font-weight:900;font-size:12px;cursor:pointer}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">nexo™</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button><div id="ticketReceipt" class="ticket-receipt" style="display:none;"></div></div></form></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.support-result{margin-top:14px;background:#ecfff0;border:1px solid #7AC742;border-left:5px solid #7AC742;border-radius:14px;padding:16px;color:#07162f}.support-result h3{font-size:22px;margin:8px 0}.support-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.support-actions button,.support-actions a{background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-weight:900;text-decoration:none;cursor:pointer;font-size:13px}.support-actions a:hover,.support-actions button:hover{filter:brightness(1.08)}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">nexo™</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form><div id="supportTicketResult" class="support-result" style="display:none"></div></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
 <div style="font-size:13px; line-height:1.7; font-weight:700;">
-  <a href="mailto:ermcba@hotmail.com?subject=RECLAMO"
+  <a href="mailto:ermcba@hotmail.com?subject=RECLAMO%20NEXO?subject=RECLAMO"
      style="color:white; text-decoration:none;">
      ermcba@hotmail.com
   </a>
@@ -1123,9 +1123,11 @@ async function guardarTicketSupabaseDirecto(ticket){
 
   const asunto = ticket + ' - ' + tipo + (pedido ? ' - Pedido '+pedido : '');
 
+  const cliente_id = await nexoFindClienteIdByEmail(email);
   return await nexoSupabaseRequest('/rest/v1/tickets', {
     method: 'POST',
     body: JSON.stringify({
+      cliente_id: cliente_id,
       nombre_cliente: nombre,
       email: email,
       asunto: asunto,
@@ -1139,8 +1141,46 @@ async function guardarTicketSupabaseDirecto(ticket){
   });
 }
 
+
+function nexoMailtoUrl(ticket){
+  const nombre=(document.getElementById('fullName')?.value||'').trim();
+  const email=(document.getElementById('email')?.value||'').trim();
+  const pedido=(document.getElementById('orderNumber')?.value||'').trim();
+  const producto=(document.getElementById('product')?.value||'').trim();
+  const detalles=(document.getElementById('details')?.value||'').trim();
+  const subject='RECLAMO NEXO '+(ticket||'');
+  const body=['Ticket: '+(ticket||''),'Cliente: '+nombre,'Correo: '+email,'Pedido: '+(pedido||'No informado'),'Producto: '+(producto||'No informado'),'','Detalle:',detalles].join('\n');
+  return 'mailto:ermcba@hotmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+function renderTicketRespaldo(ticket){
+  const box=document.getElementById('supportTicketResult'); if(!box) return;
+  box.style.display='block';
+  box.innerHTML='<div>✅ Reclamo registrado correctamente.</div><h3>Ticket: '+ticket+'</h3><div>Guarda este número como respaldo para seguimiento.</div><div class="support-actions"><button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+ticket+'\');this.textContent=\'Copiado ✅\'">Copiar ticket</button><button type="button" onclick="window.print()">Imprimir ticket</button><button type="button" onclick="guardarTicketPDF(\''+ticket+'\')">Ver / guardar PDF</button><a href="'+nexoMailtoUrl(ticket)+'">Enviar correo oficial</a></div>';
+  try{ box.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+}
+function guardarTicketPDF(ticket){
+  const nombre=(document.getElementById('fullName')?.value||'').trim();
+  const pedido=(document.getElementById('orderNumber')?.value||'').trim();
+  const producto=(document.getElementById('product')?.value||'').trim();
+  const detalle=(document.getElementById('details')?.value||'').trim();
+  const w=window.open('','_blank'); if(!w) return;
+  w.document.write('<html><head><title>'+ticket+'</title><style>body{font-family:Arial;padding:30px}h1{color:#0b1730}.box{border:1px solid #ccc;border-radius:12px;padding:18px}</style></head><body><h1>Ticket de soporte nexo™</h1><div class="box"><h2>'+ticket+'</h2><p><b>Cliente:</b> '+nombre+'</p><p><b>Pedido:</b> '+(pedido||'-')+'</p><p><b>Producto:</b> '+(producto||'-')+'</p><p><b>Detalle:</b><br>'+detalle.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</p><p><b>Correo oficial:</b> ermcba@hotmail.com</p></div><script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>');
+  w.document.close();
+}
+async function nexoFindClienteIdByEmail(email){
+  try{ if(!email) return null; const rows=await nexoSupabaseRequest('/rest/v1/clientes?select=id&email=eq.'+encodeURIComponent(email)+'&limit=1',{headers:{Prefer:''}}); return rows&&rows[0]&&rows[0].id || null; }catch(e){ return null; }
+}
+async function prefillSupportClient(){
+  try{
+    const raw=sessionStorage.getItem('nexoActiveClient')||localStorage.getItem('nexoClientProfile')||'{}'; const p=JSON.parse(raw||'{}');
+    const set=(id,v)=>{const el=document.getElementById(id); if(el && v) el.value=v;};
+    set('fullName',p.fullName||((p.nombre||p.name||'')+' '+(p.apellido||p.lastName||'')).trim()); set('email',p.email); set('phoneCode',p.areaCode||p.codigo_area); set('phone',p.phone||p.telefono);
+    if(p.country||p.pais){ const sel=document.getElementById('country'); [...sel.options].some(o=>{ if(o.textContent.includes(p.country||p.pais)||o.value===(p.countryCode||p.country_code)){ sel.value=o.value; updatePhoneCode(); return true;} }); }
+  }catch(e){}
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
-  populateCountryOptions(); applyLanguage(); updatePhoneCode();
+  populateCountryOptions(); applyLanguage(); updatePhoneCode(); prefillSupportClient();
   const tEl=document.getElementById('ticketCode'); if(tEl){ tEl.textContent = nextSupportTicket(); }
   const form=document.getElementById('supportForm');
   if(form) form.addEventListener('submit', async e=>{
@@ -1151,12 +1191,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     try{
       if(btn){ btn.disabled=true; btn.textContent='Guardando en Supabase...'; }
       await guardarTicketSupabaseDirecto(ticket);
-      const receipt=document.getElementById('ticketReceipt');
-      if(receipt){
-        receipt.style.display='block';
-        receipt.innerHTML='<div>✅ Reclamo registrado correctamente.</div><strong>Ticket: '+ticket+'</strong><div>Guarda este número como respaldo para seguimiento.</div><div class="ticket-actions"><button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+ticket+'\')">Copiar ticket</button><a href="mailto:ermcba@hotmail.com?subject=RECLAMO%20'+encodeURIComponent(ticket)+'">Enviar correo oficial</a></div>';
-      }
-      form.reset(); populateCountryOptions(); updatePhoneCode(); if(tEl) tEl.textContent=nextSupportTicket();
+      renderTicketRespaldo(ticket);
+      if(tEl) tEl.textContent=nextSupportTicket();
     }catch(error){
       console.error('Error Supabase nexo:', error);
       alert('ERROR: No se pudo guardar en Supabase.\n\nDetalle: '+(error.message || error));
@@ -1167,21 +1203,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 <script>
-function nexoPublicCleanup(){
-  try{
-    const keep = {
-      nexoLang: localStorage.getItem('nexoLang'),
-      nexo_language: localStorage.getItem('nexo_language')
-    };
-    const removeKeys = [
-      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
-      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
-    ];
-    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
-    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
-    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
-  }catch(e){}
-}
+function nexoPublicCleanup(){ /* Se conserva sesión y datos del cliente para autocompletar checkout/soporte. */ }
 document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 

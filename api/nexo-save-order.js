@@ -39,8 +39,19 @@ export default async function handler(req,res){
     };
     const pedido=await rest('pedidos', {method:'POST', body:JSON.stringify([pedidoRow])}); const pedido_id=pedido?.[0]?.id;
     await rest('pagos', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, metodo:pedidoRow.metodo_pago, estado:pedidoRow.estado_pago, monto_usd:total, moneda:'USD'}])}).catch(()=>{});
+
+    // Registro seguro de medios de pago del cliente: NO se guarda CVV ni tarjeta completa.
+    try{
+      if(cliente_id && o.cardPayment){
+        await rest('medios_pago_cliente', {method:'POST', body:JSON.stringify([{cliente_id, tipo:'card', titular:o.cardPayment.holder||'', ultimos4:String(o.cardPayment.cardNumberMasked||'').slice(-4), vencimiento:o.cardPayment.expiry||'', marca:o.cardPayment.brand||'', mascara:o.cardPayment.cardNumberMasked||'', cvv_guardado:false, activo:true}])});
+      }
+      if(cliente_id && o.bankPayment){
+        await rest('medios_pago_cliente', {method:'POST', body:JSON.stringify([{cliente_id, tipo:'bank', titular:o.bankPayment.holder||'', banco:o.bankPayment.bankName||'', routing:o.bankPayment.routingNumber||'', cuenta_mascara:o.bankPayment.accountNumberMasked||'', tipo_transferencia:o.bankPayment.rail||'ACH', activo:true}])});
+      }
+    }catch(e){ /* si la tabla aún no existe, no bloquea la compra */ }
+
     const numeroFiscal = '99001';
-    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: numeroFiscal, cliente_nombre:String(o.fullName||c.fullName||`${nombre} ${apellido}`||'Cliente nexo™').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
+    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: numeroFiscal, cliente_nombre:String(o.fullName||c.fullName||'').trim(), cliente_email:clienteRow.email, cliente_documento:clienteRow.documento, nit_documento_cliente_internacional:numeroFiscal, nit_documento_cliente:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
     await rest('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id, courier:'Amazon / Marketplace', tracking:'PENDIENTE_AMAZON', tracking_url:firstUrl, estado_envio:'En preparación', fecha_estimada_entrega:pedidoRow.fecha_estimada_entrega}])}).catch(()=>{});
     await rest('logs_agente1', {method:'POST', body:JSON.stringify([{pedido_id, accion:'pedido_registrado', estado:'pendiente', detalle:'Pedido registrado desde checkout nexo™'}])}).catch(()=>{});
     // Vincular clicks de afiliado Amazon previos con el pedido y cliente reales.

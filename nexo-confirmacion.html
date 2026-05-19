@@ -291,17 +291,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
             document.getElementById('clientName').textContent = purchase.fullName || `${purchase.firstName || ''} ${purchase.lastName || ''}`.trim() || '-';
             document.getElementById('clientEmail').textContent = purchase.email || '-';
-            let activeProfile={}; try{ activeProfile=JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}'); }catch(e){ activeProfile={}; }
-            const profileName = activeProfile.fullName || `${activeProfile.name||''} ${activeProfile.lastName||''}`.trim();
-            if((!purchase.fullName || purchase.fullName==='Cliente nexo™') && profileName) document.getElementById('clientName').textContent = profileName;
-            if((!purchase.email) && activeProfile.email) document.getElementById('clientEmail').textContent = activeProfile.email;
-            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || (purchase.customer && (purchase.customer.documentId || purchase.customer.documento)) || activeProfile.documentId || activeProfile.documento || '';
+            const countryTxt = String(purchase.country || purchase.cliente_pais || (purchase.customer && purchase.customer.country) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').country || '')).toLowerCase();
+            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || (purchase.customer && (purchase.customer.documentId || purchase.customer.documento)) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '') || '';
+            const isBolivia = countryTxt.includes('bolivia');
             const intlRow = document.getElementById('intlNitRow');
             const intlValue = document.getElementById('intlNitValue');
-            if (intlRow) { intlRow.style.display = 'flex'; }
+            if (intlRow) { intlRow.style.display = isBolivia ? 'none' : 'flex'; }
             const intlLabel = document.getElementById('intlNitLabel');
             if (intlLabel) intlLabel.textContent = 'NIT / Documento del cliente internacional:';
-            if (intlValue) intlValue.textContent = '99001';
+            if (intlValue) intlValue.textContent = isBolivia ? '' : '99001';
             const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || '-';
             const firstItem = (purchase.items && purchase.items[0]) || {};
             const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';
@@ -439,6 +437,7 @@ function nexoPublicCleanup(){
       nexo_language: localStorage.getItem('nexo_language')
     };
     const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','lastPurchase','clientEmail','clientName',
       'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
     ];
     removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
