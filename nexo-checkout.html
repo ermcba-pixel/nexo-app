@@ -1007,57 +1007,13 @@ function applyCheckoutLanguage(){
         let selectedPayment = 'paypal';
         let orderData = null;
 
-
-function nexoSafeParse(x){ try{return JSON.parse(x||'{}')}catch(e){return {}} }
-function nexoGetSavedClient(){ return nexoSafeParse(sessionStorage.getItem('nexoActiveClient')||localStorage.getItem('nexoClientProfile')||'{}'); }
-async function nexoLoadClientFromSupabase(){
-  try{
-    let p=nexoGetSavedClient();
-    let email=p.email||sessionStorage.getItem('clientEmail')||localStorage.getItem('clientEmail')||'';
-    if(!email) return p;
-    const client=initNexoSupabase();
-    const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle();
-    if(!error && data){
-      const full=((data.nombre||'')+' '+(data.apellido||'')).trim();
-      p={...p, id:data.id, fullName:full||p.fullName, nombre:data.nombre||p.nombre, apellido:data.apellido||p.apellido, name:data.nombre||p.name, lastName:data.apellido||p.lastName, email:data.email||email, country:data.pais||p.country, pais:data.pais||p.pais, areaCode:data.codigo_area||p.areaCode, codigo_area:data.codigo_area||p.codigo_area, phone:data.telefono||p.phone, telefono:data.telefono||p.telefono, postalCode:data.codigo_postal||p.postalCode, codigo_postal:data.codigo_postal||p.codigo_postal, region:data.region||p.region, city:data.ciudad||p.city, ciudad:data.ciudad||p.ciudad, address:data.direccion||p.address, direccion:data.direccion||p.direccion, documentId:data.documento||p.documentId, documento:data.documento||p.documento};
-      localStorage.setItem('nexoClientProfile', JSON.stringify(p)); sessionStorage.setItem('nexoActiveClient', JSON.stringify(p)); sessionStorage.setItem('clientEmail', p.email||''); sessionStorage.setItem('clientName', p.fullName||'');
-    }
-    return p;
-  }catch(e){ return nexoGetSavedClient(); }
-}
-function nexoApplyClientToCheckout(p){
-  p=p||nexoGetSavedClient(); const set=(id,v)=>{const el=document.getElementById(id); if(el && v!==undefined && v!==null && String(v)!=='') el.value=v;};
-  set('fullName',p.fullName||((p.nombre||p.name||'')+' '+(p.apellido||p.lastName||'')).trim()); set('email',p.email); set('phoneCode',p.areaCode||p.codigo_area); set('phoneNumber',p.phone||p.telefono); set('region',p.region); set('city',p.city||p.ciudad); set('address',p.address||p.direccion); set('zipCode',p.postalCode||p.codigo_postal);
-  const sel=document.getElementById('countrySelect'); if(sel && (p.country||p.pais)){ const val=String(p.country||p.pais); [...sel.options].some(o=>{ if(o.textContent.includes(val)||o.value===val){sel.value=o.value; updatePhoneCode(); return true;} }); }
-}
-function nexoLoadPaymentMemory(method){
-  const p=nexoSafeParse(localStorage.getItem('nexoPaymentMethods')||'{}');
-  setTimeout(()=>{
-    if(method==='card' && p.card){ const set=(id,v)=>{const el=document.getElementById(id); if(el&&v) el.value=v;}; set('cardHolder',p.card.holder); set('cardNumber',p.card.displayNumber||p.card.last4||''); set('cardExpiry',p.card.expiry); }
-    if(method==='bank' && p.bank){ const set=(id,v)=>{const el=document.getElementById(id); if(el&&v) el.value=v;}; set('bankHolder',p.bank.holder); set('bankName',p.bank.bankName); set('bankRouting',p.bank.routingNumber); set('bankAccount',p.bank.accountDisplay||p.bank.accountLast4); set('transferType',p.bank.rail); }
-  },50);
-}
-function nexoSavePaymentMemory(){
-  const store=nexoSafeParse(localStorage.getItem('nexoPaymentMethods')||'{}');
-  if(orderData && orderData.paymentMethod==='card'){
-    const num=(document.getElementById('cardNumber')?.value||'').replace(/\D/g,'');
-    store.card={holder:(document.getElementById('cardHolder')?.value||'').trim(), last4:num.slice(-4), displayNumber:num?('•••• •••• •••• '+num.slice(-4)):'', expiry:(document.getElementById('cardExpiry')?.value||'').trim(), cvvSaved:false, note:'CVV no se guarda por seguridad'};
-  }
-  if(orderData && orderData.paymentMethod==='bank'){
-    const acct=(document.getElementById('bankAccount')?.value||'').replace(/\s/g,'');
-    store.bank={holder:(document.getElementById('bankHolder')?.value||'').trim(), bankName:(document.getElementById('bankName')?.value||'').trim(), routingNumber:(document.getElementById('bankRouting')?.value||'').trim(), accountLast4:acct.slice(-4), accountDisplay:acct?('••••'+acct.slice(-4)):'', rail:(document.getElementById('transferType')?.value||'ACH')};
-  }
-  localStorage.setItem('nexoPaymentMethods',JSON.stringify(store));
-}
-
         // INICIALIZAR
-        async function init() {
+        function init() {
             renderCountrySelect();
             renderPaymentMethods();
             selectPayment('paypal');
             loadCart();
             calculateTotals();
-            const p=await nexoLoadClientFromSupabase(); nexoApplyClientToCheckout(p);
         }
 
         // RENDERIZAR SELECT DE PAÍSES
@@ -1130,7 +1086,7 @@ function selectPayment(methodId, btnEl=null) {
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con tarjeta</button>
             </div>
         `;
-        attachCardFormatters(); nexoLoadPaymentMemory('card');
+        attachCardFormatters();
     } else if (methodId === 'bank') {
         details.innerHTML = `
             <div class="payment-fields-panel">
@@ -1162,7 +1118,6 @@ function selectPayment(methodId, btnEl=null) {
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con transferencia</button>
             </div>
         `;
-        nexoLoadPaymentMemory('bank');
     } else if (methodId === 'payoneer') {
         details.innerHTML = `
             <div class="payment-fields-panel">
@@ -1326,7 +1281,7 @@ const t = ctt();
             };
             const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
             const extraRows = `${amazonShipping>0 ? `<strong style="color:#f39c12;">${t.confirmShip}:</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span><br>` : ''}${vendorFees>0 ? `<strong style="color:#f39c12;">${t.confirmVendor}:</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span><br>` : ''}<strong style="color:#f39c12;">${t.deliveryOrange}:</strong> <span style="color:#f39c12;">${deliveryInfo.label} · ${deliveryInfo.text.replace(/^.*?: /,'')}</span><br>`;
-            document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>NIT / Documento del cliente internacional:</strong> 99001<br><strong>NIT / Documento del cliente:</strong> ${(orderData.customer&&orderData.customer.documentId)||''}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br>${extraRows}<strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
+            document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br>${extraRows}<strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
 
             const legalAccept = document.getElementById('nexoLegalAccept');
             const legalWarning = document.getElementById('nexoLegalWarning');
@@ -1422,7 +1377,6 @@ const t = ctt();
                     destination: 'Verificación interna nexo™'
                 };
             }
-            nexoSavePaymentMemory();
             orderData.currency = 'USD';
             orderData.company = 'nexo™';
             orderData.commissionRate = 0.30;
@@ -1729,7 +1683,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-function nexoPublicCleanup(){ /* Se conserva sesión y datos del cliente para autocompletar checkout/soporte. */ }
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
 document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 

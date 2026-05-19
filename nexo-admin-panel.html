@@ -805,12 +805,12 @@
                                 <th>EMAIL</th>
                                 <th>TELÉFONO</th>
                                 <th>PAÍS</th>
-                                <th>CIUDAD</th><th>DIRECCIÓN</th><th>NIT / Documento del cliente</th><th>NIT / Documento del cliente internacional</th><th>PEDIDOS</th>
+                                <th>PEDIDOS</th>
                             </tr>
                         </thead>
                         <tbody id="customersTable">
                             <tr>
-                                <td colspan="8" style="text-align: center; color: var(--gray);">No hay clientes registrados</td>
+                                <td colspan="5" style="text-align: center; color: var(--gray);">No hay clientes registrados</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1241,7 +1241,7 @@ function getClientProfile() {
             if(preview){
                 preview.innerHTML = `<div class="section-box-title">Vista previa</div>
                 <table class="table"><thead><tr><th>Fecha</th><th>Factura</th><th>Cliente</th><th>Total</th><th>Comisión neta</th></tr></thead>
-                <tbody>${orders.length?orders.map(o=>`<tr><td>${new Date(o.timestamp||Date.now()).toLocaleDateString('es-BO')}</td><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${toMoney(o.totals?.total ?? o.total ?? 0)}</td><td>${toMoney(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0)}</td></tr>`).join(''):`<tr><td colspan="8">Sin datos para el filtro seleccionado</td></tr>`}</tbody></table>`;
+                <tbody>${orders.length?orders.map(o=>`<tr><td>${new Date(o.timestamp||Date.now()).toLocaleDateString('es-BO')}</td><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${toMoney(o.totals?.total ?? o.total ?? 0)}</td><td>${toMoney(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0)}</td></tr>`).join(''):`<tr><td colspan="5">Sin datos para el filtro seleccionado</td></tr>`}</tbody></table>`;
             }
         }
 
@@ -1274,14 +1274,14 @@ function getClientProfile() {
             const box = document.getElementById('shipmentsPanel');
             if(!box) return;
             const orders = getOrdersData();
-            box.innerHTML = `<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th></tr></thead><tbody>${orders.length?orders.map(o=>`<tr><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${o.customer?.city || o.city || ''}</td><td>${o.deliveryEstimate || ''}</td><td>En preparación</td></tr>`).join(''):`<tr><td colspan="8">Sin envíos registrados</td></tr>`}</tbody></table>`;
+            box.innerHTML = `<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th></tr></thead><tbody>${orders.length?orders.map(o=>`<tr><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${o.customer?.city || o.city || ''}</td><td>${o.deliveryEstimate || ''}</td><td>En preparación</td></tr>`).join(''):`<tr><td colspan="5">Sin envíos registrados</td></tr>`}</tbody></table>`;
         }
 
         function renderProducts(){
             const box = document.getElementById('productsPanel');
             if(!box) return;
             const items = getOrdersData().flatMap(o => (o.items || []));
-            box.innerHTML = `<table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Envío Amazon</th><th>Gasto vendedor</th></tr></thead><tbody>${items.length?items.map(i=>`<tr><td>${i.name||''}</td><td>${i.quantity||1}</td><td>${toMoney(i.price||0)}</td><td>${toMoney(i.shippingAmazon||0)}</td><td>${toMoney(i.vendorFee||0)}</td></tr>`).join(''):`<tr><td colspan="8">Sin productos registrados</td></tr>`}</tbody></table>`;
+            box.innerHTML = `<table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Envío Amazon</th><th>Gasto vendedor</th></tr></thead><tbody>${items.length?items.map(i=>`<tr><td>${i.name||''}</td><td>${i.quantity||1}</td><td>${toMoney(i.price||0)}</td><td>${toMoney(i.shippingAmazon||0)}</td><td>${toMoney(i.vendorFee||0)}</td></tr>`).join(''):`<tr><td colspan="5">Sin productos registrados</td></tr>`}</tbody></table>`;
         }
 
         function renderUsers(){
@@ -1915,7 +1915,7 @@ async function fetchNexoAdminData(){ const db=getNexoAdminDb(); if(db){ const [o
 function moneyAdmin(v){ return 'US$ '+Number(v||0).toFixed(2); }
 async function loadDashboard(){ try{await fetchNexoAdminData();}catch(e){console.warn(e);} const revenue=nexoOrdersCache.reduce((a,o)=>a+Number(o.total_cliente_usd||o.precio_usd||0),0); const pending=nexoOrdersCache.filter(o=>String(o.estado||'').toLowerCase().includes('pend')||String(o.estado_pago||'').toLowerCase().includes('pend')).length; const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;}; set('totalOrders',nexoOrdersCache.length); set('activeClients',nexoCustomersCache.length); set('totalRevenue',moneyAdmin(revenue)); set('pendingOrders',pending); }
 async function loadOrders(){ const table=document.getElementById('ordersTable'); if(!table)return; table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Cargando pedidos reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){table.innerHTML='<tr><td colspan="6">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoOrdersCache.length){table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Sin pedidos reales registrados todavía.</td></tr>'; return;} table.innerHTML=nexoOrdersCache.map(o=>`<tr><td>${String(o.id||'').slice(0,8)}</td><td>${o.cliente_nombre||''} ${o.cliente_apellido||''}</td><td>${o.cliente_email||''}</td><td>${moneyAdmin(o.total_cliente_usd||o.precio_usd)}</td><td>${o.estado_pago||o.estado||'pendiente'}</td><td>${o.creado_en?new Date(o.creado_en).toLocaleDateString('es-BO'):'-'}</td></tr>`).join(''); }
-async function renderCustomers(){ const tbody=document.getElementById('customersTable'); if(!tbody)return; tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--gray);">Cargando clientes reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){tbody.innerHTML='<tr><td colspan="8">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoCustomersCache.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--gray);">No hay clientes registrados</td></tr>'; return;} const counts={}; nexoOrdersCache.forEach(o=>{const em=(o.cliente_email||'').toLowerCase(); if(em)counts[em]=(counts[em]||0)+1;}); tbody.innerHTML=nexoCustomersCache.map(c=>`<tr><td>${c.nombre||''} ${c.apellido||''}</td><td>${c.email||''}</td><td>${c.codigo_area||''} ${c.telefono||''}</td><td>${c.pais||''}</td><td>${counts[(c.email||'').toLowerCase()]||0}</td></tr>`).join(''); }
+async function renderCustomers(){ const tbody=document.getElementById('customersTable'); if(!tbody)return; tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--gray);">Cargando clientes reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){tbody.innerHTML='<tr><td colspan="5">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoCustomersCache.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--gray);">No hay clientes registrados</td></tr>'; return;} const counts={}; nexoOrdersCache.forEach(o=>{const em=(o.cliente_email||'').toLowerCase(); if(em)counts[em]=(counts[em]||0)+1;}); tbody.innerHTML=nexoCustomersCache.map(c=>`<tr><td>${c.nombre||''} ${c.apellido||''}</td><td>${c.email||''}</td><td>${c.codigo_area||''} ${c.telefono||''}</td><td>${c.pais||''}</td><td>${counts[(c.email||'').toLowerCase()]||0}</td></tr>`).join(''); }
 async function renderPayments(){ const sec=document.getElementById('payments'); if(!sec)return; try{await fetchNexoAdminData();}catch(e){} const by={card:0,bank:0,paypal:0,payoneer:0}; nexoOrdersCache.forEach(o=>{const k=String(o.metodo_pago||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('transfer'))by.bank++; else if(k.includes('card')||k.includes('tarjeta'))by.card++;}); const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer;} }
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboard();}catch(e){}},500);});
 </script>
@@ -1936,11 +1936,6 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
     return cache;
   }
   window.fetchNexoAdminData = async function(){ await fetchAdmin(); window.nexoOrdersCache = cache.pedidos || []; window.nexoCustomersCache = cache.clientes || []; };
-
-  function clientById(id){ return (cache.clientes||[]).find(c=>String(c.id)===String(id)) || {}; }
-  function orderById(id){ return (cache.pedidos||[]).find(o=>String(o.id)===String(id) || String(o.factura_numero)===String(id)) || {}; }
-  function fullNameFrom(o,c){ return ((o.cliente_nombre||c.nombre||'')+' '+(o.cliente_apellido||c.apellido||'')).trim(); }
-
   window.loadDashboard = async function(){
     try{ await fetchAdmin(); }catch(e){ console.warn(e); }
     const orders = cache.pedidos || [];
@@ -1965,24 +1960,24 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
     const clients=cache.clientes || [], orders=cache.pedidos || [];
     if(!clients.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6f8284;">No hay clientes registrados</td></tr>'; return; }
     const counts={}; orders.forEach(o=>{ const k=String(o.cliente_id || o.cliente_email || '').toLowerCase(); if(k) counts[k]=(counts[k]||0)+1; });
-    tbody.innerHTML = clients.map(c => { const k1=String(c.id||'').toLowerCase(), k2=String(c.email||'').toLowerCase(); return `<tr><td>${esc((c.nombre||'')+' '+(c.apellido||''))}</td><td>${esc(c.email||'')}</td><td>${esc((c.codigo_area||'')+' '+(c.telefono||''))}</td><td>${esc(c.pais||'')}</td><td>${esc(c.ciudad||'')}</td><td>${esc(c.direccion||'')}</td><td>${esc(c.documento||'')}</td><td>99001</td><td>${counts[k1]||counts[k2]||0}</td></tr>`; }).join('');
+    tbody.innerHTML = clients.map(c => { const k1=String(c.id||'').toLowerCase(), k2=String(c.email||'').toLowerCase(); return `<tr><td>${esc((c.nombre||'')+' '+(c.apellido||''))}</td><td>${esc(c.email||'')}</td><td>${esc((c.codigo_area||'')+' '+(c.telefono||''))}</td><td>${esc(c.pais||'')}</td><td>${esc(c.ciudad||'')}</td><td>${esc(c.direccion||'')}</td><td>${esc(c.documento||'')}</td><td>${counts[k1]||counts[k2]||0}</td></tr>`; }).join('');
   };
   window.renderPayments = async function(){
     const sec=document.getElementById('payments'); if(!sec) return;
     try{ await fetchAdmin(); }catch(e){ console.warn(e); }
     const pagos = cache.pagos || [];
     const orders = cache.pedidos || [];
-    const rows = pagos.length ? pagos.map(p=>{ const o=orderById(p.pedido_id); const c=clientById(p.cliente_id||o.cliente_id); return {...p, factura:p.factura||o.factura_numero||p.pedido_id, cliente_nombre:p.cliente_nombre||fullNameFrom(o,c), metodo:p.metodo||o.metodo_pago, monto_usd:p.monto_usd||o.total_cliente_usd||o.precio_usd, estado:p.estado||o.estado_pago}; }) : orders.map(o=>{ const c=clientById(o.cliente_id); return {pedido_id:o.id, metodo:o.metodo_pago, monto_usd:o.total_cliente_usd || o.precio_usd, estado:o.estado_pago, cliente_nombre:fullNameFrom(o,c), factura:o.factura_numero}; });
+    const rows = pagos.length ? pagos : orders.map(o=>({pedido_id:o.id, metodo:o.metodo_pago, monto_usd:o.total_cliente_usd || o.precio_usd, estado:o.estado_pago, cliente_nombre:o.cliente_nombre, factura:o.factura_numero}));
     const by={card:0, bank:0, paypal:0, payoneer:0}; rows.forEach(p=>{ const k=String(p.metodo||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer'))by.bank++; else by.card++; });
     const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){ cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer; }
     let box=document.getElementById('paymentsTableWrap'); if(!box){ box=document.createElement('div'); box.id='paymentsTableWrap'; box.className='section-box'; sec.appendChild(box); }
-    box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>' + (rows.length ? rows.map(p=>`<tr><td>${esc(p.factura || p.pedido_id || '')}</td><td>${esc(p.cliente_nombre || '')}</td><td>${esc(String(p.metodo||'').toUpperCase())}</td><td>${money(p.monto_usd)}</td><td>${esc(p.estado||'')}</td></tr>`).join('') : '<tr><td colspan="8">Sin pagos registrados</td></tr>') + '</tbody></table></div>';
+    box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>' + (rows.length ? rows.map(p=>`<tr><td>${esc(p.factura || p.pedido_id || '')}</td><td>${esc(p.cliente_nombre || '')}</td><td>${esc(String(p.metodo||'').toUpperCase())}</td><td>${money(p.monto_usd)}</td><td>${esc(p.estado||'')}</td></tr>`).join('') : '<tr><td colspan="5">Sin pagos registrados</td></tr>') + '</tbody></table></div>';
   };
   window.renderShipments = async function(){
     const box=document.getElementById('shipmentsPanel'); if(!box) return;
     try{ await fetchAdmin(); }catch(e){ box.innerHTML='<p style="color:#e74c3c;font-weight:800;">Error cargando Supabase: '+esc(e.message)+'</p>'; return; }
-    const rows = (cache.tracking_envios && cache.tracking_envios.length) ? cache.tracking_envios.map(t=>{ const o=orderById(t.pedido_id); const c=clientById(t.cliente_id||o.cliente_id); return {...t, pedido_id:o.factura_numero||t.pedido_id, cliente:t.cliente||fullNameFrom(o,c), destino:t.destino||o.cliente_direccion||c.direccion||o.cliente_ciudad||c.ciudad}; }) : (cache.pedidos || []).map(o=>{ const c=clientById(o.cliente_id); return {pedido_id:o.factura_numero||o.id, cliente:fullNameFrom(o,c), destino:o.cliente_direccion||c.direccion||o.cliente_ciudad||c.ciudad, fecha_estimada_entrega:o.fecha_estimada_entrega, estado_envio:o.estado_envio}; });
-    box.innerHTML='<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th></tr></thead><tbody>' + (rows.length ? rows.map(r=>`<tr><td>${esc(r.pedido_id||'')}</td><td>${esc(r.cliente||'')}</td><td>${esc(r.destino||'')}</td><td>${esc(r.fecha_estimada_entrega||'')}</td><td>${esc(r.estado_envio||'En preparación')}</td></tr>`).join('') : '<tr><td colspan="8">Sin envíos registrados</td></tr>') + '</tbody></table>';
+    const rows = (cache.tracking_envios && cache.tracking_envios.length) ? cache.tracking_envios : (cache.pedidos || []).map(o=>({pedido_id:o.factura_numero||o.id, cliente:o.cliente_nombre, destino:o.cliente_ciudad, fecha_estimada_entrega:o.fecha_estimada_entrega, estado_envio:o.estado_envio}));
+    box.innerHTML='<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th></tr></thead><tbody>' + (rows.length ? rows.map(r=>`<tr><td>${esc(r.pedido_id||'')}</td><td>${esc(r.cliente||'')}</td><td>${esc(r.destino||'')}</td><td>${esc(r.fecha_estimada_entrega||'')}</td><td>${esc(r.estado_envio||'En preparación')}</td></tr>`).join('') : '<tr><td colspan="5">Sin envíos registrados</td></tr>') + '</tbody></table>';
   };
   window.renderProducts = async function(){
     const box=document.getElementById('productsPanel'); if(!box) return;
