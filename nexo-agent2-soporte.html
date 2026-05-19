@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>nexo™ - Atención al Cliente</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">nexo™</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}.ticket-result{margin-top:14px;background:#eefdee;border:1px solid #7AC742;border-left:5px solid #7AC742;border-radius:12px;padding:18px}.ticket-result h3{font-size:22px;margin:6px 0;color:#07162f}.ticket-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.ticket-action-btn{background:#09152e;color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:900;cursor:pointer}.official-mail-button{background:transparent;border:0;color:#fff;font-weight:900;font-size:15px;cursor:pointer;padding:0;text-align:left}.official-mail-button:hover{text-decoration:underline}.nexo-hidden-mail-link{display:none!important}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">nexo™</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form><div id="ticketResult" class="ticket-result" style="display:none;"></div></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
 <div style="font-size:13px; line-height:1.7; font-weight:700;">
-  <span onclick="nexoOpenOfficialEmail()" style="color:white; text-decoration:none;cursor:pointer;">ermcba@hotmail.com</span>
+  <button type="button" class="official-mail-button" onclick="openOfficialClaimMail()">ermcba@hotmail.com</button>
 </div>
 <div style="font-size:13px; line-height:1.7; margin-top:8px;">
   <span id="officialDesc"></span>
@@ -1136,52 +1136,6 @@ async function guardarTicketSupabaseDirecto(ticket){
   });
 }
 
-
-function nexoTicketPayload(ticket){
-  const get=id=>document.getElementById(id)?.value || '';
-  return {
-    ticket,
-    nombre:get('fullName'),
-    email:get('email'),
-    pedido:get('orderNumber'),
-    producto:get('product'),
-    detalle:get('details')
-  };
-}
-function nexoOfficialMailUrl(payload){
-  const subject = `RECLAMO NEXO ${payload.ticket || ''}`.trim();
-  const body = `Ticket: ${payload.ticket || ''}\nCliente: ${payload.nombre || ''}\nCorreo: ${payload.email || ''}\nPedido: ${payload.pedido || ''}\nProducto: ${payload.producto || ''}\nDetalle: ${payload.detalle || ''}`;
-  return `https://outlook.live.com/mail/0/deeplink/compose?to=ermcba%40hotmail.com&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-function nexoOpenOfficialEmail(ticket){
-  const payload = nexoTicketPayload(ticket || document.getElementById('ticketCode')?.textContent || '');
-  window.open(nexoOfficialMailUrl(payload), '_blank', 'noopener,noreferrer');
-}
-function nexoCopyTicket(ticket){ navigator.clipboard?.writeText(ticket).then(()=>alert('Ticket copiado: '+ticket)).catch(()=>alert(ticket)); }
-function nexoPrintTicket(ticket){
-  const p=nexoTicketPayload(ticket); const w=window.open('', '_blank');
-  if(!w) return;
-  w.document.write(`<html><head><title>${p.ticket}</title><style>body{font-family:Arial;padding:30px}h1{color:#0b1734}.box{border:1px solid #ccc;padding:18px;border-radius:12px}</style></head><body><h1>Ticket de reclamo nexo™</h1><div class="box"><p><b>Ticket:</b> ${p.ticket}</p><p><b>Cliente:</b> ${p.nombre}</p><p><b>Correo:</b> ${p.email}</p><p><b>Pedido:</b> ${p.pedido}</p><p><b>Producto:</b> ${p.producto}</p><p><b>Detalle:</b> ${p.detalle}</p></div></body></html>`);
-  w.document.close(); w.focus(); w.print();
-}
-function nexoPdfTicket(ticket){ nexoPrintTicket(ticket); }
-function nexoShowTicketPanel(ticket){
-  let box=document.getElementById('nexoTicketResult');
-  if(!box){
-    box=document.createElement('div'); box.id='nexoTicketResult'; box.className='field full';
-    const form=document.getElementById('supportForm'); form?.appendChild(box);
-  }
-  box.innerHTML = `<div style="margin-top:14px;background:#ecffef;border:1px solid #69d463;border-left:6px solid #69d463;border-radius:12px;padding:18px 20px;color:#0b1734;">
-    <div style="font-weight:800;margin-bottom:8px;">✅ Reclamo registrado correctamente.</div>
-    <div style="font-size:24px;font-weight:900;margin-bottom:8px;">Ticket: ${ticket}</div>
-    <div style="margin-bottom:14px;">Guarda este número como respaldo para seguimiento.</div>
-    <button type="button" onclick="nexoCopyTicket('${ticket}')" style="margin:4px;padding:12px 18px;border:0;border-radius:10px;background:#071533;color:white;font-weight:900;cursor:pointer;">Copiar ticket</button>
-    <button type="button" onclick="nexoPrintTicket('${ticket}')" style="margin:4px;padding:12px 18px;border:0;border-radius:10px;background:#071533;color:white;font-weight:900;cursor:pointer;">Imprimir ticket</button>
-    <button type="button" onclick="nexoPdfTicket('${ticket}')" style="margin:4px;padding:12px 18px;border:0;border-radius:10px;background:#071533;color:white;font-weight:900;cursor:pointer;">Ver / guardar PDF</button>
-    <button type="button" onclick="nexoOpenOfficialEmail('${ticket}')" style="margin:4px;padding:12px 18px;border:0;border-radius:10px;background:#071533;color:white;font-weight:900;cursor:pointer;">Enviar correo oficial</button>
-  </div>`;
-}
-
 document.addEventListener('DOMContentLoaded',()=>{
   populateCountryOptions(); applyLanguage(); updatePhoneCode();
   const tEl=document.getElementById('ticketCode'); if(tEl){ tEl.textContent = nextSupportTicket(); }
@@ -1194,13 +1148,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     try{
       if(btn){ btn.disabled=true; btn.textContent='Guardando en Supabase...'; }
       await guardarTicketSupabaseDirecto(ticket);
-      nexoShowTicketPanel(ticket);
+      renderSupportTicketResult(ticket);
       if(tEl) tEl.textContent=nextSupportTicket();
     }catch(error){
       console.error('Error Supabase nexo:', error);
-      alert('ERROR: No se pudo guardar en Supabase.
-
-Detalle: '+(error.message || error));
+      alert('ERROR: No se pudo guardar en Supabase.\n\nDetalle: '+(error.message || error));
     }finally{
       if(btn){ btn.disabled=false; btn.textContent=originalText; }
     }
@@ -1330,6 +1282,82 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
+
+
+<script>
+// HOTFIX nexo soporte: no tocar diseño; restaura países, ticket inferior, botones y correo sin preview mailto.
+(function(){
+  const OFFICIAL_EMAIL='ermcba@hotmail.com';
+  const fallbackCountries=[
+    {code:'BO',name:'Bolivia',area:'+591'},{code:'US',name:'Estados Unidos',area:'+1'},
+    {code:'ES',name:'España',area:'+34'},{code:'BR',name:'Brasil',area:'+55'},
+    {code:'AR',name:'Argentina',area:'+54'},{code:'CL',name:'Chile',area:'+56'},
+    {code:'PE',name:'Perú',area:'+51'},{code:'CO',name:'Colombia',area:'+57'},
+    {code:'MX',name:'México',area:'+52'},{code:'PY',name:'Paraguay',area:'+595'},
+    {code:'UY',name:'Uruguay',area:'+598'},{code:'EC',name:'Ecuador',area:'+593'},
+    {code:'IT',name:'Italia',area:'+39'},{code:'FR',name:'Francia',area:'+33'},
+    {code:'PT',name:'Portugal',area:'+351'},{code:'GB',name:'Reino Unido',area:'+44'}
+  ];
+  function enc(v){ return encodeURIComponent(v||''); }
+  function currentTicket(){
+    const result=document.getElementById('ticketResult');
+    const t=result?.dataset?.ticket || document.getElementById('ticketCode')?.textContent || 'NEXO-R';
+    return t.trim();
+  }
+  window.openOfficialClaimMail=function(ticketArg){
+    const ticket=ticketArg || currentTicket();
+    const nombre=document.getElementById('fullName')?.value || '';
+    const email=document.getElementById('email')?.value || '';
+    const pedido=document.getElementById('orderNumber')?.value || '';
+    const producto=document.getElementById('product')?.value || '';
+    const detalle=document.getElementById('details')?.value || '';
+    const subject='RECLAMO NEXO '+ticket;
+    const body=['Ticket: '+ticket,'Cliente: '+nombre,'Correo: '+email,'Pedido: '+pedido,'Producto: '+producto,'Detalle: '+detalle].join('\n');
+    const outlook='https://outlook.live.com/mail/0/deeplink/compose?to='+enc(OFFICIAL_EMAIL)+'&subject='+enc(subject)+'&body='+enc(body);
+    const opened=window.open(outlook,'_blank','noopener,noreferrer');
+    if(!opened){
+      navigator.clipboard?.writeText(OFFICIAL_EMAIL+' | '+subject+'\n'+body);
+      alert('Se copió el correo y el detalle del reclamo. Si el navegador bloqueó la ventana, habilita pop-ups para nexo.');
+    }
+  };
+  window.copySupportTicket=function(ticket){
+    const t=ticket||currentTicket();
+    navigator.clipboard?.writeText(t);
+    alert('Ticket copiado: '+t);
+  };
+  window.printSupportTicket=function(ticket){
+    const t=ticket||currentTicket();
+    const nombre=document.getElementById('fullName')?.value || '';
+    const email=document.getElementById('email')?.value || '';
+    const w=window.open('','_blank','noopener,noreferrer');
+    if(!w){ window.print(); return; }
+    w.document.write('<html><head><title>Ticket '+t+'</title><style>body{font-family:Arial;padding:24px}h1{color:#09152e}.box{border:1px solid #ddd;border-radius:12px;padding:18px}</style></head><body><h1>Ticket de soporte nexo™</h1><div class="box"><h2>'+t+'</h2><p><b>Cliente:</b> '+nombre+'</p><p><b>Correo:</b> '+email+'</p><p>Guarde este número como respaldo para seguimiento.</p></div></body></html>');
+    w.document.close(); w.focus(); w.print();
+  };
+  window.pdfSupportTicket=function(ticket){ printSupportTicket(ticket); };
+  window.renderSupportTicketResult=function(ticket){
+    const box=document.getElementById('ticketResult'); if(!box) return;
+    box.dataset.ticket=ticket;
+    box.innerHTML='<div>✅ Reclamo registrado correctamente.</div><h3>Ticket: '+ticket+'</h3><p>Guarda este número como respaldo para seguimiento.</p><div class="ticket-actions"><button type="button" class="ticket-action-btn" onclick="copySupportTicket(\''+ticket+'\')">Copiar ticket</button><button type="button" class="ticket-action-btn" onclick="printSupportTicket(\''+ticket+'\')">Imprimir ticket</button><button type="button" class="ticket-action-btn" onclick="pdfSupportTicket(\''+ticket+'\')">Ver / guardar PDF</button><button type="button" class="ticket-action-btn" onclick="openOfficialClaimMail(\''+ticket+'\')">Enviar correo oficial</button></div>';
+    box.style.display='block';
+  };
+  function restoreCountries(){
+    const sel=document.getElementById('country'); if(!sel) return;
+    if(sel.options.length>1) return;
+    sel.innerHTML='<option value="">Seleccione país</option>';
+    const source=(Array.isArray(window.countriesPhoneData)&&window.countriesPhoneData.length>3)?window.countriesPhoneData:fallbackCountries;
+    source.forEach(c=>{const o=document.createElement('option'); o.value=c.code; o.textContent=(c.name||c.code)+' ('+(c.area||'')+')'; o.dataset.area=c.area||''; sel.appendChild(o);});
+  }
+  function hardenSupportPanel(){
+    restoreCountries();
+    const consult=document.getElementById('consultBtn');
+    if(consult && !consult.textContent.trim()) consult.textContent='Consultar';
+    const official=document.querySelector('.official-mail-button');
+    if(official){ official.onclick=function(e){e.preventDefault(); openOfficialClaimMail();}; }
+  }
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(hardenSupportPanel,150); setTimeout(hardenSupportPanel,800); });
+})();
+</script>
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
   <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>

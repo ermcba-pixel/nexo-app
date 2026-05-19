@@ -504,9 +504,9 @@
                     <label class="filter-label"><span id="catLabel">📁 Categoría</span></label>
                     <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
                         <option value="" id="catAll">Todas las categorías</option>
-                        <option value="electronica" id="catElect">Electrónica</option>
-                        <option value="accesorios" id="catAcc">Accesorios</option>
-                        <option value="moda" id="catFashion">Moda</option>
+                        <option value="" id="catElect">Electrónica</option>
+                        <option value="" id="catAcc">Accesorios</option>
+                        <option value="" id="catFashion">Moda</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -517,9 +517,6 @@
 
             <!-- PRODUCTOS -->
             <div class="products-grid" id="productsGrid"></div>
-            <div id="nexoSearchHelp" style="margin:28px 0 6px;padding:18px 20px;border-radius:16px;background:#f4faf7;border:1px solid rgba(122,199,66,.35);color:#2d3e3f;font-weight:800;line-height:1.65;text-align:center;">
-                Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción. Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.
-            </div>
         </div>
     </div>
 
@@ -606,7 +603,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
             if(!productsToShow || productsToShow.length === 0){
-                productsToShow = nexoBuildTemporalAmazonCatalog(document.getElementById('searchInput')?.value || 'producto', Number(document.getElementById('priceFilter')?.value) || Infinity);
+                productsToShow = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
                 products = productsToShow.slice();
             }
             grid.innerHTML = productsToShow.map(p => `
@@ -635,38 +632,65 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         let nexoLastAmazonQuery = '';
 
         function nexoBuildTemporalAmazonCatalog(search, maxPrice){
-            const qRaw = String(search || '').trim();
-            const q = normalizeText(qRaw || 'producto');
-            const priceLimit = Number.isFinite(Number(maxPrice)) && Number(maxPrice) > 0 ? Number(maxPrice) : Infinity;
-            const cap = priceLimit === Infinity ? 60 : Math.max(1, priceLimit);
-            const categorySel = document.getElementById('categoryFilter')?.value || '';
-            const detectCat = categorySel || ((q.includes('camisa') || q.includes('zapato') || q.includes('cordon') || q.includes('ropa') || q.includes('pantalon') || q.includes('tenis')) ? 'moda' : (q.includes('cable') || q.includes('cargador') || q.includes('mouse') || q.includes('usb') || q.includes('oficina') ? 'accesorios' : (q.includes('iphone') || q.includes('telefono') || q.includes('laptop') || q.includes('auricular') ? 'electronica' : 'accesorios')));
-            const emoji = detectCat === 'moda' ? (q.includes('zapato') || q.includes('tenis') ? '👟' : q.includes('camisa') ? '👕' : '🛍️') : detectCat === 'electronica' ? '📱' : '🔧';
-            const baseName = qRaw || (detectCat === 'moda' ? 'producto de moda' : detectCat === 'electronica' ? 'producto electrónico' : 'accesorio');
-            const prices = [];
-            const templates = priceLimit === Infinity
-              ? [15,18.5,22.9,29.9,34,39.9,49,59,79,99,129,149,189,229,279,329,399,449,529,699]
-              : Array.from({length:20}, (_,i)=> Math.max(0.99, +(cap * (0.18 + (i*0.82/19))).toFixed(2)));
-            templates.forEach(v=>prices.push(Math.min(v, cap)));
-            const suffixes = ['oferta','económico','mejor valor','envío internacional','Amazon','básico','compacto','pack','popular','recomendado','nuevo','compatible','ligero','premium','seleccionado','promoción','uso diario','calidad/precio','disponible','ver proveedor'];
-            const mk = (idx, suffix, price) => ({
-                id: 7000 + idx,
-                name: `${baseName} ${suffix}`.trim(),
-                price: Number(price),
-                category: detectCat,
-                emoji,
-                provider:'Amazon', providerLogo:'🟠', stock:'Verificar disponibilidad y precio real en Amazon',
-                shippingAmazon: 0, vendorFee: 0,
-                aliases: `${baseName} ${suffix} ${detectCat} amazon original`,
-                sourceUrl:nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(baseName + ' ' + suffix)}${priceLimit !== Infinity ? '&rh=p_36%3A0-' + Math.round(cap*100) : ''}`),
-                imageType: detectCat
+            const q = normalizeText(search || 'producto');
+            const tag = 'nexo08-20';
+            const mk = (id,name,price,category,emoji,extra='') => ({
+                id, name, price, category, emoji,
+                provider:'Amazon', providerLogo:'🟠', stock: Math.max(6, 38 - id),
+                shippingAmazon: Math.max(6, price * 0.045), vendorFee: Math.max(3, price * 0.018),
+                aliases: `${name} ${category} amazon original ${extra}`,
+                sourceUrl:nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(name)}`),
+                imageType: category
             });
-            return suffixes.map((x,i)=>mk(i+1,x,prices[i] || cap)).filter(p=>p.price <= cap).slice(0,20);
+            let items=[];
+            if(q.includes('iphone') || q.includes('celular') || q.includes('phone')){
+                items=[
+                  mk(101,'Apple iPhone 15 Pro Max desbloqueado',999,'electronica','📱','iphone celular apple'),
+                  mk(102,'Apple iPhone 15 Plus desbloqueado',829,'electronica','📱','iphone celular apple'),
+                  mk(103,'Apple iPhone 15 desbloqueado',729,'electronica','📱','iphone celular apple'),
+                  mk(104,'Apple iPhone 14 Pro Max renovado',699,'electronica','📱','iphone celular apple'),
+                  mk(105,'Apple iPhone 14 desbloqueado',599,'electronica','📱','iphone celular apple'),
+                  mk(106,'Apple iPhone 13 Pro renovado',529,'electronica','📱','iphone celular apple'),
+                  mk(107,'Apple iPhone 13 desbloqueado',449,'electronica','📱','iphone celular apple'),
+                  mk(108,'Apple iPhone SE 3ra generación',279,'electronica','📱','iphone celular apple'),
+                  mk(109,'Cargador USB-C para iPhone',22.9,'accesorios','🔌','iphone cable'),
+                  mk(110,'Funda MagSafe transparente iPhone',18.5,'accesorios','📱','iphone funda')
+                ];
+            } else if(q.includes('laptop') || q.includes('notebook') || q.includes('computadora')){
+                items=[
+                  mk(201,'Apple MacBook Pro 14 M3',1699,'electronica','💻','laptop notebook'),
+                  mk(202,'Dell XPS 13 Plus',1299,'electronica','💻','laptop notebook'),
+                  mk(203,'HP Spectre x360 14',1199,'electronica','💻','laptop notebook'),
+                  mk(204,'Lenovo ThinkPad X1 Carbon',1149,'electronica','💻','laptop notebook'),
+                  mk(205,'ASUS ZenBook 14 OLED',899,'electronica','💻','laptop notebook'),
+                  mk(206,'Acer Aspire 5',549,'electronica','💻','laptop notebook'),
+                  mk(207,'Lenovo IdeaPad 15',429,'electronica','💻','laptop notebook'),
+                  mk(208,'HP 14 Ryzen',399,'electronica','💻','laptop notebook')
+                ];
+            } else if(q.includes('zapato') || q.includes('tenis') || q.includes('shoe') || q.includes('sneaker')){
+                items=[
+                  mk(301,'Nike Air Max zapatillas deportivas',129,'moda','👟','zapatillas tenis'),
+                  mk(302,'Adidas Ultraboost running shoes',119,'moda','👟','zapatillas tenis'),
+                  mk(303,'New Balance 574 sneakers',89,'moda','👟','zapatillas tenis'),
+                  mk(304,'Puma Smash v2 casual sneakers',54,'moda','👟','zapatillas tenis')
+                ];
+            } else {
+                const clean = (search || 'producto').trim();
+                items=[
+                  mk(401,`${clean} premium Amazon opción alta`,299,'accesorios','🛍️',clean),
+                  mk(402,`${clean} profesional seleccionado`,189,'accesorios','🛍️',clean),
+                  mk(403,`${clean} recomendado calidad/precio`,129,'accesorios','🛍️',clean),
+                  mk(404,`${clean} versión estándar`,79,'accesorios','🛍️',clean),
+                  mk(405,`${clean} accesorio compatible`,35,'accesorios','🔧',clean)
+                ];
+            }
+            items = items.filter(p => !Number.isFinite(maxPrice) || p.price <= maxPrice);
+            return items.sort((a,b)=>Number(b.price)-Number(a.price));
         }
 
         async function loadAmazonProductsFromApi(search, maxPrice){
             const q = String(search || '').trim();
-            if(q.length < 2){ products = nexoBuildTemporalAmazonCatalog(q || 'producto', maxPrice); renderProducts(products); return true; }
+            if(q.length < 2){ products = nexoBuildTemporalAmazonCatalog('iphone', maxPrice); renderProducts(products); return true; }
             const grid = document.getElementById('productsGrid');
             // Operación inmediata: no bloquear al cliente esperando la API oficial de Amazon.
             products = nexoBuildTemporalAmazonCatalog(q, maxPrice);
@@ -707,12 +731,13 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             const priceValue = document.getElementById('priceFilter').value;
             const maxPrice = priceValue === '' ? Infinity : Number(priceValue);
             clearTimeout(nexoAmazonLoadTimer);
-            // Búsqueda operativa: siempre reconstruye resultados según producto + categoría + precio.
-            if(rawSearch.trim().length >= 1 || Number.isFinite(maxPrice) || category){
-                products = nexoBuildTemporalAmazonCatalog(rawSearch.trim() || (category || 'producto'), maxPrice);
-                renderProducts(products);
-                if(rawSearch.trim().length >= 2){ nexoAmazonLoadTimer = setTimeout(()=>loadAmazonProductsFromApi(rawSearch, maxPrice), 250); }
-                return;
+            if(rawSearch.trim().length >= 2){
+                nexoAmazonLoadTimer = setTimeout(()=>loadAmazonProductsFromApi(rawSearch, maxPrice), 120);
+                if(!products || products.length === 0){
+                    products = nexoBuildTemporalAmazonCatalog(rawSearch, maxPrice);
+                    renderProducts(products);
+                    return;
+                }
             }
             const base = products
               .filter(p => Number(p.price) >= 0.0001)
