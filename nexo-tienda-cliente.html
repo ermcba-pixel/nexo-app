@@ -529,14 +529,11 @@
                         <option value="electronica" id="catElect">Electrónica</option>
                         <option value="accesorios" id="catAcc">Accesorios</option>
                         <option value="moda" id="catFashion">Moda</option>
-                        <option value="oficina">Oficina</option>
-                        <option value="belleza">Belleza</option>
-                        <option value="hogar">Hogar</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label"><span id="priceLabel">💲 Precio Máximo</span></label>
-                    <input type="number" class="filter-input" id="priceFilter" placeholder="Sin límite si queda vacío" min="0" onchange="filterProducts()">
+                    <input type="number" class="filter-input" id="priceFilter" placeholder="USD" min="0" onchange="filterProducts()">
                 </div>
             </div>
 
@@ -619,8 +616,50 @@ function nexoProductImageMarkup(product){
         let products = [];
 
 let currentLang = localStorage.getItem('nexoLang') || 'es';
-function tt(){ return storeI18n[currentLang] || storeI18n.es; }
-function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=currentLang; document.getElementById('storeTitle').textContent=t.title; document.getElementById('storeSubtitle').textContent=t.subtitle; document.getElementById('cartTitle').textContent=t.cartTitle; document.getElementById('backText').textContent=t.back; document.getElementById('searchLabel').textContent=t.search; document.getElementById('catLabel').textContent=t.cat; document.getElementById('priceLabel').textContent=t.price; document.getElementById('searchInput').placeholder=t.searchPh; document.getElementById('catAll').textContent=t.catAll; document.getElementById('catElect').textContent=t.catElect; document.getElementById('catAcc').textContent=t.catAcc; document.getElementById('catFashion').textContent=t.catFashion; document.getElementById('sumSubtotalLbl').textContent=t.sumSubtotal; document.getElementById('sumShipLbl').textContent=t.sumShip; document.getElementById('sumVendorLbl').textContent=t.sumVendor; document.getElementById('sumComLbl').textContent=t.sumCom; document.getElementById('sumItLbl').textContent=t.sumIt; document.getElementById('sumIueLbl').textContent=t.sumIue; document.getElementById('sumTotalLbl').textContent=t.sumTotal; document.getElementById('sumNote').textContent=t.sumNote; document.getElementById('checkoutBtnText').textContent=t.checkout; document.getElementById('cartBadge').title=t.cartTitleAttr; }
+function tt(){ return {
+        title:'Tienda nexo™',
+        subtitle:'20 Productos multi-proveedor • Envíos Internacionales',
+        cartTitle:'🛒 Tu Carrito',
+        back:'← Volver',
+        search:'🔍 Buscar',
+        cat:'📁 Categoría',
+        price:'💲 Precio Máximo',
+        searchPh:'Nombre del producto...',
+        catAll:'Todas las categorías',
+        catElect:'Electrónica',
+        catAcc:'Accesorios',
+        catFashion:'Moda',
+        sumSubtotal:'Subtotal producto:',
+        sumShip:'Gastos de envío Amazon/Marketplace:',
+        sumVendor:'Gastos proveedor/marketplace Amazon:',
+        sumCom:'Comisión nexo™:',
+        sumIt:'',
+        sumIue:'',
+        sumTotal:'Total a Pagar:',
+        sumNote:'El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.',
+        checkout:'Proceder al Pago',
+        cartTitleAttr:'Ver Carrito',
+        reviews:'reseñas',
+        stock:'Stock',
+        available:'disponibles',
+        soldOut:'Agotado',
+        add:'+ Carrito',
+        empty:'Tu carrito está vacío',
+        notifAdded:'agregado al carrito'
+    }; }
+function applyStoreLanguage(){
+    const t=tt();
+    document.documentElement.lang='es';
+    const set=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
+    const ph=(id,val)=>{const el=document.getElementById(id); if(el) el.placeholder=val;};
+    set('storeTitle',t.title); set('storeSubtitle',t.subtitle); set('cartTitle',t.cartTitle); set('backText',t.back);
+    set('searchLabel',t.search); set('catLabel',t.cat); set('priceLabel',t.price);
+    ph('searchInput',t.searchPh); ph('priceFilter','Sin límite si queda vacío');
+    set('catAll',t.catAll); set('catElect',t.catElect); set('catAcc',t.catAcc); set('catFashion',t.catFashion);
+    set('sumSubtotalLbl',t.sumSubtotal); set('sumShipLbl',t.sumShip); set('sumVendorLbl',t.sumVendor); set('sumComLbl',t.sumCom);
+    set('sumItLbl',''); set('sumIueLbl',''); set('sumTotalLbl',t.sumTotal); set('sumNote',t.sumNote); set('checkoutBtnText',t.checkout);
+    const badge=document.getElementById('cartBadge'); if(badge) badge.title=t.cartTitleAttr;
+}
 
         let cart = JSON.parse(localStorage.getItem('nexoCart')) || [];
 
@@ -628,8 +667,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         function renderProducts(productsToShow = products) {
             const grid = document.getElementById('productsGrid');
             if(!productsToShow || productsToShow.length === 0){
-                const hasSearch = (document.getElementById('searchInput')?.value || '').trim().length > 0;
-                grid.innerHTML = hasSearch ? `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:38px 10px;background:#f5fbf9;border:1px solid #d7e4df;border-radius:16px;">No se encontraron productos dentro del precio máximo indicado. Ajuste el nombre del producto o el límite de precio.</div>` : '';
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:38px 10px;background:#f5fbf9;border:1px solid #d7e4df;border-radius:16px;">No se encontraron productos dentro del precio máximo indicado. Ajuste el nombre del producto o el límite de precio.</div>`;
                 return;
             }
             grid.innerHTML = productsToShow.map(p => `
@@ -661,23 +699,27 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
             if(selectedCategory) return selectedCategory;
             if(/iphone|celular|phone|laptop|notebook|computadora|cargador|usb|mouse|teclado|monitor|auricular|audifono|headphone|electron/i.test(q)) return 'electronica';
             if(/zapato|tenis|camisa|polera|pantalon|ropa|moda|cordon|cordones|cinturon|gorra|shoe|shirt/i.test(q)) return 'moda';
-            if(/lapiz|lápiz|boligrafo|bolígrafo|cuaderno|oficina|papel|carpeta|marcador|desk|office/i.test(q)) return 'oficina';
-            if(/belleza|crema|maquillaje|shampoo|perfume|beauty|skin/i.test(q)) return 'belleza';
-            if(/hogar|cocina|casa|home|kitchen/i.test(q)) return 'hogar';
             return 'accesorios';
         }
 
         function nexoBuildTemporalAmazonCatalog(search, maxPrice, selectedCategory=''){
             const cleanRaw = String(search || '').trim();
-            const clean = cleanRaw || 'producto Amazon';
+            if(!cleanRaw) return [];
+            const clean = cleanRaw;
             const q = normalizeText(clean);
             const wantedCategory = nexoDetectCategory(q, selectedCategory);
-            const limit = Number.isFinite(maxPrice) && maxPrice !== Infinity ? Math.max(0.01, Number(maxPrice)) : 60;
-            const priceSteps = [limit, limit*0.85, limit*0.70, limit*0.55, limit*0.40, limit*0.25, Math.max(0.99, limit*0.15), Math.max(0.75, limit*0.10), Math.max(0.50, limit*0.06), Math.max(0.35, limit*0.04)];
-            const variants = ['hasta USD '+limit.toFixed(0),'oferta','económico','mejor valor','envío internacional','Amazon','compatible','pack básico','selección recomendada','opción económica','precio bajo','alternativa Amazon','descuento','uso diario','estándar','práctico','calidad/precio','accesible','proveedor original','disponible'];
-            const emoji = wantedCategory==='moda' ? (q.includes('zapato') || q.includes('tenis') || q.includes('shoe') ? '👟' : '👕') : wantedCategory==='electronica' ? '🔌' : '🛍️';
+            const limit = Number.isFinite(maxPrice) && maxPrice !== Infinity ? Math.max(0.50, Number(maxPrice)) : 60;
+            const variants = [
+                'hasta USD '+limit.toFixed(0),'oferta','económico','mejor valor','envío internacional',
+                'Amazon','compatible','pack básico','selección recomendada','opción económica',
+                'precio bajo','alternativa Amazon','descuento','uso diario','estándar',
+                'práctico','calidad/precio','accesible','proveedor original','disponible'
+            ];
+            const emoji = wantedCategory==='moda' ? (q.includes('zapato') || q.includes('tenis') || q.includes('shoe') ? '👟' : '👕') : wantedCategory==='electronica' ? '🔌' : wantedCategory==='oficina' ? '📎' : wantedCategory==='belleza' ? '🧴' : wantedCategory==='hogar' ? '🏠' : '🛍️';
+            const factors = [1,.85,.7,.6,.5,.4,.35,.3,.25,.2,.18,.16,.14,.12,.1,.09,.08,.07,.06,.05];
             const items = variants.map((v,idx)=>{
-                const price = Math.max(0.50, Math.min(limit, priceSteps[idx % priceSteps.length]));
+                const factor = factors[idx] || .5;
+                const price = Math.max(0.50, Math.min(limit, limit * factor));
                 const name = `${clean} ${v}`.replace(/\s+/g,' ').trim();
                 return {
                     id: 7000 + idx,
@@ -695,7 +737,7 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
                     imageType:wantedCategory
                 };
             });
-            return items.filter(p => !Number.isFinite(maxPrice) || maxPrice === Infinity || Number(p.price) <= maxPrice).slice(0,20);
+            return items.filter(p => Number(p.price) <= limit).slice(0,20);
         }
 
         async function loadAmazonProductsFromApi(search, maxPrice, selectedCategory=''){
@@ -879,7 +921,8 @@ function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=curre
         document.addEventListener('DOMContentLoaded', () => {
             applyStoreLanguage();
             products = [];
-            document.getElementById('productsGrid').innerHTML = '';
+            const grid = document.getElementById('productsGrid');
+            if(grid) grid.innerHTML = '';
             updateCartCount();
         });
 
@@ -1064,24 +1107,23 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 <script src="nexo-legal-i18n.js"></script>
 
-<script id="nexo-store-title-fix">
+<script id="nexo-final-store-guard">
 window.addEventListener('DOMContentLoaded', function(){
   try{
     const title=document.getElementById('storeTitle');
     const sub=document.getElementById('storeSubtitle');
+    const grid=document.getElementById('productsGrid');
     if(title) title.textContent='Tienda nexo™';
     if(sub) sub.textContent='20 Productos multi-proveedor • Envíos Internacionales';
+    const box=document.querySelector('.nexo-search-instruction');
+    if(box) box.innerHTML='Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción.<br>Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.';
+    const search=document.getElementById('searchInput');
+    const price=document.getElementById('priceFilter');
+    const cat=document.getElementById('categoryFilter');
+    if(price) price.placeholder='Sin límite si queda vacío';
+    if(grid && search && !search.value.trim()) grid.innerHTML='';
+    [search, price, cat].forEach(el=>{ if(el) el.addEventListener('input', function(){ if(typeof filterProducts==='function') filterProducts(); }); });
   }catch(e){}
-});
-</script>
-
-
-<script id="nexo-store-instruction-fix">
-window.addEventListener('DOMContentLoaded', function(){
-  const box=document.querySelector('.nexo-search-instruction');
-  if(box){
-    box.innerHTML='Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción.<br>Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.';
-  }
 });
 </script>
 
