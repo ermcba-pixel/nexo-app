@@ -1,40 +1,15 @@
-
-const SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
-const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
-let nexoSupabase = null;
-function initNexoSupabase(){
-  if (nexoSupabase) return nexoSupabase;
-  if (!window.supabase || !window.supabase.createClient) { console.warn('Supabase no cargó. El pedido continuará con respaldo local.'); return null; }
-  nexoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
-  window.nexoSupabase = nexoSupabase;
-  return nexoSupabase;
-}
-window.nexoSavePedidoToSupabase = async function(orderData){
-  const client = initNexoSupabase();
-  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
-  const items = Array.isArray(orderData.items) ? orderData.items : [];
-  const firstItem = items[0] || {};
-  const customer = orderData.customer || {};
-  const parts = String(orderData.fullName || '').trim().split(/\s+/);
-  const clienteNombre = parts.shift() || '';
-  const clienteApellido = parts.join(' ');
-  const metodo = orderData.paymentMethod || 'card';
-  const row = {
-    cliente_email: orderData.email || customer.email || '',
-    cliente_nombre: clienteNombre, cliente_apellido: clienteApellido, cliente_documento: customer.documentId || '',
-    cliente_tel: customer.phone || orderData.phone || '', cliente_pais: customer.country || orderData.country || '', cliente_ciudad: customer.city || orderData.city || '', cliente_direccion: customer.address || orderData.address || '',
-    producto: items.map(i => `${i.name || i.nombre || i.producto || 'Producto nexo™'} x${i.quantity || i.cantidad || 1}`).join(' | '),
-    producto_url: firstItem.url || firstItem.link || '', producto_nombre: firstItem.name || firstItem.nombre || firstItem.producto || 'Pedido nexo™', proveedor: firstItem.provider || firstItem.vendor || firstItem.proveedor || 'Marketplace externo',
-    cantidad: items.reduce((n,i)=>n+Number(i.quantity || i.cantidad || 1),0) || 1, precio_usd: Number(orderData.total || 0), costo_producto_usd: Number(orderData.subtotal || 0), costo_envio_usd: Number(orderData.amazonShipping || 0),
-    comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
-    moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
-    fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
-    observaciones: `Cobro principal PayPal (${NEXO_PAYPAL_EMAIL}). El total cobrado incluye precio proveedor + comisión nexo™ sobre precio proveedor + costos externos aplicables. ${orderData.note || ''}`.trim()
-  };
-  return await client.from('pedidos').insert([row]).select().single();
-};
-window.nexoPrefillCheckoutFromSupabase = async function(){
-  try{ const client=initNexoSupabase(); const email=(sessionStorage.getItem('clientEmail')||document.getElementById('email')?.value||'').trim(); if(!email)return; const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle(); if(error||!data)return; const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!==undefined&&v!==null)el.value=v;}; const full=`${data.nombre||''} ${data.apellido||''}`.trim(); set('fullName',full); set('email',data.email||email); set('phoneCode',data.codigo_area||''); set('phoneNumber',data.telefono||''); set('region',data.region||''); set('city',data.ciudad||''); set('address',data.direccion||''); set('zipCode',data.codigo_postal||''); sessionStorage.setItem('nexoActiveClient', JSON.stringify({fullName:full,name:data.nombre||'',lastName:data.apellido||'',documentId:data.documento||'',email:data.email||email,country:data.pais||'',areaCode:data.codigo_area||'',phone:data.telefono||'',postalCode:data.codigo_postal||'',region:data.region||'',city:data.ciudad||'',address:data.direccion||''})); }catch(e){console.warn(e);}
-};
-window.addEventListener('DOMContentLoaded',()=>{try{initNexoSupabase();}catch(e){console.warn(e)} setTimeout(()=>window.nexoPrefillCheckoutFromSupabase?.(),400);});
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagos, comisiones y reembolsos | nexo</title>
+<style>:root{--primary:#4A6B6D;--secondary:#5A7C7E;--white:#fff;--dark:#2D3E3F;--accent:#7AC742;--line:#e5eeee}*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--dark)}.wrap{max-width:1040px;margin:28px auto;padding:0 18px}.card{background:var(--white);border-radius:24px;box-shadow:0 18px 40px rgba(0,0,0,.18);padding:34px}h1{margin:20px 0;color:var(--primary);font-size:34px}h2{color:var(--primary);margin-top:30px;border-top:1px solid var(--line);padding-top:20px}p,li{line-height:1.65;font-size:16px}.btn{display:inline-block;background:var(--dark);color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700}.note{background:#f5f9ef;border-left:4px solid var(--accent);padding:14px 16px;border-radius:12px;margin:18px 0}.footer-note{margin-top:34px;text-align:center;color:#475;font-size:13px;border-top:1px solid var(--line);padding-top:18px}</style>
+</head><body><div class="wrap"><div class="card"><a class="btn" href="index.html">← Volver al portal</a><h1>Política de pagos, comisiones y reembolsos – nexo</h1><div class="note">nexo™ actúa como intermediario. Las devoluciones y reembolsos dependen de las condiciones del proveedor internacional y del medio de pago utilizado.</div>
+<h2>1. Modalidades de pago</h2><p>La plataforma puede permitir pagos mediante tarjetas, PayPal, Payoneer, transferencias bancarias internacionales u otros medios habilitados según disponibilidad operativa.</p>
+<h2>2. Estructura del pago</h2><p>El pago incluye costo del producto o servicio, costos logísticos si aplican y comisión de intermediación de nexo™.</p>
+<h2>3. Moneda</h2><p>Las operaciones se realizan en USD. Para efectos fiscales en Bolivia, los importes podrán convertirse a moneda local al tipo de cambio oficial o de referencia aplicable.</p>
+<h2>4. Confirmación</h2><p>La orden se procesa una vez confirmado el pago por la pasarela o medio de pago correspondiente.</p>
+<h2>5. Reembolsos</h2><p>Los reembolsos se evaluarán caso por caso y dependerán del proveedor internacional, marketplace, operador logístico y medio de pago utilizado. nexo™ no garantiza devoluciones si el proveedor no las acepta.</p>
+<h2>6. Comisión de intermediación</h2><p>nexo™ retiene una comisión por su servicio de intermediación internacional. La devolución de esta comisión se evaluará caso por caso según el estado de la orden y la gestión realizada.</p>
+<h2>7. Procedimiento</h2><p>El cliente debe presentar su solicitud mediante el canal oficial de soporte, indicando número de pedido, producto, motivo y evidencias.</p>
+<div class="footer-note">nexo – Plataforma de Intermediación Comercial Internacional<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>© 2026 nexo™ – Todos los derechos reservados</div></div></div><script src="nexo-legal-i18n.js"></script></body></html>

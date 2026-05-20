@@ -1,62 +1,1740 @@
-(function(){
-  const supported = ['es','en','pt','it','fr'];
-  function normalizeLang(v){
-    if(!v) return 'es';
-    v = String(v).toLowerCase();
-    if (supported.includes(v)) return v;
-    if (v.includes('english') || v=='inglés' || v=='ingles') return 'en';
-    if (v.includes('portu')) return 'pt';
-    if (v.includes('ital')) return 'it';
-    if (v.includes('fran')) return 'fr';
-    return 'es';
-  }
-  function getLang(){ return normalizeLang(localStorage.getItem('nexo_language') || 'es'); }
-  const TX = {
-    es: {
-      supportTitle:'Atención al Cliente', supportDesc:'Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.',
-      home:'Inicio', store:'Tienda', admin:'Panel Admin', language:'Idioma', ticket:'Número de ticket', destEmail:'Correo de destino',
-      supportForm:'Formulario de soporte', supportHelp:'Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.',
-      fullName:'Nombre completo', email:'Correo electrónico', phone:'Teléfono / WhatsApp', country:'País', orderNumber:'Número de pedido', product:'Producto',
-      requestType:'Tipo de solicitud', priority:'Prioridad', channel:'Canal de contacto preferido', details:'Descripción detallada', sendRequest:'Enviar reclamo',
-      placeholderFullName:'Escriba su nombre completo', placeholderEmail:'', placeholderPhone:'Escriba su número',
-      placeholderOrder:'Ej. ', placeholderProduct:'Ej. Auriculares inalámbricos Pro', placeholderDetails:'Describa el problema, fechas, qué ocurrió y qué solución espera.',
-      selectOption:'Seleccione una opción', claim:'Reclamo', inquiry:'Consulta', exchange:'Cambio', return:'Devolución',
-      selectPriority:'Seleccione prioridad', low:'Baja', medium:'Media', high:'Alta', urgent:'Urgente',
-      selectChannel:'Seleccione canal', emailChannel:'Correo electrónico', whatsapp:'WhatsApp', phoneCall:'Llamada telefónica', webChat:'Chat web',
-      attentionLevels:'Niveles de atención', levels:['Recepción y clasificación automática del caso','Validación de pedido, producto y canal de pago','Asignación de prioridad para seguimiento','Respuesta inicial por el canal elegido'],
-      complaintsEmail:'Correo oficial de reclamos', complaintsBody:'Todos los reclamos enviados desde este formulario deben dirigirse al correo oficial.',
-      virtualAgent:'Agente virtual NEXO', virtualAgentBody:'Asistente inicial para orientar consultas frecuentes antes de escalar el caso al equipo humano.', quickConsult:'Escriba aquí su consulta rápida...', consult:'Consultar',
-      storeTitle:'Tienda NEXO', storeSub:'12 Productos Premium • Envíos Internacionales', back:'← Volver', search:'🔍 Buscar', searchPlaceholder:'Nombre del producto...', category:'📁 Categoría', allCategories:'Todas las categorías', electronics:'Electrónica', accessories:'Accesorios', fashion:'Moda', maxPrice:'💲 Precio Máximo', viewCart:'Ver Carrito',
-      cartTitle:'🛒 Tu Carrito', emptyCart:'Tu carrito está vacío', subtotalProduct:'Subtotal producto:', shippingAmazon:'Gastos de envío (Amazon/Marketplace):', vendorFees:'Gastos de la empresa vendedora:', commission35:'Comisión NEXO:', it3:'', iue25:'', totalToPay:'Total a Pagar:', orangeNote:'Los valores en naranja corresponden a transporte y cargos externos del proveedor o marketplace.', proceedPayment:'Proceder al Pago', reviews:'reviews', stock:'Stock', available:'disponibles', soldOut:'Agotado', addCart:'+ Carrito', publicStore:'Tienda Pública',
-      checkoutTitle:'Checkout NEXO', checkoutSub:'Compra Segura • 256-bit SSL • 196 Países', backStore:'← Volver a Tienda', yourCart:'🛒 Tu Carrito', personalData:'👤 Datos Personales', fullName2:'Nombre Completo', email2:'Email', phone2:'Teléfono', code:'Código', number:'Número', shippingAddress:'📍 Dirección de Envío', selectCountry:'Selecciona un país...', region:'Región/Estado', city:'Ciudad', fullAddress:'Dirección Completa', zip:'Código Postal', paymentMethod:'💳 Método de Pago', costSummary:'📊 Resumen de Costo', productPrice:'📦 Precio del Producto', subtotalLabel:'Subtotal (Producto):', mediationCommission:'🏢 Comisión de Intermediación', taxesCommission:'💰 ', totalPay:'💵 TOTAL A PAGAR:', completePurchase:'🔒 Completar Compra', customerObs:'Observación del cliente', obsPlaceholder:'Ej.: entregar en horario de oficina, referencia de dirección, etc.', reviewConfirm:'Revisa y confirma el pedido', purchaseConfirmation:'Confirmación de compra', goBackBtn:'Volver', confirmPurchase:'Confirmar compra', card:'💳 Tarjeta de Crédito/Débito', bank:'🏦 Transferencia Bancaria', paypal:'🅿️ PayPal', payoneer:'📱 Payoneer', cardNumber:'Número de Tarjeta', accountNumber:'Número de Cuenta', swift:'Código SWIFT/BIC', paypalRedirect:'✅ Serás redirigido a PayPal para completar el pago de forma segura.', payoneerRedirect:'✅ Serás redirigido a Payoneer para completar el pago de forma segura.', secureFooter:'Checkout Seguro Internacional', client:'Cliente', destination:'Destino', address:'Dirección', paymentMethod2:'Método de pago',
-      confirmed:'¡Compra Confirmada!', confirmedMsg:'Tu pedido ha sido procesado correctamente. Recibirás un email con los detalles de tu compra.', invoiceNumber:'Número de Factura', purchaseDate:'Fecha de Compra:', items:'Artículos:', totalPaid:'Total Pagado:', emailNote:'📧 Revisa tu correo (incluyendo spam) para la factura y detalles de envío.', trackNote:'📱 Puedes rastrear tu pedido usando el número de factura.', continueShopping:'🛒 Continuar Comprando', goPortal:'🏠 Ir al Portal', articleSing:'artículo', articlePlur:'artículos'
-    },
-    en: {
-      supportTitle:'Customer Care', supportDesc:'Manage claims, inquiries, exchanges, returns and order tracking in one corporate panel.', home:'Home', store:'Store', admin:'Admin Panel', language:'Language', ticket:'Ticket number', destEmail:'Destination email', supportForm:'Support Form', supportHelp:'Complete the form so the team can review your case with priority, traceability and formal ticket registration.', fullName:'Full name', email:'Email address', phone:'Phone / WhatsApp', country:'Country', orderNumber:'Order number', product:'Product', requestType:'Request type', priority:'Priority', channel:'Preferred contact channel', details:'Detailed description', sendRequest:'Send request', placeholderFullName:'Enter your full name', placeholderEmail:'customer@email.com', placeholderPhone:'Enter your number', placeholderOrder:'Ex. ', placeholderProduct:'Ex. Wireless Earbuds Pro', placeholderDetails:'Describe the issue, dates, what happened and your expected solution.', selectOption:'Select an option', claim:'Claim', inquiry:'Inquiry', exchange:'Exchange', return:'Return', selectPriority:'Select priority', low:'Low', medium:'Medium', high:'High', urgent:'Urgent', selectChannel:'Select channel', emailChannel:'Email', whatsapp:'WhatsApp', phoneCall:'Phone call', webChat:'Web chat', attentionLevels:'Service levels', levels:['Automatic case reception and classification','Validation of order, product and payment channel','Priority assignment for follow-up','Initial response through the selected channel'], complaintsEmail:'Official claims email', complaintsBody:'All claims submitted from this form must be sent to the official email address.', virtualAgent:'NEXO virtual agent', virtualAgentBody:'Initial assistant to guide frequent questions before escalating the case to the human team.', quickConsult:'Write your quick question here...', consult:'Consult',
-      storeTitle:'NEXO Store', storeSub:'12 Premium Products • International Shipping', back:'← Back', search:'🔍 Search', searchPlaceholder:'Product name...', category:'📁 Category', allCategories:'All categories', electronics:'Electronics', accessories:'Accessories', fashion:'Fashion', maxPrice:'💲 Maximum Price', viewCart:'View cart', cartTitle:'🛒 Your Cart', emptyCart:'Your cart is empty', subtotalProduct:'Product subtotal:', shippingAmazon:'Shipping fees (Amazon/Marketplace):', vendorFees:'Seller company fees:', commission35:'NEXO commission (35%):', it3:'', iue25:'', totalToPay:'Total to Pay:', orangeNote:'Orange values correspond to transport and external provider or marketplace charges.', proceedPayment:'Proceed to Payment', reviews:'reviews', stock:'Stock', available:'available', soldOut:'Sold out', addCart:'+ Cart', publicStore:'Store',
-      checkoutTitle:'NEXO Checkout', checkoutSub:'Secure Purchase • 256-bit SSL • 196 Countries', backStore:'← Back to Store', yourCart:'🛒 Your Cart', personalData:'👤 Personal Information', fullName2:'Full Name', email2:'Email', phone2:'Phone', code:'Code', number:'Number', shippingAddress:'📍 Shipping Address', selectCountry:'Select a country...', region:'Region/State', city:'City', fullAddress:'Full Address', zip:'Postal Code', paymentMethod:'💳 Payment Method', costSummary:'📊 Cost Summary', productPrice:'📦 Product Price', subtotalLabel:'Subtotal (Product):', mediationCommission:'🏢 Intermediation Commission', taxesCommission:'💰 ', totalPay:'💵 TOTAL TO PAY:', completePurchase:'🔒 Complete Purchase', customerObs:'Customer note', obsPlaceholder:'Ex.: deliver during office hours, address reference, etc.', reviewConfirm:'Review and confirm the order', purchaseConfirmation:'Purchase confirmation', goBackBtn:'Back', confirmPurchase:'Confirm purchase', card:'💳 Credit/Debit Card', bank:'🏦 Bank Transfer', paypal:'🅿️ PayPal', payoneer:'📱 Payoneer', cardNumber:'Card Number', accountNumber:'Account Number', swift:'SWIFT/BIC Code', paypalRedirect:'✅ You will be redirected to PayPal to complete the payment securely.', payoneerRedirect:'✅ You will be redirected to Payoneer to complete the payment securely.', secureFooter:'International Secure Checkout', client:'Client', destination:'Destination', address:'Address', paymentMethod2:'Payment method', confirmed:'Purchase Confirmed!', confirmedMsg:'Your order has been processed successfully. You will receive an email with the details of your purchase.', invoiceNumber:'Invoice Number', purchaseDate:'Purchase Date:', items:'Items:', totalPaid:'Total Paid:', emailNote:'📧 Check your email (including spam) for the invoice and shipping details.', trackNote:'📱 You can track your order using the invoice number.', continueShopping:'🛒 Continue Shopping', goPortal:'🏠 Go to Portal', articleSing:'item', articlePlur:'items'
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexo™ - Checkout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --light-bg: #D0DDD8;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --gray: #7A8B8B;
+            --danger: #E74C3C;
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: var(--white);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 14px;
+            padding: 4px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .logo-subtext {
+            font-size: 8px;
+            opacity: 0.8;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: var(--white);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* ========== CONTENEDOR PRINCIPAL ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 40px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 32px;
+        }
+
+        /* ========== CARRITO ARRIBA ========== */
+        .cart-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            grid-column: 1 / -1;
+            order: -1;
+        }
+
+        .cart-header {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .cart-item {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .cart-item-icon {
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .cart-item-provider {
+            font-size: 10px;
+            color: var(--primary);
+            font-weight: 900;
+            background: rgba(122,199,66,0.12);
+            padding: 4px 6px;
+            border-radius: 999px;
+            width: fit-content;
+        }
+
+        .cart-item-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+
+        .cart-item-price {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .cart-item-shipping {
+            font-size: 10px;
+            color: var(--gray);
+            font-weight: 600;
+            border-top: 1px solid var(--light-bg);
+            padding-top: 8px;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .cart-item-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: var(--tertiary);
+            color: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .cart-item-btn:hover {
+            background: var(--secondary);
+        }
+
+        .cart-item-qty {
+            min-width: 30px;
+            height: 30px;
+            background: var(--light);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 12px;
+        }
+
+        .cart-item-delete {
+            background: var(--danger);
+            border: none;
+            color: var(--white);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .cart-item-delete:hover {
+            opacity: 0.8;
+        }
+
+        /* ========== FORMULARIO ========== */
+        .form-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .form-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+        }
+
+        .form-input,
+        .form-select {
+            padding: 14px 16px;
+            border: 2px solid var(--light-bg);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--white);
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(122, 199, 66, 0.2);
+        }
+
+        /* ========== TELÉFONO CON CÓDIGO DE ÁREA ========== */
+        .phone-group {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 8px;
+        }
+
+        .phone-code {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .phone-code .form-input {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .phone-number {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* ========== RESUMEN LATERAL ========== */
+        .summary-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .summary-row.total {
+            border-bottom: none;
+            border-top: 2px solid var(--accent);
+            padding-top: 16px;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .summary-row.section-header {
+            background: rgba(122, 199, 66, 0.1);
+            padding: 12px 12px;
+            margin: 0 -12px 12px;
+            border-bottom: 2px solid var(--accent);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            text-align: right;
+            font-weight: 900;
+        }
+
+        .summary-row.tax {
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .summary-row.fee {
+            font-size: 12px;
+            color: var(--dark);
+            font-weight: 700;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .summary-row.shipping {
+            font-size: 11px;
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        /* ========== MÉTODOS DE PAGO ========== */
+        .payment-methods {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .payment-btn {
+            padding: 12px;
+            border: 2px solid var(--light-bg);
+            background: var(--white);
+            color: var(--dark);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .payment-btn:hover {
+            border-color: var(--accent);
+            background: rgba(122, 199, 66, 0.05);
+        }
+
+        .payment-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: var(--dark);
+        }
+
+        /* ========== BOTÓN COMPRAR ========== */
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: var(--dark);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(122, 199, 66, 0.2);
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(122, 199, 66, 0.3);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: var(--primary);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 24px;
+            font-size: 11px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            grid-column: 1 / -1;
+            margin-top: 32px;
+        }
+
+        .footer strong {
+            color: var(--white);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-section {
+                position: static;
+                order: 2;
+            }
+
+            .cart-section {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .cart-items {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .phone-group {
+                grid-template-columns: 80px 1fr;
+            }
+        }
+    
+        .cart-item-icon{background:#fff;overflow:hidden;font-size:0!important;}
+        .cart-item-icon img{width:100%;height:100%;object-fit:cover;display:block;border-radius:12px;}
+        .payment-btn.active{background:#7ac742!important;color:#0c2b2d!important;border-color:#7ac742!important;}
+</style>
+<style id="nexo-footer-link-color-fix">.nexo-legal-links a{color:#eef7f2!important;text-decoration:underline}.nexo-legal-links span{color:#eef7f2!important}</style></head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-text">neXo</div>
+                <div class="logo-subtext">PAY</div>
+            </div>
+            <div class="header-content">
+                <div class="header-title" id="chkTitle">Checkout nexo™</div>
+                <div class="header-subtitle" id="chkSubtitle">Compra Segura • 256-bit SSL • 196 Países</div>
+            </div>
+        </div>
+        <button class="back-btn" onclick="window.location.href='nexo-tienda-publica.html'"><span id="backStore">← <span id="confirmBackText">Volver</span> a Tienda</span></button>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container">
+
+        <!-- CARRITO (ARRIBA) -->
+        <div class="cart-section">
+            <div class="cart-header" id="cartHeader">🛒 Tu Carrito</div>
+            <div class="cart-items" id="cartItems">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+
+        <!-- FORMULARIO (IZQUIERDA) -->
+        <div class="form-section">
+            
+            <!-- DATOS PERSONALES -->
+            <div class="form-title" id="personalTitle">👤 Datos Personales</div>
+            <div class="form-group">
+                <label class="form-label" id="lblFullName">Nombre Completo</label>
+                <input type="text" class="form-input" id="fullName" placeholder="Juan Pérez" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblEmail">Email</label>
+                <input type="email" class="form-input" id="email" placeholder="juan@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblPhone">Teléfono</label>
+                <div class="phone-group">
+                    <div class="phone-code">
+                        <label class="form-label" id="lblCode">Código</label>
+                        <input type="text" class="form-input" id="phoneCode" placeholder="" readonly>
+                    </div>
+                    <div class="phone-number">
+                        <label class="form-label" id="lblNumber">Número</label>
+                        <input type="text" class="form-input" id="phoneNumber" placeholder="75432100" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIRECCIÓN DE ENVÍO -->
+            <div class="form-title" style="margin-top: 24px;" id="shippingTitle">📍 Dirección de Envío</div>
+            <div class="form-group">
+                <label class="form-label" id="lblCountry">País</label>
+                <select class="form-select" id="countrySelect" onchange="updatePhoneCode()" required>
+                    <option value="">Selecciona un país...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblRegion">Región/Estado</label>
+                <input type="text" class="form-input" id="region" placeholder="La Paz, Santa Cruz, etc." required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblCity">Ciudad</label>
+                <input type="text" class="form-input" id="city" placeholder="La Paz" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblAddress">Dirección Completa</label>
+                <input type="text" class="form-input" id="address" placeholder="Calle, número, apartamento..." required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblZip">Código Postal</label>
+                <input type="text" class="form-input" id="zipCode" placeholder="CP 1234" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblDelivery">Preferencia de envío</label>
+                <select class="form-select" id="shippingPriority" onchange="refreshDeliveryEstimate()">
+                    <option value="standard">Envío estándar</option>
+                    <option value="priority">Envío prioritario</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" id="lblArrival">Entrega estimada</label>
+                <div id="deliveryEstimateBox" style="background:#fff7ef;border:1px solid #ffd39e;border-radius:10px;padding:12px 14px;color:#a85d00;font-size:12px;font-weight:700;line-height:1.5;">Llega en 12 días</div>
+            </div>
+
+            <!-- MÉTODO DE PAGO -->
+            <div class="form-title" style="margin-top: 24px;" id="paymentTitle">💳 Método de Pago</div>
+            <div class="payment-methods" id="paymentMethods">
+                <!-- Se genera dinámicamente -->
+            </div>
+
+            <!-- DETALLES DE PAGO (según método) -->
+            <div id="paymentDetails"></div>
+            
+
+        </div>
+
+        <!-- RESUMEN (DERECHA) -->
+        <div class="summary-section">
+            <div class="summary-title" id="summaryTitle">📊 Resumen de Costo</div>
+            
+            <!-- SECCIÓN 1: PRECIO DEL PRODUCTO -->
+            <div class="summary-row section-header"><span id="prodSection">📦 Precio del Producto</span></div>
+            <div class="summary-row">
+                <span><span id="sumSubtotalLbl">Subtotal (Producto):</span></span>
+                <span class="summary-value" id="subtotal">$0.00</span>
+            </div>
+            <div class="summary-row shipping">
+                <span><span id="sumShipLbl">Gastos de Envío (Amazon/Marketplace):</span></span>
+                <span class="summary-value" id="amazonShipping">$0.00</span>
+            </div>
+            <div class="summary-row shipping">
+                <span><span id="sumVendorLbl">Gastos de la Empresa Vendedora:</span></span>
+                <span class="summary-value" id="vendorFees">$0.00</span>
+            </div>
+
+            <!-- SECCIÓN 2: COMISIÓN DE INTERMEDIACIÓN -->
+            <div class="summary-row section-header" style="margin-top: 16px;"><span id="comSection">🏢 Comisión de Intermediación</span></div>
+            <div class="summary-row fee">
+                <span><span id="sumCommissionLbl">Comisión nexo™:</span></span>
+                <span class="summary-value" id="commission">$0.00</span>
+            </div>
+
+            <!-- SECCIÓN 3: IMPUESTOS SOBRE COMISIÓN -->
+            <div class="summary-row section-header"><span id="taxSection">💰 </span></div>
+            <div class="summary-row tax">
+                <span><span id="sumItLbl"></span></span>
+                <span class="summary-value" id="itf">$0.00</span>
+            </div>
+            <div class="summary-row tax">
+                <span><span id="sumIueLbl"></span></span>
+                <span class="summary-value" id="iue">$0.00</span>
+            </div>
+            <div class="summary-row shipping" id="deliverySummaryRow">
+                <span><span id="sumDeliveryLbl">Entrega estimada:</span></span>
+                <span class="summary-value" id="deliverySummary">Llega en 12 días</span>
+            </div>
+
+            <!-- TOTAL FINAL -->
+            <div class="summary-row total" style="margin-top: 16px;">
+                <span><span id="sumTotalLbl">💵 TOTAL A PAGAR:</span></span>
+                <span class="summary-value" id="total">$0.00</span>
+            </div>
+
+            <button class="checkout-btn" onclick="openConfirmationModal()"><span id="completeBtnText">🔒 Completar Compra</span></button>
+        </div>
+
+    </div>
+
+
+    <div id="confirmationModal" style="display:none;position:fixed;inset:0;background:rgba(33,47,48,.66);z-index:5000;padding:18px;overflow:auto;">
+        <div style="max-width:660px;margin:40px auto;background:#fff;border-radius:26px;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.24);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px;">
+                <div><div style="font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#5b7c7f;"><span id="confirmMiniTitle">Confirmación de compra</span></div><h3 style="font-size:32px;color:#2d3e3f;margin-top:8px;"><span id="confirmTitle">Revisa y confirma el pedido</span></h3></div>
+                <button onclick="closeConfirmationModal()" style="border:0;background:#eef4f3;width:40px;height:40px;border-radius:50%;font-size:24px;cursor:pointer;">×</button>
+            </div>
+            <div id="confirmationSummary" style="background:#f6fbfa;border:1px solid #d8e5e2;border-radius:18px;padding:18px;color:#526668;line-height:1.8;margin-bottom:18px;"></div>
+            <div class="form-group"><label class="form-label" id="lblNote">Observación del cliente</label><textarea class="form-input" id="customerNote" rows="3" style="resize:vertical;padding-top:14px" placeholder="Ej.: entregar en horario de oficina, referencia de dirección, etc."></textarea></div>
+            <div class="nexo-checkout-legal" style="margin:18px 0;padding:15px 16px;border:1px solid rgba(74,107,109,.28);border-radius:16px;background:#f6faf9;color:#2D3E3F;font-size:13px;line-height:1.55;">
+                <p style="margin:0 0 10px 0;"><strong>Declaración de intermediación:</strong> nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales. El pago incluye costos del proveedor, logística y comisión de intermediación.</p>
+                <p style="margin:0 0 10px 0;"><strong>Pagos y reembolsos:</strong> el procesamiento puede realizarse por PayPal, tarjeta o transferencia ACH/Wire. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor original y de la logística internacional.</p>
+                <label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;">
+                    <input type="checkbox" id="nexoLegalAccept" required style="margin-top:3px;min-width:18px;min-height:18px;">
+                    <span>Acepto los términos y condiciones, la política de privacidad, la política de pagos y la condición de intermediación comercial internacional de nexo™.</span>
+                </label>
+                <div id="nexoLegalWarning" style="display:none;margin-top:10px;color:#c62828;font-weight:800;">Para continuar debes aceptar las condiciones legales de la compra.</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <button class="checkout-btn" style="margin-top:6px;background:#dfe9e5;color:#395153;box-shadow:none" onclick="closeConfirmationModal()"><span id="confirmBackText">Volver</span></button>
+                <button class="checkout-btn" style="margin-top:6px" onclick="submitPurchase()"><span id="confirmBuyText">Confirmar compra</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span><strong>nexo™</strong> © 2026 | <strong><span id="footerCheckout">Checkout Seguro Internacional</span></strong> | Nexo Servicios Generales y Empresariales | <strong>NIT: 774651015</strong> | <strong>🔐 256-bit SSL</strong><br><small>nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</small></span>
+    </div>
+
+    
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://ujqbbniptflzytdankwp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv";
+const NEXO_PAYPAL_EMAIL = "ermcba@hotmail.com";
+let nexoSupabase = null;
+function initNexoSupabase(){
+  if (nexoSupabase) return nexoSupabase;
+  if (!window.supabase || !window.supabase.createClient) { console.warn('Supabase no cargó. El pedido continuará con respaldo local.'); return null; }
+  nexoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  window.nexoSupabase = nexoSupabase;
+  return nexoSupabase;
+}
+window.nexoSavePedidoToSupabase = async function(orderData){
+  try {
+    const apiResp = await fetch('/api/nexo-save-order', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(orderData)
+    });
+    const apiData = await apiResp.json().catch(()=>({}));
+    if(apiResp.ok && apiData.ok && apiData.pedido_id){
+      return { data: { id: apiData.pedido_id, factura_numero: apiData.factura_numero, api_saved:true }, error:null };
     }
+    console.warn('API Supabase guardado no confirmado, intenta cliente directo', apiData);
+  } catch(e) { console.warn('API Supabase no disponible, intenta cliente directo', e); }
+  const client = initNexoSupabase();
+  if (!client) return { data: { id: orderData.id || ('LOCAL-' + Date.now()), local_only: true }, error: null };
+  const items = Array.isArray(orderData.items) ? orderData.items : [];
+  const firstItem = items[0] || {};
+  const customer = orderData.customer || {};
+  const parts = String(orderData.fullName || '').trim().split(/\s+/);
+  const clienteNombre = parts.shift() || '';
+  const clienteApellido = parts.join(' ');
+  const metodo = orderData.paymentMethod || 'card';
+  const row = {
+    cliente_email: orderData.email || customer.email || '',
+    cliente_nombre: clienteNombre, cliente_apellido: clienteApellido, cliente_documento: customer.documentId || '',
+    cliente_telefono: customer.phone || orderData.phone || '', cliente_pais: customer.country || orderData.country || '', cliente_ciudad: customer.city || orderData.city || '', cliente_direccion: customer.address || orderData.address || '',
+    producto: items.map(i => `${i.name || i.nombre || i.producto || 'Producto nexo™'} x${i.quantity || i.cantidad || 1}`).join(' | '),
+    producto_url: firstItem.url || firstItem.link || '', producto_nombre: firstItem.name || firstItem.nombre || firstItem.producto || 'Pedido nexo™', proveedor: firstItem.provider || firstItem.vendor || firstItem.proveedor || 'Marketplace externo',
+    cantidad: items.reduce((n,i)=>n+Number(i.quantity || i.cantidad || 1),0) || 1, precio_usd: Number(orderData.total || 0), costo_producto_usd: Number(orderData.subtotal || 0), costo_envio_usd: Number(orderData.amazonShipping || 0),
+    comision_nexo_usd: Number(orderData.commission || 0), impuesto_it_usd: Number(orderData.itf || 0), impuesto_iue_usd: Number(orderData.iue || 0), total_cliente_usd: Number(orderData.total || 0),
+    moneda:'USD', metodo_pago: metodo, estado:'pendiente', estado_pago:'pendiente_confirmacion', estado_compra:'pendiente_agente_1', estado_envio:'pendiente', tracking:'',
+    fecha_estimada_entrega: orderData.deliveryEstimate || '', prioridad_envio: orderData.deliveryLabel || orderData.shippingPriority || '',
+    observaciones: `Cobro principal PayPal (${NEXO_PAYPAL_EMAIL}). El total cobrado incluye precio proveedor + comisión nexo™ sobre precio proveedor + costos externos aplicables. ${orderData.note || ''}`.trim()
   };
-  TX.pt = TX.en; TX.it = TX.en; TX.fr = TX.en;
-  function tx(k){ return (TX[getLang()]||TX.es)[k] || TX.es[k] || k; }
-  function setText(sel,val){ const el=document.querySelector(sel); if(el) el.textContent=val; }
-  function setPlaceholder(sel,val){ const el=document.querySelector(sel); if(el) el.placeholder=val; }
-  function setOptionTexts(sel,arr){ const el=document.querySelector(sel); if(!el) return; [...el.options].forEach((opt,i)=>{ if(arr[i]!==undefined) opt.textContent=arr[i]; }); }
-  function updateActiveButtons(){ const l=getLang(); document.querySelectorAll('.lang-btn, .lang-switch button').forEach(btn=>{ const txt=(btn.textContent||'').toLowerCase(); const match=(l==='es' && txt.includes('espa')) || (l==='en' && (txt.includes('ing')||txt.includes('eng'))) || (l==='pt'&&txt.includes('portu')) || (l==='it'&&txt.includes('ital')) || (l==='fr'&&txt.includes('fran')); btn.classList.toggle('active',!!match); }); }
-  function bindLangButtons(){ document.querySelectorAll('.lang-btn, .lang-switch button').forEach(btn=>{ if(btn.dataset.i18nBound) return; btn.dataset.i18nBound='1'; btn.addEventListener('click',()=>{ const txt=(btn.textContent||'').toLowerCase(); let l='es'; if(txt.includes('ing')||txt.includes('eng')) l='en'; else if(txt.includes('portu')) l='pt'; else if(txt.includes('ital')) l='it'; else if(txt.includes('fran')) l='fr'; localStorage.setItem('nexo_language',l); applyPage(); }); }); }
-  function applySupport(){ document.title='NEXO - '+tx('supportTitle'); setText('.hero h1',tx('supportTitle')); setText('.hero p',tx('supportDesc')); const navs=document.querySelectorAll('.nav-links a'); if(navs[0]) navs[0].textContent=tx('home'); if(navs[1]) navs[1].textContent=tx('store'); if(navs[2]) navs[2].textContent=tx('admin'); const labels=document.querySelectorAll('.side-label'); if(labels[0]) labels[0].textContent=tx('language'); if(labels[1]) labels[1].textContent=tx('ticket'); if(labels[2]) labels[2].textContent=tx('destEmail'); const langBtns=document.querySelectorAll('.lang-switch button'); if(langBtns[0]) langBtns[0].textContent='Español'; if(langBtns[1]) langBtns[1].textContent='English'; setText('.card h2',tx('supportForm')); setText('.helper',tx('supportHelp')); const fieldLabels=[tx('fullName'),tx('email'),tx('phone'),tx('country'),tx('orderNumber'),tx('product'),tx('requestType'),tx('priority'),tx('channel'),tx('details')]; document.querySelectorAll('form .field label').forEach((el,i)=>{ if(fieldLabels[i]) el.textContent=fieldLabels[i]; }); setPlaceholder('#fullName',tx('placeholderFullName')); setPlaceholder('#email',tx('placeholderEmail')); setPlaceholder('#phone',tx('placeholderPhone')); setPlaceholder('#orderNumber',tx('placeholderOrder')); setPlaceholder('#product',tx('placeholderProduct')); setPlaceholder('#details',tx('placeholderDetails')); setOptionTexts('#requestType',[tx('selectOption'),tx('claim'),tx('inquiry'),tx('exchange'),tx('return')]); setOptionTexts('#priority',[tx('selectPriority'),tx('low'),tx('medium'),tx('high'),tx('urgent')]); setOptionTexts('#preferredChannel',[tx('selectChannel'),tx('emailChannel'),tx('whatsapp'),tx('phoneCall'),tx('webChat')]); setText('.submit-btn',tx('sendRequest')); const infoCards=document.querySelectorAll('.info-card'); if(infoCards[0]){ const h=infoCards[0].querySelector('h3'); if(h) h.textContent=tx('attentionLevels'); const lis=infoCards[0].querySelectorAll('li'); tx('levels').forEach((v,i)=>{ if(lis[i]) lis[i].textContent=v; }); } if(infoCards[1]){ const h=infoCards[1].querySelector('h3'); if(h) h.textContent=tx('complaintsEmail'); const ps=infoCards[1].querySelectorAll('p'); if(ps[0]) ps[0].textContent=tx('complaintsBody'); } if(infoCards[2]){ const h=infoCards[2].querySelector('h3'); if(h) h.textContent='🤖 '+tx('virtualAgent'); const p=infoCards[2].querySelector('p'); if(p) p.textContent=tx('virtualAgentBody'); const ta=infoCards[2].querySelector('textarea'); if(ta) ta.placeholder=tx('quickConsult'); const b=infoCards[2].querySelector('button'); if(b) b.textContent=tx('consult'); } }
-  function applyStore(){ document.title='NEXO - '+tx('storeTitle'); setText('.logo-store-subtitle',tx('publicStore')); setText('.header-title h1',tx('storeTitle')); setText('.header-title p',tx('storeSub')); const cartBadge=document.querySelector('.cart-badge'); if(cartBadge) cartBadge.title=tx('viewCart'); setText('.back-btn',tx('back')); const fl=document.querySelectorAll('.filter-label'); if(fl[0]) fl[0].textContent=tx('search'); if(fl[1]) fl[1].textContent=tx('category'); if(fl[2]) fl[2].textContent=tx('maxPrice'); setPlaceholder('#searchInput',tx('searchPlaceholder')); setOptionTexts('#categoryFilter',[tx('allCategories'),tx('electronics'),tx('accessories'),tx('fashion')]); document.querySelectorAll('.product-card').forEach(card=>{ const rating=card.querySelector('.product-rating'); if(rating) rating.textContent=`★★★★★ (128 ${tx('reviews')})`; const stock=card.querySelector('.product-stock'); const m=stock && stock.textContent.match(/(\d+)/); const n=m?m[1]:'0'; if(stock) stock.textContent=`${tx('stock')}: ${n} ${tx('available')}`; const btn=card.querySelector('.add-to-cart-btn'); if(btn) btn.textContent = btn.disabled ? tx('soldOut') : tx('addCart'); }); setText('.modal-header h2',tx('cartTitle')); const rows=document.querySelectorAll('.cart-summary .summary-row span:first-child'); const vals=[tx('subtotalProduct'),tx('shippingAmazon'),tx('vendorFees'),tx('commission35'),tx('it3'),tx('iue25'),tx('totalToPay')]; rows.forEach((el,i)=>{ if(vals[i]) el.textContent=vals[i]; }); const note=document.querySelector('.cart-summary div[style*="margin-top:10px"]'); if(note) note.textContent=tx('orangeNote'); setText('.modal-content .checkout-btn',tx('proceedPayment')); const cartItems=document.getElementById('cartItems'); if(cartItems && /vac[ií]o|empty/i.test(cartItems.textContent.trim())) cartItems.innerHTML=`<p style="text-align:center; color:#888; padding:20px;">${tx('emptyCart')}</p>`; }
-  function applyCheckout(){ document.title='NEXO - '+tx('checkoutTitle'); setText('.header-title',tx('checkoutTitle')); setText('.header-subtitle',tx('checkoutSub')); setText('.header .back-btn',tx('backStore')); const titles=document.querySelectorAll('.form-title'); if(titles[0]) titles[0].textContent=tx('personalData'); if(titles[1]) titles[1].textContent=tx('shippingAddress'); if(titles[2]) titles[2].textContent=tx('paymentMethod'); setText('.cart-header',tx('yourCart')); const labels=document.querySelectorAll('.form-section .form-label'); const vals=[tx('fullName2'),tx('email2'),tx('phone2'),tx('code'),tx('number'),tx('country'),tx('region'),tx('city'),tx('fullAddress'),tx('zip')]; labels.forEach((el,i)=>{ if(vals[i]) el.textContent=vals[i]; }); setPlaceholder('#fullName','John Smith'); setPlaceholder('#email','john@example.com'); setPlaceholder('#phoneNumber','75432100'); setPlaceholder('#region',getLang()==='en'?'Region, State, etc.':'La Paz, Santa Cruz, etc.'); setPlaceholder('#city',getLang()==='en'?'City':'La Paz'); setPlaceholder('#address',getLang()==='en'?'Street, number, apartment...':'Calle, número, apartamento...'); setPlaceholder('#zipCode',getLang()==='en'?'ZIP 1234':'CP 1234'); const firstCountry=document.querySelector('#countrySelect option'); if(firstCountry && !document.getElementById('countrySelect').value) firstCountry.textContent=tx('selectCountry'); setText('.summary-title',tx('costSummary')); const hdrs=document.querySelectorAll('.summary-row.section-header'); if(hdrs[0]) hdrs[0].textContent=tx('productPrice'); if(hdrs[1]) hdrs[1].textContent=tx('mediationCommission'); if(hdrs[2]) hdrs[2].textContent=tx('taxesCommission'); const sumrows=document.querySelectorAll('.summary-section .summary-row:not(.section-header) span:first-child'); const sumvals=[tx('subtotalLabel'),tx('shippingAmazon'),tx('vendorFees'),tx('commission35'),tx('it3'),tx('iue25'),tx('totalPay')]; sumrows.forEach((el,i)=>{ if(sumvals[i]) el.textContent=sumvals[i]; }); const completeBtn=document.querySelector('.summary-section .checkout-btn'); if(completeBtn) completeBtn.textContent=tx('completePurchase'); const modalSmall=document.querySelector('#confirmationModal div div div:first-child'); if(modalSmall) modalSmall.textContent=tx('purchaseConfirmation'); const modalTitle=document.querySelector('#confirmationModal h3'); if(modalTitle) modalTitle.textContent=tx('reviewConfirm'); const obsLabel=document.querySelector('#confirmationModal .form-group .form-label'); if(obsLabel) obsLabel.textContent=tx('customerObs'); setPlaceholder('#customerNote',tx('obsPlaceholder')); const modalBtns=document.querySelectorAll('#confirmationModal .checkout-btn'); if(modalBtns[0]) modalBtns[0].textContent=tx('goBackBtn'); if(modalBtns[1]) modalBtns[1].textContent=tx('confirmPurchase'); const footer=document.querySelector('.footer span'); if(footer) footer.innerHTML=`<strong>NEXO</strong> © 2024 | <strong>${tx('secureFooter')}</strong> | <strong>NIT: </strong> | <strong>🔐 256-bit SSL</strong>`; const pbtns=document.querySelectorAll('#paymentMethods .payment-btn'); const ids=['card','bank','paypal','payoneer']; pbtns.forEach((b,i)=>{ if(ids[i]) b.textContent=tx(ids[i]); }); const details=document.getElementById('paymentDetails'); if(details){ const dlabels=details.querySelectorAll('.form-label'); if(selectedPayment==='card'){ if(dlabels[0]) dlabels[0].textContent=tx('cardNumber'); } else if(selectedPayment==='bank'){ if(dlabels[0]) dlabels[0].textContent=tx('accountNumber'); if(dlabels[1]) dlabels[1].textContent=tx('swift'); } else if(selectedPayment==='paypal'){ details.innerHTML=`<p style="color:#7AC742;font-size:12px;font-weight:700;">${tx('paypalRedirect')}</p>`; } else if(selectedPayment==='payoneer'){ details.innerHTML=`<p style="color:#7AC742;font-size:12px;font-weight:700;">${tx('payoneerRedirect')}</p>`; } } }
-  function rebuildCheckoutConfirmationSummary(){ const summary=document.getElementById('confirmationSummary'); if(!summary || document.getElementById('confirmationModal').style.display==='none') return; const fullName=document.getElementById('fullName')?.value || ''; const email=document.getElementById('email')?.value || ''; const phoneCode=document.getElementById('phoneCode')?.value || ''; const phoneNumber=document.getElementById('phoneNumber')?.value || ''; const country=document.getElementById('countrySelect'); const region=document.getElementById('region')?.value || ''; const city=document.getElementById('city')?.value || ''; const address=document.getElementById('address')?.value || ''; const zipCode=document.getElementById('zipCode')?.value || ''; const money=id=>parseFloat((document.getElementById(id)?.textContent || '0').replace(/[^\d.]/g,''))||0; const subtotal=money('subtotal'), amazonShipping=money('amazonShipping'), vendorFees=money('vendorFees'), commission=money('commission'), itf=money('itf'), iue=money('iue'), total=money('total'); const paymentName = selectedPayment ? tx(selectedPayment) : '-'; summary.innerHTML=`<strong>${tx('client')}:</strong> ${fullName}<br><strong>${tx('email2')}:</strong> ${email}<br><strong>${tx('phone2')}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${tx('destination')}:</strong> ${country && country.selectedIndex>=0 ? country.options[country.selectedIndex].text : ''}, ${region}, ${city}<br><strong>${tx('address')}:</strong> ${address} | CP ${zipCode}<br><strong>${tx('paymentMethod2')}:</strong> ${paymentName}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${tx('subtotalLabel')}</strong> $${subtotal.toFixed(2)}<br><strong style="color:#f39c12;">${tx('shippingAmazon')}</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span><br><strong style="color:#f39c12;">${tx('vendorFees')}</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span><br><strong>${tx('commission35')}</strong> $${commission.toFixed(2)}<br><strong>${tx('it3')}</strong> $${itf.toFixed(2)}<br><strong>${tx('iue25')}</strong> $${iue.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${tx('totalToPay')} $${total.toFixed(2)}</strong>`; }
-  function applyConfirmation(){ document.title='NEXO - '+tx('confirmed'); setText('.confirmation-card h1',tx('confirmed')); const p=document.querySelector('.confirmation-card > p'); if(p) p.textContent=tx('confirmedMsg'); const head=document.querySelector('.invoice-section > div'); if(head) head.textContent=tx('invoiceNumber'); const labels=document.querySelectorAll('.detail-label'); const vals=[tx('purchaseDate'),tx('client')+':',tx('email')+':',tx('items'),tx('paymentMethod2')+':',tx('totalPaid')+':']; labels.forEach((el,i)=>{ if(vals[i]) el.textContent=vals[i]; }); const note=document.querySelector('.email-note'); if(note) note.innerHTML=`${tx('emailNote')}<br>${tx('trackNote')}`; const btns=document.querySelectorAll('.action-buttons .btn'); if(btns[0]) btns[0].textContent=tx('continueShopping'); if(btns[1]) btns[1].textContent=tx('goPortal'); const purchase=JSON.parse(localStorage.getItem('lastPurchase') || '{}'); const order=JSON.parse(localStorage.getItem('nexoLastOrder') || '{}'); const total = purchase.total || order.total || 0; const numeric=typeof total==='string'? total.replace(/[^\d.]/g,'') : total; const totalEl=document.getElementById('totalPaid'); if(totalEl) totalEl.textContent=Number(numeric||0).toFixed(2); const itemCountEl=document.getElementById('itemCount'); if(itemCountEl){ const count=(purchase.items || order.items || []).length || 0; itemCountEl.textContent=`${count} ${count===1?tx('articleSing'):tx('articlePlur')}`; } const pm=document.getElementById('paymentMethod'); if(pm){ const key = purchase.paymentMethod || order.paymentMethodLegacy || order.paymentMethod; const map={credit:tx('card'), card:tx('card'), paypal:tx('paypal'), bank:tx('bank'), payoneer:tx('payoneer')}; pm.textContent = map[key] || '-'; } }
-  function applyPortal(){ const map={
-    es:{title:'nexo<br>Plataforma de Intermediación<br>Comercial Internacional', sub:'Portal principal nexo para tienda, atención al cliente y administración interna.', desc:'Tienda Pública • Pagos Internacionales • Atención al Cliente • Reportes Bolivia', ch:'Tienda Pública y Atención al Cliente', cd:'Panel Administrativo', st:'IR A LA TIENDA', sp:'ATENCIÓN AL CLIENTE', ap:'INGRESAR PANEL ADMIN'},
-    en:{title:'nexo<br>International Commercial<br>Intermediation System', sub:'Main nexo portal for store, customer care and internal administration.', desc:'Public Store • International Payments • Customer Care • Bolivia Reports', ch:'Public Store and Customer Care', cd:'Admin Panel', st:'GO TO STORE', sp:'CUSTOMER CARE', ap:'ENTER ADMIN PANEL'},
-    pt:{title:'nexo<br>Sistema de Intermediação<br>Comercial Internacional', sub:'Portal principal nexo para loja, atendimento ao cliente e administração interna.', desc:'Loja Pública • Pagamentos Internacionais • Atendimento ao Cliente • Relatórios Bolívia', ch:'Loja Pública e Atendimento ao Cliente', cd:'Painel Administrativo', st:'IR PARA A LOJA', sp:'ATENDIMENTO AO CLIENTE', ap:'ENTRAR NO PAINEL ADMIN'},
-    it:{title:'nexo<br>Sistema di Intermediazione<br>Commerciale Internazionale', sub:'Portale principale nexo per negozio, assistenza clienti e amministrazione interna.', desc:'Negozio Pubblico • Pagamenti Internazionali • Assistenza Clienti • Report Bolivia', ch:'Negozio Pubblico e Assistenza Clienti', cd:'Pannello Amministrativo', st:'VAI AL NEGOZIO', sp:'ASSISTENZA CLIENTI', ap:'ENTRA NEL PANNELLO ADMIN'},
-    fr:{title:'nexo<br>Système d’Intermédiation<br>Commerciale Internationale', sub:'Portail principal nexo pour boutique, service client et administration interne.', desc:'Boutique Publique • Paiements Internationaux • Service Client • Rapports Bolivie', ch:'Boutique Publique et Service Client', cd:'Panneau Administratif', st:'ALLER À LA BOUTIQUE', sp:'SERVICE CLIENT', ap:'ENTRER AU PANNEAU ADMIN'}
-  }; const m=map[getLang()]||map.es; const mt=document.getElementById('mainTitle'); if(mt) mt.innerHTML=m.title; const sub=document.querySelector('.subtitle'); if(sub) sub.textContent=m.sub; const desc=document.getElementById('mainDescription'); if(desc) desc.textContent=m.desc; const cards=document.querySelectorAll('.card h2'); if(cards[0]) cards[0].textContent=m.ch; if(cards[1]) cards[1].textContent=m.cd; const alinks=document.querySelectorAll('.action-link'); if(alinks[0]) alinks[0].textContent=m.st; if(alinks[1]) alinks[1].textContent=m.sp; const btn=document.querySelector('.btn.secondary'); if(btn) btn.textContent=m.ap; }
-  function applyPage(){ bindLangButtons(); updateActiveButtons(); const page=(location.pathname.split('/').pop() || 'index.html'); if(page==='index.html' || page==='nexo-portal-principal.html') applyPortal(); if(page==='nexo-agent2-soporte.html') applySupport(); if(page==='nexo-tienda-publica.html' || page==='nexo-tienda-cliente.html') applyStore(); if(page==='nexo-checkout.html') { applyCheckout(); rebuildCheckoutConfirmationSummary(); } if(page==='nexo-confirmacion.html') applyConfirmation(); }
-  document.addEventListener('DOMContentLoaded',()=>{ if(typeof window.renderProducts==='function' && !window.renderProducts._i18n){ const orig=window.renderProducts; window.renderProducts=function(){ const r=orig.apply(this,arguments); applyStore(); return r; }; window.renderProducts._i18n=true; } if(typeof window.renderCartItems==='function' && !window.renderCartItems._i18n){ const orig=window.renderCartItems; window.renderCartItems=function(){ const r=orig.apply(this,arguments); applyStore(); return r; }; window.renderCartItems._i18n=true; } if(typeof window.renderPaymentMethods==='function' && !window.renderPaymentMethods._i18n){ const orig=window.renderPaymentMethods; window.renderPaymentMethods=function(){ const r=orig.apply(this,arguments); applyCheckout(); return r; }; window.renderPaymentMethods._i18n=true; } if(typeof window.selectPayment==='function' && !window.selectPayment._i18n){ const orig=window.selectPayment; window.selectPayment=function(){ const r=orig.apply(this,arguments); applyCheckout(); return r; }; window.selectPayment._i18n=true; } if(typeof window.openConfirmationModal==='function' && !window.openConfirmationModal._i18n){ const orig=window.openConfirmationModal; window.openConfirmationModal=function(){ const r=orig.apply(this,arguments); applyCheckout(); rebuildCheckoutConfirmationSummary(); return r; }; window.openConfirmationModal._i18n=true; } applyPage(); });
-  window.addEventListener('pageshow',applyPage);
+  return await client.from('pedidos').insert([row]).select().single();
+};
+window.nexoPrefillCheckoutFromSupabase = async function(){
+  try{ const client=initNexoSupabase(); const email=(sessionStorage.getItem('clientEmail')||document.getElementById('email')?.value||'').trim(); if(!email)return; const {data,error}=await client.from('clientes').select('*').eq('email',email).maybeSingle(); if(error||!data)return; const set=(id,v)=>{const el=document.getElementById(id); if(el&&v!==undefined&&v!==null)el.value=v;}; const full=`${data.nombre||''} ${data.apellido||''}`.trim(); set('fullName',full); set('email',data.email||email); set('phoneCode',data.codigo_area||''); set('phoneNumber',data.telefono||''); set('region',data.region||''); set('city',data.ciudad||''); set('address',data.direccion||''); set('zipCode',data.codigo_postal||''); sessionStorage.setItem('nexoActiveClient', JSON.stringify({fullName:full,name:data.nombre||'',lastName:data.apellido||'',documentId:data.documento||'',email:data.email||email,country:data.pais||'',areaCode:data.codigo_area||'',phone:data.telefono||'',postalCode:data.codigo_postal||'',region:data.region||'',city:data.ciudad||'',address:data.direccion||''})); }catch(e){console.warn(e);}
+};
+window.addEventListener('DOMContentLoaded',()=>{try{initNexoSupabase();}catch(e){console.warn(e)} setTimeout(()=>window.nexoPrefillCheckoutFromSupabase?.(),400);});
+</script>
+<script>
+        
+const checkoutI18n={
+ es:{chkTitle:'Checkout nexo™',chkSubtitle:'Compra Segura • 256-bit SSL • 196 Países',backStore:'← Volver a Tienda',cartHeader:'🛒 Tu Carrito',personalTitle:'👤 Datos Personales',lblFullName:'Nombre Completo',lblEmail:'Email',lblPhone:'Teléfono',lblCode:'Código',lblNumber:'Número',shippingTitle:'📍 Dirección de Envío',lblCountry:'País',lblRegion:'Región/Estado',lblCity:'Ciudad',lblAddress:'Dirección Completa',lblZip:'Código Postal',lblDelivery:'Preferencia de envío',lblArrival:'Entrega estimada',paymentTitle:'💳 Método de Pago',summaryTitle:'📊 Resumen de Costo',prodSection:'📦 Precio del Producto',sumSubtotalLbl:'Subtotal (Producto):',sumShipLbl:'Gastos de Envío (Amazon/Marketplace):',sumVendorLbl:'Gastos de la Empresa Vendedora:',comSection:'🏢 Comisión de Intermediación',sumCommissionLbl:'Comisión nexo™:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL A PAGAR:',completeBtnText:'🔒 Completar Compra',confirmMiniTitle:'Confirmación de compra',confirmTitle:'Revisa y confirma el pedido',lblNote:'Observación del cliente',confirmBackText:'Volver',confirmBuyText:'Confirmar compra',footerCheckout:'Checkout Seguro Internacional',phCountry:'Selecciona un país...', phRegion:'La Paz, Santa Cruz, etc.', phCity:'La Paz', phAddress:'Calle, número, apartamento...', phZip:'CP 1234', phNote:'Ej.: entregar en horario de oficina, referencia de dirección, etc.', itemWord:'artículos', confirmClient:'Cliente', confirmEmail:'Email', confirmPhone:'Teléfono', confirmDestination:'Destino', confirmAddress:'Dirección', confirmPayment:'Método de pago', confirmSubtotal:'Subtotal producto', confirmShip:'Gastos Amazon/Marketplace', confirmVendor:'Gastos empresa vendedora', confirmCommission:'Comisión nexo™',  confirmTotal:'Total a pagar',deliveryStandard:'Envío estándar',deliveryPriority:'Envío prioritario',deliveryEta:'Entrega estimada',deliveryOrange:'Detalle de envío externo'},
+ en:{chkTitle:'nexo™ Checkout',chkSubtitle:'Secure Purchase • 256-bit SSL • 196 Countries',backStore:'← Back to Store',cartHeader:'🛒 Your Cart',personalTitle:'👤 Personal Information',lblFullName:'Full Name',lblEmail:'Email',lblPhone:'Phone',lblCode:'Code',lblNumber:'Number',shippingTitle:'📍 Shipping Address',lblCountry:'Country',lblRegion:'Region/State',lblCity:'City',lblAddress:'Full Address',lblZip:'Postal Code',lblDelivery:'Shipping preference',lblArrival:'Estimated delivery',paymentTitle:'💳 Payment Method',summaryTitle:'📊 Cost Summary',prodSection:'📦 Product Price',sumSubtotalLbl:'Subtotal (Product):',sumShipLbl:'Shipping Costs (Amazon/Marketplace):',sumVendorLbl:'Seller Company Charges:',comSection:'🏢 Intermediation Commission',sumCommissionLbl:'nexo™ Commission:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL TO PAY:',completeBtnText:'🔒 Complete Purchase',confirmMiniTitle:'Purchase confirmation',confirmTitle:'Review and confirm the order',lblNote:'Customer note',confirmBackText:'Back',confirmBuyText:'Confirm purchase',footerCheckout:'Secure International Checkout',phCountry:'Select a country...', phRegion:'State / region', phCity:'City', phAddress:'Street, number, apartment...', phZip:'ZIP 1234', phNote:'Ex.: office hours delivery, address reference, etc.', itemWord:'items', confirmClient:'Client', confirmEmail:'Email', confirmPhone:'Phone', confirmDestination:'Destination', confirmAddress:'Address', confirmPayment:'Payment method', confirmSubtotal:'Product subtotal', confirmShip:'Amazon/Marketplace charges', confirmVendor:'Seller company charges', confirmCommission:'NEXO commission',  confirmTotal:'Total to pay',deliveryStandard:'Standard shipping',deliveryPriority:'Priority shipping',deliveryEta:'Estimated delivery',deliveryOrange:'External shipping detail'},
+ pt:{chkTitle:'Checkout nexo™',chkSubtitle:'Compra Segura • SSL 256-bit • 196 Países',backStore:'← Voltar à Loja',cartHeader:'🛒 Seu Carrinho',personalTitle:'👤 Dados Pessoais',lblFullName:'Nome Completo',lblEmail:'E-mail',lblPhone:'Telefone',lblCode:'Código',lblNumber:'Número',shippingTitle:'📍 Endereço de Entrega',lblCountry:'País',lblRegion:'Região/Estado',lblCity:'Cidade',lblAddress:'Endereço Completo',lblZip:'CEP',paymentTitle:'💳 Método de Pagamento',summaryTitle:'📊 Resumo de Custos',prodSection:'📦 Preço do Produto',sumSubtotalLbl:'Subtotal (Produto):',sumShipLbl:'Custos de Envio (Amazon/Marketplace):',sumVendorLbl:'Custos da Empresa Vendedora:',comSection:'🏢 Comissão de Intermediação',sumCommissionLbl:'Comissão NEXO:',taxSection:'💰 ',sumItLbl:'',sumIueLbl:'',sumTotalLbl:'💵 TOTAL A PAGAR:',completeBtnText:'🔒 Finalizar Compra',confirmMiniTitle:'Confirmação da compra',confirmTitle:'Revise e confirme o pedido',lblNote:'Observação do cliente',confirmBackText:'Voltar',confirmBuyText:'Confirmar compra',footerCheckout:'Checkout Internacional Seguro',phCountry:'Selecione um país...', phRegion:'Região / estado', phCity:'Cidade', phAddress:'Rua, número, apartamento...', phZip:'CEP 1234', phNote:'Ex.: entrega em horário comercial, referência de endereço, etc.', itemWord:'itens', confirmClient:'Cliente', confirmEmail:'E-mail', confirmPhone:'Telefone', confirmDestination:'Destino', confirmAddress:'Endereço', confirmPayment:'Método de pagamento', confirmSubtotal:'Subtotal do produto', confirmShip:'Custos Amazon/Marketplace', confirmVendor:'Custos da empresa vendedora', confirmCommission:'Comissão NEXO',  confirmTotal:'Total a pagar',deliveryStandard:'Envío estándar',deliveryPriority:'Envío prioritario',deliveryEta:'Entrega estimada',deliveryOrange:'Detalle de envío externo'},
+ it:{chkTitle:'Checkout nexo™',chkSubtitle:'Acquisto Sicuro • SSL 256-bit • 196 Paesi',backStore:'← Torna al Negozio',cartHeader:'🛒 Il tuo Carrello',personalTitle:'👤 Dati Personali',lblFullName:'Nome Completo',lblEmail:'Email',lblPhone:'Telefono',lblCode:'Codice',lblNumber:'Numero',shippingTitle:'📍 Indirizzo di Spedizione',lblCountry:'Paese',lblRegion:'Regione/Stato',lblCity:'Città',lblAddress:'Indirizzo Completo',lblZip:'CAP',lblDelivery:'Preferenza di spedizione',lblArrival:'Consegna stimata',paymentTitle:'💳 Metodo di Pagamento',summaryTitle:'📊 Riepilogo Costi',prodSection:'📦 Prezzo del Prodotto',sumSubtotalLbl:'Subtotale (Prodotto):',sumShipLbl:'Costi di Spedizione (Amazon/Marketplace):',sumVendorLbl:'Costi dell’Azienda Venditrice:',comSection:'🏢 Commissione di Intermediazione',sumCommissionLbl:'Commissione NEXO:',taxSection:'💰 Tasse (sulla Commissione)',sumItLbl:'IT (3% sulla commissione):',sumIueLbl:'IUE (25% sulla commissione):',sumTotalLbl:'💵 TOTALE DA PAGARE:',completeBtnText:'🔒 Completa Acquisto',confirmMiniTitle:'Conferma acquisto',confirmTitle:'Controlla e conferma l’ordine',lblNote:'Nota del cliente',confirmBackText:'Indietro',confirmBuyText:'Conferma acquisto',footerCheckout:'Checkout Internazionale Sicuro',phCountry:'Seleziona un paese...', phRegion:'Regione / stato', phCity:'Città', phAddress:'Via, numero, appartamento...', phZip:'CAP 1234', phNote:'Es.: consegna in orario d’ufficio, riferimento indirizzo, ecc.', itemWord:'articoli', confirmClient:'Cliente', confirmEmail:'Email', confirmPhone:'Telefono', confirmDestination:'Destinazione', confirmAddress:'Indirizzo', confirmPayment:'Metodo di pagamento', confirmSubtotal:'Subtotale prodotto', confirmShip:'Costi Amazon/Marketplace', confirmVendor:'Costi dell’azienda venditrice', confirmCommission:'Commissione NEXO',   confirmTotal:'Totale da pagare',deliveryStandard:'Spedizione standard',deliveryPriority:'Spedizione prioritaria',deliveryEta:'Consegna stimata',deliveryOrange:'Dettaglio spedizione esterna'},
+ fr:{chkTitle:'Checkout nexo™',chkSubtitle:'Achat Sécurisé • SSL 256-bit • 196 Pays',backStore:'← Retour à la Boutique',cartHeader:'🛒 Votre Panier',personalTitle:'👤 Informations Personnelles',lblFullName:'Nom Complet',lblEmail:'E-mail',lblPhone:'Téléphone',lblCode:'Code',lblNumber:'Numéro',shippingTitle:'📍 Adresse de Livraison',lblCountry:'Pays',lblRegion:'Région/État',lblCity:'Ville',lblAddress:'Adresse Complète',lblZip:'Code Postal',paymentTitle:'💳 Mode de Paiement',summaryTitle:'📊 Résumé des Coûts',prodSection:'📦 Prix du Produit',sumSubtotalLbl:'Sous-total (Produit) :',sumShipLbl:'Frais de Livraison (Amazon/Marketplace) :',sumVendorLbl:'Frais de l’Entreprise Vendeuse :',comSection:'🏢 Commission d’Intermédiation',sumCommissionLbl:'Commission NEXO :',taxSection:'💰 Taxes (sur la commission)',sumItLbl:'IT (3% sur commission) :',sumIueLbl:'IUE (25% sur commission) :',sumTotalLbl:'💵 TOTAL À PAYER :',completeBtnText:'🔒 Finaliser l’Achat',confirmMiniTitle:'Confirmation d’achat',confirmTitle:'Vérifiez et confirmez la commande',lblNote:'Note du client',confirmBackText:'Retour',confirmBuyText:'Confirmer l’achat',footerCheckout:'Checkout International Sécurisé',phCountry:'Sélectionnez un pays...', phRegion:'Région / état', phCity:'Ville', phAddress:'Rue, numéro, appartement...', phZip:'CP 1234', phNote:'Ex. : livraison pendant les heures de bureau, repère d’adresse, etc.', itemWord:'articles', confirmClient:'Client', confirmEmail:'E-mail', confirmPhone:'Téléphone', confirmDestination:'Destination', confirmAddress:'Adresse', confirmPayment:'Mode de paiement', confirmSubtotal:'Sous-total produit', confirmShip:'Frais Amazon/Marketplace', confirmVendor:'Frais de l’entreprise vendeuse', confirmCommission:'Commission NEXO',   confirmTotal:'Total à payer'}
+};
+let currentLang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+function ctt(){ return checkoutI18n[currentLang] || checkoutI18n.es; }
+
+function applyCheckoutLanguage(){
+ currentLang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; document.documentElement.lang=currentLang; const t=ctt();
+ ['chkTitle','chkSubtitle','backStore','cartHeader','personalTitle','lblFullName','lblEmail','lblPhone','lblCode','lblNumber','shippingTitle','lblCountry','lblRegion','lblCity','lblAddress','lblZip','lblDelivery','lblArrival','paymentTitle','summaryTitle','prodSection','sumSubtotalLbl','sumShipLbl','sumVendorLbl','comSection','sumCommissionLbl','taxSection','sumItLbl','sumIueLbl','sumDeliveryLbl','sumTotalLbl','completeBtnText','confirmMiniTitle','confirmTitle','lblNote','confirmBackText','confirmBuyText','footerCheckout'].forEach(id=>{ const el=document.getElementById(id); if(el && t[id]) el.textContent=t[id]; });
+ const region=document.getElementById('region'); if(region) region.placeholder=t.phRegion;
+ const city=document.getElementById('city'); if(city) city.placeholder=t.phCity;
+ const address=document.getElementById('address'); if(address) address.placeholder=t.phAddress;
+ const zip=document.getElementById('zipCode'); if(zip) zip.placeholder=t.phZip;
+ const note=document.getElementById('customerNote'); if(note) note.placeholder=t.phNote;
+ const first=document.querySelector('#countrySelect option[value=""]'); if(first) first.textContent=t.phCountry;
+ const shipSel=document.getElementById('shippingPriority'); if(shipSel && shipSel.options.length>=2){ shipSel.options[0].textContent=t.deliveryStandard; shipSel.options[1].textContent=t.deliveryPriority; }
+ document.querySelectorAll('.payment-method, .payment-btn').forEach(btn=>{
+   const raw=(btn.dataset.method||btn.getAttribute('data-method')||btn.textContent||'').toLowerCase();
+   if(raw.includes('tarjeta')||raw.includes('card')||raw.includes('credito')) btn.innerHTML='💳 '+({es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'}[currentLang]||'Credit/Debit Card');
+   else if(raw.includes('transfer')||raw.includes('bancaria')||raw.includes('bancário')||raw.includes('virement')) btn.innerHTML='🏦 '+({es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'}[currentLang]||'Bank Transfer');
+   else if(raw.includes('paypal')) btn.innerHTML='🅿️ PayPal';
+ });
+}
+
+
+        // DATOS DE 196 PAÍSES CON CÓDIGOS DE ÁREA
+        const countriesPhoneData = [
+            { code: 'BO', name: 'Bolivia', area: '+591' },
+            { code: 'AR', name: 'Argentina', area: '+54' },
+            { code: 'BR', name: 'Brasil', area: '+55' },
+            { code: 'CL', name: 'Chile', area: '+56' },
+            { code: 'CO', name: 'Colombia', area: '+57' },
+            { code: 'EC', name: 'Ecuador', area: '+593' },
+            { code: 'PE', name: 'Perú', area: '+51' },
+            { code: 'PY', name: 'Paraguay', area: '+595' },
+            { code: 'UY', name: 'Uruguay', area: '+598' },
+            { code: 'VE', name: 'Venezuela', area: '+58' },
+            { code: 'MX', name: 'México', area: '+52' },
+            { code: 'US', name: 'Estados Unidos', area: '+1' },
+            { code: 'CA', name: 'Canadá', area: '+1' },
+            { code: 'CR', name: 'Costa Rica', area: '+506' },
+            { code: 'CU', name: 'Cuba', area: '+53' },
+            { code: 'GT', name: 'Guatemala', area: '+502' },
+            { code: 'HN', name: 'Honduras', area: '+504' },
+            { code: 'PA', name: 'Panamá', area: '+507' },
+            { code: 'SV', name: 'El Salvador', area: '+503' },
+            { code: 'NI', name: 'Nicaragua', area: '+505' },
+            { code: 'DO', name: 'República Dominicana', area: '+1' },
+            { code: 'ES', name: 'España', area: '+34' },
+            { code: 'PT', name: 'Portugal', area: '+351' },
+            { code: 'IT', name: 'Italia', area: '+39' },
+            { code: 'FR', name: 'Francia', area: '+33' },
+            { code: 'DE', name: 'Alemania', area: '+49' },
+            { code: 'GB', name: 'Reino Unido', area: '+44' },
+            { code: 'IE', name: 'Irlanda', area: '+353' },
+            { code: 'CH', name: 'Suiza', area: '+41' },
+            { code: 'SE', name: 'Suecia', area: '+46' },
+            { code: 'NL', name: 'Países Bajos', area: '+31' },
+            { code: 'AT', name: 'Austria', area: '+43' },
+            { code: 'BE', name: 'Bélgica', area: '+32' },
+            { code: 'BG', name: 'Bulgaria', area: '+359' },
+            { code: 'HR', name: 'Croacia', area: '+385' },
+            { code: 'CY', name: 'Chipre', area: '+357' },
+            { code: 'CZ', name: 'República Checa', area: '+420' },
+            { code: 'DK', name: 'Dinamarca', area: '+45' },
+            { code: 'EE', name: 'Estonia', area: '+372' },
+            { code: 'FI', name: 'Finlandia', area: '+358' },
+            { code: 'GR', name: 'Grecia', area: '+30' },
+            { code: 'HU', name: 'Hungría', area: '+36' },
+            { code: 'LV', name: 'Letonia', area: '+371' },
+            { code: 'LT', name: 'Lituania', area: '+370' },
+            { code: 'LU', name: 'Luxemburgo', area: '+352' },
+            { code: 'MT', name: 'Malta', area: '+356' },
+            { code: 'PL', name: 'Polonia', area: '+48' },
+            { code: 'RO', name: 'Rumania', area: '+40' },
+            { code: 'RU', name: 'Rusia', area: '+7' },
+            { code: 'SK', name: 'Eslovaquia', area: '+421' },
+            { code: 'SI', name: 'Eslovenia', area: '+386' },
+            { code: 'UA', name: 'Ucrania', area: '+380' },
+            { code: 'TR', name: 'Turquía', area: '+90' },
+            { code: 'GE', name: 'Georgia', area: '+995' },
+            { code: 'IL', name: 'Israel', area: '+972' },
+            { code: 'JO', name: 'Jordania', area: '+962' },
+            { code: 'LB', name: 'Líbano', area: '+961' },
+            { code: 'SA', name: 'Arabia Saudita', area: '+966' },
+            { code: 'AE', name: 'Emiratos Árabes', area: '+971' },
+            { code: 'QA', name: 'Qatar', area: '+974' },
+            { code: 'KW', name: 'Kuwait', area: '+965' },
+            { code: 'BH', name: 'Baréin', area: '+973' },
+            { code: 'OM', name: 'Omán', area: '+968' },
+            { code: 'YE', name: 'Yemen', area: '+967' },
+            { code: 'EG', name: 'Egipto', area: '+20' },
+            { code: 'LY', name: 'Libia', area: '+218' },
+            { code: 'TN', name: 'Túnez', area: '+216' },
+            { code: 'DZ', name: 'Argelia', area: '+213' },
+            { code: 'MA', name: 'Marruecos', area: '+212' },
+            { code: 'ZA', name: 'Sudáfrica', area: '+27' },
+            { code: 'KE', name: 'Kenia', area: '+254' },
+            { code: 'NG', name: 'Nigeria', area: '+234' },
+            { code: 'GH', name: 'Ghana', area: '+233' },
+            { code: 'IN', name: 'India', area: '+91' },
+            { code: 'PK', name: 'Pakistán', area: '+92' },
+            { code: 'BD', name: 'Bangladesh', area: '+880' },
+            { code: 'LK', name: 'Sri Lanka', area: '+94' },
+            { code: 'NP', name: 'Nepal', area: '+977' },
+            { code: 'TH', name: 'Tailandia', area: '+66' },
+            { code: 'VN', name: 'Vietnam', area: '+84' },
+            { code: 'PH', name: 'Filipinas', area: '+63' },
+            { code: 'ID', name: 'Indonesia', area: '+62' },
+            { code: 'MY', name: 'Malasia', area: '+60' },
+            { code: 'SG', name: 'Singapur', area: '+65' },
+            { code: 'JP', name: 'Japón', area: '+81' },
+            { code: 'KR', name: 'Corea del Sur', area: '+82' },
+            { code: 'KP', name: 'Corea del Norte', area: '+850' },
+            { code: 'CN', name: 'China', area: '+86' },
+            { code: 'TW', name: 'Taiwán', area: '+886' },
+            { code: 'HK', name: 'Hong Kong', area: '+852' },
+            { code: 'MO', name: 'Macao', area: '+853' },
+            { code: 'MM', name: 'Myanmar', area: '+95' },
+            { code: 'KH', name: 'Camboya', area: '+855' },
+            { code: 'LA', name: 'Laos', area: '+856' },
+            { code: 'AU', name: 'Australia', area: '+61' },
+            { code: 'NZ', name: 'Nueva Zelanda', area: '+64' },
+            { code: 'FJ', name: 'Fiyi', area: '+679' },
+            { code: 'SB', name: 'Islas Salomón', area: '+677' },
+            { code: 'VU', name: 'Vanuatu', area: '+678' },
+            { code: 'WS', name: 'Samoa', area: '+685' },
+            { code: 'TO', name: 'Tonga', area: '+676' },
+            { code: 'PG', name: 'Papúa Nueva Guinea', area: '+675' },
+            { code: 'KI', name: 'Kiribati', area: '+686' },
+            { code: 'MH', name: 'Islas Marshall', area: '+692' },
+            { code: 'FM', name: 'Micronesia', area: '+691' },
+            { code: 'PW', name: 'Palaos', area: '+680' },
+            { code: 'NR', name: 'Nauru', area: '+674' },
+            { code: 'TL', name: 'Timor Oriental', area: '+670' },
+            { code: 'BN', name: 'Brunéi', area: '+673' },
+            { code: 'HT', name: 'Haití', area: '+509' },
+            { code: 'JM', name: 'Jamaica', area: '+1' },
+            { code: 'TT', name: 'Trinidad y Tobago', area: '+1' },
+            { code: 'BS', name: 'Bahamas', area: '+1' },
+            { code: 'BB', name: 'Barbados', area: '+1' },
+            { code: 'AG', name: 'Antigua y Barbuda', area: '+1' },
+            { code: 'GD', name: 'Granada', area: '+1' },
+            { code: 'VC', name: 'San Vicente y las Granadinas', area: '+1' },
+            { code: 'LC', name: 'Santa Lucía', area: '+1' },
+            { code: 'DM', name: 'Dominica', area: '+1' },
+            { code: 'KN', name: 'San Cristóbal y Nieves', area: '+1' },
+            { code: 'BZ', name: 'Belice', area: '+501' },
+            { code: 'MG', name: 'Madagascar', area: '+261' },
+            { code: 'MU', name: 'Mauricio', area: '+230' },
+            { code: 'SC', name: 'Seychelles', area: '+248' },
+            { code: 'MW', name: 'Malaui', area: '+265' },
+            { code: 'ZM', name: 'Zambia', area: '+260' },
+            { code: 'ZW', name: 'Zimbabue', area: '+263' },
+            { code: 'BW', name: 'Botsuana', area: '+267' },
+            { code: 'NA', name: 'Namibia', area: '+264' },
+            { code: 'AO', name: 'Angola', area: '+244' },
+            { code: 'GW', name: 'Guinea-Bisáu', area: '+245' },
+            { code: 'GN', name: 'Guinea', area: '+224' },
+            { code: 'SN', name: 'Senegal', area: '+221' },
+            { code: 'GM', name: 'Gambia', area: '+220' },
+            { code: 'CV', name: 'Cabo Verde', area: '+238' },
+            { code: 'MR', name: 'Mauritania', area: '+222' },
+            { code: 'CM', name: 'Camerún', area: '+237' },
+            { code: 'CF', name: 'República Centroafricana', area: '+236' },
+            { code: 'CD', name: 'República Democrática del Congo', area: '+243' },
+            { code: 'CG', name: 'República del Congo', area: '+242' },
+            { code: 'GA', name: 'Gabón', area: '+241' },
+            { code: 'GQ', name: 'Guinea Ecuatorial', area: '+240' },
+            { code: 'ST', name: 'Santo Tomé y Príncipe', area: '+239' },
+            { code: 'SL', name: 'Sierra Leona', area: '+232' },
+            { code: 'LR', name: 'Liberia', area: '+231' },
+            { code: 'CI', name: 'Costa de Marfil', area: '+225' },
+            { code: 'ML', name: 'Mali', area: '+223' },
+            { code: 'BJ', name: 'Benín', area: '+229' },
+            { code: 'BF', name: 'Burkina Faso', area: '+226' },
+            { code: 'TG', name: 'Togo', area: '+228' },
+            { code: 'NE', name: 'Níger', area: '+227' },
+            { code: 'ER', name: 'Eritrea', area: '+291' },
+            { code: 'ET', name: 'Etiopía', area: '+251' },
+            { code: 'DJ', name: 'Yibuti', area: '+253' },
+            { code: 'SO', name: 'Somalia', area: '+252' },
+            { code: 'UG', name: 'Uganda', area: '+256' },
+            { code: 'TZ', name: 'Tanzania', area: '+255' },
+            { code: 'RW', name: 'Ruanda', area: '+250' },
+            { code: 'BI', name: 'Burundi', area: '+257' },
+            { code: 'AZ', name: 'Azerbaiyán', area: '+994' },
+            { code: 'KZ', name: 'Kazajistán', area: '+7' },
+            { code: 'UZ', name: 'Uzbekistán', area: '+998' },
+            { code: 'TM', name: 'Turkmenistán', area: '+993' },
+            { code: 'KG', name: 'Kirguistán', area: '+996' },
+            { code: 'TJ', name: 'Tayikistán', area: '+992' },
+            { code: 'AF', name: 'Afganistán', area: '+93' },
+            { code: 'IR', name: 'Irán', area: '+98' },
+            { code: 'IQ', name: 'Irak', area: '+964' },
+            { code: 'SY', name: 'Siria', area: '+963' },
+            { code: 'AM', name: 'Armenia', area: '+374' },
+            { code: 'AW', name: 'Aruba', area: '+297' },
+            { code: 'CW', name: 'Curazao', area: '+599' },
+            { code: 'SX', name: 'Sint Maarten', area: '+1' },
+            { code: 'BM', name: 'Bermudas', area: '+1' },
+            { code: 'KY', name: 'Islas Caimán', area: '+1' },
+            { code: 'TC', name: 'Islas Turcas y Caicos', area: '+1' },
+            { code: 'VG', name: 'Islas Vírgenes Británicas', area: '+1' },
+            { code: 'AI', name: 'Anguila', area: '+1' },
+            { code: 'MS', name: 'Montserrat', area: '+1' },
+            { code: 'BL', name: 'San Bartolomé', area: '+590' },
+            { code: 'MF', name: 'Saint Martín', area: '+590' },
+            { code: 'GF', name: 'Guayana Francesa', area: '+594' },
+            { code: 'SR', name: 'Surinam', area: '+597' },
+            { code: 'GY', name: 'Guyana', area: '+592' },
+            { code: 'PR', name: 'Puerto Rico', area: '+1' },
+            { code: 'VI', name: 'Islas Vírgenes Estadounidenses', area: '+1' },
+            { code: 'AS', name: 'Samoa Americana', area: '+1' },
+            { code: 'GU', name: 'Guam', area: '+1' },
+            { code: 'MP', name: 'Islas Marianas del Norte', area: '+1' },
+            { code: 'IS', name: 'Islandia', area: '+354' },
+            { code: 'NO', name: 'Noruega', area: '+47' },
+            { code: 'RS', name: 'Serbia', area: '+381' },
+            { code: 'ME', name: 'Montenegro', area: '+382' },
+            { code: 'BA', name: 'Bosnia y Herzegovina', area: '+387' },
+            { code: 'MK', name: 'Macedonia del Norte', area: '+389' },
+            { code: 'AL', name: 'Albania', area: '+355' },
+            { code: 'XK', name: 'Kosovo', area: '+383' },
+            { code: 'AD', name: 'Andorra', area: '+376' },
+            { code: 'MC', name: 'Mónaco', area: '+377' },
+            { code: 'LI', name: 'Liechtenstein', area: '+423' },
+            { code: 'SM', name: 'San Marino', area: '+378' },
+            { code: 'VA', name: 'Ciudad del Vaticano', area: '+39' },
+            { code: 'BY', name: 'Bielorrusia', area: '+375' },
+            { code: 'MD', name: 'Moldavia', area: '+373' },
+        ];
+
+        // MÉTODOS DE PAGO
+        // Todos los métodos visibles. El Agente 1 centraliza la operación en PayPal Business nexo™.
+        const paymentMethods = [
+            { id: 'paypal', name: 'PayPal', icon: '🅿️' },
+            { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' },
+            { id: 'bank', name: 'ACH / Wire / Transferencia bancaria', icon: '🏦' },
+            { id: 'payoneer', name: 'Payoneer', icon: '📱' }
+        ];
+
+        let selectedPayment = 'paypal';
+        let orderData = null;
+
+        // INICIALIZAR
+        function init() {
+            renderCountrySelect();
+            renderPaymentMethods();
+            selectPayment('paypal');
+            loadCart();
+            calculateTotals();
+        }
+
+        // RENDERIZAR SELECT DE PAÍSES
+        function renderCountrySelect() {
+            const select = document.getElementById('countrySelect');
+            select.innerHTML = '<option value=""></option>';
+            
+            countriesPhoneData.slice().sort((a, b) => a.name.localeCompare(b.name, 'es')).forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = `${country.name} (${country.area})`;
+                select.appendChild(option);
+            });
+        }
+
+        // ACTUALIZAR CÓDIGO DE ÁREA
+        function updatePhoneCode() {
+            const countryCode = document.getElementById('countrySelect').value;
+            const country = countriesPhoneData.find(c => c.code === countryCode);
+            if (country) {
+                document.getElementById('phoneCode').value = country.area;
+            } else {
+                document.getElementById('phoneCode').value = '';
+            }
+        }
+
+        // RENDERIZAR MÉTODOS DE PAGO
+        function renderPaymentMethods() {
+            const container = document.getElementById('paymentMethods');
+            container.innerHTML = paymentMethods.map(method => `
+                <button class="payment-btn" data-method="${method.id}" onclick="selectPayment('${method.id}', this)">
+                    ${method.icon} ${method.name}
+                </button>
+            `).join('');
+        }
+
+        // SELECCIONAR MÉTODO DE PAGO
+        
+function selectPayment(methodId, btnEl=null) {
+    selectedPayment = methodId;
+    document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
+    if(btnEl) btnEl.classList.add('active');
+    else {
+      const found=[...document.querySelectorAll('.payment-btn')].find(b => (b.dataset.method||'')===methodId || (b.getAttribute('onclick')||'').includes(`'${methodId}'`));
+      if(found) found.classList.add('active');
+    }
+    const details = document.getElementById('paymentDetails');
+
+    if (methodId === 'card') {
+        details.innerHTML = `
+            <div class="payment-fields-panel">
+                <div class="form-group">
+                    <label class="form-label">Nombre como aparece en la tarjeta</label>
+                    <input type="text" class="form-input" id="cardHolder" placeholder="Nombre del titular">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Número de Tarjeta</label>
+                    <input type="text" class="form-input" placeholder="1234 5678 8765 4567" id="cardNumber" inputmode="numeric" maxlength="19">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">MM/AA</label>
+                        <input type="text" class="form-input" placeholder="11/32" id="cardExpiry" inputmode="numeric" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV</label>
+                        <input type="text" class="form-input" placeholder="123" id="cardCVV" inputmode="numeric" maxlength="4">
+                    </div>
+                </div>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con tarjeta</button>
+            </div>
+        `;
+        attachCardFormatters();
+    } else if (methodId === 'bank') {
+        details.innerHTML = `
+            <div class="payment-fields-panel">
+                <div class="form-group">
+                    <label class="form-label">Titular de la cuenta bancaria</label>
+                    <input type="text" class="form-input" id="bankHolder" placeholder="Nombre del titular">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Banco del cliente</label>
+                    <input type="text" class="form-input" id="bankName" placeholder="Nombre del banco">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Número de ruta / Routing / ABA</label>
+                        <input type="text" class="form-input" id="bankRouting" placeholder="Número de ruta">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Número de cuenta</label>
+                        <input type="text" class="form-input" id="bankAccount" placeholder="Cuenta bancaria">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo de transferencia</label>
+                    <select class="form-select" id="transferType">
+                        <option value="ACH">ACH sin costo</option>
+                        <option value="Wire">Wire / transferencia por cable con costo del banco o empresa wire</option>
+                    </select>
+                </div>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con transferencia</button>
+            </div>
+        `;
+    } else if (methodId === 'payoneer') {
+        details.innerHTML = `
+            <div class="payment-fields-panel">
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con Payoneer</button>
+            </div>
+        `;
+    } else {
+        details.innerHTML = `
+            <div class="payment-fields-panel">
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con PayPal</button>
+            </div>
+        `;
+    }
+}
+
+        const nexoCheckoutImages = {
+            laptop: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80', notebook: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80', impresora: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80', printer: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80', audifonos: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', auriculares: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', cable: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80', cargador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80', celular: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', iphone: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', reloj: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80', parlante: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80', hdmi: 'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80', adaptador: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80', soporte: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', protector: 'https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80', zapatos: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', zapatillas: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', cordones: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80', camisa: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80', mochila: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', default: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
+        };
+        function nexoText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+        function nexoCartImage(item){
+            if(item.image || item.imageUrl || item.photo) return item.image || item.imageUrl || item.photo;
+            const hay=nexoText([item.name,item.nombre,item.producto,item.aliases,item.category].join(' '));
+            for(const [k,url] of Object.entries(nexoCheckoutImages)){ if(k!=='default' && hay.includes(k)) return url; }
+            return nexoCheckoutImages.default;
+        }
+
+        // CARGAR CARRITO
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            const container = document.getElementById('cartItems');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #7A8B8B;">El carrito está vacío</p>';
+                return;
+            }
+
+            container.innerHTML = cart.map((rawItem, idx) => {
+                const item = { ...rawItem };
+                item.id = item.id ?? idx;
+                item.icon = item.icon || item.emoji || '📦';
+                item.name = item.name || item.nombre || item.producto || item.title || 'Producto nexo™';
+                item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? 0);
+                item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
+                item.shippingAmazon = Number(item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
+                item.vendorFee = Number(item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
+                item.provider = item.provider || item.proveedor || item.vendor || 'Proveedor externo';
+                item.providerLogo = item.providerLogo || '🏪';
+                return `
+                <div class="cart-item">
+                    <div class="cart-item-icon"><img src="${nexoCartImage(item)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoCheckoutImages.default;"></div>
+                    <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                    <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
+                    <div class="cart-item-shipping">🏪 Vendedor: $${(item.vendorFee || 0).toFixed(2)}</div>
+                    <div class="cart-item-controls">
+                        <button class="cart-item-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                        <div class="cart-item-qty">${item.quantity}</div>
+                        <button class="cart-item-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <button class="cart-item-delete" onclick="removeFromCart(${item.id})">🗑️ Eliminar</button>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // ACTUALIZAR CANTIDAD
+        function updateQuantity(productId, change) {
+            let cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            const item = cart.find(p => p.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity < 1) item.quantity = 1;
+                localStorage.setItem('nexoCart', JSON.stringify(cart));
+                loadCart();
+                calculateTotals();
+            }
+        }
+
+        // ELIMINAR DEL CARRITO
+        function removeFromCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('nexoCart', JSON.stringify(cart));
+            loadCart();
+            calculateTotals();
+        }
+
+        // CALCULAR TOTALES
+        function calculateTotals() {
+            const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+            const priority = document.getElementById('shippingPriority')?.value || 'standard';
+            const shippingFactor = priority === 'priority' ? 1.15 : 1;
+            const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            const amazonShipping = cart.reduce((total, item) => total + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
+            const baseVendorFees = cart.reduce((total, item) => total + ((item.vendorFee || 0) * item.quantity), 0);
+            const priorityVendorFee = priority === 'priority' ? Math.max(1.50, subtotal * 0.10) : 0;
+            const vendorFees = baseVendorFees + priorityVendorFee;
+            const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
+            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
+            const commission = subtotal * commissionRate;
+            const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
+            const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
+            const itf = commission * itfRate;
+            const iue = commission * iueRate;
+            const total = subtotal + amazonShipping + vendorFees + commission;
+
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('amazonShipping').textContent = `$${amazonShipping.toFixed(2)}`;
+            document.getElementById('vendorFees').textContent = `$${vendorFees.toFixed(2)}`;
+            document.getElementById('commission').textContent = `$${commission.toFixed(2)}`;
+            if(document.getElementById('itf')) document.getElementById('itf').textContent = '$0.00';
+            if(document.getElementById('iue')) document.getElementById('iue').textContent = '$0.00';
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            refreshDeliveryEstimate();
+        }
+
+        // ABRIR MODAL DE CONFIRMACIÓN
+        
+function openConfirmationModal() {
+            prefillClientData();
+            const fullName = document.getElementById('fullName').value.trim() || 'Cliente nexo™';
+            const email = document.getElementById('email').value.trim() || '';
+            const country = document.getElementById('countrySelect');
+            const shippingPriority = document.getElementById('shippingPriority').value;
+            const region = document.getElementById('region').value.trim() || '';
+            const city = document.getElementById('city').value.trim() || '';
+            const address = document.getElementById('address').value.trim() || 'Dirección registrada';
+            const zipCode = document.getElementById('zipCode').value.trim() || '0000';
+            const phoneCode = document.getElementById('phoneCode').value.trim() || '';
+            const phoneNumber = document.getElementById('phoneNumber').value.trim() || '70000000';
+            if (!selectedPayment) selectedPayment = 'card';
+            if(country && !country.value) country.value='';
+            const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shippingFactor = shippingPriority === 'priority' ? 1.15 : 1;
+            const amazonShipping = cart.reduce((sum, item) => sum + ((item.shippingAmazon || 0) * item.quantity), 0) * shippingFactor;
+            const baseVendorFees = cart.reduce((sum, item) => sum + ((item.vendorFee || 0) * item.quantity), 0);
+            const priorityVendorFee = shippingPriority === 'priority' ? Math.max(1.50, subtotal * 0.10) : 0;
+            const vendorFees = baseVendorFees + priorityVendorFee;
+            const companyInfo = JSON.parse(localStorage.getItem('nexoCompanyInfo') || '{}');
+            const commissionRate = typeof companyInfo.commission === 'number' ? companyInfo.commission / 100 : (parseFloat(localStorage.getItem('nexoCommission') || '30') / 100);
+            const commission = subtotal * commissionRate;
+            const itfRate = typeof companyInfo.itf === 'number' ? companyInfo.itf / 100 : 0.03;
+            const iueRate = typeof companyInfo.iue === 'number' ? companyInfo.iue / 100 : 0.25;
+            const itf = commission * itfRate;
+            const iue = commission * iueRate;
+            const total = subtotal + amazonShipping + vendorFees + commission;
+            const deliveryInfo = getDeliveryInfo(shippingPriority);
+            orderData = { fullName, email, phone: `${phoneCode} ${phoneNumber}`, country: country.options[country.selectedIndex].text, region, city, address, zipCode, paymentMethod: selectedPayment, shippingPriority, deliveryEstimate: deliveryInfo.text, deliveryLabel: deliveryInfo.label, items: cart, itemsCount: cart.reduce((n,i)=>n+(i.quantity||1),0), subtotal:Number(subtotal.toFixed(2)), amazonShipping:Number(amazonShipping.toFixed(2)), vendorFees:Number(vendorFees.toFixed(2)), commission:Number(commission.toFixed(2)), itf:Number(itf.toFixed(2)), iue:Number(iue.toFixed(2)), total:Number(total.toFixed(2)), customer:{fullName,email,country:country.options[country.selectedIndex].text, areaCode:phoneCode, phone:phoneNumber, region, city, address, zipCode, documentId:(JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documento || '')} };
+            
+const t = ctt();
+            const paymentMap = {
+              paypal:{es:'PayPal',en:'PayPal',pt:'PayPal',it:'PayPal',fr:'PayPal'},
+              card:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
+              tarjeta:{es:'Tarjeta de Crédito/Débito',en:'Credit/Debit Card',pt:'Cartão de Crédito/Débito',it:'Carta di Credito/Debito',fr:'Carte de Crédit/Débit'},
+              bank:{es:'Transferencia ACH / Wire',en:'ACH / Wire Transfer',pt:'Transferência ACH / Wire',it:'Bonifico ACH / Wire',fr:'Virement ACH / Wire'},
+              transferencia:{es:'Transferencia Bancaria',en:'Bank Transfer',pt:'Transferência Bancária',it:'Bonifico Bancario',fr:'Virement Bancaire'},
+              payoneer:{es:'Payoneer',en:'Payoneer',pt:'Payoneer',it:'Payoneer',fr:'Payoneer'}
+            };
+            const paymentLabel = (paymentMap[selectedPayment] && paymentMap[selectedPayment][currentLang]) || selectedPayment.toUpperCase();
+            const extraRows = `${amazonShipping>0 ? `<strong style="color:#f39c12;">${t.confirmShip}:</strong> <span style="color:#f39c12;">$${amazonShipping.toFixed(2)}</span><br>` : ''}${vendorFees>0 ? `<strong style="color:#f39c12;">${t.confirmVendor}:</strong> <span style="color:#f39c12;">$${vendorFees.toFixed(2)}</span><br>` : ''}<strong style="color:#f39c12;">${t.deliveryOrange}:</strong> <span style="color:#f39c12;">${deliveryInfo.label} · ${deliveryInfo.text.replace(/^.*?: /,'')}</span><br>`;
+            document.getElementById('confirmationSummary').innerHTML = `<strong>${t.confirmClient}:</strong> ${fullName}<br><strong>${t.confirmEmail}:</strong> ${email}<br><strong>${t.confirmPhone}:</strong> ${phoneCode} ${phoneNumber}<br><strong>${t.confirmDestination}:</strong> ${country.options[country.selectedIndex].text}, ${region}, ${city}<br><strong>${t.confirmAddress}:</strong> ${address} | CP ${zipCode}<br><strong>${t.confirmPayment}:</strong> ${paymentLabel}<hr style="border:none;border-top:1px solid #d8e5e2;margin:12px 0"><strong>${t.confirmSubtotal}:</strong> $${subtotal.toFixed(2)}<br>${extraRows}<strong>${t.confirmCommission}:</strong> $${commission.toFixed(2)}<br><strong style="font-size:18px;color:#7ac742;">${t.confirmTotal}: $${total.toFixed(2)}</strong>`;
+
+            const legalAccept = document.getElementById('nexoLegalAccept');
+            const legalWarning = document.getElementById('nexoLegalWarning');
+            if(legalAccept) legalAccept.checked = false;
+            if(legalWarning) legalWarning.style.display = 'none';
+            applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
+        }
+        function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
+
+        async function startNexoPagoSeguro(orderData){
+            // PAYPAL REAL: el cliente paga a PayPal Business de nexo.
+            // El Agente 1 espera confirmación/captura PayPal y luego deja preparada la compra Amazon.
+            const amount = Math.max(1, Number(orderData.total || 0)).toFixed(2);
+            const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
+            const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&metodo=paypal&paypal=return`;
+            const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=paypal`;
+
+            try {
+                const r = await fetch('/api/paypal-create-order', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        amount,
+                        pedidoId,
+                        orderData,
+                        returnUrl: successUrl,
+                        cancelUrl
+                    })
+                });
+                const data = await r.json().catch(()=>({}));
+                if(r.ok && data.ok && data.approvalUrl){
+                    orderData.paypalOrderId = data.orderId;
+                    orderData.paypalEnvironment = data.env;
+                    orderData.estado_pago = 'paypal_redireccionado_cliente';
+                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                    window.location.href = data.approvalUrl;
+                    return;
+                }
+                console.warn('PayPal Orders API no disponible, se usará fallback PayPal Standard.', data);
+            } catch(e) {
+                console.warn('No se pudo crear orden PayPal API, se usará fallback PayPal Standard.', e);
+            }
+
+            // Fallback operativo: PayPal Standard directo a la cuenta empresarial de nexo.
+            const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
+            const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(fallbackSuccessUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
+            window.location.href = paypalLiveUrl;
+        }
+
+        async function submitPurchase(){
+            if(!orderData) return;
+            const btnText = document.getElementById('confirmBuyText');
+            const oldBtnText = btnText ? btnText.textContent : '';
+            const legalAccept = document.getElementById('nexoLegalAccept');
+            const legalWarning = document.getElementById('nexoLegalWarning');
+            if(!legalAccept || !legalAccept.checked){
+                if(legalWarning) legalWarning.style.display = 'block';
+                alert('Para continuar debes aceptar los términos, privacidad y condición de intermediación de nexo™.');
+                if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra';
+                return;
+            }
+            if(legalWarning) legalWarning.style.display = 'none';
+            if(btnText) btnText.textContent = 'Guardando pedido...';
+
+            orderData.note = document.getElementById('customerNote').value.trim();
+            orderData.timestamp = new Date().toISOString();
+            orderData.legalAcceptance = {
+                accepted: true,
+                acceptedAt: orderData.timestamp,
+                terms: 'terminos-condiciones.html',
+                privacy: 'politica-privacidad.html',
+                intermediaryDeclaration: 'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',
+                userAgent: navigator.userAgent || '',
+                source: 'nexo-checkout.html'
+            };
+            orderData.id = orderData.id || ('NEXO-' + Date.now());
+                        orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
+            if(orderData.paymentMethod === 'card'){
+                orderData.cardPayment = {
+                    holder: (document.getElementById('cardHolder')?.value || '').trim(),
+                    cardNumberMasked: (document.getElementById('cardNumber')?.value || '').replace(/\s/g,'').replace(/.(?=.{4})/g,'•'),
+                    expiry: (document.getElementById('cardExpiry')?.value || '').trim(),
+                    destination: 'Procesamiento interno nexo™'
+                };
+            }
+            if(orderData.paymentMethod === 'bank'){
+                orderData.bankPayment = {
+                    holder: (document.getElementById('bankHolder')?.value || '').trim(),
+                    bankName: (document.getElementById('bankName')?.value || '').trim(),
+                    routingNumber: (document.getElementById('bankRouting')?.value || '').trim(),
+                    accountNumberMasked: (document.getElementById('bankAccount')?.value || '').trim().replace(/.(?=.{4})/g,'•'),
+                    rail: (document.getElementById('transferType')?.value || 'ACH'),
+                    destination: 'Verificación interna nexo™'
+                };
+            }
+            orderData.currency = 'USD';
+            orderData.company = 'nexo™';
+            orderData.commissionRate = 0.30;
+            orderData.taxRates = { it: 0.03, iue: 0.25 };
+            orderData.netCommissionAfterTaxes = +(orderData.commission - orderData.itf - orderData.iue).toFixed(2);
+            orderData.customer = {
+                fullName: orderData.fullName,
+                email: orderData.email,
+                phone: `${document.getElementById('phoneCode').value.trim()} ${document.getElementById('phoneNumber').value.trim()}`.trim(),
+                countryCode: document.getElementById('countrySelect').value,
+                country: orderData.country,
+                areaCode: document.getElementById('phoneCode').value.trim(),
+                region: document.getElementById('region').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                zipCode: document.getElementById('zipCode').value.trim(),
+                documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
+            };
+            orderData.totals = {
+                subtotal: +orderData.subtotal.toFixed(2),
+                amazonShipping: +orderData.amazonShipping.toFixed(2),
+                vendorFees: +orderData.vendorFees.toFixed(2),
+                commission: +orderData.commission.toFixed(2),
+                itf: +orderData.itf.toFixed(2),
+                iue: +orderData.iue.toFixed(2),
+                total: +orderData.total.toFixed(2),
+                netCommissionAfterTaxes: +orderData.netCommissionAfterTaxes.toFixed(2)
+            };
+            orderData.reporting = {
+                periodo: new Date(orderData.timestamp).toISOString().slice(0,7),
+                nitEmpresa: '774651015',
+                razonSocial: 'Nexo Servicios Generales y Empresariales',
+                concepto: 'Servicios de Intermediación / Comercialización Internacional',
+                baseFiscal: +orderData.commission.toFixed(2),
+                itFiscal: +orderData.itf.toFixed(2),
+                iueFiscal: +orderData.iue.toFixed(2)
+            };
+            try {
+                if (!window.nexoSavePedidoToSupabase) throw new Error('Conexión Supabase no inicializada');
+                const { data, error } = await window.nexoSavePedidoToSupabase(orderData);
+                if (error) throw error;
+                orderData.supabase_id = data?.id || orderData.id;
+                orderData.factura_numero = data?.factura_numero || orderData.factura_numero || orderData.id;
+                orderData.estado = 'pedido_registrado';
+                orderData.supabase_status = data?.local_only ? 'respaldo_local' : 'guardado';
+            } catch (err) {
+                console.warn('Supabase no disponible. Pedido continúa con respaldo local.', err);
+                orderData.supabase_id = orderData.id;
+                orderData.estado = 'pedido_registrado_respaldo_local';
+                orderData.supabase_status = 'pendiente_sincronizacion';
+            }
+
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            const orders = JSON.parse(localStorage.getItem('nexoOrders') || '[]');
+            orders.push(orderData);
+            localStorage.setItem('nexoOrders', JSON.stringify(orders));
+
+            const prof = JSON.parse(localStorage.getItem('nexoClientProfile') || '{}');
+            const updated = {
+                ...prof,
+                fullName: orderData.fullName,
+                email: orderData.email,
+                countryCode: document.getElementById('countrySelect').value,
+                country: orderData.country,
+                areaCode: document.getElementById('phoneCode').value,
+                phone: document.getElementById('phoneNumber').value.trim(),
+                region: document.getElementById('region').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                zipCode: document.getElementById('zipCode').value.trim()
+            };
+            localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
+            orderData.providerFlow = {
+                active:true,
+                agent:'AGENTE 1',
+                status: orderData.paymentMethod === 'paypal' ? 'cola_pago_proveedor' : 'pendiente_confirmacion_manual',
+                cliente_cobra_en: orderData.paymentMethod === 'paypal' ? 'PayPal nexo™' : (orderData.paymentMethod === 'card' ? 'Tarjeta registrada para procesamiento manual/pendiente' : 'Transferencia ACH/Wire registrada para verificación'),
+                proveedor_pago_con:'PayPal (si el proveedor acepta PayPal)',
+                margen_empresa:'Comisión nexo™ calculada sobre precio proveedor y registrada en el pedido',
+                providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace']
+            };
+            try {
+                const queue = JSON.parse(localStorage.getItem('nexoProviderPaymentQueue') || '[]');
+                queue.push({
+                    pedido_id: orderData.id,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente_pago_proveedor',
+                    cobrar_cliente_en: orderData.paymentMethod === 'paypal' ? 'PayPal' : (orderData.paymentMethod === 'card' ? 'Tarjeta registrada - no redirige a PayPal' : 'ACH/Wire registrado - no redirige a PayPal'),
+                    pagar_proveedor_con: 'PayPal (si el proveedor acepta PayPal)',
+                    total_cliente_usd: orderData.total,
+                    subtotal_producto_usd: orderData.subtotal,
+                    comision_nexo_usd: orderData.commission,
+                    items: orderData.items || [],
+                    nota: 'Automatización real requiere webhook PayPal + API oficial del proveedor.'
+                });
+                localStorage.setItem('nexoProviderPaymentQueue', JSON.stringify(queue));
+            } catch(e) {}
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            try {
+                await fetch('/api/agente1-pagos', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(orderData)
+                });
+            } catch(e) {
+                console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
+            }
+
+            // PAYPAL REAL: si el cliente eligió PayPal, se envía a PayPal Business.
+            // Al volver de PayPal, /api/paypal-capture-order confirma el cobro,
+            // actualiza Supabase y activa /api/agent1-procesar automáticamente.
+            if(orderData.paymentMethod === 'paypal'){
+                orderData.estado_pago = 'paypal_redireccionado_cliente';
+                orderData.estado_compra = 'pendiente_pago_paypal';
+                orderData.estado_agente = 'esperando_pago_paypal';
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                if(btnText) btnText.textContent = 'Abriendo PayPal seguro...';
+                await startNexoPagoSeguro(orderData);
+                return;
+            }
+
+            // CIERRE INTERNO NEXO: para tarjetas, ACH/Wire y Payoneer se emite recibo interno.
+            // El cliente no es redirigido automáticamente a PayPal; el Agente 1 gestiona el cobro
+            // en PayPal Business y luego compra al proveedor/Amazon con la dirección del cliente.
+            orderData.estado_pago = orderData.paymentMethod === 'paypal'
+                ? 'pendiente_agente_1_paypal'
+                : (orderData.paymentMethod === 'card'
+                    ? 'tarjeta_pendiente_agente_1_paypal'
+                    : (orderData.paymentMethod === 'bank'
+                        ? 'transferencia_pendiente_agente_1_paypal'
+                        : 'payoneer_pendiente_agente_1_paypal'));
+            orderData.estado_compra = 'pedido_cerrado_agente_1_automatico';
+            orderData.agent1_mode = 'automatico_sin_aprobacion_manual';
+            orderData.paypal_destination = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
+            orderData.confirmationNote = 'Pedido cerrado en nexo™. El Agente 1 gestionará el cobro en PayPal Business, comprará al proveedor/Amazon con la dirección del cliente y registrará el tracking. La comisión queda en PayPal.';
+            try {
+                const agentQueue = JSON.parse(localStorage.getItem('nexoAgent1AutoQueue') || '[]');
+                agentQueue.push({
+                    pedido_id: orderData.supabase_id || orderData.id,
+                    fecha: new Date().toISOString(),
+                    estado: 'pendiente_cobro_paypal_y_compra_amazon',
+                    automatico: true,
+                    sin_aprobacion_manual: true,
+                    cobrar_en: 'PayPal Business nexo™',
+                    paypal_email: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
+                    comprar_en: 'Amazon/proveedor original',
+                    destino_cliente: orderData.customer,
+                    total_cliente_usd: orderData.total,
+                    subtotal_producto_usd: orderData.subtotal,
+                    gastos_amazon_marketplace_usd: orderData.amazonShipping,
+                    gastos_proveedor_usd: orderData.vendorFees,
+                    comision_nexo_usd: orderData.commission,
+                    items: orderData.items || []
+                });
+                localStorage.setItem('nexoAgent1AutoQueue', JSON.stringify(agentQueue));
+            } catch(e) {}
+            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+            localStorage.removeItem('nexoCart');
+            window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
+        }
+        function attachCardFormatters(){
+            const num=document.getElementById('cardNumber'), exp=document.getElementById('cardExpiry'), cvv=document.getElementById('cardCVV');
+            if(num){ num.addEventListener('input', ()=>{ let v=num.value.replace(/\D/g,'').slice(0,16); num.value=v.replace(/(.{4})/g,'$1 ').trim(); }); }
+            if(exp){ exp.addEventListener('input', ()=>{ let v=exp.value.replace(/\D/g,'').slice(0,4); if(v.length>=3) v=v.slice(0,2)+'/'+v.slice(2); exp.value=v; }); }
+            if(cvv){ cvv.addEventListener('input', ()=>{ cvv.value=cvv.value.replace(/\D/g,'').slice(0,4); }); }
+        }
+
+
+        function getDeliveryInfo(priority){
+            const t = ctt();
+            const now = new Date();
+            const days = priority === 'priority' ? 9 : 12;
+            const eta = new Date(now.getTime() + days*24*60*60*1000);
+            const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+            const monthsEn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const monthSet = currentLang === 'en' ? monthsEn : months;
+            const etaText = `${eta.getDate()} ${monthSet[eta.getMonth()]} ${eta.getFullYear()}`;
+            return {
+                label: priority === 'priority' ? t.deliveryPriority : t.deliveryStandard,
+                days,
+                text: `${t.deliveryEta}: ${etaText}`
+            };
+        }
+
+        function refreshDeliveryEstimate(){
+            const priority = document.getElementById('shippingPriority')?.value || 'standard';
+            const info = getDeliveryInfo(priority);
+            const box = document.getElementById('deliveryEstimateBox');
+            const row = document.getElementById('deliverySummary');
+            const shipLbl = document.getElementById('sumShipLbl');
+            if(box){ box.innerHTML = `${info.text}<br><span style="font-size:11px;">${info.label}</span>`; }
+            if(row){ row.textContent = `${info.label} · ${info.text.replace(/^.*?: /,'')}`; }
+            if(shipLbl){ shipLbl.textContent = priority === 'priority' ? `${ctt().sumShipLbl} - ${info.label}` : ctt().sumShipLbl; }
+        }
+
+        
+function prefillClientData(){
+    let profile = null;
+    try{
+      profile = JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || 'null');
+    }catch(e){ profile = null; }
+    if(!profile) return;
+
+    const setVal = (id, value) => {
+      const el = document.getElementById(id);
+      if(el) el.value = value || '';
+    };
+
+    setVal('fullName', profile.fullName || profile.name || '');
+    setVal('email', profile.email || '');
+    setVal('phoneCode', profile.areaCode || '');
+    setVal('phoneNumber', profile.phone || '');
+    setVal('region', profile.region || '');
+    setVal('city', profile.city || '');
+    setVal('address', profile.address || '');
+    setVal('zipCode', profile.zipCode || profile.postalCode || '0000');
+
+    const sel = document.getElementById('countrySelect');
+    if(sel){
+      const pCountry = (profile.countryCode || profile.country || '').toString().toLowerCase();
+      const opt = [...sel.options].find(o => o.value.toLowerCase() === pCountry || o.textContent.toLowerCase().includes(pCountry));
+      if(opt) sel.value = opt.value;
+    }
+    updatePhoneCode();
+    if(profile.areaCode) setVal('phoneCode', profile.areaCode);
+}
+
+
+        // INICIAR
+        init();
+        prefillClientData();
+        refreshDeliveryEstimate();
+        setTimeout(()=>{prefillClientData();},100);
+        setTimeout(()=>{ selectPayment(selectedPayment || 'paypal'); }, 50);
+        const cpBtn=document.getElementById('completePurchaseBtn') || document.querySelector('.checkout-btn'); if(cpBtn){ cpBtn.onclick=function(e){ if(e) e.preventDefault(); openConfirmationModal(); return false; }; }
+window.addEventListener('DOMContentLoaded', ()=>{ try{ applyCheckoutLanguage(); refreshDeliveryEstimate(); }catch(e){} });
+    
+
+</script>
+
+
+<script>
+function nexoHideInternalTaxesForCustomer(){
+  const ids = ['sumItLbl','sumIueLbl','itf','iue','taxAmount','retentionAmount','taxSection'];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) {
+      const row = el.closest('.summary-row') || el.parentElement;
+      if (row) row.style.display = 'none';
+      else el.style.display = 'none';
+    }
+  });
+  ['sumCommissionLbl'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.textContent = (el.textContent || '').replace(/\s*\(.*?\)/g,'').replace(/35%/g,'').replace(/30%/g,'').trim();
+      if(!el.textContent.endsWith(':')) el.textContent = el.textContent.replace(/:?$/,'') + ':';
+    }
+  });
+}
+window.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(nexoHideInternalTaxesForCustomer, 50);
+  setTimeout(nexoHideInternalTaxesForCustomer, 300);
+});
+</script>
+
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  function nexoCustomerFinalCleanup(){
+    // hide any lingering undefined rows anywhere
+    document.querySelectorAll('div, p, span, strong').forEach(el=>{
+      const t = (el.textContent || '').trim();
+      if (/^undefined\s*:/i.test(t)) {
+        const row = el.closest('.summary-row') || el.parentElement;
+        if (row) row.remove(); else el.remove();
+      }
+    });
+
+    // remove 35% if still printed in client summary/cart
+    document.querySelectorAll('*').forEach(el=>{
+      if (el.children.length === 0 && el.textContent) {
+        el.textContent = el.textContent.replace(/\s*\(35%\)/g,'').replace(/\s*35%/g,'');
+      }
+    });
+
+    // translatable delivery label in summary card
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const deliveryMap = {
+      es: 'Entrega estimada',
+      en: 'Estimated delivery',
+      pt: 'Entrega estimada',
+      it: 'Consegna stimata',
+      fr: 'Livraison estimée'
+    };
+    const lbl = document.getElementById('sumDeliveryLbl');
+    if (lbl) lbl.textContent = deliveryMap[lang] || deliveryMap.es;
+  }
+  setTimeout(nexoCustomerFinalCleanup, 50);
+  setTimeout(nexoCustomerFinalCleanup, 250);
+  setTimeout(nexoCustomerFinalCleanup, 800);
+});
+</script>
+
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+
+<footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
+  nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
+  nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
+  © 2026 nexo™ – Todos los derechos reservados<br>
+  <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+    <a href="aviso-legal.html">Aviso Legal</a><span>&nbsp;|&nbsp;</span>
+    <a href="terminos-condiciones.html">Términos y Condiciones</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-privacidad.html">Privacidad</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-cookies.html">Cookies</a><span>&nbsp;|&nbsp;</span>
+    <a href="reembolsos.html">Reembolsos</a>
+  </div>
+</footer>
+
+
+<script>
+(function(){
+  function nexoCheckoutLegalOk(){
+    var cb=document.getElementById('nexoLegalAccept');
+    if(cb && !cb.checked){ alert('Debes aceptar los términos legales de nexo™ para continuar.'); return false; }
+    return true;
+  }
+  document.addEventListener('click', function(e){
+    var el=e.target;
+    if(!el) return;
+    var txt=(el.textContent||el.value||'').toLowerCase();
+    if((el.tagName==='BUTTON' || el.tagName==='A') && (txt.includes('pagar') || txt.includes('confirmar') || txt.includes('paypal'))){
+      if(!nexoCheckoutLegalOk()){ e.preventDefault(); e.stopPropagation(); }
+    }
+  }, true);
 })();
+</script>
+
+<script src="nexo-legal-i18n.js"></script>
+</body>
+</html>

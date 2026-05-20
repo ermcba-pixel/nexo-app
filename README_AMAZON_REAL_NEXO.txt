@@ -1,29 +1,46 @@
-INTEGRACION AMAZON BUSINESS - nexo
 
-Este ZIP actualiza:
-- api/amazon-products.js
-- api/agent1-amazon.js
-- nexo-tienda-cliente.html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacidad | nexo</title>
+<meta name="robots" content="index,follow">
+<style>
+:root{--primary:#4A6B6D;--secondary:#5A7C7E;--light:#E8F0F0;--white:#fff;--dark:#2D3E3F;--accent:#7AC742;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--dark)}
+.wrap{max-width:1040px;margin:28px auto;padding:0 18px}
+.card{background:var(--white);border-radius:24px;box-shadow:0 18px 40px rgba(0,0,0,.18);padding:34px}
+h1{margin:0 0 18px;color:var(--primary);font-size:34px}
+h2{color:var(--primary);margin-top:30px;font-size:22px;border-top:1px solid #e7eeee;padding-top:22px}
+h3{color:var(--dark);margin-top:18px;font-size:18px}
+p,li{line-height:1.65;font-size:16px}
+ul{padding-left:22px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.btn{display:inline-block;background:var(--dark);color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700}
+.nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0 4px}
+.nav a{color:var(--primary);font-weight:700;text-decoration:underline}
+.note{background:#f5f9ef;border-left:4px solid var(--accent);padding:14px 16px;border-radius:12px;margin:18px 0}
+.footer-note{margin-top:34px;text-align:center;color:#546;font-size:13px;border-top:1px solid #e7eeee;padding-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<div class="top"><a class="btn" href="index.html">← Volver al portal</a><strong>nexo Servicios Generales y Empresariales</strong></div>
+<div class="nav"><a href="aviso-legal.html">Aviso Legal</a> | <a href="terminos-condiciones.html">Términos y Condiciones</a> | <a href="privacidad.html">Privacidad</a> | <a href="cookies.html">Cookies</a> | <a href="reembolsos.html">Reembolsos</a></div>
 
-Qué hace:
-1. Intercambia AMAZON_REFRESH_TOKEN + AMAZON_CLIENT_ID + AMAZON_CLIENT_SECRET por access token LWA.
-2. Intenta llamar a Amazon Business Product Search API usando endpoint sandbox NA por defecto.
-3. Si Amazon sandbox/producción no devuelve catálogo dinámico, muestra un catálogo inteligente de respaldo de hasta 24 productos para evitar resultados pobres como una sola funda.
-4. Agent 1 verifica token LWA y prepara pedido en sandbox-ready.
+<h1>Política de Privacidad – nexo</h1>
+<div class="note">nexo™ recopila únicamente la información necesaria para operar la plataforma, procesar solicitudes, coordinar envíos y brindar soporte.</div>
+<h2>1. Datos recopilados</h2><ul><li>Nombre completo</li><li>Correo electrónico</li><li>Teléfono y código de país</li><li>Dirección de envío</li><li>Ciudad, región, país, código postal y datos necesarios para facturación</li><li>Historial de solicitudes, compras, tickets y comunicaciones dentro de la plataforma</li></ul>
+<h2>2. Finalidad del tratamiento</h2><p>Los datos son utilizados para procesar compras, coordinar envíos, verificar pagos, brindar atención al cliente, generar reportes internos, cumplir obligaciones legales y mejorar la experiencia de uso.</p>
+<h2>3. Pagos y datos financieros</h2><p>Los pagos se procesan mediante plataformas externas seguras como PayPal, tarjetas de crédito/débito y banco/ACH/Wire cuando PayPal los habilite. nexo™ no almacena datos financieros sensibles como números completos de tarjeta, claves bancarias o credenciales de pago.</p>
+<h2>4. Compartición de datos</h2><p>Los datos pueden compartirse, cuando sea necesario, con proveedores internacionales, plataformas de pago, operadores logísticos, servicios tecnológicos, asesores legales/contables o autoridades competentes cuando exista requerimiento legal.</p>
+<h2>5. Seguridad</h2><p>nexo™ aplica medidas técnicas y organizativas razonables para proteger la información del usuario frente a accesos no autorizados, pérdida, alteración o uso indebido.</p>
+<h2>6. Conservación</h2><p>La información será conservada durante el tiempo necesario para cumplir la finalidad para la que fue recopilada, obligaciones legales, tributarias, contables o defensa ante reclamos.</p>
+<h2>7. Derechos del usuario</h2><p>El usuario puede solicitar acceso, corrección, actualización o eliminación de sus datos cuando corresponda legalmente.</p>
+<h2>8. Contacto</h2><p>Correo oficial: ermcba@hotmail.com.</p>
 
-Variables necesarias en Vercel:
-- AMAZON_CLIENT_ID
-- AMAZON_CLIENT_SECRET
-- AMAZON_REFRESH_TOKEN
-- SUPABASE_URL
-- SUPABASE_ANON_KEY
-
-Variables opcionales:
-- AMAZON_REGION=NA
-- AMAZON_MARKETPLACE_ID=ATVPDKIKX0DER
-- AMAZON_BUSINESS_API_ENDPOINT=https://sandbox.na.business-api.amazon.com
-- AMAZON_PRODUCT_SEARCH_PATH=/products/2020-08-26/products
-- AMAZON_USE_LIVE=1
-
-Importante:
-Amazon Business Sandbox es estático y puede devolver respuestas simuladas solo con parámetros exactos de su guía. Para compra real se necesita aprobación de producción para Product Search, Cart API y Ordering API.
+<div class="footer-note">nexo – Plataforma de Intermediación Comercial Internacional<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>© 2026 nexo™ – Todos los derechos reservados</div>
+</div></div>
+</body></html>

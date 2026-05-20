@@ -1,33 +1,35 @@
-CORRECCIÓN REAL APLICADA
+nexo – Agente 1 automático PayPal → Amazon
 
-1) Nombre oficial SENAPI
-Se eliminó la frase "Intermediación Digital" y "Plataforma de intermediación comercial internacional".
-El sistema queda como:
+Cambios aplicados:
+1. Se agregó /api/agent1-auto-purchase.
+2. Al volver de PayPal Orders API, nexo-confirmacion.html captura el pago y llama automáticamente al Agente 1.
+3. El pedido ya no queda como “pendiente de aprobación manual”; queda como:
+   - agente_1_compra_automatica_iniciada
+   - agente_1_compra_automatica_preparada_sandbox
+   - agente_1_compra_automatica_en_cola
+4. La comisión/diferencia queda registrada como margen nexo en PayPal.
+5. Meru no se usa como API. Solo queda como cuenta bancaria/retiro.
+6. Cuando Amazon habilite producción real, activar en Vercel:
+   AMAZON_PRODUCTION_ENABLED=true
+   o
+   AMAZON_AUTO_PURCHASE_ENABLED=true
 
-nexo – Sistema de Intermediación Comercial Internacional
+Variables mínimas Vercel:
+PAYPAL_CLIENT_ID=
+PAYPAL_CLIENT_SECRET=
+PAYPAL_ENV=live
+AMAZON_CLIENT_ID=
+AMAZON_CLIENT_SECRET=
+AMAZON_REFRESH_TOKEN=
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-Aplicado en panel principal, portal principal, footers, i18n global y paneles internos.
+Cuando Amazon habilite Creators API:
+AMAZON_ACCESS_KEY=
+AMAZON_SECRET_KEY=
+AMAZON_ASSOCIATE_TAG=nexo08-20
 
-2) Tienda / productos Amazon
-Se eliminó el catálogo demo local como fuente visible inicial para evitar que aparezcan productos falsos de AliExpress/Temu/Marketplace cuando se busca iPhone/laptop.
-Ahora la tienda consulta primero:
-/api/amazon-products
-
-El endpoint está preparado para PA-API 5.0 de Amazon y devuelve productos reales ordenados de mayor a menor precio, con imágenes originales Amazon.
-
-Para que Amazon devuelva productos reales en Vercel deben existir estas variables:
-AMAZON_ACCESS_KEY
-AMAZON_SECRET_KEY
-AMAZON_ASSOCIATE_TAG
-AMAZON_REGION=us-east-1
-AMAZON_HOST=webservices.amazon.com
-AMAZON_MARKETPLACE=www.amazon.com
-
-Las variables AMAZON_CLIENT_ID, AMAZON_CLIENT_SECRET y AMAZON_REFRESH_TOKEN son de SP-API/LWA y sirven para la fase de órdenes/compras, pero por sí solas no reemplazan PA-API para búsqueda de productos e imágenes originales.
-
-3) Gastos reales Amazon / Marketplace
-/api/amazon-shipping-quote recibe dirección real del cliente e items.
-No inventa costos sandbox. Si Amazon no devuelve costo real, deja shippingAmazon/vendorFee en null y marca status pending_real_amazon_checkout_quote.
-
-4) Después de subir este ZIP a GitHub/Vercel
-Hacer Redeploy y limpiar caché del navegador con Ctrl+F5.
+Nota técnica honesta:
+Mientras Amazon mantenga SP-API en entorno de pruebas o Creators API bloqueada por ventas calificadas, el Agente 1 toma el pedido automáticamente y lo deja en cola técnica automática, sin aprobación manual humana. La ejecución real de compra Amazon requiere Amazon Ordering/SP-API en producción y permisos activos.

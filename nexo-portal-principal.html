@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>nexo™ - Portal Principal</title>
+    <title>nexo™ - Confirmación de Compra</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #4A6B6D;
@@ -19,9 +15,6 @@
             --white: #FFFFFF;
             --dark: #2D3E3F;
             --accent: #7AC742;
-            --accent-light: #A8D965;
-            --danger: #E74C3C;
-            --warning: #F39C12;
             --success: #27AE60;
         }
 
@@ -30,457 +23,412 @@
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
             margin: 0;
-            gap: 30px;
         }
 
-        .portal-container {
-            width: 100%;
-            max-width: 1300px;
-            background-color: var(--white);
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-            display: flex;
-            flex-direction: row;
-            min-height: 650px;
-        }
-
-        /* ============ HEADER IZQUIERDO ============ */
-        .portal-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
-            padding: 60px 50px;
-            text-align: center;
-            color: var(--white);
-            position: relative;
-            overflow: hidden;
-            width: 35%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 25px;
-        }
-
-        .portal-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 1;
-            max-width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 18px;
-        }
-
-        /* ========== LOGO COMPLETO BLANCO ========== */
-        .logo-container {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-box {
+        .confirmation-card {
             background: var(--white);
-            border-radius: 25px;
-            padding: 14px 22px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            gap: 6px;
-            width: 130px;
+            border-radius: 30px;
+            padding: 60px 40px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            animation: slideDown 0.5s ease-out;
         }
 
-        .logo-text-nexo {
-            font-size: 52px;
-            font-weight: 900;
-            letter-spacing: -2px;
-            line-height: 1;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .logo-ne {
-            color: var(--primary);
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease-out;
         }
 
-        .logo-x {
-            color: var(--accent);
-            font-weight: 900;
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
 
-        .logo-o {
-            color: var(--primary);
-        }
-
-        .logo-subtitle {
-            font-size: 10px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 700;
-        }
-
-        .portal-title {
+        .confirmation-card h1 {
             font-size: 32px;
             font-weight: 900;
-            margin: 15px 0 10px 0;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
-        }
-
-        .portal-description {
-            font-size: 14px;
-            line-height: 1.6;
-            opacity: 0.9;
-            max-width: 95%;
-            margin: 0 auto;
-        }
-
-        /* ============ CONTENT DERECHO ============ */
-        .portal-content {
-            padding: 45px 45px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: 30px;
-        }
-
-        .access-section {
-            margin-bottom: 0;
-        }
-
-        .access-title {
-            font-size: 13px;
-            font-weight: 700;
             color: var(--dark);
-            text-transform: uppercase;
-            letter-spacing: 2px;
             margin-bottom: 12px;
+            letter-spacing: -1px;
         }
 
-        .access-card {
-            background-color: var(--light);
-            border-radius: 18px;
+        .confirmation-card p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .invoice-section {
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            border: 2px solid rgba(74, 107, 109, 0.1);
+            border-radius: 16px;
             padding: 24px;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            cursor: pointer;
-            border: 2px solid transparent;
-            display: flex;
-            gap: 16px;
-            align-items: flex-start;
+            margin: 30px 0;
+            text-align: left;
         }
 
-        .access-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-color: var(--accent);
-            background: linear-gradient(135deg, rgba(122, 199, 66, 0.08) 0%, rgba(74, 107, 109, 0.05) 100%);
-        }
-
-        .access-icon {
-            font-size: 32px;
-            flex-shrink: 0;
-            margin-top: 4px;
-        }
-
-        .access-content {
-            flex: 1;
-        }
-
-        .access-card h3 {
-            font-size: 22px;
+        .invoice-id {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
             font-weight: 900;
             color: var(--primary);
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+            word-break: break-all;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--white);
+            border-radius: 8px;
         }
 
-        .access-card p {
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(74, 107, 109, 0.1);
             font-size: 14px;
-            color: #555;
-            line-height: 1.5;
-            margin-bottom: 14px;
         }
 
-        .access-btn {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
-            color: var(--white);
-            padding: 12px 20px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 1px;
-            transition: all 0.3s;
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .detail-value {
+            color: #666;
+        }
+
+        .detail-value.total {
+            font-weight: 900;
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px;
             border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(74, 107, 109, 0.2);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .access-btn:hover {
+        .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(74, 107, 109, 0.3);
         }
 
-        /* ============ LANGUAGE SELECTOR ============ */
-        .language-footer {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(232, 240, 240, 0.8) 100%);
-            padding: 24px 32px;
-            border-radius: 16px;
-            border: 2px solid rgba(74, 107, 109, 0.15);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            flex-direction: row;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .language-section {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            justify-content: center;
-        }
-
-        .language-title {
-            font-size: 16px;
+        .btn-secondary {
+            background: var(--light);
             color: var(--dark);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            white-space: nowrap;
+            border: 2px solid rgba(74, 107, 109, 0.1);
         }
 
-        .language-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .lang-btn {
-            background-color: var(--white);
-            color: var(--dark);
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 2px solid var(--primary);
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: capitalize;
-            letter-spacing: 0.5px;
-        }
-
-        .lang-btn:hover,
-        .lang-btn.active {
-            background-color: var(--accent);
-            color: var(--white);
+        .btn-secondary:hover {
             border-color: var(--accent);
-            transform: scale(1.05);
+            background: rgba(122, 199, 66, 0.05);
         }
 
-        @media (max-width: 1024px) {
-            .portal-container {
-                flex-direction: column;
-                min-height: auto;
-            }
-
-            .portal-header {
-                width: 100%;
-                padding: 45px 40px;
-                min-height: 280px;
-            }
-
-            .portal-content {
-                padding: 40px;
-            }
-
-            .language-footer {
-                margin-top: 20px;
-            }
+        .btn-tertiary {
+            background: #364349;
+            color: var(--white);
         }
 
-        @media (max-width: 768px) {
-            .portal-header {
-                padding: 35px 30px;
-                gap: 20px;
+        .btn-tertiary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 62, 63, 0.25);
+        }
+
+        .email-note {
+            background: rgba(122, 199, 66, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .confirmation-card {
+                padding: 40px 25px;
             }
 
-            .logo-box {
-                padding: 12px 18px;
+            .confirmation-card h1 {
+                font-size: 24px;
             }
 
-            .logo-text-nexo {
-                font-size: 42px;
-            }
-
-            .portal-title {
-                font-size: 26px;
-            }
-
-            .portal-content {
-                padding: 35px;
-            }
-
-            .access-card {
-                padding: 20px;
-            }
-
-            .access-card h3 {
-                font-size: 18px;
-            }
-
-            .language-footer {
-                padding: 20px 25px;
-                gap: 16px;
-            }
-
-            .language-title {
-                font-size: 14px;
+            .action-buttons {
+                grid-template-columns: 1fr;
             }
         }
     
-.nexo-left-legal-card{margin:22px auto 0;max-width:390px;background:rgba(45,62,63,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;color:#fff;text-align:center;font-size:11px;line-height:1.55;padding:12px 14px;box-shadow:0 10px 25px rgba(0,0,0,.12)}.nexo-left-legal-card a{color:#fff;font-weight:800;text-decoration:underline}
-body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
+@page{size:auto;margin:10mm;}@media print{html,body{background:#fff!important;padding:0!important;margin:0!important;display:block!important;min-height:auto!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important;padding:20px 24px!important}.action-buttons,.email-note,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}.confirmation-card p{margin-bottom:12px!important}}
 </style>
 <style id="nexo-footer-link-color-fix">.nexo-legal-links a{color:#eef7f2!important;text-decoration:underline}.nexo-legal-links span{color:#eef7f2!important}</style></head>
 <body>
-    <div class="portal-container">
-        <!-- HEADER IZQUIERDO -->
-        <div class="portal-header">
-            <div class="header-content">
-                <div class="logo-container">
-                    <div class="logo-box">
-                        <div class="logo-text-nexo">
-                            <span class="logo-ne">ne</span><span class="logo-x">x</span><span class="logo-o">o</span>
-                        </div>
-                        <div class="logo-subtitle">Servicios Empresariales</div>
-                    </div>
-                </div>
+    <div class="confirmation-card">
+        <div class="success-icon">✅</div>
+        <h1 id="confTitle">¡Compra Confirmada!</h1>
+        <p><span id="confDesc">Tu pedido ha sido procesado correctamente. Recibirás un email con los detalles de tu compra.</span></p>
 
-                <h2 class="portal-title">nexo<br>Plataforma de Intermediación<br>Comercial Internacional</h2>
+        <div class="invoice-section">
+            <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--dark); margin-bottom: 12px;">
+                <span id="invoiceLabel">Número de Factura</span>
+            </div>
+            <div class="invoice-id" id="invoiceId">NEXO-FACT-202412-XXXX</div>
 
-                <p class="portal-description">
-                    Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
-                </p>
-                <div class="nexo-left-legal-card">
-                    <strong>nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
-                    nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
-                    nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
-                    © 2026 nexo™ – Todos los derechos reservados<br>
-                    <a href="aviso-legal.html">Aviso Legal</a> | <a href="terminos-condiciones.html">Términos y Condiciones</a> | <a href="politica-privacidad.html">Privacidad</a> | <a href="politica-cookies.html">Cookies</a> | <a href="reembolsos.html">Reembolsos</a>
-                </div>
+            <div class="detail-row">
+                <span class="detail-label" id="purchaseLabel">Fecha de Compra:</span>
+                <span class="detail-value" id="purchaseDate">-</span>
+            </div>
 
+            <div class="detail-row">
+                <span class="detail-label" id="clientLabel">Cliente:</span>
+                <span class="detail-value" id="clientName">-</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label" id="emailLabel">Correo:</span>
+                <span class="detail-value" id="clientEmail">-</span>
+            </div>
+
+            <div class="detail-row" id="intlNitRow">
+                <span class="detail-label" id="intlNitLabel">NIT / Documento del cliente internacional:</span>
+                <span class="detail-value" id="intlNitValue">99001</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label" id="nitLabel">NIT / Documento del cliente:</span>
+                <span class="detail-value" id="clientNit">-</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label" id="itemsLabel">Producto comprado:</span>
+                <span class="detail-value" id="itemCount">0</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label" id="paymentLabel">Método de Pago:</span>
+                <span class="detail-value" id="paymentMethod">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label" id="deliveryLabel">Entrega:</span>
+                <span class="detail-value" id="deliveryInfo">-</span>
+            </div>
+
+            <div class="detail-row" style="border: none; margin-top: 12px;">
+                <span class="detail-label" id="totalLabel">Total Pagado:</span>
+                <span class="detail-value total">$<span id="totalPaid">0.00</span></span>
             </div>
         </div>
 
-        <!-- CONTENT DERECHO -->
-        <div class="portal-content">
-            <!-- ACCESO CLIENTE -->
-            <div class="access-section">
-                <div class="access-title">👥 Acceso Cliente</div>
-                <div class="access-card" onclick="goToPublicStore()">
-                    <div class="access-icon">🛒</div>
-                    <div class="access-content">
-                        <h3>Tienda Pública</h3>
-                        <p>Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.</p>
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
-                            <button class="access-btn" onclick="event.stopPropagation(); goToPublicStore()">Ir a la Tienda</button>
-                            <button class="access-btn" onclick="event.stopPropagation(); goToCustomerSupport()">Ir a Atención al Cliente</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="email-note">
+            <span id="emailNote1">📧 Revisa tu correo (incluyendo spam) para la factura y detalles de envío.</span><br><span id="emailNote2">📱 Puedes rastrear tu pedido usando el número de factura.</span>
+        </div>
 
-            <!-- LANGUAGE SELECTOR -->
-            <div style="display: flex; justify-content: center; width: 100%;">
-                <div class="language-footer">
-                    <div class="language-section">
-                        <div class="language-title">🌍 Idioma</div>
-                        <div class="language-buttons">
-                            <button class="lang-btn active" onclick="setLanguage('es')">Español</button>
-                            <button class="lang-btn" onclick="setLanguage('en')">English</button>
-                            <button class="lang-btn" onclick="setLanguage('pt')">Português</button>
-                            <button class="lang-btn" onclick="setLanguage('it')">Italiano</button>
-                            <button class="lang-btn" onclick="setLanguage('fr')">Français</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ACCESO ADMINISTRATIVO -->
-            <div class="access-section">
-                <div class="access-title">🔐 Acceso Administrativo</div>
-                <div class="access-card" onclick="goToAdminLogin()">
-                    <div class="access-icon">⚙️</div>
-                    <div class="access-content">
-                        <h3>Panel Administrativo</h3>
-                        <p>Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.</p>
-                        <button class="access-btn">Ingresar Panel Admin</button>
-                    </div>
-                </div>
-            </div>
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="btnPrint" type="button" onclick="nexoPrintInvoice()">🖨️ Imprimir Factura</button>
+            <button class="btn btn-primary" id="btnPdf" type="button" onclick="nexoDownloadPDF()">📥 Descargar PDF</button>
+            <button class="btn btn-tertiary" id="btnContinue" type="button" onclick="nexoContinueShopping()">Continuar Comprando</button>
+            <button class="btn btn-secondary" id="btnPortal" type="button" onclick="nexoGoToPortal()">🏠 Ir al Portal</button>
         </div>
     </div>
-
-    <!-- FOOTER COPYRIGHT -->
-    <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600;">
-        nexo – Plataforma de Intermediación Comercial Internacional | © 2026 | NIT: 774651015 | 3 Agentes IA Integrados
-    </div>
-
     <script>
-        function setLanguage(lang) {
-            localStorage.setItem('nexo_language', lang);
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-        }
+        
+const confirmI18n={
+ es:{confTitle:'¡Compra Confirmada!',confDesc:'Tu pedido ha sido procesado correctamente. Recibirás un email con los detalles de tu compra.',invoiceLabel:'Número de Factura',purchaseLabel:'Fecha de Compra:',clientLabel:'Cliente:',emailLabel:'Correo:',itemsLabel:'Producto comprado:',paymentLabel:'Método de Pago:',deliveryLabel:'Entrega:',totalLabel:'Total Pagado:',emailNote1:'📧 Revisa tu correo (incluyendo spam) para la factura y detalles de envío.',emailNote2:'📱 Puedes rastrear tu pedido usando el número de factura.',btnContinue:'🛒 Continuar Comprando',btnPortal:'🏠 Ir al Portal',itemsWord:'artículos',pay:{credit:'💳 Tarjeta de Crédito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Transferencia Bancaria'}},
+ en:{confTitle:'Purchase Confirmed!',confDesc:'Your order has been processed successfully. You will receive an email with your purchase details.',invoiceLabel:'Invoice Number',purchaseLabel:'Purchase Date:',clientLabel:'Client:',emailLabel:'Email:',itemsLabel:'Items:',paymentLabel:'Payment Method:',deliveryLabel:'Delivery:',totalLabel:'Total Paid:',emailNote1:'📧 Check your email (including spam) for the invoice and shipping details.',emailNote2:'📱 You can track your order using the invoice number.',btnContinue:'🛒 Continue Shopping',btnPortal:'🏠 Go to Portal',itemsWord:'items',pay:{credit:'💳 Credit Card',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Bank Transfer'}},
+ pt:{confTitle:'Compra Confirmada!',confDesc:'Seu pedido foi processado com sucesso. Você receberá um e-mail com os detalhes da compra.',invoiceLabel:'Número da Fatura',purchaseLabel:'Data da Compra:',clientLabel:'Cliente:',emailLabel:'E-mail:',itemsLabel:'Itens:',paymentLabel:'Método de Pagamento:',deliveryLabel:'Entrega:',totalLabel:'Total Pago:',emailNote1:'📧 Verifique seu e-mail (inclusive spam) para a fatura e detalhes do envio.',emailNote2:'📱 Você pode rastrear seu pedido usando o número da fatura.',btnContinue:'🛒 Continuar Comprando',btnPortal:'🏠 Ir ao Portal',itemsWord:'itens',pay:{credit:'💳 Cartão de Crédito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Transferência Bancária'}},
+ it:{confTitle:'Acquisto Confermato!',confDesc:'Il tuo ordine è stato elaborato correttamente. Riceverai un’email con i dettagli dell’acquisto.',invoiceLabel:'Numero Fattura',purchaseLabel:'Data di Acquisto:',clientLabel:'Cliente:',emailLabel:'Email:',itemsLabel:'Articoli:',paymentLabel:'Metodo di Pagamento:',deliveryLabel:'Consegna:',totalLabel:'Totale Pagato:',emailNote1:'📧 Controlla la tua email (anche spam) per fattura e dettagli di spedizione.',emailNote2:'📱 Puoi tracciare il tuo ordine usando il numero di fattura.',btnContinue:'🛒 Continua gli Acquisti',btnPortal:'🏠 Vai al Portale',itemsWord:'articoli',pay:{credit:'💳 Carta di Credito',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Bonifico Bancario'}},
+ fr:{confTitle:'Achat Confirmé !',confDesc:'Votre commande a été traitée avec succès. Vous recevrez un e-mail avec les détails de votre achat.',invoiceLabel:'Numéro de Facture',purchaseLabel:'Date d’Achat :',clientLabel:'Client :',emailLabel:'E-mail :',itemsLabel:'Articles :',paymentLabel:'Mode de Paiement :',deliveryLabel:'Livraison :',totalLabel:'Total Payé :',emailNote1:'📧 Vérifiez votre e-mail (y compris spam) pour la facture et les détails d’expédition.',emailNote2:'📱 Vous pouvez suivre votre commande avec le numéro de facture.',btnContinue:'🛒 Continuer les Achats',btnPortal:'🏠 Aller au Portail',itemsWord:'articles',pay:{credit:'💳 Carte Bancaire',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Virement Bancaire'}}
+};
 
-        function goToPublicStore() {
+document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
+            const invoiceId = params.get('invoice') || purchase.factura_numero || purchase.invoice || purchase.id || params.get('pedido_id');
+            if (invoiceId) {
+                document.getElementById('invoiceId').textContent = invoiceId;
+                document.title = 'nexo™ - Factura ' + invoiceId;
+            }
+
+            document.getElementById('purchaseDate').textContent = purchase.date || new Date().toLocaleString('es-ES');
+            document.getElementById('clientName').textContent = purchase.fullName || `${purchase.firstName || ''} ${purchase.lastName || ''}`.trim() || '-';
+            document.getElementById('clientEmail').textContent = purchase.email || '-';
+            const countryTxt = String(purchase.country || purchase.cliente_pais || (purchase.customer && purchase.customer.country) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').country || '')).toLowerCase();
+            const docRaw = purchase.documento || purchase.cliente_documento || purchase.nit || purchase.document || (purchase.customer && (purchase.customer.documentId || purchase.customer.documento)) || (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '') || '';
+            const isBolivia = countryTxt.includes('bolivia');
+            const intlRow = document.getElementById('intlNitRow');
+            const intlValue = document.getElementById('intlNitValue');
+            if (intlRow) { intlRow.style.display = isBolivia ? 'none' : 'flex'; }
+            const intlLabel = document.getElementById('intlNitLabel');
+            if (intlLabel) intlLabel.textContent = 'NIT / Documento del cliente internacional:';
+            if (intlValue) intlValue.textContent = isBolivia ? '' : '99001';
+            const nitEl = document.getElementById('clientNit'); if(nitEl) nitEl.textContent = docRaw || '-';
+            const firstItem = (purchase.items && purchase.items[0]) || {};
+            const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';
+            document.getElementById('itemCount').textContent = productName;
+            document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
+            if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
+                const note = document.querySelector('.email-note');
+                if(note){ note.innerHTML += '<br><strong>Estado operativo:</strong> pedido registrado; confirmación de pago en proceso.'; }
+            }
+            document.getElementById('deliveryInfo').textContent = purchase.deliveryLabel ? `${purchase.deliveryLabel} · ${purchase.deliveryEstimate || '-'}` : (purchase.deliveryEstimate || '-'); let amt = purchase.total || '0.00'; if(typeof amt==='string') amt = amt.replace(/^\$+/, ''); document.getElementById('totalPaid').textContent = Number(amt || 0).toFixed(2);
+        });
+
+        function goToStore() {
             window.location.href = 'nexo-tienda-publica.html';
         }
 
-        function goToAdminLogin() {
-            window.location.href = 'nexo-admin-login.html';
+        function goHome() {
+            window.location.href = 'index.html';
         }
-
-        function goToCustomerSupport() {
-            window.location.href = 'nexo-agent2-soporte.html';
+    
+        function keepConfirmationStable(){
+            const card = document.querySelector('.confirmation-card');
+            if(card){ card.style.display='block'; card.style.visibility='visible'; card.style.opacity='1'; }
+            const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+            const t = confirmI18n[lang] || confirmI18n.es;
+            const ids = ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'];
+            ids.forEach(id=>{ const el=document.getElementById(id); if(el && t[id]) el.textContent=t[id]; });
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('nexo_language') || 'es';
-            const langs = ['es', 'en', 'pt', 'it', 'fr'];
-            document.querySelectorAll('.lang-btn').forEach((btn, idx) => {
-                if (langs[idx] === savedLang) btn.classList.add('active');
-            });
-        });
+        window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(keepConfirmationStable, 100); setTimeout(keepConfirmationStable, 600); setTimeout(keepConfirmationStable, 1200); });
     </script>
 
+<script>
+function nexoBuildInvoicePrintHtml(){
+  const invoice = document.querySelector('.invoice-section');
+  const title = document.getElementById('confTitle')?.outerHTML || '<h1>¡Compra Confirmada!</h1>';
+  const desc = document.getElementById('confDesc')?.parentElement?.outerHTML || '';
+  const id = document.getElementById('invoiceId')?.textContent || 'Factura nexo';
+  return `<!doctype html><html><head><meta charset="utf-8"><title> </title><style>
+    @page{size:auto;margin:6mm}*{box-sizing:border-box}html,body{font-family:Segoe UI,Tahoma,sans-serif;background:#fff;color:#2D3E3F;margin:0;padding:0;text-align:center}.wrap{max-width:720px;margin:0 auto;padding:4px 10px}.invoice-section{background:#f4faf7;border:1px solid #dbe9e6;border-radius:14px;padding:22px;text-align:left;margin-top:0}.invoice-id{font-family:Courier New,monospace;font-size:18px;font-weight:900;color:#4A6B6D;padding:10px 12px;background:#fff;border-radius:8px;margin:10px 0 16px}.detail-row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid #dbe9e6;font-size:14px}.detail-label{font-weight:800}.detail-value{color:#465b5d;text-align:right}.detail-value.total{font-weight:900;color:#65bd35;font-size:18px}@media print{button,.success-icon,h1,p,.email-note,.action-buttons,footer,.nexo-legal-footer{display:none!important}}
+  </style><style id="nexo-footer-link-color-fix">.nexo-legal-links a{color:#eef7f2!important;text-decoration:underline}.nexo-legal-links span{color:#eef7f2!important}</style></head><body><div class="wrap">${invoice?invoice.outerHTML:''}</div><script>window.onload=()=>{document.title=' ';setTimeout(()=>window.print(),150)}<\/script></body></html>`;
+}
+function nexoPrintInvoice(){
+  const w = window.open('', '_blank', 'width=850,height=900');
+  if(!w){ window.print(); return; }
+  w.document.open(); w.document.write(nexoBuildInvoicePrintHtml()); w.document.close();
+}
+function nexoDownloadPDF(){ nexoPrintInvoice(); }
+
+function nexoContinueShopping(){
+  const candidates = ['nexo-tienda-publica.html','nexo-tienda.html','index.html'];
+  for (const href of candidates){
+    try { window.location.href = href; return; } catch(e) {}
+  }
+}
+
+function nexoGoToPortal(){
+  const candidates = ['index.html','portal-principal.html','nexo-portal-principal.html'];
+  for (const href of candidates){
+    try { window.location.href = href; return; } catch(e) {}
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const buttons = Array.from(document.querySelectorAll('button, a'));
+  buttons.forEach(btn => {
+    const tx = (btn.textContent || '').trim().toLowerCase();
+    if (tx.includes('imprimir factura') || tx.includes('print invoice')) {
+      btn.setAttribute('type', 'button');
+      btn.onclick = nexoPrintInvoice;
+    }
+    if (tx.includes('descargar pdf') || tx.includes('download pdf')) {
+      btn.setAttribute('type', 'button');
+      btn.onclick = nexoDownloadPDF;
+    }
+    if (tx.includes('continuar comprando') || tx.includes('continue shopping')) {
+      btn.setAttribute('type', 'button');
+      btn.onclick = nexoContinueShopping;
+    }
+    if (tx.includes('ir al portal') || tx.includes('go to portal')) {
+      btn.setAttribute('type', 'button');
+      btn.onclick = nexoGoToPortal;
+    }
+  });
+});
+</script>
+
+
+
+
+<script>
+async function nexoCapturePayPalReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token') || params.get('paypal_order_id');
+  const metodo = params.get('metodo');
+  const fallback = params.get('fallback');
+  if(metodo !== 'paypal' || fallback === 'standard' || !token) return;
+  const note = document.querySelector('.email-note');
+  try{
+    if(note) note.innerHTML += '<br><strong>PayPal:</strong> confirmando cobro aprobado...';
+    const r = await fetch('/api/paypal-capture-order', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({orderId: token, pedidoId: params.get('pedido_id') || params.get('invoice') || ''})
+    });
+    const data = await r.json().catch(()=>({}));
+    const order = JSON.parse(localStorage.getItem('nexoLastOrder') || '{}');
+    order.paypalOrderId = token;
+    order.paypalCapture = data;
+    order.paymentMethod = 'paypal';
+    if(r.ok && data.ok){
+      order.estado_pago = 'paypal_pagado_capturado';
+      order.payment_status = 'paid';
+      order.estado_compra = 'pendiente_agente_1_compra_amazon';
+      if(note) note.innerHTML += '<br><strong>PayPal:</strong> pago recibido y capturado correctamente. Agente 1 queda listo para compra Amazon.';
+      const title = document.getElementById('confTitle');
+      if(title) title.textContent = '¡Pago PayPal Confirmado!';
+    } else {
+      order.estado_pago = 'paypal_aprobado_pendiente_captura';
+      order.payment_status = 'pending_capture';
+      if(note) note.innerHTML += '<br><strong>PayPal:</strong> aprobación recibida; captura pendiente de verificación.';
+    }
+    localStorage.setItem('nexoLastOrder', JSON.stringify(order));
+  }catch(e){
+    console.warn('No se pudo capturar PayPal automáticamente', e);
+    if(note) note.innerHTML += '<br><strong>PayPal:</strong> retorno recibido; captura pendiente de verificación técnica.';
+  }
+}
+window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(nexoCapturePayPalReturn, 250); });
+</script>
 <script>
 function nexoPublicCleanup(){
   try{
@@ -489,7 +437,7 @@ function nexoPublicCleanup(){
       nexo_language: localStorage.getItem('nexo_language')
     };
     const removeKeys = [
-      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoClientProfile','nexoLastPurchase','lastPurchase','clientEmail','clientName',
       'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
     ];
     removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
@@ -499,6 +447,7 @@ function nexoPublicCleanup(){
 }
 document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
+
 
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
@@ -514,6 +463,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
     <a href="reembolsos.html">Reembolsos</a>
   </div>
 </footer>
+
 <script src="nexo-legal-i18n.js"></script>
 </body>
 </html>

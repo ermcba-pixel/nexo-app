@@ -1,84 +1,1286 @@
-(function(){
-  const LINKS = {
-    legal:'aviso-legal.html', terms:'terminos-condiciones.html', privacy:'politica-privacidad.html', cookies:'politica-cookies.html', refunds:'reembolsos.html'
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexo™ - Login Cliente</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --danger: #c62828;
+            --success: #2e7d32;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 1280px;
+            background-color: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            overflow: hidden;
+            display: flex;
+            min-height: 680px;
+        }
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 60px 50px;
+            text-align: center;
+            color: var(--white);
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-logo {
+            background-color: var(--white);
+            border-radius: 22px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 12px 18px;
+            margin-bottom: 18px;
+        }
+        .logo-text-nexo {
+            font-size: 65px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .logo-ne { color: var(--primary); }
+        .logo-x { color: var(--accent); }
+        .logo-o { color: var(--primary); }
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .login-header p {
+            font-size: 13px;
+            opacity: 0.85;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+        .login-content {
+            padding: 42px 50px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .back-btn {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+            font-weight: 600;
+            border-left: 4px solid;
+            width: 100%;
+            max-width: 560px;
+        }
+        .alert.show { display: block; }
+        .alert-error {
+            background: #ffebee;
+            color: var(--danger);
+            border-left-color: #E74C3C;
+        }
+        .alert-success {
+            background: #e8f5e9;
+            color: var(--success);
+            border-left-color: #27AE60;
+        }
+        .form-title {
+            text-align: center;
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+        .form-wrapper {
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-row.full { grid-template-columns: 1fr; }
+        .form-label {
+            display: block;
+            margin-bottom: 9px;
+            color: var(--dark);
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 13px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            background-color: var(--white);
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(122,199,66,0.2);
+        }
+        .password-help {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
+        }
+        .password-rules-panel{
+            margin-top:10px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:#f6faf7;
+            border:1px solid #e2ece5;
+        }
+        .password-rules-title{
+            font-size:12px;
+            font-weight:800;
+            color:#a94442;
+            margin-bottom:8px;
+        }
+        .password-rules-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:6px 18px;
+            font-size:12px;
+            color:#5b6c6d;
+        }
+        .password-rule.ok{color:#2f7d32;font-weight:700;}
+        .password-rule.no{color:#a94442;font-weight:700;}
+
+        .recovery-modal{
+            position:fixed;
+            inset:0;
+            background:rgba(31,45,46,.55);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+            padding:20px;
+        }
+        .recovery-modal.show{display:flex !important;}
+        .recovery-card{
+            width:min(560px,100%);
+            background:#fff;
+            border-radius:24px;
+            box-shadow:0 24px 60px rgba(0,0,0,.25);
+            padding:24px;
+            margin:auto;
+        }
+        .recovery-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+        .recovery-title{font-size:24px;font-weight:900;color:var(--primary);margin:0;}
+        .recovery-close{border:none;background:#eef3f3;color:var(--primary);width:42px;height:42px;border-radius:12px;cursor:pointer;font-size:20px;font-weight:900;}
+        .recovery-note{background:#f4f9ef;border-left:4px solid var(--accent);border-radius:12px;padding:12px 14px;font-size:13px;color:#4a6264;margin-bottom:14px;line-height:1.5;}
+        .recovery-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+        .recovery-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:16px;}
+        .recovery-status{margin-top:12px;padding:12px 14px;border-radius:12px;display:none;font-size:13px;line-height:1.5;}
+        .recovery-status.ok{display:block;background:#eef9ef;color:#2d5a2d;border-left:4px solid #79c54a;}
+        .recovery-status.err{display:block;background:#fff3f3;color:#7a2d2d;border-left:4px solid #d9534f;}
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            box-shadow: 0 6px 20px rgba(74,107,109,0.2);
+        }
+        .btn-login:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .toggle-form a {
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .hide { display: none; }
+
+        .nexo-left-legal{
+            margin-top:18px;
+            max-width:360px;
+            font-size:11px;
+            line-height:1.55;
+            color:rgba(255,255,255,.95);
+            font-weight:600;
+            text-align:center;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(45,62,63,.28);
+            border:1px solid rgba(255,255,255,.18);
+        }
+
+        @media (max-width: 1024px) {
+            .login-container { flex-direction: column; }
+            .login-header { width: 100%; padding: 45px 40px; }
+            .login-content { padding: 45px 40px; }
+        }
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+<style id="nexo-footer-link-color-fix">.nexo-legal-links a{color:#eef7f2!important;text-decoration:underline}.nexo-legal-links span{color:#eef7f2!important}</style></head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div>
+                <div class="login-logo">
+                    <div class="logo-text-nexo">
+                        <span class="logo-ne">ne</span><span class="logo-x">x</span><span class="logo-o">o</span>
+                    </div>
+                </div>
+                <h1>nexo™</h1>
+                <p>Tienda Digital - Acceso Cliente Directo</p>
+<div class="nexo-left-legal" data-nexo-legal-footer="1">
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
+  nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
+  nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
+  © 2026 nexo™ – Todos los derechos reservados<br>
+  <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+    <a href="aviso-legal.html">Aviso Legal</a><span>&nbsp;|&nbsp;</span>
+    <a href="terminos-condiciones.html">Términos y Condiciones</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-privacidad.html">Privacidad</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-cookies.html">Cookies</a><span>&nbsp;|&nbsp;</span>
+    <a href="reembolsos.html">Reembolsos</a>
+  </div>
+</div>
+
+            </div>
+        </div>
+
+        <div class="login-content">
+            <a class="back-btn" href="index.html" onclick="goBack(event)">← Volver al Portal</a>
+            <div id="alertBox" class="alert"></div>
+
+            <div id="loginForm">
+                <div class="form-title">Ingreso a Tienda</div>
+                <div class="form-wrapper">
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">📧 Correo Electrónico</label>
+                            <input type="email" class="form-input" id="loginEmail" placeholder="tu@email.com">
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">🔐 Contraseña</label>
+                            <div style="position:relative;"><input type="password" class="form-input" id="loginPassword" placeholder="Mínimo 8 caracteres" style="padding-right:44px;"><button type="button" id="toggleLoginPass" onclick="toggleLoginPassword()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:18px;">👁️</button></div>
+                            <div id="passwordRulesLive" class="password-rules-panel"><div class="password-rules-title">Muy débil</div><div class="password-rules-grid"></div></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-login" id="loginBtn" onclick="loginClient(event)">Ingresar a Tienda</button>
+                    <div class="toggle-form" id="loginLinks">¿Aún no tienes cuenta? <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">Regístrate aquí</a><br><a href="#" id="forgotUserLink" onclick="return openRecoveryModal('user');">¿Te olvidaste tu usuario?</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">¿Olvidaste tu contraseña?</a></div>
+                </div>
+            </div>
+
+            <div id="registerForm" class="hide">
+                <div class="form-title">Crear Mi Cuenta</div>
+                <div class="form-wrapper">
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">👤 Nombre</label>
+                            <input type="text" class="form-input" id="regName" placeholder="Juan">
+                        </div>
+                        <div>
+                            <label class="form-label">Apellido</label>
+                            <input type="text" class="form-input" id="regLastName" placeholder="Pérez">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">🪪 Número Documento de Identidad / NIT</label>
+                            <input type="text" class="form-input" id="regDocument" placeholder="CI, pasaporte o NIT">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">📧 Correo Electrónico</label>
+                            <input type="email" class="form-input" id="regEmail" placeholder="tu@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">🌍 País</label>
+                            <select class="form-select" id="regCountry" onchange="syncAreaCode(); validateRegisterForm();">
+                                <option value="">Seleccione país</option>
+                                <option value="Afganistán" data-code="+93">Afganistán (+93)</option>
+                                <option value="Albania" data-code="+355">Albania (+355)</option>
+                                <option value="Alemania" data-code="+49">Alemania (+49)</option>
+                                <option value="Andorra" data-code="+376">Andorra (+376)</option>
+                                <option value="Angola" data-code="+244">Angola (+244)</option>
+                                <option value="Anguila" data-code="+1">Anguila (+1)</option>
+                                <option value="Antigua y Barbuda" data-code="+1">Antigua y Barbuda (+1)</option>
+                                <option value="Antártida" data-code="+672">Antártida (+672)</option>
+                                <option value="Arabia Saudí" data-code="+966">Arabia Saudí (+966)</option>
+                                <option value="Argelia" data-code="+213">Argelia (+213)</option>
+                                <option value="Argentina" data-code="+54">Argentina (+54)</option>
+                                <option value="Armenia" data-code="+374">Armenia (+374)</option>
+                                <option value="Aruba" data-code="+297">Aruba (+297)</option>
+                                <option value="Australia" data-code="+61">Australia (+61)</option>
+                                <option value="Austria" data-code="+43">Austria (+43)</option>
+                                <option value="Azerbaiyán" data-code="+994">Azerbaiyán (+994)</option>
+                                <option value="Bahamas" data-code="+1">Bahamas (+1)</option>
+                                <option value="Bangladés" data-code="+880">Bangladés (+880)</option>
+                                <option value="Barbados" data-code="+1">Barbados (+1)</option>
+                                <option value="Baréin" data-code="+973">Baréin (+973)</option>
+                                <option value="Belice" data-code="+501">Belice (+501)</option>
+                                <option value="Benín" data-code="+229">Benín (+229)</option>
+                                <option value="Bermudas" data-code="+1">Bermudas (+1)</option>
+                                <option value="Bielorrusia" data-code="+375">Bielorrusia (+375)</option>
+                                <option value="Bolivia" data-code="+591">Bolivia (+591)</option>
+                                <option value="Bosnia y Herzegovina" data-code="+387">Bosnia y Herzegovina (+387)</option>
+                                <option value="Botsuana" data-code="+267">Botsuana (+267)</option>
+                                <option value="Brasil" data-code="+55">Brasil (+55)</option>
+                                <option value="Brunéi" data-code="+673">Brunéi (+673)</option>
+                                <option value="Bulgaria" data-code="+359">Bulgaria (+359)</option>
+                                <option value="Burkina Faso" data-code="+226">Burkina Faso (+226)</option>
+                                <option value="Burundi" data-code="+257">Burundi (+257)</option>
+                                <option value="Bután" data-code="+975">Bután (+975)</option>
+                                <option value="Bélgica" data-code="+32">Bélgica (+32)</option>
+                                <option value="Cabo Verde" data-code="+238">Cabo Verde (+238)</option>
+                                <option value="Camboya" data-code="+855">Camboya (+855)</option>
+                                <option value="Camerún" data-code="+237">Camerún (+237)</option>
+                                <option value="Canadá" data-code="+1">Canadá (+1)</option>
+                                <option value="Caribe neerlandés" data-code="+599">Caribe neerlandés (+599)</option>
+                                <option value="Catar" data-code="+974">Catar (+974)</option>
+                                <option value="Chad" data-code="+235">Chad (+235)</option>
+                                <option value="Chequia" data-code="+420">Chequia (+420)</option>
+                                <option value="Chile" data-code="+56">Chile (+56)</option>
+                                <option value="China" data-code="+86">China (+86)</option>
+                                <option value="Chipre" data-code="+357">Chipre (+357)</option>
+                                <option value="Ciudad del Vaticano" data-code="+379">Ciudad del Vaticano (+379)</option>
+                                <option value="Colombia" data-code="+57">Colombia (+57)</option>
+                                <option value="Comoras" data-code="+269">Comoras (+269)</option>
+                                <option value="Congo" data-code="+242">Congo (+242)</option>
+                                <option value="Corea del Norte" data-code="+850">Corea del Norte (+850)</option>
+                                <option value="Corea del Sur" data-code="+82">Corea del Sur (+82)</option>
+                                <option value="Costa Rica" data-code="+506">Costa Rica (+506)</option>
+                                <option value="Croacia" data-code="+385">Croacia (+385)</option>
+                                <option value="Cuba" data-code="+53">Cuba (+53)</option>
+                                <option value="Curazao" data-code="+599">Curazao (+599)</option>
+                                <option value="Côte d’Ivoire" data-code="+225">Côte d’Ivoire (+225)</option>
+                                <option value="Dinamarca" data-code="+45">Dinamarca (+45)</option>
+                                <option value="Dominica" data-code="+1">Dominica (+1)</option>
+                                <option value="Ecuador" data-code="+593">Ecuador (+593)</option>
+                                <option value="Egipto" data-code="+20">Egipto (+20)</option>
+                                <option value="El Salvador" data-code="+503">El Salvador (+503)</option>
+                                <option value="Emiratos Árabes Unidos" data-code="+971">Emiratos Árabes Unidos (+971)</option>
+                                <option value="Eritrea" data-code="+291">Eritrea (+291)</option>
+                                <option value="Eslovaquia" data-code="+421">Eslovaquia (+421)</option>
+                                <option value="Eslovenia" data-code="+386">Eslovenia (+386)</option>
+                                <option value="España" data-code="+34">España (+34)</option>
+                                <option value="Estados Unidos" data-code="+1">Estados Unidos (+1)</option>
+                                <option value="Estonia" data-code="+372">Estonia (+372)</option>
+                                <option value="Esuatini" data-code="+268">Esuatini (+268)</option>
+                                <option value="Etiopía" data-code="+251">Etiopía (+251)</option>
+                                <option value="Filipinas" data-code="+63">Filipinas (+63)</option>
+                                <option value="Finlandia" data-code="+358">Finlandia (+358)</option>
+                                <option value="Fiyi" data-code="+679">Fiyi (+679)</option>
+                                <option value="Francia" data-code="+33">Francia (+33)</option>
+                                <option value="Gabón" data-code="+241">Gabón (+241)</option>
+                                <option value="Gambia" data-code="+220">Gambia (+220)</option>
+                                <option value="Georgia" data-code="+995">Georgia (+995)</option>
+                                <option value="Ghana" data-code="+233">Ghana (+233)</option>
+                                <option value="Gibraltar" data-code="+350">Gibraltar (+350)</option>
+                                <option value="Granada" data-code="+1">Granada (+1)</option>
+                                <option value="Grecia" data-code="+30">Grecia (+30)</option>
+                                <option value="Groenlandia" data-code="+299">Groenlandia (+299)</option>
+                                <option value="Guadalupe" data-code="+590">Guadalupe (+590)</option>
+                                <option value="Guam" data-code="+1">Guam (+1)</option>
+                                <option value="Guatemala" data-code="+502">Guatemala (+502)</option>
+                                <option value="Guayana Francesa" data-code="+594">Guayana Francesa (+594)</option>
+                                <option value="Guernesey" data-code="+44">Guernesey (+44)</option>
+                                <option value="Guinea" data-code="+224">Guinea (+224)</option>
+                                <option value="Guinea Ecuatorial" data-code="+240">Guinea Ecuatorial (+240)</option>
+                                <option value="Guinea-Bisáu" data-code="+245">Guinea-Bisáu (+245)</option>
+                                <option value="Guyana" data-code="+592">Guyana (+592)</option>
+                                <option value="Haití" data-code="+509">Haití (+509)</option>
+                                <option value="Honduras" data-code="+504">Honduras (+504)</option>
+                                <option value="Hungría" data-code="+36">Hungría (+36)</option>
+                                <option value="India" data-code="+91">India (+91)</option>
+                                <option value="Indonesia" data-code="+62">Indonesia (+62)</option>
+                                <option value="Irak" data-code="+964">Irak (+964)</option>
+                                <option value="Irlanda" data-code="+353">Irlanda (+353)</option>
+                                <option value="Irán" data-code="+98">Irán (+98)</option>
+                                <option value="Isla Bouvet" data-code="">Isla Bouvet</option>
+                                <option value="Isla Norfolk" data-code="">Isla Norfolk</option>
+                                <option value="Isla de Man" data-code="+44">Isla de Man (+44)</option>
+                                <option value="Isla de Navidad" data-code="+61">Isla de Navidad (+61)</option>
+                                <option value="Islandia" data-code="+354">Islandia (+354)</option>
+                                <option value="Islas Aland" data-code="">Islas Aland</option>
+                                <option value="Islas Caimán" data-code="+1">Islas Caimán (+1)</option>
+                                <option value="Islas Cocos" data-code="">Islas Cocos</option>
+                                <option value="Islas Cook" data-code="+682">Islas Cook (+682)</option>
+                                <option value="Islas Feroe" data-code="+298">Islas Feroe (+298)</option>
+                                <option value="Islas Georgia del Sur y Sandwich del Sur" data-code="">Islas Georgia del Sur y Sandwich del Sur</option>
+                                <option value="Islas Heard y McDonald" data-code="">Islas Heard y McDonald</option>
+                                <option value="Islas Malvinas" data-code="+500">Islas Malvinas (+500)</option>
+                                <option value="Islas Marianas del Norte" data-code="+1">Islas Marianas del Norte (+1)</option>
+                                <option value="Islas Marshall" data-code="+692">Islas Marshall (+692)</option>
+                                <option value="Islas Pitcairn" data-code="">Islas Pitcairn</option>
+                                <option value="Islas Salomón" data-code="+677">Islas Salomón (+677)</option>
+                                <option value="Islas Turcas y Caicos" data-code="+1">Islas Turcas y Caicos (+1)</option>
+                                <option value="Islas Vírgenes Británicas" data-code="+1">Islas Vírgenes Británicas (+1)</option>
+                                <option value="Islas Vírgenes de EE. UU." data-code="+1">Islas Vírgenes de EE. UU. (+1)</option>
+                                <option value="Islas menores alejadas de EE. UU." data-code="">Islas menores alejadas de EE. UU.</option>
+                                <option value="Israel" data-code="+972">Israel (+972)</option>
+                                <option value="Italia" data-code="+39">Italia (+39)</option>
+                                <option value="Jamaica" data-code="+1">Jamaica (+1)</option>
+                                <option value="Japón" data-code="+81">Japón (+81)</option>
+                                <option value="Jersey" data-code="+44">Jersey (+44)</option>
+                                <option value="Jordania" data-code="+962">Jordania (+962)</option>
+                                <option value="Kazajistán" data-code="+7">Kazajistán (+7)</option>
+                                <option value="Kenia" data-code="+254">Kenia (+254)</option>
+                                <option value="Kirguistán" data-code="+996">Kirguistán (+996)</option>
+                                <option value="Kiribati" data-code="+686">Kiribati (+686)</option>
+                                <option value="Kuwait" data-code="+965">Kuwait (+965)</option>
+                                <option value="Laos" data-code="+856">Laos (+856)</option>
+                                <option value="Lesoto" data-code="+266">Lesoto (+266)</option>
+                                <option value="Letonia" data-code="+371">Letonia (+371)</option>
+                                <option value="Liberia" data-code="+231">Liberia (+231)</option>
+                                <option value="Libia" data-code="+218">Libia (+218)</option>
+                                <option value="Liechtenstein" data-code="+423">Liechtenstein (+423)</option>
+                                <option value="Lituania" data-code="+370">Lituania (+370)</option>
+                                <option value="Luxemburgo" data-code="+352">Luxemburgo (+352)</option>
+                                <option value="Líbano" data-code="+961">Líbano (+961)</option>
+                                <option value="Macedonia del Norte" data-code="+389">Macedonia del Norte (+389)</option>
+                                <option value="Madagascar" data-code="+261">Madagascar (+261)</option>
+                                <option value="Malasia" data-code="+60">Malasia (+60)</option>
+                                <option value="Malaui" data-code="+265">Malaui (+265)</option>
+                                <option value="Maldivas" data-code="+960">Maldivas (+960)</option>
+                                <option value="Mali" data-code="+223">Mali (+223)</option>
+                                <option value="Malta" data-code="+356">Malta (+356)</option>
+                                <option value="Marruecos" data-code="+212">Marruecos (+212)</option>
+                                <option value="Martinica" data-code="+596">Martinica (+596)</option>
+                                <option value="Mauricio" data-code="+230">Mauricio (+230)</option>
+                                <option value="Mauritania" data-code="+222">Mauritania (+222)</option>
+                                <option value="Mayotte" data-code="+262">Mayotte (+262)</option>
+                                <option value="Micronesia" data-code="+691">Micronesia (+691)</option>
+                                <option value="Moldavia" data-code="+373">Moldavia (+373)</option>
+                                <option value="Mongolia" data-code="+976">Mongolia (+976)</option>
+                                <option value="Montenegro" data-code="+382">Montenegro (+382)</option>
+                                <option value="Montserrat" data-code="+1">Montserrat (+1)</option>
+                                <option value="Mozambique" data-code="+258">Mozambique (+258)</option>
+                                <option value="Myanmar (Birmania)" data-code="+95">Myanmar (Birmania) (+95)</option>
+                                <option value="México" data-code="+52">México (+52)</option>
+                                <option value="Mónaco" data-code="+377">Mónaco (+377)</option>
+                                <option value="Namibia" data-code="+264">Namibia (+264)</option>
+                                <option value="Nauru" data-code="+674">Nauru (+674)</option>
+                                <option value="Nepal" data-code="+977">Nepal (+977)</option>
+                                <option value="Nicaragua" data-code="+505">Nicaragua (+505)</option>
+                                <option value="Nigeria" data-code="+234">Nigeria (+234)</option>
+                                <option value="Niue" data-code="+683">Niue (+683)</option>
+                                <option value="Noruega" data-code="+47">Noruega (+47)</option>
+                                <option value="Nueva Caledonia" data-code="+687">Nueva Caledonia (+687)</option>
+                                <option value="Nueva Zelanda" data-code="+64">Nueva Zelanda (+64)</option>
+                                <option value="Níger" data-code="+227">Níger (+227)</option>
+                                <option value="Omán" data-code="+968">Omán (+968)</option>
+                                <option value="Pakistán" data-code="+92">Pakistán (+92)</option>
+                                <option value="Palaos" data-code="+680">Palaos (+680)</option>
+                                <option value="Panamá" data-code="+507">Panamá (+507)</option>
+                                <option value="Papúa Nueva Guinea" data-code="+675">Papúa Nueva Guinea (+675)</option>
+                                <option value="Paraguay" data-code="+595">Paraguay (+595)</option>
+                                <option value="Países Bajos" data-code="+31">Países Bajos (+31)</option>
+                                <option value="Perú" data-code="+51">Perú (+51)</option>
+                                <option value="Polinesia Francesa" data-code="+689">Polinesia Francesa (+689)</option>
+                                <option value="Polonia" data-code="+48">Polonia (+48)</option>
+                                <option value="Portugal" data-code="+351">Portugal (+351)</option>
+                                <option value="Puerto Rico" data-code="+1">Puerto Rico (+1)</option>
+                                <option value="RAE de Hong Kong (China)" data-code="+852">RAE de Hong Kong (China) (+852)</option>
+                                <option value="RAE de Macao (China)" data-code="+853">RAE de Macao (China) (+853)</option>
+                                <option value="Reino Unido" data-code="+44">Reino Unido (+44)</option>
+                                <option value="República Centroafricana" data-code="+236">República Centroafricana (+236)</option>
+                                <option value="República Democrática del Congo" data-code="+243">República Democrática del Congo (+243)</option>
+                                <option value="República Dominicana" data-code="+1">República Dominicana (+1)</option>
+                                <option value="Reunión" data-code="+262">Reunión (+262)</option>
+                                <option value="Ruanda" data-code="+250">Ruanda (+250)</option>
+                                <option value="Rumanía" data-code="+40">Rumanía (+40)</option>
+                                <option value="Rusia" data-code="+7">Rusia (+7)</option>
+                                <option value="Samoa" data-code="+685">Samoa (+685)</option>
+                                <option value="Samoa Americana" data-code="+1">Samoa Americana (+1)</option>
+                                <option value="San Bartolomé" data-code="+590">San Bartolomé (+590)</option>
+                                <option value="San Cristóbal y Nieves" data-code="+1">San Cristóbal y Nieves (+1)</option>
+                                <option value="San Marino" data-code="+378">San Marino (+378)</option>
+                                <option value="San Martín" data-code="+590">San Martín (+590)</option>
+                                <option value="San Pedro y Miquelón" data-code="+508">San Pedro y Miquelón (+508)</option>
+                                <option value="San Vicente y las Granadinas" data-code="+1">San Vicente y las Granadinas (+1)</option>
+                                <option value="Santa Elena" data-code="+290">Santa Elena (+290)</option>
+                                <option value="Santa Lucía" data-code="+1">Santa Lucía (+1)</option>
+                                <option value="Santo Tomé y Príncipe" data-code="+239">Santo Tomé y Príncipe (+239)</option>
+                                <option value="Senegal" data-code="+221">Senegal (+221)</option>
+                                <option value="Serbia" data-code="+381">Serbia (+381)</option>
+                                <option value="Seychelles" data-code="+248">Seychelles (+248)</option>
+                                <option value="Sierra Leona" data-code="+232">Sierra Leona (+232)</option>
+                                <option value="Singapur" data-code="+65">Singapur (+65)</option>
+                                <option value="Sint Maarten" data-code="+1">Sint Maarten (+1)</option>
+                                <option value="Siria" data-code="+963">Siria (+963)</option>
+                                <option value="Somalia" data-code="+252">Somalia (+252)</option>
+                                <option value="Sri Lanka" data-code="+94">Sri Lanka (+94)</option>
+                                <option value="Sudáfrica" data-code="+27">Sudáfrica (+27)</option>
+                                <option value="Sudán" data-code="+249">Sudán (+249)</option>
+                                <option value="Sudán del Sur" data-code="+211">Sudán del Sur (+211)</option>
+                                <option value="Suecia" data-code="+46">Suecia (+46)</option>
+                                <option value="Suiza" data-code="+41">Suiza (+41)</option>
+                                <option value="Surinam" data-code="+597">Surinam (+597)</option>
+                                <option value="Svalbard y Jan Mayen" data-code="+47">Svalbard y Jan Mayen (+47)</option>
+                                <option value="Sáhara Occidental" data-code="+212">Sáhara Occidental (+212)</option>
+                                <option value="Tailandia" data-code="+66">Tailandia (+66)</option>
+                                <option value="Taiwán" data-code="+886">Taiwán (+886)</option>
+                                <option value="Tanzania" data-code="+255">Tanzania (+255)</option>
+                                <option value="Tayikistán" data-code="+992">Tayikistán (+992)</option>
+                                <option value="Territorio Británico del Océano Índico" data-code="+246">Territorio Británico del Océano Índico (+246)</option>
+                                <option value="Territorios Australes Franceses" data-code="+262">Territorios Australes Franceses (+262)</option>
+                                <option value="Territorios Palestinos" data-code="+970">Territorios Palestinos (+970)</option>
+                                <option value="Timor-Leste" data-code="+670">Timor-Leste (+670)</option>
+                                <option value="Togo" data-code="+228">Togo (+228)</option>
+                                <option value="Tokelau" data-code="+690">Tokelau (+690)</option>
+                                <option value="Tonga" data-code="+676">Tonga (+676)</option>
+                                <option value="Trinidad y Tobago" data-code="+1">Trinidad y Tobago (+1)</option>
+                                <option value="Turkmenistán" data-code="+993">Turkmenistán (+993)</option>
+                                <option value="Turquía" data-code="+90">Turquía (+90)</option>
+                                <option value="Tuvalu" data-code="+688">Tuvalu (+688)</option>
+                                <option value="Túnez" data-code="+216">Túnez (+216)</option>
+                                <option value="Ucrania" data-code="+380">Ucrania (+380)</option>
+                                <option value="Uganda" data-code="+256">Uganda (+256)</option>
+                                <option value="Uruguay" data-code="+598">Uruguay (+598)</option>
+                                <option value="Uzbekistán" data-code="+998">Uzbekistán (+998)</option>
+                                <option value="Vanuatu" data-code="+678">Vanuatu (+678)</option>
+                                <option value="Venezuela" data-code="+58">Venezuela (+58)</option>
+                                <option value="Vietnam" data-code="+84">Vietnam (+84)</option>
+                                <option value="Wallis y Futuna" data-code="+681">Wallis y Futuna (+681)</option>
+                                <option value="Yemen" data-code="+967">Yemen (+967)</option>
+                                <option value="Yibuti" data-code="+253">Yibuti (+253)</option>
+                                <option value="Zambia" data-code="+260">Zambia (+260)</option>
+                                <option value="Zimbabue" data-code="+263">Zimbabue (+263)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">☎️ Código de área</label>
+                            <input type="text" class="form-input" id="regAreaCode" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">📱 Teléfono</label>
+                            <input type="tel" class="form-input" id="regPhone" placeholder="77777777">
+                        </div>
+                        <div>
+                            <label class="form-label">📮 Código Postal</label>
+                            <input type="text" class="form-input" id="regPostalCode" placeholder="0000">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">🗺️ Región / Estado</label>
+                            <input type="text" class="form-input" id="regRegion" placeholder="">
+                        </div>
+                        <div>
+                            <label class="form-label">🏠 Ciudad</label>
+                            <input type="text" class="form-input" id="regCity" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">📍 Dirección exacta de envío</label>
+                            <input type="text" class="form-input" id="regAddress" placeholder="Calle, número, zona, referencia">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">🔐 Contraseña</label>
+                            <input type="password" class="form-input" id="regPassword" placeholder="Mínimo 8 caracteres" oninput="validateRegisterForm()">
+                            <div id="registerPasswordRules" class="password-rules-panel"><div class="password-rules-title">Muy débil</div><div class="password-rules-grid"></div></div>
+                            <div class="password-help">Mínimo 8 caracteres para crear la cuenta.</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-login" id="registerBtn" onclick="registerClient(event)">Crear Cuenta</button>
+                    <div class="toggle-form">¿Ya tienes cuenta? <a href="#" onclick="toggleForms(); return false;">Inicia sesión aquí</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForms() {
+            document.getElementById('loginForm').classList.toggle('hide');
+            document.getElementById('registerForm').classList.toggle('hide');
+            document.getElementById('alertBox').classList.remove('show');
+            setTimeout(() => { applyLoginLanguage(); applyRegisterLanguage(); }, 20);
+        }
+
+        function syncAreaCode() {
+            const sel = document.getElementById('regCountry');
+            const opt = sel.options[sel.selectedIndex];
+            document.getElementById('regAreaCode').value = (opt && opt.getAttribute('data-code')) || '';
+        }
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert show alert-${type}`;
+        }
+
+        function validateRegisterForm() {
+            const requiredIds = [
+                'regName','regLastName','regDocument','regEmail','regCountry',
+                'regAreaCode','regPhone','regPostalCode','regRegion','regCity',
+                'regAddress','regPassword'
+            ];
+            const allFilled = requiredIds.every(id => {
+                const el = document.getElementById(id);
+                return el && String(el.value || '').trim() !== '';
+            });
+            const password = document.getElementById('regPassword').value || '';
+            const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(password);
+            const hasLower = /[a-záéíóúñ]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(password);
+            const hasLength = password.length >= 8;
+            if (typeof renderLivePasswordRules === 'function') renderLivePasswordRules('regPassword', 'registerPasswordRules');
+            const ok = allFilled && hasUpper && hasLower && hasNumber && hasSymbol && hasLength;
+            document.getElementById('registerBtn').disabled = !ok;
+            return ok;
+        }
+
+        function getProfileFromForm() {
+            return {
+                fullName: (document.getElementById('regName').value + ' ' + document.getElementById('regLastName').value).trim(),
+                name: document.getElementById('regName').value.trim(),
+                lastName: document.getElementById('regLastName').value.trim(),
+                documentId: document.getElementById('regDocument').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                country: document.getElementById('regCountry').value.trim(),
+                areaCode: document.getElementById('regAreaCode').value.trim(),
+                phone: document.getElementById('regPhone').value.trim(),
+                postalCode: document.getElementById('regPostalCode').value.trim(),
+                region: document.getElementById('regRegion').value.trim(),
+                city: document.getElementById('regCity').value.trim(),
+                address: document.getElementById('regAddress').value.trim(),
+                password: document.getElementById('regPassword').value
+            };
+        }
+
+        async function registerClient(e) {
+            if (e) e.preventDefault();
+            if (!validateRegisterForm()) {
+                showAlert('Completa todos los campos y usa una contraseña de mínimo 8 caracteres.', 'error');
+                return;
+            }
+            const profile = getProfileFromForm();
+            localStorage.setItem('nexoClientProfile', JSON.stringify(profile));
+            sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile));
+            sessionStorage.setItem('clientEmail', profile.email);
+            sessionStorage.setItem('clientName', profile.fullName);
+            try {
+                const resp = await fetch('/api/nexo-save-client', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(profile)
+                });
+                const js = await resp.json().catch(()=>null);
+                if(!js || js.ok === false){ await nexoDirectSaveClientToSupabase(profile); }
+            } catch(e) { console.warn('Cliente guardado local; sincronización Supabase pendiente', e); }
+            showAlert('✅ Cuenta creada correctamente. Abriendo tienda...', 'success');
+            setTimeout(() => {
+                window.location.href = 'nexo-tienda-publica.html';
+            }, 450);
+        }
+
+        function loginClient(e) {
+            if (e) e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const saved = JSON.parse(localStorage.getItem('nexoClientProfile') || 'null');
+
+            if (!email || !password) {
+                showAlert('Ingresa correo y contraseña.', 'error');
+                return;
+            }
+
+            if (saved && saved.email) {
+                if (saved.email.toLowerCase() !== email.toLowerCase() || saved.password !== password) {
+                    showAlert('Correo o contraseña incorrectos.', 'error');
+                    return;
+                }
+                sessionStorage.setItem('clientEmail', saved.email);
+                sessionStorage.setItem('clientName', saved.fullName || '');
+                sessionStorage.setItem('nexoActiveClient', JSON.stringify(saved));
+            } else {
+                sessionStorage.setItem('clientEmail', email);
+            }
+
+            showAlert('✅ Ingreso habilitado. Abriendo tienda...', 'success');
+            setTimeout(() => {
+                window.location.href = 'nexo-tienda-publica.html';
+            }, 450);
+        }
+
+        function goBack(e) {
+            if (e) e.preventDefault();
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#registerForm input, #registerForm select').forEach(el => {
+                el.addEventListener('input', validateRegisterForm);
+                el.addEventListener('change', validateRegisterForm);
+            });
+            validateRegisterForm();
+        });
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!document.getElementById('registerForm').classList.contains('hide')) {
+                    registerClient();
+                } else {
+                    loginClient();
+                }
+            }
+        });
+    
+function hardTranslateClientLogin(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  const M = {
+    es:{title:'INGRESO A TIENDA', email:'Correo Electrónico', pass:'Contraseña', btn:'INGRESAR A TIENDA', back:'← Volver al Portal', noacc:'¿Aún no tienes cuenta?', reg:'Regístrate aquí', forgotu:'¿Te olvidaste tu usuario?', forgotp:'¿Olvidaste tu contraseña?'},
+    en:{title:'STORE LOGIN', email:'Email Address', pass:'Password', btn:'ENTER STORE', back:'← Back to Portal', noacc:"Don't have an account?", reg:'Register here', forgotu:'Forgot your username?', forgotp:'Forgot your password?'},
+    pt:{title:'ENTRADA NA LOJA', email:'Correio Eletrônico', pass:'Senha', btn:'ENTRAR NA LOJA', back:'← Voltar ao Portal', noacc:'Ainda não tem conta?', reg:'Registre-se aqui', forgotu:'Esqueceu seu usuário?', forgotp:'Esqueceu sua senha?'},
+    it:{title:'ACCESSO AL NEGOZIO', email:'Email', pass:'Password', btn:'ENTRA NEL NEGOZIO', back:'← Torna al Portale', noacc:'Non hai un account?', reg:'Registrati qui', forgotu:'Hai dimenticato il tuo utente?', forgotp:'Hai dimenticato la password?'},
+    fr:{title:'CONNEXION À LA BOUTIQUE', email:'Adresse e-mail', pass:'Mot de passe', btn:'ENTRER DANS LA BOUTIQUE', back:'← Retour au Portail', noacc:"Vous n'avez pas de compte ?", reg:'Inscrivez-vous ici', forgotu:'Utilisateur oublié ?', forgotp:'Mot de passe oublié ?'}
   };
-  const T = {
-    es:{
-      line1:'nexo – Plataforma de Intermediación Comercial Internacional',
-      line2:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
-      line3:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',
-      line4:'© 2026 nexo™ – Todos los derechos reservados',
-      legal:'Aviso Legal', terms:'Términos y Condiciones', privacy:'Privacidad', cookies:'Cookies', refunds:'Reembolsos'
-    },
-    en:{
-      line1:'nexo – Plataforma de Intermediación Comercial Internacional',
-      line2:'nexo Servicios Generales y Empresariales – Tax ID/NIT: 774651015 – Bolivia',
-      line3:'nexo™ acts exclusively as an intermediary between the customer and international providers.',
-      line4:'© 2026 nexo™ – All rights reserved',
-      legal:'Legal Notice', terms:'Terms and Conditions', privacy:'Privacy', cookies:'Cookies', refunds:'Refunds'
-    },
-    pt:{
-      line1:'nexo – Plataforma de Intermediación Comercial Internacional',
-      line2:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolívia',
-      line3:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',
-      line4:'© 2026 nexo™ – Todos os direitos reservados',
-      legal:'Aviso Legal', terms:'Termos e Condições', privacy:'Privacidade', cookies:'Cookies', refunds:'Reembolsos'
-    },
-    it:{
-      line1:'nexo – Plataforma de Intermediación Comercial Internacional',
-      line2:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
-      line3:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',
-      line4:'© 2026 nexo™ – Tutti i diritti riservati',
-      legal:'Avviso Legale', terms:'Termini e Condizioni', privacy:'Privacy', cookies:'Cookie', refunds:'Rimborsi'
-    },
-    fr:{
-      line1:'nexo – Plataforma de Intermediación Comercial Internacional',
-      line2:'nexo Servicios Generales y Empresariales – NIT : 774651015 – Bolivie',
-      line3:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',
-      line4:'© 2026 nexo™ – Tous droits réservés',
-      legal:'Mentions légales', terms:'Conditions générales', privacy:'Confidentialité', cookies:'Cookies', refunds:'Remboursements'
+  const t = M[lang] || M.es;
+  document.querySelectorAll('h1,h2,h3,label,div,span,p,a,button').forEach(el=>{
+    const tx=(el.textContent||'').trim();
+    if(tx==='INGRESO A TIENDA' || tx==='STORE LOGIN') el.textContent=t.title;
+    if(tx==='Correo Electrónico' || tx==='Email Address') el.textContent='📧 ' + t.email;
+    if(tx==='Contraseña' || tx==='Password' || tx==='undefined') el.textContent='🔐 ' + t.pass;
+    if(tx==='INGRESAR A TIENDA' || tx==='ENTER STORE') el.textContent=t.btn;
+    if(tx==='← Volver al Portal' || tx==='← Back to Portal') el.textContent=t.back;
+  });
+  const wrap = document.querySelector('.login-links') || document.getElementById('loginLinksWrap') || document.getElementById('loginLinksText');
+  if (wrap) {
+    wrap.innerHTML = `${t.noacc} <a href="#" onclick="toggleForms();return false;">${t.reg}</a><br><a href="#" onclick="alert('En preparación');return false;">${t.forgotu}</a> · <a href="#" onclick="alert('En preparación');return false;">${t.forgotp}</a>`;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function(){ setTimeout(hardTranslateClientLogin,50); setTimeout(hardTranslateClientLogin,250); });
+</script>
+
+<script>
+const loginTexts = {
+  es:{title:'Ingreso a Tienda', email:'📧 Correo Electrónico', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', btn:'Ingresar a Tienda', back:'← Volver al Portal', side:'Tienda Digital - Acceso Cliente Directo', noAccount:'¿Aún no tienes cuenta?', register:'Regístrate aquí', forgotUser:'¿Te olvidaste tu usuario?', forgotPass:'¿Olvidaste tu contraseña?', forgotUserMsg:'Tu usuario es el correo con el que te registraste.', forgotPassMsg:'La recuperación de contraseña está en preparación.'},
+  en:{title:'Store Login', email:'📧 Email Address', pass:'🔐 Password', passPh:'Minimum 8 characters', btn:'Enter Store', back:'← Back to Portal', side:'Digital Store - Direct Client Access', noAccount:"Don't have an account?", register:'Register here', forgotUser:'Forgot your username?', forgotPass:'Forgot your password?', forgotUserMsg:'Your username is the email you registered with.', forgotPassMsg:'Password recovery is in preparation.'},
+  pt:{title:'Acesso à Loja', email:'📧 E-mail', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', btn:'Entrar na Loja', back:'← Voltar ao Portal', side:'Loja Digital - Acesso Direto do Cliente', noAccount:'Ainda não tem conta?', register:'Cadastre-se aqui', forgotUser:'Esqueceu seu usuário?', forgotPass:'Esqueceu sua senha?', forgotUserMsg:'Seu usuário é o e-mail usado no cadastro.', forgotPassMsg:'A recuperação de senha está em preparação.'},
+  it:{title:'Accesso al Negozio', email:'📧 Email', pass:'🔐 Password', passPh:'Minimo 8 caratteri', btn:'Entra nel Negozio', back:'← Torna al Portale', side:'Negozio Digitale - Accesso Diretto Cliente', noAccount:'Non hai un account?', register:'Registrati qui', forgotUser:'Hai dimenticato il tuo utente?', forgotPass:'Hai dimenticato la password?', forgotUserMsg:'Il tuo utente è l’e-mail con cui ti sei registrato.', forgotPassMsg:'Il recupero password è in preparazione.'},
+  fr:{title:'Accès Boutique', email:'📧 E-mail', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', btn:'Entrer dans la Boutique', back:'← Retour au Portail', side:'Boutique Digitale - Accès Client Direct', noAccount:"Vous n'avez pas de compte ?", register:'Inscrivez-vous ici', forgotUser:'Vous avez oublié votre identifiant ?', forgotPass:'Vous avez oublié votre mot de passe ?', forgotUserMsg:'Votre identifiant est l’e-mail utilisé lors de l’inscription.', forgotPassMsg:'La récupération du mot de passe est en préparation.'}
+};
+let currentLoginTexts = loginTexts.es;
+function applyLoginLanguage(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  const t = loginTexts[lang] || loginTexts.es;
+  currentLoginTexts = t;
+  const formTitle = document.querySelector('#loginForm .form-title'); if(formTitle) formTitle.textContent = t.title;
+  const labels = document.querySelectorAll('#loginForm .form-label');
+  if(labels[0]) labels[0].textContent = t.email;
+  if(labels[1]) labels[1].textContent = t.pass;
+  const em = document.getElementById('loginEmail'); if(em) em.placeholder = 'tu@email.com';
+  const pw = document.getElementById('loginPassword'); if(pw) pw.placeholder = t.passPh;
+  const btn = document.getElementById('loginBtn'); if(btn) btn.textContent = t.btn;
+  const back = document.querySelector('.back-btn'); if(back) back.textContent = t.back;
+  const sidep = document.querySelector('.login-header p'); if(sidep) sidep.textContent = t.side;
+  const links = document.getElementById('loginLinks'); if(links) links.innerHTML = `${t.noAccount} <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">${t.register}</a><br><a href="#" id="forgotUserLink" onclick="return openRecoveryModal('user');">${t.forgotUser}</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">${t.forgotPass}</a>`;
+}
+function toggleLoginPassword(){
+  const el=document.getElementById('loginPassword'); const eye=document.getElementById('toggleLoginPass');
+  if(!el) return; el.type = el.type==='password' ? 'text' : 'password'; if(eye) eye.textContent = el.type==='password' ? '👁️' : '🙈';
+}
+document.addEventListener('DOMContentLoaded', () => { applyLoginLanguage(); applyRegisterLanguage(); });
+
+const registerTexts = {
+  es:{title:'Crear Mi Cuenta', back:'← Volver al Portal', first:'👤 Nombre', last:'Apellido', doc:'🪪 Número Documento de Identidad / NIT', docPh:'CI, pasaporte o NIT', email:'📧 Correo Electrónico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Teléfono', zip:'📮 Código Postal', region:'🏙️ Región / Estado', city:'🏠 Ciudad', address:'📍 Dirección exacta de envío', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para crear la cuenta.', btn:'Crear Cuenta', have:'¿Ya tienes cuenta?', signin:'Inicia sesión aquí'},
+  en:{title:'Create My Account', back:'← Back to Portal', first:'👤 First Name', last:'Last Name', doc:'🪪 Identity Document Number / Tax ID', docPh:'ID, passport or tax ID', email:'📧 Email Address', country:'🌎 Country', area:'☎️ Area Code', phone:'📱 Phone', zip:'📮 Postal Code', region:'🏙️ Region / State', city:'🏠 City', address:'📍 Exact Shipping Address', pass:'🔐 Password', passPh:'Minimum 8 characters', passHelp:'Minimum 8 characters to create the account.', btn:'Create Account', have:'Already have an account?', signin:'Sign in here'},
+  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres<div class="password-rules-panel">✔ Mayús<br>✔ minús<br>✔ Número<br>✔ Símbolo<br>✔ 8 carac</div> para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
+  it:{title:'Crea Il Mio Account', back:'← Torna al Portale', first:'👤 Nome', last:'Cognome', doc:'🪪 Numero Documento d’Identità / Partita IVA', docPh:'CI, passaporto o P.IVA', email:'📧 Email', country:'🌎 Paese', area:'☎️ Prefisso', phone:'📱 Telefono', zip:'📮 Codice Postale', region:'🏙️ Regione / Stato', city:'🏠 Città', address:'📍 Indirizzo esatto di spedizione', pass:'🔐 Password', passPh:'Minimo 8 caratteri', passHelp:'Minimo 8 caratteri per creare l’account.', btn:'Crea Account', have:'Hai già un account?', signin:'Accedi qui'},
+  fr:{title:'Créer Mon Compte', back:'← Retour au Portail', first:'👤 Prénom', last:'Nom', doc:'🪪 Numéro du document d’identité / NIF', docPh:'CI, passeport ou NIF', email:'📧 Adresse e-mail', country:'🌎 Pays', area:'☎️ Indicatif', phone:'📱 Téléphone', zip:'📮 Code Postal', region:'🏙️ Région / État', city:'🏠 Ville', address:'📍 Adresse exacte de livraison', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', passHelp:'Minimum 8 caractères pour créer le compte.', btn:'Créer le Compte', have:'Vous avez déjà un compte ?', signin:'Connectez-vous ici'}
+};
+function applyRegisterLanguage(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  const t = registerTexts[lang] || registerTexts.es;
+  const back = document.querySelector('.back-btn'); if(back) back.textContent = t.back;
+  const title = document.querySelector('#registerForm .form-title'); if(title) title.textContent = t.title;
+  const labels = document.querySelectorAll('#registerForm .form-label');
+  if(labels[0]) labels[0].textContent = t.first;
+  if(labels[1]) labels[1].textContent = t.last;
+  if(labels[2]) labels[2].textContent = t.doc;
+  if(labels[3]) labels[3].textContent = t.email;
+  if(labels[4]) labels[4].textContent = t.country;
+  if(labels[5]) labels[5].textContent = t.area;
+  if(labels[6]) labels[6].textContent = t.phone;
+  if(labels[7]) labels[7].textContent = t.zip;
+  if(labels[8]) labels[8].textContent = t.region;
+  if(labels[9]) labels[9].textContent = t.city;
+  if(labels[10]) labels[10].textContent = t.address;
+  if(labels[11]) labels[11].textContent = t.pass;
+
+  const doc = document.getElementById('regDocument'); if(doc) doc.placeholder = t.docPh;
+  const pass = document.getElementById('regPassword'); if(pass) pass.placeholder = t.passPh;
+  const ph = document.querySelector('#registerForm .password-help'); if(ph) ph.textContent = t.passHelp;
+  const btn = document.getElementById('registerBtn'); if(btn) btn.textContent = t.btn;
+  const toggle = document.querySelector('#registerForm .toggle-form'); if(toggle) toggle.innerHTML = `${t.have} <a href="#" onclick="toggleForms(); return false;">${t.signin}</a>`;
+}
+
+</script>
+
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+
+<div id="recoveryModal" class="recovery-modal" style="display:none;">
+  <div class="recovery-card">
+    <div class="recovery-head">
+      <h3 class="recovery-title" id="recoveryTitle">Recuperar acceso</h3>
+      <button type="button" class="recovery-close" onclick="closeRecoveryModal()">×</button>
+    </div>
+    <div class="recovery-note" id="recoveryNote">Actualiza tus datos de acceso para volver a ingresar a la tienda.</div>
+    <div class="recovery-grid">
+      <div>
+        <label class="form-label" id="recoveryLabel1">Dato 1</label>
+        <input type="text" class="form-input" id="recoveryField1">
+      </div>
+      <div>
+        <label class="form-label" id="recoveryLabel2">Dato 2</label>
+        <input type="text" class="form-input" id="recoveryField2">
+      </div>
+      <div>
+        <label class="form-label" id="recoveryLabel3">Dato 3</label>
+        <input type="text" class="form-input" id="recoveryField3">
+      </div>
+    </div>
+    <div id="recoveryStatus" class="recovery-status"></div>
+    <div class="recovery-actions">
+      <button type="button" class="back-btn" id="recoveryCancelBtn" onclick="closeRecoveryModal()">Cancelar</button>
+      <button type="button" class="btn-login" id="recoverySaveBtn" onclick="submitRecovery()">Guardar y volver</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+let currentRecoveryMode = 'user';
+
+const recoveryTexts = {
+  es: {
+    userTitle: 'Actualizar usuario',
+    userNote: 'Para cambiar tu usuario, escribe tu contraseña actual y repite tu nuevo usuario.',
+    passTitle: 'Actualizar contraseña',
+    passNote: 'Para cambiar tu contraseña, escribe tu usuario actual y repite tu nueva contraseña.',
+    f1User: 'Contraseña actual',
+    f2User: 'Nuevo usuario',
+    f3User: 'Repite nuevo usuario',
+    f1Pass: 'Usuario actual',
+    f2Pass: 'Nueva contraseña',
+    f3Pass: 'Repite nueva contraseña',
+    save: 'Guardar y volver',
+    cancel: 'Cancelar',
+    noProfile: 'No existe una cuenta registrada en este navegador. Primero crea tu cuenta.',
+    wrongPassword: 'La contraseña actual no coincide.',
+    wrongUser: 'El usuario actual no coincide.',
+    mismatchUser: 'Los dos campos del nuevo usuario no coinciden.',
+    mismatchPass: 'Los dos campos de la nueva contraseña no coinciden.',
+    shortPass: 'La nueva contraseña debe tener al menos 8 caracteres.',
+    emptyFields: 'Completa los tres campos.',
+    userOk: 'Usuario actualizado correctamente. Ya puedes ingresar con tu nuevo usuario.',
+    passOk: 'Contraseña actualizada correctamente. Ya puedes ingresar con tu nueva contraseña.'
+  },
+  en: {
+    userTitle: 'Update username',
+    userNote: 'To change your username, enter your current password and repeat your new username.',
+    passTitle: 'Update password',
+    passNote: 'To change your password, enter your current username and repeat your new password.',
+    f1User: 'Current password',
+    f2User: 'New username',
+    f3User: 'Repeat new username',
+    f1Pass: 'Current username',
+    f2Pass: 'New password',
+    f3Pass: 'Repeat new password',
+    save: 'Save and return',
+    cancel: 'Cancel',
+    noProfile: 'There is no registered account in this browser. Please create your account first.',
+    wrongPassword: 'The current password does not match.',
+    wrongUser: 'The current username does not match.',
+    mismatchUser: 'The two new username fields do not match.',
+    mismatchPass: 'The two new password fields do not match.',
+    shortPass: 'The new password must be at least 8 characters.',
+    emptyFields: 'Complete all three fields.',
+    userOk: 'Username updated successfully. You can now sign in with your new username.',
+    passOk: 'Password updated successfully. You can now sign in with your new password.'
+  },
+  pt: {
+    userTitle: 'Atualizar usuário',
+    userNote: 'Para alterar seu usuário, informe sua senha atual e repita o novo usuário.',
+    passTitle: 'Atualizar senha',
+    passNote: 'Para alterar sua senha, informe seu usuário atual e repita a nova senha.',
+    f1User: 'Senha atual',
+    f2User: 'Novo usuário',
+    f3User: 'Repita o novo usuário',
+    f1Pass: 'Usuário atual',
+    f2Pass: 'Nova senha',
+    f3Pass: 'Repita a nova senha',
+    save: 'Salvar e voltar',
+    cancel: 'Cancelar',
+    noProfile: 'Não existe conta registrada neste navegador. Primeiro crie sua conta.',
+    wrongPassword: 'A senha atual não confere.',
+    wrongUser: 'O usuário atual não confere.',
+    mismatchUser: 'Os dois campos do novo usuário não coincidem.',
+    mismatchPass: 'Os dois campos da nova senha não coincidem.',
+    shortPass: 'A nova senha deve ter pelo menos 8 caracteres.',
+    emptyFields: 'Preencha os três campos.',
+    userOk: 'Usuário atualizado com sucesso. Agora você já pode entrar com o novo usuário.',
+    passOk: 'Senha atualizada com sucesso. Agora você já pode entrar com a nova senha.'
+  },
+  it: {
+    userTitle: 'Aggiorna utente',
+    userNote: 'Per cambiare il tuo utente, inserisci la password attuale e ripeti il nuovo utente.',
+    passTitle: 'Aggiorna password',
+    passNote: 'Per cambiare la tua password, inserisci il tuo utente attuale e ripeti la nuova password.',
+    f1User: 'Password attuale',
+    f2User: 'Nuovo utente',
+    f3User: 'Ripeti nuovo utente',
+    f1Pass: 'Utente attuale',
+    f2Pass: 'Nuova password',
+    f3Pass: 'Ripeti nuova password',
+    save: 'Salva e torna',
+    cancel: 'Annulla',
+    noProfile: 'Non esiste un account registrato in questo browser. Prima crea il tuo account.',
+    wrongPassword: 'La password attuale non corrisponde.',
+    wrongUser: 'L’utente attuale non corrisponde.',
+    mismatchUser: 'I due campi del nuovo utente non coincidono.',
+    mismatchPass: 'I due campi della nuova password non coincidono.',
+    shortPass: 'La nuova password deve avere almeno 8 caratteri.',
+    emptyFields: 'Completa tutti e tre i campi.',
+    userOk: 'Utente aggiornato correttamente. Ora puoi accedere con il nuovo utente.',
+    passOk: 'Password aggiornata correttamente. Ora puoi accedere con la nuova password.'
+  },
+  fr: {
+    userTitle: 'Mettre à jour l’identifiant',
+    userNote: 'Pour modifier votre identifiant, saisissez votre mot de passe actuel et répétez le nouvel identifiant.',
+    passTitle: 'Mettre à jour le mot de passe',
+    passNote: 'Pour modifier votre mot de passe, saisissez votre identifiant actuel et répétez le nouveau mot de passe.',
+    f1User: 'Mot de passe actuel',
+    f2User: 'Nouvel identifiant',
+    f3User: 'Répétez le nouvel identifiant',
+    f1Pass: 'Identifiant actuel',
+    f2Pass: 'Nouveau mot de passe',
+    f3Pass: 'Répétez le nouveau mot de passe',
+    save: 'Enregistrer et revenir',
+    cancel: 'Annuler',
+    noProfile: 'Aucun compte enregistré dans ce navigateur. Créez d’abord votre compte.',
+    wrongPassword: 'Le mot de passe actuel ne correspond pas.',
+    wrongUser: 'L’identifiant actuel ne correspond pas.',
+    mismatchUser: 'Les deux champs du nouvel identifiant ne correspondent pas.',
+    mismatchPass: 'Les deux champs du nouveau mot de passe ne correspondent pas.',
+    shortPass: 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
+    emptyFields: 'Remplissez les trois champs.',
+    userOk: 'Identifiant mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre nouvel identifiant.',
+    passOk: 'Mot de passe mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.'
+  }
+};
+
+function getRecoveryLang(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  return recoveryTexts[lang] ? lang : 'es';
+}
+function getSavedClientProfile(){
+  try{
+    return JSON.parse(localStorage.getItem('nexoClientProfile') || sessionStorage.getItem('nexoActiveClient') || 'null');
+  }catch(e){ return null; }
+}
+function setSavedClientProfile(profile){
+  localStorage.setItem('nexoClientProfile', JSON.stringify(profile));
+  sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile));
+  sessionStorage.setItem('clientEmail', profile.email || '');
+  sessionStorage.setItem('clientName', profile.fullName || '');
+}
+function setRecoveryStatus(msg, type){
+  const box = document.getElementById('recoveryStatus');
+  if(!box) return;
+  box.className = 'recovery-status ' + (type === 'ok' ? 'ok' : 'err');
+  box.textContent = msg;
+}
+function openRecoveryModal(mode){
+  currentRecoveryMode = mode || 'user';
+  const lang = getRecoveryLang();
+  const t = recoveryTexts[lang];
+  const modal = document.getElementById('recoveryModal');
+  if(!modal) return false;
+
+  document.getElementById('recoveryTitle').textContent = mode === 'user' ? t.userTitle : t.passTitle;
+  document.getElementById('recoveryNote').textContent = mode === 'user' ? t.userNote : t.passNote;
+  document.getElementById('recoveryLabel1').textContent = mode === 'user' ? t.f1User : t.f1Pass;
+  document.getElementById('recoveryLabel2').textContent = mode === 'user' ? t.f2User : t.f2Pass;
+  document.getElementById('recoveryLabel3').textContent = mode === 'user' ? t.f3User : t.f3Pass;
+  document.getElementById('recoverySaveBtn').textContent = t.save;
+  document.getElementById('recoveryCancelBtn').textContent = t.cancel;
+
+  const f1 = document.getElementById('recoveryField1');
+  const f2 = document.getElementById('recoveryField2');
+  const f3 = document.getElementById('recoveryField3');
+  f1.value = ''; f2.value = ''; f3.value = '';
+  f1.type = mode === 'user' ? 'password' : 'text';
+  f2.type = mode === 'user' ? 'text' : 'password';
+  f3.type = mode === 'user' ? 'text' : 'password';
+  document.getElementById('recoveryStatus').className = 'recovery-status';
+  document.getElementById('recoveryStatus').textContent = '';
+
+  modal.style.display = 'flex';
+  modal.classList.add('show');
+  return false;
+}
+function closeRecoveryModal(){
+  const modal = document.getElementById('recoveryModal');
+  if(modal){
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+}
+function submitRecovery(){
+  const lang = getRecoveryLang();
+  const t = recoveryTexts[lang];
+  const profile = getSavedClientProfile();
+  if(!profile || !profile.email){
+    setRecoveryStatus(t.noProfile, 'err');
+    return false;
+  }
+
+  const f1 = (document.getElementById('recoveryField1').value || '').trim();
+  const f2 = (document.getElementById('recoveryField2').value || '').trim();
+  const f3 = (document.getElementById('recoveryField3').value || '').trim();
+
+  if(!f1 || !f2 || !f3){
+    setRecoveryStatus(t.emptyFields, 'err');
+    return false;
+  }
+
+  if(currentRecoveryMode === 'user'){
+    if((profile.password || '') !== f1){
+      setRecoveryStatus(t.wrongPassword, 'err');
+      return false;
     }
-  };
-  function norm(v){
-    v=(v||'es').toString().toLowerCase();
-    if(['es','en','pt','it','fr'].includes(v)) return v;
-    if(v.includes('eng')||v.includes('ing')) return 'en';
-    if(v.includes('port')) return 'pt';
-    if(v.includes('ital')) return 'it';
-    if(v.includes('fran')) return 'fr';
-    return 'es';
+    if(f2.toLowerCase() !== f3.toLowerCase()){
+      setRecoveryStatus(t.mismatchUser, 'err');
+      return false;
+    }
+    profile.email = f2;
+    setSavedClientProfile(profile);
+    const loginEmail = document.getElementById('loginEmail');
+    if(loginEmail) loginEmail.value = profile.email;
+    setRecoveryStatus(t.userOk, 'ok');
+  } else {
+    if((profile.email || '').toLowerCase() !== f1.toLowerCase()){
+      setRecoveryStatus(t.wrongUser, 'err');
+      return false;
+    }
+    if(f2 !== f3){
+      setRecoveryStatus(t.mismatchPass, 'err');
+      return false;
+    }
+    if(f2.length < 8){
+      setRecoveryStatus(t.shortPass, 'err');
+      return false;
+    }
+    profile.password = f2;
+    setSavedClientProfile(profile);
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    if(loginEmail) loginEmail.value = profile.email;
+    if(loginPassword) loginPassword.value = profile.password;
+    setRecoveryStatus(t.passOk, 'ok');
   }
-  function lang(){ return norm(localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es'); }
-  function html(t){
-    return `<strong>${t.line1.replace('nexo™','nexo™')}</strong><br>`+
-      `${t.line2}<br>`+
-      `${t.line3}<br>`+
-      `${t.line4}<br>`+
-      `<div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">`+
-      `<a href="${LINKS.legal}">${t.legal}</a><span>&nbsp;|&nbsp;</span>`+
-      `<a href="${LINKS.terms}">${t.terms}</a><span>&nbsp;|&nbsp;</span>`+
-      `<a href="${LINKS.privacy}">${t.privacy}</a><span>&nbsp;|&nbsp;</span>`+
-      `<a href="${LINKS.cookies}">${t.cookies}</a><span>&nbsp;|&nbsp;</span>`+
-      `<a href="${LINKS.refunds}">${t.refunds}</a>`+
-      `</div>`;
-  }
-  function apply(){
-    const t=T[lang()]||T.es;
-    document.documentElement.lang=lang();
-    document.querySelectorAll('.nexo-left-legal,.nexo-legal-footer,#nexo-legal-footer,[data-nexo-legal-footer]').forEach(el=>{
-      el.setAttribute('data-nexo-legal-footer','1');
-      el.innerHTML=html(t);
+
+  setTimeout(function(){
+    closeRecoveryModal();
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    if(loginForm && loginForm.classList.contains('hide')) toggleForms();
+  }, 900);
+
+  return false;
+}
+document.addEventListener('DOMContentLoaded', function(){
+  const modal = document.getElementById('recoveryModal');
+  if(modal){
+    modal.addEventListener('click', function(e){
+      if(e.target === modal) closeRecoveryModal();
     });
-    document.querySelectorAll('.nexo-legal-links a').forEach(a=>{ a.style.color='inherit'; a.style.textDecoration='underline'; a.style.fontWeight='700'; });
   }
-  document.addEventListener('DOMContentLoaded', apply);
-  window.addEventListener('pageshow', apply);
-  window.addEventListener('storage', apply);
-  document.addEventListener('click', function(e){
-    const b=e.target.closest('[data-lang],.lang-btn,.language-btn,button');
-    if(b) setTimeout(apply, 80);
-  }, true);
-  let last='';
-  setInterval(()=>{ const now=lang(); if(now!==last){ last=now; apply(); } }, 350);
-  window.nexoApplyLegalFooterLanguage=apply;
+});
+</script>
+
+
+
+
+<script>
+function renderLivePasswordRules(inputId, boxId){
+  const input = document.getElementById(inputId);
+  const box = document.getElementById(boxId);
+  if(!input || !box) return;
+
+  const val = input.value || '';
+  const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(val);
+  const hasLower = /[a-záéíóúñ]/.test(val);
+  const hasNumber = /[0-9]/.test(val);
+  const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(val);
+  const hasLength = val.length >= 8;
+
+  let score = 0;
+  [hasUpper, hasLower, hasNumber, hasSymbol, hasLength].forEach(v => { if(v) score += 1; });
+
+  const title = score <= 1 ? 'Muy débil' : score <= 3 ? 'Media' : score === 4 ? 'Fuerte' : 'Muy fuerte';
+  const titleColor = score <= 1 ? '#a94442' : score <= 3 ? '#b37a00' : '#2f7d32';
+
+  box.innerHTML = `
+    <div class="password-rules-title" style="color:${titleColor}">${title}</div>
+    <div class="password-rules-grid">
+      <div class="password-rule ${hasUpper ? 'ok' : 'no'}">${hasUpper ? '✔' : '✖'} Mayús</div>
+      <div class="password-rule ${hasLower ? 'ok' : 'no'}">${hasLower ? '✔' : '✖'} minús</div>
+      <div class="password-rule ${hasNumber ? 'ok' : 'no'}">${hasNumber ? '✔' : '✖'} Número</div>
+      <div class="password-rule ${hasSymbol ? 'ok' : 'no'}">${hasSymbol ? '✔' : '✖'} Símbolo</div>
+      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 carac</div>
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const loginPass = document.getElementById('loginPassword');
+  if(loginPass){
+    loginPass.addEventListener('input', function(){
+      renderLivePasswordRules('loginPassword', 'passwordRulesLive');
+    });
+    renderLivePasswordRules('loginPassword', 'passwordRulesLive');
+  }
+
+  const regPass = document.getElementById('regPassword');
+  if(regPass){
+    regPass.addEventListener('input', function(){
+      renderLivePasswordRules('regPassword', 'registerPasswordRules');
+    });
+    renderLivePasswordRules('regPassword', 'registerPasswordRules');
+  }
+
+  const modal = document.getElementById('recoveryModal');
+  if(modal){
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+});
+</script>
+<script src="nexo-legal-i18n.js"></script>
+<script>
+window.NEXO_COUNTRY_DIAL_CODES = {"Afganistán": "+93", "Albania": "+355", "Alemania": "+49", "Andorra": "+376", "Angola": "+244", "Anguila": "+1", "Antigua y Barbuda": "+1", "Antártida": "+672", "Arabia Saudí": "+966", "Argelia": "+213", "Argentina": "+54", "Armenia": "+374", "Aruba": "+297", "Australia": "+61", "Austria": "+43", "Azerbaiyán": "+994", "Bahamas": "+1", "Bangladés": "+880", "Barbados": "+1", "Baréin": "+973", "Belice": "+501", "Benín": "+229", "Bermudas": "+1", "Bielorrusia": "+375", "Bolivia": "+591", "Bosnia y Herzegovina": "+387", "Botsuana": "+267", "Brasil": "+55", "Brunéi": "+673", "Bulgaria": "+359", "Burkina Faso": "+226", "Burundi": "+257", "Bután": "+975", "Bélgica": "+32", "Cabo Verde": "+238", "Camboya": "+855", "Camerún": "+237", "Canadá": "+1", "Caribe neerlandés": "+599", "Catar": "+974", "Chad": "+235", "Chequia": "+420", "Chile": "+56", "China": "+86", "Chipre": "+357", "Ciudad del Vaticano": "+379", "Colombia": "+57", "Comoras": "+269", "Congo": "+242", "Corea del Norte": "+850", "Corea del Sur": "+82", "Costa Rica": "+506", "Croacia": "+385", "Cuba": "+53", "Curazao": "+599", "Côte d’Ivoire": "+225", "Dinamarca": "+45", "Dominica": "+1", "Ecuador": "+593", "Egipto": "+20", "El Salvador": "+503", "Emiratos Árabes Unidos": "+971", "Eritrea": "+291", "Eslovaquia": "+421", "Eslovenia": "+386", "España": "+34", "Estados Unidos": "+1", "Estonia": "+372", "Esuatini": "+268", "Etiopía": "+251", "Filipinas": "+63", "Finlandia": "+358", "Fiyi": "+679", "Francia": "+33", "Gabón": "+241", "Gambia": "+220", "Georgia": "+995", "Ghana": "+233", "Gibraltar": "+350", "Granada": "+1", "Grecia": "+30", "Groenlandia": "+299", "Guadalupe": "+590", "Guam": "+1", "Guatemala": "+502", "Guayana Francesa": "+594", "Guernesey": "+44", "Guinea": "+224", "Guinea Ecuatorial": "+240", "Guinea-Bisáu": "+245", "Guyana": "+592", "Haití": "+509", "Honduras": "+504", "Hungría": "+36", "India": "+91", "Indonesia": "+62", "Irak": "+964", "Irán": "+98", "Irlanda": "+353", "Isla de Man": "+44", "Isla de Navidad": "+61", "Islandia": "+354", "Islas Caimán": "+1", "Islas Cook": "+682", "Islas Feroe": "+298", "Islas Malvinas": "+500", "Islas Marianas del Norte": "+1", "Islas Marshall": "+692", "Islas Salomón": "+677", "Islas Turcas y Caicos": "+1", "Islas Vírgenes Británicas": "+1", "Islas Vírgenes de EE. UU.": "+1", "Israel": "+972", "Italia": "+39", "Jamaica": "+1", "Japón": "+81", "Jersey": "+44", "Jordania": "+962", "Kazajistán": "+7", "Kenia": "+254", "Kirguistán": "+996", "Kiribati": "+686", "Kuwait": "+965", "Laos": "+856", "Lesoto": "+266", "Letonia": "+371", "Liberia": "+231", "Libia": "+218", "Liechtenstein": "+423", "Lituania": "+370", "Luxemburgo": "+352", "Líbano": "+961", "Macedonia del Norte": "+389", "Madagascar": "+261", "Malasia": "+60", "Malaui": "+265", "Maldivas": "+960", "Mali": "+223", "Malta": "+356", "Marruecos": "+212", "Martinica": "+596", "Mauricio": "+230", "Mauritania": "+222", "Mayotte": "+262", "Micronesia": "+691", "Moldavia": "+373", "Mongolia": "+976", "Montenegro": "+382", "Montserrat": "+1", "Mozambique": "+258", "Myanmar (Birmania)": "+95", "México": "+52", "Mónaco": "+377", "Namibia": "+264", "Nauru": "+674", "Nepal": "+977", "Nicaragua": "+505", "Nigeria": "+234", "Niue": "+683", "Noruega": "+47", "Nueva Caledonia": "+687", "Nueva Zelanda": "+64", "Níger": "+227", "Omán": "+968", "Pakistán": "+92", "Palaos": "+680", "Panamá": "+507", "Papúa Nueva Guinea": "+675", "Paraguay": "+595", "Países Bajos": "+31", "Perú": "+51", "Polinesia Francesa": "+689", "Polonia": "+48", "Portugal": "+351", "Puerto Rico": "+1", "RAE de Hong Kong (China)": "+852", "RAE de Macao (China)": "+853", "Reino Unido": "+44", "República Centroafricana": "+236", "República Democrática del Congo": "+243", "República Dominicana": "+1", "Reunión": "+262", "Ruanda": "+250", "Rumanía": "+40", "Rusia": "+7", "Samoa": "+685", "Samoa Americana": "+1", "San Bartolomé": "+590", "San Cristóbal y Nieves": "+1", "San Marino": "+378", "San Martín": "+590", "San Pedro y Miquelón": "+508", "San Vicente y las Granadinas": "+1", "Santa Elena": "+290", "Santa Lucía": "+1", "Santo Tomé y Príncipe": "+239", "Senegal": "+221", "Serbia": "+381", "Seychelles": "+248", "Sierra Leona": "+232", "Singapur": "+65", "Sint Maarten": "+1", "Siria": "+963", "Somalia": "+252", "Sri Lanka": "+94", "Sudáfrica": "+27", "Sudán": "+249", "Sudán del Sur": "+211", "Suecia": "+46", "Suiza": "+41", "Surinam": "+597", "Svalbard y Jan Mayen": "+47", "Sáhara Occidental": "+212", "Tailandia": "+66", "Taiwán": "+886", "Tanzania": "+255", "Tayikistán": "+992", "Territorio Británico del Océano Índico": "+246", "Territorios Australes Franceses": "+262", "Territorios Palestinos": "+970", "Timor-Leste": "+670", "Togo": "+228", "Tokelau": "+690", "Tonga": "+676", "Trinidad y Tobago": "+1", "Turkmenistán": "+993", "Turquía": "+90", "Tuvalu": "+688", "Túnez": "+216", "Ucrania": "+380", "Uganda": "+256", "Uruguay": "+598", "Uzbekistán": "+998", "Vanuatu": "+678", "Venezuela": "+58", "Vietnam": "+84", "Wallis y Futuna": "+681", "Yemen": "+967", "Yibuti": "+253", "Zambia": "+260", "Zimbabue": "+263"};
+(function(){
+  const oldSync = window.syncAreaCode;
+  window.syncAreaCode = function(){
+    const sel=document.getElementById("regCountry"); const area=document.getElementById("regAreaCode");
+    if(!sel||!area) return;
+    const opt=sel.options[sel.selectedIndex];
+    const v=(opt&&opt.getAttribute("data-code")) || (window.NEXO_COUNTRY_DIAL_CODES && window.NEXO_COUNTRY_DIAL_CODES[sel.value]) || "";
+    area.value=v;
+  };
+  document.addEventListener("DOMContentLoaded", function(){
+    const sel=document.getElementById("regCountry"); if(sel){ Array.from(sel.options).forEach(function(o){ const c=window.NEXO_COUNTRY_DIAL_CODES[o.value]; if(c){ o.setAttribute("data-code",c); if(!o.textContent.includes("("+c+")")) o.textContent=o.value+" ("+c+")"; } }); }
+  });
 })();
+</script>
+
+<script>
+async function nexoDirectSaveClientToSupabase(profile){
+  const URL='https://ujqbbniptflzytdankwp.supabase.co';
+  const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+  const row={nombre:profile.name||'',apellido:profile.lastName||'',email:profile.email||'',telefono:profile.phone||'',pais:profile.country||'',direccion:profile.address||'',documento:profile.documentId||'',codigo_area:profile.areaCode||'',codigo_postal:profile.postalCode||'',region:profile.region||'',ciudad:profile.city||'',password:profile.password||null};
+  const r=await fetch(URL+'/rest/v1/clientes',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify([row])});
+  if(!r.ok){ const t=await r.text(); throw new Error(t||'No se pudo guardar cliente en Supabase'); }
+  return await r.json();
+}
+</script>
+</body>
+</html>
