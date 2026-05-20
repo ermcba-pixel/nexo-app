@@ -1,43 +1,1043 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>nexo™ - Correo Oficial</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0b1e3c;
-    padding: 40px;
-}
-.info-card {
-    background: #0b1e3c;
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 500px;
-}
-a {
-    color: white;
-    text-decoration: underline;
-    font-weight: bold;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexo™ - Tienda Pública</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --success: #27AE60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .store-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+        }
+
+        /* ========== HEADER ========== */
+        .store-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 30px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--white);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-store {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-weight: 900;
+            font-size: 28px;
+        }
+
+        .logo-store .ne { color: var(--primary); }
+        .logo-store .x { color: var(--accent); }
+        .logo-store .o { color: var(--primary); }
+
+        .logo-store-subtitle {
+            font-size: 7px;
+            color: #888;
+            letter-spacing: 1px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .header-title h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin: 4px 0 0 0;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nexo-search-instruction{
+            flex:1;
+            max-width:660px;
+            margin:0 22px;
+            padding:14px 18px;
+            border:1px solid rgba(255,255,255,.28);
+            border-radius:16px;
+            background:rgba(255,255,255,.10);
+            color:#fff;
+            font-size:12px;
+            line-height:1.45;
+            font-weight:700;
+            text-align:left;
+        }
+        .nexo-search-instruction strong{color:#fff;font-weight:900;}
+        .nexo-legal-links a{color:#eef7f2!important;text-decoration:underline;}
+        .nexo-legal-links span{color:#eef7f2!important;}
+
+        .cart-badge {
+            background: var(--accent);
+            color: var(--dark);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: var(--white);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        /* ========== CONTENT ========== */
+        .store-content {
+            padding: 40px;
+        }
+
+        .filters-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            border-radius: 16px;
+            border: 2px solid rgba(74, 107, 109, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(122, 199, 66, 0.2);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            border: 2px solid rgba(74, 107, 109, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: var(--accent);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: var(--white);
+        }
+
+        .product-info {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .product-name {
+            font-weight: 900;
+            color: var(--dark);
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+        .product-rating {
+            font-size: 12px;
+            color: #F39C12;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+
+        .product-stock {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .add-to-cart-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(74, 107, 109, 0.3);
+        }
+
+        .add-to-cart-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========== CART MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--white);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(74, 107, 109, 0.1);
+            padding-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--dark);
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 1fr 100px 100px;
+            gap: 16px;
+            padding: 14px;
+            background: var(--light);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .cart-item-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 13px;
+        }
+
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .cart-item-price {
+            text-align: right;
+            font-weight: 900;
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .cart-summary {
+            background: linear-gradient(135deg, var(--light) 0%, rgba(122, 199, 66, 0.05) 100%);
+            border: 2px solid rgba(74, 107, 109, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid rgba(74, 107, 109, 0.1);
+            padding-top: 10px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.3);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .filters-section {
+                grid-template-columns: 1fr;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 16px;
+            }
+
+            .store-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .cart-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .cart-item-qty,
+            .cart-item-price {
+                justify-content: space-between;
+                text-align: left;
+            }
+        }
+    
+        .nexo-img-fallback{width:100%;height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(135deg,#eef6f5,#ffffff);border-radius:14px;filter:drop-shadow(0 8px 14px rgba(45,62,63,.18));}
+        </style>
 <style id="nexo-footer-link-color-fix">.nexo-legal-links a{color:#eef7f2!important;text-decoration:underline}.nexo-legal-links span{color:#eef7f2!important}</style></head>
 <body>
+    <div class="store-container">
+        <!-- HEADER -->
+        <div class="store-header">
+            <div class="header-left">
+                <div class="logo-store">
+                    <span><span class="ne">ne</span><span class="x">X</span><span class="o">o</span></span>
+                    <div class="logo-store-subtitle">Tienda</div>
+                </div>
+                <div class="header-title">
+                    <h1 id="storeTitle">Tienda NEXO</h1>
+                    <p id="storeSubtitle">12 Productos Premium • Envíos Internacionales</p>
+                </div>
+            </div>
+            <div class="nexo-search-instruction">
+                Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción.<br>
+                Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.
+            </div>
+            <div class="header-right">
+                <button class="back-btn" onclick="openClientProfile()" id="profileBtn">👤 Mi perfil</button>
+                <div class="cart-badge" onclick="openCart()" title="Ver Carrito" id="cartBadge">
+                    🛒 <span id="cartCount">0</span>
+                </div>
+                <button class="back-btn" onclick="goBack()"><span id="backText">← Volver</span></button>
+            </div>
+        </div>
 
-<div class="info-card dark">
-  <h3>Correo oficial de reclamos</h3>
+        <!-- CONTENT -->
+        <div class="store-content">
+            <!-- FILTROS -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label"><span id="searchLabel">🔍 Buscar</span></label>
+                    <input type="text" class="filter-input" id="searchInput" placeholder="Nombre del producto..." onkeyup="filterProducts()">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label"><span id="catLabel">📁 Categoría</span></label>
+                    <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
+                        <option value="" id="catAll">Todas las categorías</option>
+                        <option value="electronica" id="catElect">Electrónica</option>
+                        <option value="accesorios" id="catAcc">Accesorios</option>
+                        <option value="moda" id="catFashion">Moda</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label"><span id="priceLabel">💲 Precio Máximo</span></label>
+                    <input type="number" class="filter-input" id="priceFilter" placeholder="USD" min="0" onchange="filterProducts()">
+                </div>
+            </div>
 
-  <div style="font-size:13px; line-height:1.7; font-weight:700;">
-    <a href="mailto:ermcba@hotmail.com?subject=Reclamo%20NEXO&body=nexo%20ermcba@hotmail.com%0A%0ADetalle%20del%20reclamo:">
-       ermcba@hotmail.com
-    </a>
+            <!-- PRODUCTOS -->
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+    </div>
+
+    <!-- CART MODAL -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="cartTitle">🛒 Tu Carrito</h2>
+                <button class="close-btn" onclick="closeCart()">&times;</button>
+            </div>
+            <div id="cartItems"></div>
+            <div class="cart-summary">
+                <div class="summary-row"><span id="sumSubtotalLbl">Subtotal producto:</span><span>$<span id="subtotal">0.00</span></span></div>
+                <div class="summary-row nexo-extra-cost-row" id="shipRow"><span id="sumShipLbl" style="color:#f39c12;font-weight:800;">Gastos de envío Amazon/Marketplace:</span><span style="color:#f39c12;">$<span id="amazonShipping">0.00</span></span></div>
+                <div class="summary-row nexo-extra-cost-row" id="vendorRow"><span id="sumVendorLbl" style="color:#f39c12;font-weight:800;">Gastos proveedor/marketplace Amazon:</span><span style="color:#f39c12;">$<span id="vendorFees">0.00</span></span></div>
+                <div class="summary-row"><span id="sumComLbl">Comisión NEXO:</span><span>$<span id="commission">0.00</span></span></div>
+                <div class="summary-row"><span id="sumItLbl"></span><span>$<span id="taxAmount">0.00</span></span></div>
+                <div class="summary-row"><span id="sumIueLbl"></span><span>$<span id="retentionAmount">0.00</span></span></div>
+                <div class="summary-row total"><span id="sumTotalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
+                <div style="margin-top:10px;font-size:12px;color:#6f8182;line-height:1.5;"><span id="sumNote">El Agente 1 calculará estos costos con Amazon usando país, ciudad, código postal y dirección exacta del cliente antes de confirmar el pedido.</span></div>
+            </div>
+            <button class="checkout-btn" onclick="goToCheckout()"><span id="checkoutBtnText">Proceder al Pago</span></button>
+        </div>
+    </div>
+
+    <script>
+
+const NEXO_AMAZON_TAG = 'nexo08-20';
+function nexoAmazonAffiliateUrl(url){
+  try{
+    let u = String(url || '').trim();
+    if(!u) return 'https://www.amazon.com/s?k=producto&tag=' + NEXO_AMAZON_TAG;
+    if(!/amazon\./i.test(u)) u = 'https://www.amazon.com/s?k=' + encodeURIComponent(u.replace(/^https?:\/\//,''));
+    const obj = new URL(u);
+    obj.searchParams.set('tag', NEXO_AMAZON_TAG);
+    return obj.toString();
+  }catch(e){
+    return 'https://www.amazon.com/s?k=' + encodeURIComponent(String(url || 'producto')) + '&tag=' + NEXO_AMAZON_TAG;
+  }
+}
+function nexoTrackAffiliateClick(ev, productId){
+  try{
+    const a = ev && ev.currentTarget;
+    if(!a) return true;
+    const href = nexoAmazonAffiliateUrl(a.getAttribute('href'));
+    a.setAttribute('href', href);
+    const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
+    const profile = JSON.parse(localStorage.getItem('nexoClientProfile') || '{}');
+    const body = JSON.stringify({
+      amazon_url: href,
+      amazon_tag: NEXO_AMAZON_TAG,
+      product_id: productId || null,
+      cliente_email: profile.email || localStorage.getItem('clientEmail') || null,
+      cliente_nombre: profile.nombre || profile.fullName || localStorage.getItem('clientName') || null,
+      evento: 'click'
+    });
+    if(navigator.sendBeacon){
+      navigator.sendBeacon('/api/amazon-affiliate-click', new Blob([body], {type:'application/json'}));
+    } else {
+      fetch('/api/amazon-affiliate-click',{method:'POST',headers:{'Content-Type':'application/json'},body,keepalive:true}).catch(()=>{});
+    }
+  }catch(e){}
+  return true;
+}
+
+
+function nexoProductImageMarkup(product){
+  const safe = (product && product.image && /^https?:\/\//i.test(product.image)) ? product.image : '';
+  const type = (product && (product.imageType || '') || '').toLowerCase();
+  const emoji = type.includes('phone') ? '📱' : type.includes('laptop') ? '💻' : type.includes('shirt') ? '👕' : type.includes('shoe') ? '👟' : type.includes('cable') ? '🔌' : type.includes('monitor') ? '🖥️' : '🛍️';
+  if (safe) return `<img src="${safe}" alt="${product.name || product.title || 'Producto Amazon'}" onerror="this.outerHTML='<div class=&quot;nexo-img-fallback&quot;>${emoji}</div>'">`;
+  return `<div class="nexo-img-fallback">${emoji}</div>`;
+}
+
+        let products = [];
+
+let currentLang = localStorage.getItem('nexoLang') || 'es';
+function tt(){ return storeI18n[currentLang] || storeI18n.es; }
+function applyStoreLanguage(){ const t=tt(); document.documentElement.lang=currentLang; document.getElementById('storeTitle').textContent=t.title; document.getElementById('storeSubtitle').textContent=t.subtitle; document.getElementById('cartTitle').textContent=t.cartTitle; document.getElementById('backText').textContent=t.back; document.getElementById('searchLabel').textContent=t.search; document.getElementById('catLabel').textContent=t.cat; document.getElementById('priceLabel').textContent=t.price; document.getElementById('searchInput').placeholder=t.searchPh; document.getElementById('catAll').textContent=t.catAll; document.getElementById('catElect').textContent=t.catElect; document.getElementById('catAcc').textContent=t.catAcc; document.getElementById('catFashion').textContent=t.catFashion; document.getElementById('sumSubtotalLbl').textContent=t.sumSubtotal; document.getElementById('sumShipLbl').textContent=t.sumShip; document.getElementById('sumVendorLbl').textContent=t.sumVendor; document.getElementById('sumComLbl').textContent=t.sumCom; document.getElementById('sumItLbl').textContent=t.sumIt; document.getElementById('sumIueLbl').textContent=t.sumIue; document.getElementById('sumTotalLbl').textContent=t.sumTotal; document.getElementById('sumNote').textContent=t.sumNote; document.getElementById('checkoutBtnText').textContent=t.checkout; document.getElementById('cartBadge').title=t.cartTitleAttr; }
+
+        let cart = JSON.parse(localStorage.getItem('nexoCart')) || [];
+
+
+        function renderProducts(productsToShow = products) {
+            const grid = document.getElementById('productsGrid');
+            if(!productsToShow || productsToShow.length === 0){
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:38px 10px;background:#f5fbf9;border:1px solid #d7e4df;border-radius:16px;">No se encontraron productos dentro del precio máximo indicado. Ajuste el nombre del producto o el límite de precio.</div>`;
+                return;
+            }
+            grid.innerHTML = productsToShow.map(p => `
+                <div class="product-card">
+                    <div class="product-image">${nexoProductImageMarkup({...p, image:(p.image || '')}) || p.emoji}</div>
+                    <div class="product-info">
+                        <div style="font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content;">${p.providerLogo || '🏪'} ${p.provider || 'Proveedor externo'}</div>
+                        <a href="${nexoAmazonAffiliateUrl(p.sourceUrl || ('https://www.amazon.com/s?k=' + encodeURIComponent(p.name || 'producto')))}" onclick="nexoTrackAffiliateClick(event, ${p.id})" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline;">Ver proveedor original</a>
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-rating">★★★★★ (128 ${tt().reviews})</div>
+                        <div class="product-price">$${Number(p.price).toFixed(2)}</div>
+                        <div class="product-stock">${tt().stock}: ${p.stock} ${tt().available}</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
+                            ${p.stock === 0 ? tt().soldOut : tt().add}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function normalizeText(v){
+            return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+        }
+
+        let nexoAmazonLoadTimer = null;
+        let nexoLastAmazonQuery = '';
+
+        function nexoDetectCategory(q, selectedCategory){
+            if(selectedCategory) return selectedCategory;
+            if(/iphone|celular|phone|laptop|notebook|computadora|cargador|usb|mouse|teclado|monitor|auricular|audifono|headphone|electron/i.test(q)) return 'electronica';
+            if(/zapato|tenis|camisa|polera|pantalon|ropa|moda|cordon|cordones|cinturon|gorra|shoe|shirt/i.test(q)) return 'moda';
+            return 'accesorios';
+        }
+
+        function nexoBuildTemporalAmazonCatalog(search, maxPrice, selectedCategory=''){
+            const cleanRaw = String(search || '').trim();
+            const clean = cleanRaw || 'producto Amazon';
+            const q = normalizeText(clean);
+            const wantedCategory = nexoDetectCategory(q, selectedCategory);
+            const limit = Number.isFinite(maxPrice) && maxPrice !== Infinity ? Math.max(0.01, Number(maxPrice)) : 60;
+            const priceSteps = [limit, limit*0.85, limit*0.70, limit*0.55, limit*0.40, limit*0.25, Math.max(0.99, limit*0.15), Math.max(0.75, limit*0.10), Math.max(0.50, limit*0.06), Math.max(0.35, limit*0.04)];
+            const variants = ['hasta USD '+limit.toFixed(0),'oferta','económico','mejor valor','envío internacional','Amazon','compatible','pack básico','selección recomendada','opción económica','precio bajo','alternativa Amazon','descuento','uso diario','estándar','práctico','calidad/precio','accesible','proveedor original','disponible'];
+            const emoji = wantedCategory==='moda' ? (q.includes('zapato') || q.includes('tenis') || q.includes('shoe') ? '👟' : '👕') : wantedCategory==='electronica' ? '🔌' : '🛍️';
+            const items = variants.map((v,idx)=>{
+                const price = Math.max(0.50, Math.min(limit, priceSteps[idx % priceSteps.length]));
+                const name = `${clean} ${v}`.replace(/\s+/g,' ').trim();
+                return {
+                    id: 7000 + idx,
+                    name,
+                    price: Number(price.toFixed(2)),
+                    category: wantedCategory,
+                    emoji,
+                    provider:'Amazon',
+                    providerLogo:'🟠',
+                    stock:'Verificar disponibilidad y precio real en Amazon',
+                    shippingAmazon:0,
+                    vendorFee:0,
+                    aliases:`${name} ${wantedCategory} amazon original ${clean}`,
+                    sourceUrl:nexoAmazonAffiliateUrl(`https://www.amazon.com/s?k=${encodeURIComponent(clean)}${Number.isFinite(maxPrice)&&maxPrice!==Infinity?'&rh=p_36%3A-'+Math.round(limit*100):''}`),
+                    imageType:wantedCategory
+                };
+            });
+            return items.filter(p => !Number.isFinite(maxPrice) || maxPrice === Infinity || Number(p.price) <= maxPrice).slice(0,20);
+        }
+
+        async function loadAmazonProductsFromApi(search, maxPrice, selectedCategory=''){
+            const q = String(search || '').trim();
+            if(q.length < 1){ renderProducts(products); return true; }
+            products = nexoBuildTemporalAmazonCatalog(q, maxPrice, selectedCategory);
+            renderProducts(products);
+            try{
+                const controller = new AbortController();
+                const t = setTimeout(()=>controller.abort(), 2500);
+                const url = `/api/amazon-products?q=${encodeURIComponent(q)}${Number.isFinite(maxPrice) && maxPrice !== Infinity ? `&maxPrice=${encodeURIComponent(maxPrice)}` : ''}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`;
+                const r = await fetch(url, {headers:{'Accept':'application/json'}, signal: controller.signal});
+                clearTimeout(t);
+                const data = await r.json().catch(()=>null);
+                if(data && data.ok && Array.isArray(data.products) && data.products.length){
+                    products = data.products.map((p, idx)=>({
+                        ...p,
+                        id: Number(p.id) || (9000 + idx + 1),
+                        name: p.name || p.title || 'Producto Amazon',
+                        provider: p.provider || 'Amazon',
+                        providerLogo: p.providerLogo || '🟠',
+                        category: p.category || selectedCategory || nexoDetectCategory(q, selectedCategory),
+                        stock: p.stock || 'Verificar en Amazon',
+                        sourceUrl: nexoAmazonAffiliateUrl(p.sourceUrl || p.url || `https://www.amazon.com/s?k=${encodeURIComponent(p.name || p.title || q)}`),
+                        aliases: [p.name, p.title, p.asin, q, 'amazon original'].filter(Boolean).join(' ')
+                    })).filter(p=> !Number.isFinite(maxPrice) || Number(p.price||0) <= maxPrice).slice(0,20);
+                    renderProducts(products);
+                    return true;
+                }
+            }catch(e){ console.warn('Amazon API pendiente; usando enlace operativo Amazon:', e && e.message ? e.message : e); }
+            return true;
+        }
+        function filterProducts() {
+            const rawSearch = document.getElementById('searchInput').value;
+            const search = normalizeText(rawSearch);
+            const category = document.getElementById('categoryFilter').value;
+            const priceValue = document.getElementById('priceFilter').value;
+            const maxPrice = priceValue === '' ? Infinity : Number(priceValue);
+            clearTimeout(nexoAmazonLoadTimer);
+            if(rawSearch.trim().length >= 1){
+                products = nexoBuildTemporalAmazonCatalog(rawSearch, maxPrice, category);
+                renderProducts(products);
+                nexoAmazonLoadTimer = setTimeout(()=>loadAmazonProductsFromApi(rawSearch, maxPrice, category), 250);
+                return;
+            }
+            const base = products
+              .filter(p => Number(p.price) >= 0.0001)
+              .filter(p => category === '' || p.category === category)
+              .filter(p => Number(p.price) <= maxPrice);
+            let filtered = base.map(p => {
+                const hay = normalizeText([p.name, p.category, p.provider, p.aliases].join(' '));
+                let score = 0;
+                if(!search) score = 1;
+                else {
+                  const words = search.split(/\s+/).filter(Boolean);
+                  score = words.reduce((s,w)=> s + (hay.includes(w) ? 1 : 0), 0);
+                }
+                return { ...p, _score: score };
+              })
+              .filter(p => !search || p._score > 0)
+              .sort((a,b)=> (b._score - a._score) || (Number(a.price)-Number(b.price)));
+            renderProducts(filtered.slice(0,20));
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(c => c.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            localStorage.setItem('nexoCart', JSON.stringify(cart));
+            updateCartCount();
+            showNotification(`${product.name} ${tt().notifAdded}`);
+        }
+
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'block';
+            renderCartItems();
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItems');
+
+            if (cart.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#888; padding:20px;">${tt().empty}</p>`;
+                document.querySelector('.checkout-btn').disabled = true;
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-name">${item.emoji} ${item.name}</div>
+                    <div class="cart-item-qty">
+                        <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                        <span>${item.quantity}</span>
+                        <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                </div>
+            `).join('');
+
+            updateCartSummary();
+            document.querySelector('.checkout-btn').disabled = false;
+        }
+
+        function updateQuantity(productId, change) {
+            const item = cart.find(c => c.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(c => c.id !== productId);
+                }
+                localStorage.setItem('nexoCart', JSON.stringify(cart));
+                updateCartCount();
+                renderCartItems();
+            }
+        }
+
+        function updateCartSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const amazonShipping = cart.reduce((sum, item) => sum + ((Number(item.shippingAmazon) || 0) * item.quantity), 0);
+            const vendorFees = cart.reduce((sum, item) => sum + ((Number(item.vendorFee) || 0) * item.quantity), 0);
+            const tax = subtotal * 0.30 * 0.03;
+            const retention = subtotal * 0.30 * 0.25;
+            const commission = subtotal * 0.30;
+            const total = subtotal + amazonShipping + vendorFees + commission;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('amazonShipping').textContent = amazonShipping.toFixed(2);
+            document.getElementById('vendorFees').textContent = vendorFees.toFixed(2);
+            document.getElementById('commission').textContent = commission.toFixed(2);
+            if(document.getElementById('taxAmount')) document.getElementById('taxAmount').textContent = '0.00';
+            if(document.getElementById('retentionAmount')) document.getElementById('retentionAmount').textContent = '0.00';
+            document.getElementById('totalPrice').textContent = total.toFixed(2);
+            const shipRow=document.getElementById('shipRow'); if(shipRow) shipRow.style.display = amazonShipping>0 ? 'flex' : 'none';
+            const vendorRow=document.getElementById('vendorRow'); if(vendorRow) vendorRow.style.display = vendorFees>0 ? 'flex' : 'none';
+        }
+
+        function goToCheckout() {
+            if (cart.length > 0) {
+                window.location.href = 'nexo-checkout.html';
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--accent);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 700;
+                z-index: 2000;
+                animation: slideIn 0.3s;
+            `;
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 2000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoreLanguage();
+            products = nexoBuildTemporalAmazonCatalog('iphone', Infinity);
+            renderProducts(products);
+            updateCartCount();
+        });
+
+        window.onclick = function(e) {
+            const modal = document.getElementById('cartModal');
+            if (e.target === modal) modal.style.display = 'none';
+        }
+    </script>
+
+<script>
+function nexoHideInternalTaxesForCustomer(){
+  const ids = ['sumItLbl','sumIueLbl','itf','iue','taxAmount','retentionAmount','taxSection'];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) {
+      const row = el.closest('.summary-row') || el.parentElement;
+      if (row) row.style.display = 'none';
+      else el.style.display = 'none';
+    }
+  });
+  ['sumCommissionLbl'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.textContent = (el.textContent || '').replace(/\s*\(.*?\)/g,'').replace(/35%/g,'').replace(/30%/g,'').trim();
+      if(!el.textContent.endsWith(':')) el.textContent = el.textContent.replace(/:?$/,'') + ':';
+    }
+  });
+}
+window.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(nexoHideInternalTaxesForCustomer, 50);
+  setTimeout(nexoHideInternalTaxesForCustomer, 300);
+});
+</script>
+
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const clean = () => {
+    document.querySelectorAll('*').forEach(el => {
+      if (el.children.length === 0 && el.textContent) {
+        el.textContent = el.textContent.replace(/\s*\(35%\)/g,'').replace(/\s*35%/g,'');
+      }
+    });
+  };
+  setTimeout(clean, 50); setTimeout(clean, 250); setTimeout(clean, 800);
+});
+</script>
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+<div id="clientProfileModal" class="modal">
+  <div class="modal-content" style="max-width:860px;">
+    <div class="modal-header">
+      <h2 id="clientProfileTitle">👤 Mis datos</h2>
+      <button class="close-btn" onclick="closeClientProfile()">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div><label class="filter-label">Nombre completo</label><input class="filter-input" id="profileFullName" type="text"></div>
+      <div><label class="filter-label">Correo / usuario</label><input class="filter-input" id="profileEmail" type="email"></div>
+      <div><label class="filter-label">Contraseña</label><input class="filter-input" id="profilePassword" type="text"></div>
+      <div><label class="filter-label">País</label><input class="filter-input" id="profileCountry" type="text"></div>
+      <div><label class="filter-label">Código de área</label><input class="filter-input" id="profileAreaCode" type="text"></div>
+      <div><label class="filter-label">Teléfono</label><input class="filter-input" id="profilePhone" type="text"></div>
+      <div><label class="filter-label">Región / Estado</label><input class="filter-input" id="profileRegion" type="text"></div>
+      <div><label class="filter-label">Ciudad</label><input class="filter-input" id="profileCity" type="text"></div>
+      <div style="grid-column:1 / -1;"><label class="filter-label">Dirección</label><input class="filter-input" id="profileAddress" type="text"></div>
+      <div><label class="filter-label">Código Postal</label><input class="filter-input" id="profileZipCode" type="text"></div>
+    </div>
+    <div id="profileModalNote" style="margin-top:14px;padding:12px 14px;border-radius:12px;background:#f4f9ef;border-left:4px solid var(--accent);font-size:13px;color:#456;">Aquí puedes revisar y corregir tus datos de acceso y envío.</div>
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:18px;">
+      <button class="back-btn" onclick="closeClientProfile()" id="profileCloseBtn">Cerrar</button>
+      <button class="checkout-btn" onclick="saveClientProfile()" id="profileSaveBtn">Guardar cambios</button>
+    </div>
   </div>
-
-  <p>
-    Todos los reclamos enviados desde este formulario deben dirigirse al correo oficial.
-  </p>
 </div>
+<script>
+(function(){
+  function getClientProfileData(){
+    try{return JSON.parse(localStorage.getItem('nexoClientProfile') || sessionStorage.getItem('nexoActiveClient') || '{}');}
+    catch(e){return {};}
+  }
+  function setClientProfileData(profile){
+    localStorage.setItem('nexoClientProfile', JSON.stringify(profile));
+    sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile));
+    sessionStorage.setItem('clientEmail', profile.email || '');
+    sessionStorage.setItem('clientName', profile.fullName || '');
+  }
+  const profileI18n = {
+    es:{btn:'👤 Mi perfil', title:'👤 Mis datos', note:'Aquí puedes revisar y corregir tus datos de acceso y envío.', save:'Guardar cambios', close:'Cerrar'},
+    en:{btn:'👤 My profile', title:'👤 My details', note:'Here you can review and correct your access and shipping data.', save:'Save changes', close:'Close'},
+    pt:{btn:'👤 Meu perfil', title:'👤 Meus dados', note:'Aqui você pode revisar e corrigir seus dados de acesso e entrega.', save:'Salvar alterações', close:'Fechar'},
+    it:{btn:'👤 Il mio profilo', title:'👤 I miei dati', note:'Qui puoi rivedere e correggere i tuoi dati di accesso e spedizione.', save:'Salva modifiche', close:'Chiudi'},
+    fr:{btn:'👤 Mon profil', title:'👤 Mes données', note:'Ici vous pouvez vérifier et corriger vos données d’accès et de livraison.', save:'Enregistrer les modifications', close:'Fermer'}
+  };
+  window.openClientProfile = function(){
+    const p = getClientProfileData();
+    const setVal = (id,v) => { const el=document.getElementById(id); if(el) el.value=v||''; };
+    setVal('profileFullName', p.fullName || '');
+    setVal('profileEmail', p.email || '');
+    setVal('profilePassword', p.password || '');
+    setVal('profileCountry', p.country || '');
+    setVal('profileAreaCode', p.areaCode || '');
+    setVal('profilePhone', p.phone || '');
+    setVal('profileRegion', p.region || '');
+    setVal('profileCity', p.city || '');
+    setVal('profileAddress', p.address || '');
+    setVal('profileZipCode', p.zipCode || '');
+    document.getElementById('clientProfileModal').style.display='flex';
+  };
+  window.closeClientProfile = function(){
+    const m=document.getElementById('clientProfileModal');
+    if(m) m.style.display='none';
+  };
+  window.saveClientProfile = function(){
+    const profile = {
+      fullName: document.getElementById('profileFullName').value.trim(),
+      email: document.getElementById('profileEmail').value.trim(),
+      password: document.getElementById('profilePassword').value,
+      country: document.getElementById('profileCountry').value.trim(),
+      areaCode: document.getElementById('profileAreaCode').value.trim(),
+      phone: document.getElementById('profilePhone').value.trim(),
+      region: document.getElementById('profileRegion').value.trim(),
+      city: document.getElementById('profileCity').value.trim(),
+      address: document.getElementById('profileAddress').value.trim(),
+      zipCode: document.getElementById('profileZipCode').value.trim()
+    };
+    setClientProfileData(profile);
+    closeClientProfile();
+    alert('Datos del cliente actualizados correctamente.');
+  };
+  function applyProfileI18n(){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const t = profileI18n[lang] || profileI18n.es;
+    const btn = document.getElementById('profileBtn'); if(btn) btn.textContent = t.btn;
+    const title = document.getElementById('clientProfileTitle'); if(title) title.textContent = t.title;
+    const note = document.getElementById('profileModalNote'); if(note) note.textContent = t.note;
+    const save = document.getElementById('profileSaveBtn'); if(save) save.textContent = t.save;
+    const close = document.getElementById('profileCloseBtn'); if(close) close.textContent = t.close;
+  }
+  const oldApplyStoreLanguage = window.applyStoreLanguage;
+  window.applyStoreLanguage = function(){
+    if(typeof oldApplyStoreLanguage === 'function') oldApplyStoreLanguage();
+    applyProfileI18n();
+  };
+  document.addEventListener('DOMContentLoaded', applyProfileI18n);
+})();
+</script>
 
 
 

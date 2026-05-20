@@ -1,15 +1,42 @@
-CORRECCIÓN 2026-05-15 - nexo
+INTEGRACION AMAZON BUSINESS / SP-API PARA nexo
 
-Incluye:
-1. Checkout vuelve a cargar datos reales del cliente desde localStorage/sessionStorage y Supabase.
-2. Al volver a ingresar, ya no se borra nexoClientProfile ni clientEmail.
-3. Factura/confirmación muestra:
-   - Cliente: nombre real registrado.
-   - Correo: correo real registrado.
-   - NIT / Documento del cliente internacional: 99001 fijo.
-   - NIT / Documento del cliente: documento/NIT declarado por el cliente.
-4. API de guardado de orden deja numero_fiscal siempre como 99001 y guarda el documento real aparte.
-5. Atención al cliente ya no muestra alert fijo: muestra recibo visible del ticket para respaldo del cliente.
-6. Correo oficial mantiene enlace mailto a ermcba@hotmail.com con asunto RECLAMO.
+Cambios realizados:
+1. Nuevo endpoint /api/amazon-products
+   - Carga productos Amazon Business Sandbox.
+   - Usa Environment Variables AMAZON_CLIENT_ID y AMAZON_CLIENT_SECRET para detectar credenciales LWA.
+   - Deja la estructura lista para reemplazar Sandbox por llamada SP-API producción cuando Amazon entregue OAuth refresh token + AWS IAM Role.
 
-Subir este ZIP completo a GitHub/Vercel y probar nuevamente con una compra pequeña.
+2. Nuevo endpoint /api/agent1-amazon
+   - Recibe pedidos del checkout.
+   - Prepara cola del Agente 1 para productos Amazon.
+   - En modo sandbox no ejecuta compra real automática.
+
+3. api/agente1-pagos.js actualizado
+   - Detecta credenciales Amazon y Supabase.
+   - Devuelve estado de cola pago/compra.
+
+4. nexo-tienda-cliente.html actualizado
+   - Busca productos desde /api/amazon-products.
+   - Muestra proveedor encima del producto.
+   - Soporta imágenes de Amazon y datos de precio/stock.
+   - Mantiene respaldo local si la API no responde.
+
+5. nexo-checkout.html actualizado
+   - Envía pedido también a /api/agent1-amazon.
+   - PayPal solo redirige cuando se selecciona PayPal.
+
+6. vercel.json actualizado
+   - Permite imágenes de m.media-amazon.com y dominios SSL de Amazon.
+   - Permite conexión a Supabase.
+
+Variables requeridas en Vercel:
+SUPABASE_URL=https://ujqbbniptflzytdankwp.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_...
+AMAZON_CLIENT_ID=amzn1.application-oa2-client...
+AMAZON_CLIENT_SECRET=amzn1.oa2-cs.v1...
+
+IMPORTANTE:
+Con las credenciales actuales solo queda listo Sandbox. Para compra real automática en producción, Amazon debe entregar/aprobar:
+- autorización OAuth de app con refresh token,
+- AWS IAM Role/ARN para SP-API,
+- permisos/roles de Ordering/Orders/Cart según el flujo final.

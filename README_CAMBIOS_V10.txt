@@ -1,13 +1,10 @@
-nexo – Amazon Afiliado temporal hasta Creators API
+nexo v10 - SENAPI + Amazon Sandbox limpio
 
-Ajustes incluidos:
-1. Todos los enlaces Amazon generados desde la tienda incorporan tag=nexo08-20.
-2. Si el cliente hace clic en “Ver proveedor original”, sale a Amazon como referido de nexo.
-3. Se guarda rastro local del click y se intenta registrar en Supabase tabla afiliados_amazon.
-4. En pedidos se guarda producto_url/amazon_url con tag=nexo08-20, amazon_tag y amazon_asin si existe.
-5. api/amazon-products.js devuelve URLs temporales y PA-API con tag afiliado.
+Cambios aplicados:
+1. Nombre oficial SENAPI en paneles e idiomas: nexo – Sistema de Intermediación Comercial Internacional.
+2. Eliminado catálogo demo viejo multi-proveedor en tienda pública.
+3. Productos ordenados de precio mayor a menor.
+4. Tienda preparada para usar imagen original de Amazon cuando Amazon Business Producción entregue URL válida.
+5. En Sandbox no se fuerzan URLs rotas de m.media-amazon.com: se usa imagen segura sin errores para no mostrar cuadros rotos.
 
-Importante:
-- Amazon exige ventas calificadas antes de liberar Creators API completa.
-- Mientras tanto, los links afiliados permiten acumular compras/referidos para nexo08-20.
-- Cuando Amazon autorice Creators API, solo se reemplaza proveedor de catálogo sin cambiar el flujo principal.
+Nota honesta: Amazon Business Sandbox no entrega siempre imágenes originales válidas de catálogo. Para fotos originales reales se requiere catálogo/roles de producción aprobados por Amazon.

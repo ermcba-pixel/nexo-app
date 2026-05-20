@@ -1,11 +1,15 @@
-NEXO - CAMBIO A CATÁLOGO AUTOMÁTICO TEMPORAL
+CORRECCIÓN 2026-05-15 - nexo
 
-Corrección aplicada:
-- La tienda ya NO se queda bloqueada en "Agente 1 consultando Amazon API".
-- Al buscar productos, el Agente 1 muestra de inmediato catálogo operativo temporal con enlaces a Amazon.
-- La consulta oficial a Amazon Creators API queda en segundo plano.
-- Cuando Amazon habilite Creators API, el sistema reemplazará automáticamente el catálogo temporal por productos oficiales.
-- El flujo PayPal LIVE y carrito no fueron eliminados.
+Incluye:
+1. Checkout vuelve a cargar datos reales del cliente desde localStorage/sessionStorage y Supabase.
+2. Al volver a ingresar, ya no se borra nexoClientProfile ni clientEmail.
+3. Factura/confirmación muestra:
+   - Cliente: nombre real registrado.
+   - Correo: correo real registrado.
+   - NIT / Documento del cliente internacional: 99001 fijo.
+   - NIT / Documento del cliente: documento/NIT declarado por el cliente.
+4. API de guardado de orden deja numero_fiscal siempre como 99001 y guarda el documento real aparte.
+5. Atención al cliente ya no muestra alert fijo: muestra recibo visible del ticket para respaldo del cliente.
+6. Correo oficial mantiene enlace mailto a ermcba@hotmail.com con asunto RECLAMO.
 
-Motivo:
-Amazon Associates confirmó que exige ventas calificadas antes de habilitar acceso completo a Creators API.
+Subir este ZIP completo a GitHub/Vercel y probar nuevamente con una compra pequeña.
