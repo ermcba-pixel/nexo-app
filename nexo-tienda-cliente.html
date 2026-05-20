@@ -35,6 +35,12 @@
     footer{margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88)}
     footer a{color:#fff;font-weight:800}
     @media(max-width:900px){.store-header{grid-template-columns:1fr}.filters-section{grid-template-columns:1fr}.nexo-search-instruction{max-width:100%}.store-content{padding:24px}}
+  
+    .product-image{font-size:0!important;overflow:hidden}
+    .product-image img{width:100%;height:100%;object-fit:cover;display:block}
+    .product-features{font-size:11px;color:#4A6B6D;line-height:1.45;background:rgba(255,255,255,.55);border-radius:8px;padding:8px;margin-top:2px}
+    .product-features strong{color:#2D3E3F}
+
   </style>
 </head>
 <body>
@@ -46,6 +52,7 @@
       </div>
       <div class="nexo-search-instruction">
         Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción.<br>
+        O escoja el producto, cárguelo al carrito, podrá ver el producto que compra y proceda a su pago mediante nexo™.<br>
         Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.
       </div>
       <div class="header-right">
@@ -115,15 +122,53 @@ function buildProducts(search,maxPrice,catSel){
   return variants.map((v,i)=>{
     const price=Math.max(.50,Math.min(limit,limit*(factors[i]||.5)));
     const name=(clean+' '+v).replace(/\s+/g,' ').trim();
-    return {id:9000+i,name,price:Number(price.toFixed(2)),category:cat,emoji,provider:'Amazon',providerLogo:'🟠',stock:'Verificar disponibilidad y precio real en Amazon',shippingAmazon:0,vendorFee:0,sourceUrl:nexoAmazonAffiliateUrl(clean)};
+    const product={id:9000+i,name,price:Number(price.toFixed(2)),category:cat,emoji,provider:'Amazon',providerLogo:'🟠',stock:'Verificar disponibilidad y precio real en Amazon',shippingAmazon:0,vendorFee:0,sourceUrl:nexoAmazonAffiliateUrl(clean)}; product.image=nexoStoreImageFor(product); product.features=nexoProductFeatures(product); return product;
   }).slice(0,20);
 }
+
+const nexoStoreImages = {
+  laptop:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
+  notebook:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
+  impresora:'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80',
+  printer:'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80',
+  audifonos:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+  auriculares:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+  cable:'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80',
+  cargador:'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
+  celular:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+  telefono:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+  reloj:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+  parlante:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80',
+  hdmi:'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80',
+  adaptador:'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
+  soporte:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+  protector:'https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80',
+  zapatos:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+  zapatillas:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+  cordones:'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80',
+  camisa:'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
+  mochila:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
+  default:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
+};
+function nexoStoreImageFor(item){
+  if(item.image || item.imageUrl || item.photo) return item.image || item.imageUrl || item.photo;
+  const hay=normalizeText([item.name,item.aliases,item.category].join(' '));
+  for(const [k,url] of Object.entries(nexoStoreImages)){ if(k!=='default' && hay.includes(k)) return url; }
+  return nexoStoreImages.default;
+}
+function nexoProductFeatures(item){
+  const cat = item.category || 'general';
+  const name = item.name || 'Producto';
+  const source = item.provider || 'Amazon';
+  return `<strong>Características:</strong><br>• Producto sugerido según búsqueda: ${name}<br>• Proveedor original: ${source}<br>• Precio máximo respetado por filtro nexo™<br>• Verificar disponibilidad, talla/color y envío en proveedor original`;
+}
+
 function renderProducts(list){
   const grid=document.getElementById('productsGrid');
   if(!list.length){grid.innerHTML='<div class="empty-note">Ingrese un producto y un precio máximo para buscar en Amazon.</div>';return;}
   grid.innerHTML=list.map(p=>`
     <div class="product-card">
-      <div class="product-image">${p.emoji}</div>
+      <div class="product-image"><img src="${nexoStoreImageFor(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src=nexoStoreImages.default;"></div>
       <div class="product-info">
         <div class="provider">${p.providerLogo} ${p.provider}</div>
         <a class="provider-link" href="${p.sourceUrl}" target="_blank" rel="noopener">Ver proveedor original</a>
@@ -131,6 +176,7 @@ function renderProducts(list){
         <div class="product-rating">★★★★★ (128 reseñas)</div>
         <div class="product-price">$${p.price.toFixed(2)}</div>
         <div class="product-stock">Stock: ${p.stock}</div>
+        <div class="product-features">${p.features || nexoProductFeatures(p)}</div>
         <button class="add-to-cart-btn" onclick="addToCart(${p.id})">+ Carrito</button>
       </div>
     </div>`).join('');
@@ -146,7 +192,7 @@ function filterProducts(){
 function addToCart(id){
   const p=products.find(x=>x.id===id); if(!p)return;
   const found=cart.find(x=>x.id===id);
-  if(found) found.quantity++; else cart.push({...p,quantity:1});
+  if(found) found.quantity++; else cart.push({...p,image:nexoStoreImageFor(p),features:p.features || nexoProductFeatures(p),quantity:1});
   localStorage.setItem('nexoCart',JSON.stringify(cart)); updateCartCount();
 }
 function updateCartCount(){document.getElementById('cartCount').textContent=cart.reduce((s,i)=>s+i.quantity,0);}

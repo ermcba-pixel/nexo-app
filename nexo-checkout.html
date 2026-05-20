@@ -517,6 +517,9 @@
         .cart-item-icon{background:#fff;overflow:hidden;font-size:0!important;}
         .cart-item-icon img{width:100%;height:100%;object-fit:cover;display:block;border-radius:12px;}
         .payment-btn.active{background:#7ac742!important;color:#0c2b2d!important;border-color:#7ac742!important;}
+
+        .cart-item-features{font-size:10px;color:#4A6B6D;line-height:1.4;background:#f5fbf9;border-radius:6px;padding:7px;margin-top:2px;}
+
 </style>
 </head>
 <body>
@@ -1173,6 +1176,7 @@ function selectPayment(methodId, btnEl=null) {
                     <div class="cart-item-icon"><img src="${nexoCartImage(item)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoCheckoutImages.default;"></div>
                     <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
                     <div class="cart-item-name">${item.name}</div>
+                    ${item.features ? `<div class="cart-item-features">${item.features}</div>` : ''}
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
                     <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
                     <div class="cart-item-shipping">🏪 Vendedor: $${(item.vendorFee || 0).toFixed(2)}</div>
