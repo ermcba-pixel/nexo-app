@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nexo™ - Confirmación de Compra</title>
@@ -313,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         function goToStore() {
-            window.location.href = 'nexo-tienda-publica.html';
+            window.location.href = 'nexo-tienda-cliente.html';
         }
 
         function goHome() {
@@ -337,7 +340,10 @@ function nexoBuildInvoicePrintHtml(){
   const title = document.getElementById('confTitle')?.outerHTML || '<h1>¡Compra Confirmada!</h1>';
   const desc = document.getElementById('confDesc')?.parentElement?.outerHTML || '';
   const id = document.getElementById('invoiceId')?.textContent || 'Factura nexo';
-  return `<!doctype html><html><head><meta charset="utf-8"><title> </title><style>
+  return `<!doctype html><html><head>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0"><meta charset="utf-8"><title> </title><style>
     @page{size:auto;margin:6mm}*{box-sizing:border-box}html,body{font-family:Segoe UI,Tahoma,sans-serif;background:#fff;color:#2D3E3F;margin:0;padding:0;text-align:center}.wrap{max-width:720px;margin:0 auto;padding:4px 10px}.invoice-section{background:#f4faf7;border:1px solid #dbe9e6;border-radius:14px;padding:22px;text-align:left;margin-top:0}.invoice-id{font-family:Courier New,monospace;font-size:18px;font-weight:900;color:#4A6B6D;padding:10px 12px;background:#fff;border-radius:8px;margin:10px 0 16px}.detail-row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid #dbe9e6;font-size:14px}.detail-label{font-weight:800}.detail-value{color:#465b5d;text-align:right}.detail-value.total{font-weight:900;color:#65bd35;font-size:18px}@media print{button,.success-icon,h1,p,.email-note,.action-buttons,footer,.nexo-legal-footer{display:none!important}}
   </style></head><body><div class="wrap">${invoice?invoice.outerHTML:''}</div><script>window.onload=()=>{document.title=' ';setTimeout(()=>window.print(),150)}<\/script></body></html>`;
 }
@@ -349,7 +355,7 @@ function nexoPrintInvoice(){
 function nexoDownloadPDF(){ nexoPrintInvoice(); }
 
 function nexoContinueShopping(){
-  const candidates = ['nexo-tienda-publica.html','nexo-tienda.html','index.html'];
+  const candidates = ['nexo-tienda-cliente.html','nexo-tienda.html','index.html'];
   for (const href of candidates){
     try { window.location.href = href; return; } catch(e) {}
   }

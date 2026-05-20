@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>nexo™ - Tienda Cliente</title>
@@ -169,5 +172,37 @@ function goToCheckout(){if(cart.length)location.href='nexo-checkout.html';}
 document.addEventListener('DOMContentLoaded',()=>{products=[];document.getElementById('productsGrid').innerHTML='<div class="empty-note">Ingrese un producto y un precio máximo para buscar en Amazon.</div>';updateCartCount();});
 </script>
 <script src="nexo-legal-i18n.js"></script>
+
+
+
+
+<script id="nexo-anti-demo-final">
+(function(){
+  const demoWords = [
+    'Apple'+' '+'iPhone',
+    'i'+'Phone 15',
+    'i'+'Phone 14',
+    'i'+'Phone 13',
+    'Max '+'desbloqueado',
+    'Max '+'renovado'
+  ];
+  function cleanDemo(){
+    try{
+      const grid = document.getElementById('productsGrid');
+      if(grid && demoWords.some(w => grid.innerText.includes(w))){
+        grid.innerHTML = '<div class="empty-note">Ingrese un producto y un precio máximo para buscar en Amazon.</div>';
+      }
+      document.querySelectorAll('.product-card').forEach(card=>{
+        if(demoWords.some(w => card.innerText.includes(w))) card.remove();
+      });
+    }catch(e){}
+  }
+  window.addEventListener('DOMContentLoaded', cleanDemo);
+  setTimeout(cleanDemo, 100);
+  setTimeout(cleanDemo, 500);
+  setTimeout(cleanDemo, 1200);
+})();
+</script>
+
 </body>
 </html>
