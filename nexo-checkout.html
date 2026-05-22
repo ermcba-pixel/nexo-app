@@ -579,7 +579,7 @@
 
             <!-- DIRECCIÓN DE ENVÍO -->
             <div class="form-title" style="margin-top: 24px;" id="shippingTitle">📍 Dirección de Envío</div>
-            <div class="form-group">
+            <div class="form-group" id="countryGroup" style="display:none;">
                 <label class="form-label" id="lblCountry">País</label>
                 <select class="form-select" id="countrySelect" onchange="updatePhoneCode()" required>
                     <option value="">Selecciona un país...</option>
@@ -1025,7 +1025,7 @@ function applyCheckoutLanguage(){
         // RENDERIZAR SELECT DE PAÍSES
         function renderCountrySelect() {
             const select = document.getElementById('countrySelect');
-            select.innerHTML = '<option value=""></option>';
+            select.innerHTML = '<option value=""></option>'; const cg=document.getElementById('countryGroup'); if(cg) cg.style.display='none';
             
             countriesPhoneData.slice().sort((a, b) => a.name.localeCompare(b.name, 'es')).forEach(country => {
                 const option = document.createElement('option');
@@ -1505,9 +1505,19 @@ const t = ctt();
                 return;
             }
 
-            // CIERRE INTERNO NEXO: para tarjetas, ACH/Wire y Payoneer se emite recibo interno.
-            // El cliente no es redirigido automáticamente a PayPal; el Agente 1 gestiona el cobro
-            // en PayPal Business y luego compra al proveedor/Amazon con la dirección del cliente.
+            // COBRO REAL: tarjetas, ACH/Wire y Payoneer también pasan por pago seguro PayPal.
+            // Así el cliente puede pagar con tarjeta/cuenta bancaria cuando PayPal lo permita y nexo recibe el cobro real.
+            if(orderData.paymentMethod !== 'paypal'){
+                orderData.estado_pago = 'redireccionado_pago_seguro_paypal';
+                orderData.estado_compra = 'pendiente_pago_seguro';
+                orderData.estado_agente = 'esperando_cobro_cliente';
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                if(btnText) btnText.textContent = 'Abriendo pago seguro...';
+                await startNexoPagoSeguro(orderData);
+                return;
+            }
+
+            // CIERRE INTERNO NEXO: respaldo si el pago externo no redirige.
             orderData.estado_pago = orderData.paymentMethod === 'paypal'
                 ? 'pendiente_agente_1_paypal'
                 : (orderData.paymentMethod === 'card'
@@ -1606,7 +1616,12 @@ function prefillClientData(){
       const pCountry = (profile.countryCode || profile.country || '').toString().toLowerCase();
       const opt = [...sel.options].find(o => o.value.toLowerCase() === pCountry || o.textContent.toLowerCase().includes(pCountry));
       if(opt) sel.value = opt.value;
+      if(!sel.value){
+        const bol = [...sel.options].find(o => o.value === 'BO' || o.textContent.toLowerCase().includes('bolivia'));
+        if(bol) sel.value = bol.value;
+      }
     }
+    const cg=document.getElementById('countryGroup'); if(cg) cg.style.display='none';
     updatePhoneCode();
     if(profile.areaCode) setVal('phoneCode', profile.areaCode);
 }

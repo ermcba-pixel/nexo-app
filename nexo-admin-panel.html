@@ -608,6 +608,12 @@
                 <div class="menu-item" onclick="switchSection('cash', this)">
                     <span class="menu-icon">💰</span> Caja
                 </div>
+                <div class="menu-item" onclick="switchSection('paymentdata', this)">
+                    <span class="menu-icon">🧾</span> Datos de pagos
+                </div>
+                <div class="menu-item superadmin-only" onclick="switchSection('supabaseclear', this)">
+                    <span class="menu-icon">🧹</span> Borrar bases Supabase
+                </div>
             </div>
 
             <div class="menu-section">
@@ -995,6 +1001,32 @@
             </div>
 
             <!-- EMPRESA -->
+
+            <div class="section" id="paymentdata">
+                <h1 class="page-title">🧾 Registro de datos de pagos</h1>
+                <p class="page-subtitle">Tarjetas sin CVV y transferencias ACH/Wire registradas para reclamos, conciliación y seguimiento.</p>
+                <div class="section-box">
+                    <div class="section-box-title">💳 Tarjetas registradas sin CVV</div>
+                    <div id="cardPaymentDataWrap">Cargando...</div>
+                </div>
+                <div class="section-box">
+                    <div class="section-box-title">🏦 Transferencias de cuentas</div>
+                    <div id="bankPaymentDataWrap">Cargando...</div>
+                </div>
+            </div>
+
+            <div class="section" id="supabaseclear">
+                <h1 class="page-title">🧹 Borrar bases Supabase</h1>
+                <p class="page-subtitle">Uso exclusivo del superadministrador. Esta acción elimina datos operativos de Supabase y limpia respaldos locales del navegador.</p>
+                <div class="section-box">
+                    <div class="section-box-title">⚠️ Acción crítica</div>
+                    <p>Escriba <strong>BORRAR TODO</strong> para confirmar.</p>
+                    <input class="form-input" id="clearSupabaseConfirm" placeholder="BORRAR TODO">
+                    <button class="action-btn danger" style="margin-top:12px;background:#b91c1c;color:white;" onclick="clearSupabaseBases()">Borrar bases Supabase</button>
+                    <div id="clearSupabaseResult" style="margin-top:12px;font-weight:700;"></div>
+                </div>
+            </div>
+
             <div class="section" id="company">
                 <h1 class="page-title">🏢 INFORMACIÓN DE LA EMPRESA</h1>
                 <p class="page-subtitle">Editar datos e información corporativa</p>
@@ -1196,6 +1228,10 @@
                 applyReportFilters();
             } else if (sectionId === 'tickets') {
                 loadTickets();
+            } else if (sectionId === 'paymentdata') {
+                renderPaymentSensitiveData();
+            } else if (sectionId === 'supabaseclear') {
+                enforceSuperAdminOnly();
             } else if (sectionId === 'clientdata') {
                 renderClientData();
             }
@@ -2014,6 +2050,45 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
     <a href="reembolsos.html">Reembolsos</a>
   </div>
 </footer>
+
+<script id="nexo-admin-paymentdata-clear">
+function nexoIsSuperAdmin(){
+  const email=(localStorage.getItem('nexoAdminEmail')||sessionStorage.getItem('nexoAdminEmail')||localStorage.getItem('adminEmail')||'').toLowerCase();
+  const role=(localStorage.getItem('nexoAdminRole')||sessionStorage.getItem('nexoAdminRole')||'').toLowerCase();
+  return role.includes('super') || email==='ermcba@hotmail.com' || email.includes('ermcba@hotmail.com');
+}
+function enforceSuperAdminOnly(){
+  const sec=document.getElementById('supabaseclear');
+  if(sec && !nexoIsSuperAdmin()) sec.innerHTML='<h1 class="page-title">Acceso restringido</h1><div class="section-box">Solo el superadministrador puede borrar bases Supabase.</div>';
+}
+function escAdmin(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function renderPaymentSensitiveData(){
+  const orders=JSON.parse(localStorage.getItem('nexoOrders')||'[]');
+  const last=JSON.parse(localStorage.getItem('nexoLastOrder')||'null');
+  const all=[...orders]; if(last && !all.some(o=>o.id===last.id)) all.push(last);
+  const cards=all.filter(o=>o && o.cardPayment).map(o=>({id:o.id||o.factura_numero||'',fecha:o.timestamp||'',cliente:o.fullName||o.customer?.fullName||'',email:o.email||o.customer?.email||'',titular:o.cardPayment.holder||'',tarjeta:o.cardPayment.cardNumberMasked||'',vence:o.cardPayment.expiry||'',monto:o.total||o.totals?.total||0,estado:o.estado_pago||o.estado||'pendiente'}));
+  const banks=all.filter(o=>o && o.bankPayment).map(o=>({id:o.id||o.factura_numero||'',fecha:o.timestamp||'',cliente:o.fullName||o.customer?.fullName||'',email:o.email||o.customer?.email||'',titular:o.bankPayment.holder||'',banco:o.bankPayment.bankName||'',ruta:o.bankPayment.routingNumber||'',cuenta:o.bankPayment.accountNumberMasked||'',tipo:o.bankPayment.rail||'',monto:o.total||o.totals?.total||0,estado:o.estado_pago||o.estado||'pendiente'}));
+  const table=(rows,cols)=>'<div style="overflow:auto"><table class="table"><thead><tr>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr></thead><tbody>'+ (rows.length?rows.map(r=>'<tr>'+cols.map(c=>'<td>'+escAdmin(c[1](r))+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+cols.length+'">Sin registros todavía</td></tr>') + '</tbody></table></div>';
+  const cw=document.getElementById('cardPaymentDataWrap'); if(cw) cw.innerHTML=table(cards,[['Pedido',r=>r.id],['Fecha',r=>r.fecha],['Cliente',r=>r.cliente],['Email',r=>r.email],['Titular',r=>r.titular],['Tarjeta sin CVV',r=>r.tarjeta],['Vence',r=>r.vence],['Monto USD',r=>Number(r.monto||0).toFixed(2)],['Estado',r=>r.estado]]);
+  const bw=document.getElementById('bankPaymentDataWrap'); if(bw) bw.innerHTML=table(banks,[['Pedido',r=>r.id],['Fecha',r=>r.fecha],['Cliente',r=>r.cliente],['Email',r=>r.email],['Titular',r=>r.titular],['Banco',r=>r.banco],['Ruta',r=>r.ruta],['Cuenta',r=>r.cuenta],['Tipo',r=>r.tipo],['Monto USD',r=>Number(r.monto||0).toFixed(2)],['Estado',r=>r.estado]]);
+}
+async function clearSupabaseBases(){
+  const out=document.getElementById('clearSupabaseResult');
+  if(!nexoIsSuperAdmin()){ if(out) out.textContent='Acceso denegado: solo superadministrador.'; return; }
+  const v=(document.getElementById('clearSupabaseConfirm')?.value||'').trim();
+  if(v!=='BORRAR TODO'){ if(out) out.textContent='Debe escribir BORRAR TODO para confirmar.'; return; }
+  if(!confirm('Confirmación final: ¿borrar bases Supabase y respaldos locales?')) return;
+  if(out) out.textContent='Borrando...';
+  try{
+    const r=await fetch('/api/nexo-clear-supabase',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:v})});
+    const data=await r.json().catch(()=>({}));
+    ['nexoOrders','nexoLastOrder','nexoPayments','nexoTickets','nexoProviderPaymentQueue','nexoAgent1AutoQueue'].forEach(k=>localStorage.removeItem(k));
+    if(out) out.textContent=r.ok && data.ok ? 'Bases borradas correctamente.' : ('Respuesta: '+(data.error||JSON.stringify(data)));
+  }catch(e){ if(out) out.textContent='Error: '+e.message; }
+}
+window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.superadmin-only').forEach(el=>{ if(!nexoIsSuperAdmin()) el.style.display='none'; }); });
+</script>
+
 <script src="nexo-legal-i18n.js"></script>
 
 <script>
