@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="nexo-admin-build-login" content="CJ-REAL-ADMIN-2026-05-27-FINAL">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nexo™ - Login Admin</title>
@@ -930,7 +934,7 @@ function validarLogin(){
 
     if(pass === "Lolo1234@"){
         localStorage.setItem('nexoAdminAuth','ok');
-        window.location.href = 'nexo-admin-panel.html';
+        window.location.href = 'nexo-admin-panel.html?v=CJREALADMIN20260527';
         return false;
     }
 

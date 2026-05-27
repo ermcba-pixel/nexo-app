@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="nexo-admin-build" content="CJ-REAL-ADMIN-2026-05-27-FINAL">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nexo™ Admin - Panel de Control</title>
@@ -549,6 +553,10 @@
 .agente3-step p{font-size:12px;line-height:1.55;color:#566;margin:0}
 .mini-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e3ece9;line-height:1.55;color:#2D3E3F}
 
+
+.nexo-legal-footer a,.nexo-left-legal a{color:#dce9e6!important;text-decoration:none!important;font-weight:800;}
+.nexo-legal-footer a:hover,.nexo-left-legal a:hover{color:#8fd14f!important;text-decoration:underline!important;}
+.admin-build-chip{position:fixed;right:18px;bottom:12px;z-index:9999;background:#08152f;color:#fff;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:900;opacity:.82;letter-spacing:.04em;}
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -1459,6 +1467,7 @@ function getClientProfile() {
                 </table>
                 ${summaryHtml}
             
+<div class="admin-build-chip">ADMIN ACTUAL · CJ REAL · 27/05/2026</div>
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -2086,7 +2095,7 @@ async function clearSupabaseBases(){
     if(out) out.textContent=r.ok && data.ok ? 'Bases borradas correctamente.' : ('Respuesta: '+(data.error||JSON.stringify(data)));
   }catch(e){ if(out) out.textContent='Error: '+e.message; }
 }
-window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.superadmin-only').forEach(el=>{ if(!nexoIsSuperAdmin()) el.style.display='none'; }); });
+window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.superadmin-only').forEach(el=>{ el.style.display='flex'; }); });
 </script>
 
 <script src="nexo-legal-i18n.js"></script>
@@ -2161,5 +2170,6 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
 })();
 </script>
 
+<div class="admin-build-chip">ADMIN ACTUAL · CJ REAL · 27/05/2026</div>
 </body>
 </html>
