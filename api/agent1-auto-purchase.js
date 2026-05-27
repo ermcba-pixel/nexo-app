@@ -95,7 +95,7 @@ export default async function handler(req,res){
     detalle,
     payment:{ method:'paypal', verified:true, totalClienteUsd:totalCliente },
     margin:{ subtotalProveedorUsd:subtotalProveedor, shippingAmazonUsd:shippingAmazon, vendorFeesUsd:vendorFees, comisionNexoUsd:comision, netCommissionAfterTaxesUsd:netCommissionAfterTaxes, staysIn:'PayPal' },
-    amazon:{ orderingConfigured:hasAmazonOrdering, creatorsApiConfigured:hasCreatorsApi, productionEnabled, affiliateTag, links:amazonLinks }, cj:{ configured:Boolean(process.env.CJ_ACCESS_TOKEN || process.env.CJ_API_TOKEN), priorityProvider:true },
-    next: (items.some(i=>String(i.provider||'').toLowerCase().includes('cj')) ? 'cola_orden_cj_o_ejecutar_cj_api' : (hasAmazonOrdering && productionEnabled ? 'ejecutar_orden_amazon_real' : 'cola_automatica_hasta_habilitar_amazon_produccion'))
+    amazon:{ orderingConfigured:hasAmazonOrdering, creatorsApiConfigured:hasCreatorsApi, productionEnabled, affiliateTag, links:amazonLinks },
+    next: hasAmazonOrdering && productionEnabled ? 'ejecutar_orden_amazon_real' : 'cola_automatica_hasta_habilitar_amazon_produccion'
   });
 }
