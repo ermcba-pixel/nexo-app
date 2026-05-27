@@ -268,6 +268,17 @@
             border:1px solid rgba(255,255,255,.18);
         }
 
+
+        .nexo-left-legal a, .nexo-left-legal a:visited {
+            color: #E8F0F0 !important;
+            text-decoration: none !important;
+            font-weight: 800;
+        }
+        .nexo-left-legal a:hover {
+            color: #A8D965 !important;
+            text-decoration: underline !important;
+        }
+
         @media (max-width: 1024px) {
             .login-container { flex-direction: column; }
             .login-header { width: 100%; padding: 45px 40px; }
@@ -854,7 +865,6 @@ function applyLoginLanguage(){
   const back = document.querySelector('.back-btn'); if(back) back.textContent = t.back;
   const sidep = document.querySelector('.login-header p'); if(sidep) sidep.textContent = t.side;
   const links = document.getElementById('loginLinks'); if(links) links.innerHTML = `${t.noAccount} <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">${t.register}</a><br><a href="#" id="forgotUserLink" onclick="return openRecoveryModal('user');">${t.forgotUser}</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">${t.forgotPass}</a>`;
-  if (typeof renderLivePasswordRules === 'function') renderLivePasswordRules('loginPassword', 'passwordRulesLive');
 }
 function toggleLoginPassword(){
   const el=document.getElementById('loginPassword'); const eye=document.getElementById('toggleLoginPass');
@@ -865,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => { applyLoginLanguage(); appl
 const registerTexts = {
   es:{title:'Crear Mi Cuenta', back:'← Volver al Portal', first:'👤 Nombre', last:'Apellido', doc:'🪪 Número Documento de Identidad / NIT', docPh:'CI, pasaporte o NIT', email:'📧 Correo Electrónico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Teléfono', zip:'📮 Código Postal', region:'🏙️ Región / Estado', city:'🏠 Ciudad', address:'📍 Dirección exacta de envío', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para crear la cuenta.', btn:'Crear Cuenta', have:'¿Ya tienes cuenta?', signin:'Inicia sesión aquí'},
   en:{title:'Create My Account', back:'← Back to Portal', first:'👤 First Name', last:'Last Name', doc:'🪪 Identity Document Number / Tax ID', docPh:'ID, passport or tax ID', email:'📧 Email Address', country:'🌎 Country', area:'☎️ Area Code', phone:'📱 Phone', zip:'📮 Postal Code', region:'🏙️ Region / State', city:'🏠 City', address:'📍 Exact Shipping Address', pass:'🔐 Password', passPh:'Minimum 8 characters', passHelp:'Minimum 8 characters to create the account.', btn:'Create Account', have:'Already have an account?', signin:'Sign in here'},
-  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
+  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres<div class="password-rules-panel">✔ Mayús<br>✔ minús<br>✔ Número<br>✔ Símbolo<br>✔ 8 carac</div> para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
   it:{title:'Crea Il Mio Account', back:'← Torna al Portale', first:'👤 Nome', last:'Cognome', doc:'🪪 Numero Documento d’Identità / Partita IVA', docPh:'CI, passaporto o P.IVA', email:'📧 Email', country:'🌎 Paese', area:'☎️ Prefisso', phone:'📱 Telefono', zip:'📮 Codice Postale', region:'🏙️ Regione / Stato', city:'🏠 Città', address:'📍 Indirizzo esatto di spedizione', pass:'🔐 Password', passPh:'Minimo 8 caratteri', passHelp:'Minimo 8 caratteri per creare l’account.', btn:'Crea Account', have:'Hai già un account?', signin:'Accedi qui'},
   fr:{title:'Créer Mon Compte', back:'← Retour au Portail', first:'👤 Prénom', last:'Nom', doc:'🪪 Numéro du document d’identité / NIF', docPh:'CI, passeport ou NIF', email:'📧 Adresse e-mail', country:'🌎 Pays', area:'☎️ Indicatif', phone:'📱 Téléphone', zip:'📮 Code Postal', region:'🏙️ Région / État', city:'🏠 Ville', address:'📍 Adresse exacte de livraison', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', passHelp:'Minimum 8 caractères pour créer le compte.', btn:'Créer le Compte', have:'Vous avez déjà un compte ?', signin:'Connectez-vous ici'}
 };
@@ -893,7 +903,6 @@ function applyRegisterLanguage(){
   const ph = document.querySelector('#registerForm .password-help'); if(ph) ph.textContent = t.passHelp;
   const btn = document.getElementById('registerBtn'); if(btn) btn.textContent = t.btn;
   const toggle = document.querySelector('#registerForm .toggle-form'); if(toggle) toggle.innerHTML = `${t.have} <a href="#" onclick="toggleForms(); return false;">${t.signin}</a>`;
-  if (typeof renderLivePasswordRules === 'function') renderLivePasswordRules('regPassword', 'registerPasswordRules');
 }
 
 </script>
@@ -1220,20 +1229,17 @@ function renderLivePasswordRules(inputId, boxId){
   let score = 0;
   [hasUpper, hasLower, hasNumber, hasSymbol, hasLength].forEach(v => { if(v) score += 1; });
 
-  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
-  const P = {es:{weak:'Muy débil',mid:'Media',strong:'Fuerte',very:'Muy fuerte',upper:'Mayús',lower:'minús',number:'Número',symbol:'Símbolo',length:'8 carac'},en:{weak:'Very weak',mid:'Medium',strong:'Strong',very:'Very strong',upper:'Uppercase',lower:'lowercase',number:'Number',symbol:'Symbol',length:'8 chars'},pt:{weak:'Muito fraca',mid:'Média',strong:'Forte',very:'Muito forte',upper:'Maiúscula',lower:'minúscula',number:'Número',symbol:'Símbolo',length:'8 caract.'},it:{weak:'Molto debole',mid:'Media',strong:'Forte',very:'Molto forte',upper:'Maiuscola',lower:'minuscola',number:'Numero',symbol:'Simbolo',length:'8 caratt.'},fr:{weak:'Très faible',mid:'Moyenne',strong:'Forte',very:'Très forte',upper:'Majuscule',lower:'minuscule',number:'Nombre',symbol:'Symbole',length:'8 caract.'}};
-  const txt = P[lang] || P.es;
-  const title = score <= 1 ? txt.weak : score <= 3 ? txt.mid : score === 4 ? txt.strong : txt.very;
+  const title = score <= 1 ? 'Muy débil' : score <= 3 ? 'Media' : score === 4 ? 'Fuerte' : 'Muy fuerte';
   const titleColor = score <= 1 ? '#a94442' : score <= 3 ? '#b37a00' : '#2f7d32';
 
   box.innerHTML = `
     <div class="password-rules-title" style="color:${titleColor}">${title}</div>
     <div class="password-rules-grid">
-      <div class="password-rule ${hasUpper ? 'ok' : 'no'}">${hasUpper ? '✔' : '✖'} ${txt.upper}</div>
-      <div class="password-rule ${hasLower ? 'ok' : 'no'}">${hasLower ? '✔' : '✖'} ${txt.lower}</div>
-      <div class="password-rule ${hasNumber ? 'ok' : 'no'}">${hasNumber ? '✔' : '✖'} ${txt.number}</div>
-      <div class="password-rule ${hasSymbol ? 'ok' : 'no'}">${hasSymbol ? '✔' : '✖'} ${txt.symbol}</div>
-      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} ${txt.length}</div>
+      <div class="password-rule ${hasUpper ? 'ok' : 'no'}">${hasUpper ? '✔' : '✖'} Mayús</div>
+      <div class="password-rule ${hasLower ? 'ok' : 'no'}">${hasLower ? '✔' : '✖'} minús</div>
+      <div class="password-rule ${hasNumber ? 'ok' : 'no'}">${hasNumber ? '✔' : '✖'} Número</div>
+      <div class="password-rule ${hasSymbol ? 'ok' : 'no'}">${hasSymbol ? '✔' : '✖'} Símbolo</div>
+      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 carac</div>
     </div>
   `;
 }

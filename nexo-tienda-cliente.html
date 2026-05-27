@@ -23,7 +23,7 @@
     .filter-input,.filter-select{padding:12px;border:2px solid #ddd;border-radius:8px;font-size:14px}.filter-input:focus,.filter-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 8px rgba(122,199,66,.25)}
     .hint{grid-column:1/-1;font-size:12px;color:#5e7172;font-weight:700;text-align:right}
     .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px;margin-bottom:40px}
-    .empty-note{grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:38px 10px;background:#f5fbf9;border:1px solid #d7e4df;border-radius:16px}
+    .empty-note,.loading-note,.api-note{grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:38px 10px;background:#f5fbf9;border:1px solid #d7e4df;border-radius:16px}.api-note{border-left:6px solid var(--warning);line-height:1.6}.loading-note{opacity:.9}
     .product-card{background:linear-gradient(135deg,var(--light),rgba(122,199,66,.05));border:2px solid rgba(74,107,109,.1);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
     .product-image{height:150px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:58px;border-bottom:1px solid rgba(74,107,109,.08)}
     .product-info{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}.provider{font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content}
@@ -48,12 +48,10 @@
     <div class="store-header">
       <div class="header-left">
         <div class="logo-store"><span><span class="ne">ne</span><span class="x">X</span><span class="o">o</span></span><div class="logo-store-subtitle" data-i18n-store="logoSubtitle">Tienda</div></div>
-        <div class="header-title"><h1 data-i18n-store="title">Tienda nexo™</h1><p data-i18n-store="subtitle">CJ Dropshipping primero • Amazon al final • Envíos Internacionales</p></div>
+        <div class="header-title"><h1 data-i18n-store="title">Tienda nexo™</h1><p data-i18n-store="subtitle">20 Productos multi-proveedor • Envíos Internacionales</p></div>
       </div>
       <div class="nexo-search-instruction" id="storeInstruction">
-        Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción.<br>
-        O escoja el producto, cárguelo al carrito, podrá ver el producto que compra y proceda a su pago mediante nexo™.<br>
-        Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.
+        Ingrese el producto que desea comprar y defina el presupuesto máximo que desea invertir. nexo™ buscará primero productos reales en CJ Dropshipping, mostrará precio, imagen y costos del proveedor, y mantendrá Amazon solo como respaldo final.
       </div>
       <div class="header-right">
         <div class="cart-badge" onclick="openCart()" title="Ver Carrito" data-i18n-title-store="cartTitle">🛒 <span id="cartCount">0</span></div>
@@ -78,7 +76,7 @@
       <div class="cart-summary">
         <div class="summary-row"><span data-i18n-store="subtotalLbl">Subtotal producto:</span><span>$<span id="subtotal">0.00</span></span></div>
         <div class="summary-row"><span data-i18n-store="shippingLbl">Gastos de envío CJ/Marketplace:</span><span>$<span id="amazonShipping">0.00</span></span></div>
-        <div class="summary-row"><span data-i18n-store="vendorLbl">Gastos proveedor CJ/Marketplace:</span><span>$<span id="vendorFees">0.00</span></span></div>
+        <div class="summary-row"><span data-i18n-store="vendorLbl">Gastos proveedor/marketplace CJ:</span><span>$<span id="vendorFees">0.00</span></span></div>
         <div class="summary-row"><span data-i18n-store="commissionLbl">Comisión nexo™:</span><span>$<span id="commission">0.00</span></span></div>
         <div class="summary-row total"><span data-i18n-store="totalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
       </div>
@@ -100,7 +98,6 @@ let products=[];
 let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
 function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function nexoAmazonAffiliateUrl(search){return 'https://www.amazon.com/s?k='+encodeURIComponent(search||'producto')+'&tag='+NEXO_AMAZON_TAG;}
-function nexoCJUrl(search){return 'https://www.cjdropshipping.com/search/'+encodeURIComponent(search||'product')+'.html';}
 function detectCategory(q, selected){
   if(selected) return selected;
   if(/iphone|celular|phone|laptop|usb|cargador|mouse|teclado|auricular|monitor|tablet/.test(q)) return 'electronica';
@@ -111,28 +108,41 @@ function detectCategory(q, selected){
   return 'accesorios';
 }
 function emojiFor(cat,q){if(cat==='moda') return /(zapato|tenis|shoe)/.test(q)?'👟':'👕'; if(cat==='electronica') return '🔌'; if(cat==='oficina') return '📎'; if(cat==='belleza') return '🧴'; if(cat==='hogar') return '🏠'; return '🛍️';}
-function buildProducts(search,maxPrice,catSel){
-  const clean=String(search||'').trim();
-  if(!clean) return [];
-  const q=normalizeText(clean);
-  const noLimit = !Number.isFinite(maxPrice) || maxPrice === Infinity;
-  const limit = noLimit ? 80 : Math.max(.50, Number(maxPrice));
-  const cat=detectCategory(q,catSel);
-  const emoji=emojiFor(cat,q);
-  const exactNames = getExactProductNames(clean, cat, q);
-  const factors=[1,.92,.86,.78,.70,.62,.54,.46,.38,.32,.26,.22,.18,.15,.12,.10,.08,.06,.05,.04];
-  return exactNames.map((name,i)=>{
-    const price=Math.max(.50,Math.min(limit,limit*(factors[i]||.5)));
-    const product={id:9000+i,name,price:Number(price.toFixed(2)),category:cat,emoji,provider:'CJ Dropshipping',providerLogo:'🟧',stock:nexoStoreT('stockCJ'),shippingAmazon:Number((price*0.18+1.2).toFixed(2)),vendorFee:Number((price*0.08+0.4).toFixed(2)),sourceUrl:nexoCJUrl(clean)};
-    product.image=nexoStoreImageFor(product); product.features=nexoProductFeatures(product); return product;
-  }).filter(p => noLimit || p.price <= limit).slice(0,20);
+function normalizeCjProduct(raw, idx){
+  const price = Number(raw.price ?? raw.sellPrice ?? raw.nowPrice ?? raw.discountPrice ?? raw.cjProductCost ?? 0);
+  const ship = Number(raw.cjShippingCost ?? raw.shippingAmazon ?? raw.shippingCost ?? raw.shippingPrice ?? raw.logisticPrice ?? 0);
+  const fee = Number(raw.cjHandlingFee ?? raw.vendorFee ?? raw.handlingFee ?? raw.serviceFee ?? 0);
+  return {
+    id: String(raw.id || raw.cjProductId || raw.pid || raw.sku || raw.productSku || ('cj-'+idx)).replace(/[^a-zA-Z0-9_-]/g,'_'),
+    cjProductId: raw.cjProductId || raw.pid || raw.productId || raw.id || '',
+    sku: raw.sku || raw.productSku || '',
+    name: raw.name || raw.nameEn || raw.productNameEn || raw.productName || 'CJ Dropshipping product',
+    price: Number((Number.isFinite(price) ? price : 0).toFixed(2)),
+    cjProductCost: Number((Number.isFinite(price) ? price : 0).toFixed(2)),
+    category: raw.category || raw.categoryName || raw.oneCategoryName || 'CJ Dropshipping',
+    emoji: '📦',
+    provider: 'CJ Dropshipping',
+    providerLogo: '🇨🇳',
+    stock: raw.stock || raw.inventory || raw.warehouseInventoryNum || raw.totalVerifiedInventory || 'Stock real CJ / verificar al confirmar',
+    shippingAmazon: Number((Number.isFinite(ship) ? ship : 0).toFixed(2)),
+    cjShippingCost: Number((Number.isFinite(ship) ? ship : 0).toFixed(2)),
+    vendorFee: Number((Number.isFinite(fee) ? fee : 0).toFixed(2)),
+    cjHandlingFee: Number((Number.isFinite(fee) ? fee : 0).toFixed(2)),
+    sourceUrl: raw.sourceUrl || raw.productUrl || ('https://www.cjdropshipping.com/search/'+encodeURIComponent(raw.name || raw.productNameEn || '')+'.html'),
+    image: raw.image || raw.bigImage || raw.productImage || raw.imageUrl || raw.productImageSet?.[0] || '',
+    features: ''
+  };
 }
-function getExactProductNames(clean, cat, q){
-  const safe = clean.trim();
-  if(/laptop|notebook|portatil|portátil/.test(q)) return ['Laptop notebook 14 inch CJ Dropshipping','Laptop portable computer 15.6 inch','Notebook business lightweight laptop','Laptop sleeve and computer bundle','Portable laptop computer for office','Laptop computer backpack kit','Laptop cooling stand accessory','Laptop power adapter replacement','Laptop USB-C docking station','Laptop office package CJ'];
-  if(/cordon|cordones|shoelace|lace/.test(q)) return ['cordones opción económica','cordones mejor valor','cordones envío internacional','cordones stock disponible','cordones calidad/precio','cordones selección recomendada','cordones deportivos estándar','cordones planos para tenis','cordones resistentes básicos','cordones pack internacional'];
-  if(/smartwatch|reloj/.test(q)) return ['smartwatch reloj inteligente deportivo','smartwatch bluetooth para llamadas','smartwatch monitor de salud','smartwatch impermeable básico','smartwatch pantalla completa','smartwatch económico CJ','smartwatch carga magnética','smartwatch fitness tracker'];
-  return [safe,safe+' opción económica',safe+' mejor valor',safe+' envío internacional',safe+' stock disponible',safe+' calidad/precio',safe+' selección recomendada',safe+' proveedor CJ',safe+' pack básico',safe+' alternativa internacional',safe+' descuento',safe+' uso diario',safe+' estándar',safe+' práctico',safe+' accesible',safe+' disponible',safe+' global',safe+' recomendado',safe+' premium básico',safe+' internacional'];
+async function fetchCjProducts(search,maxPrice,catSel){
+  const params = new URLSearchParams();
+  params.set('q', search || '');
+  if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
+  if(catSel) params.set('category', catSel);
+  params.set('size','20');
+  const res = await fetch('/api/cj-products?'+params.toString(), {cache:'no-store'});
+  const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
+  if(!res.ok || data.ok === false) return {ok:false, status:data.status || 'error', message:data.message || data.error || 'CJ API no disponible', setup:data.setup || []};
+  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0)};
 }
 
 const nexoStoreImages = {
@@ -175,7 +185,7 @@ function nexoProductFeatures(item){
 function renderProducts(list){
   const grid=document.getElementById('productsGrid');
   if(!list.length){grid.innerHTML='<div class="empty-note">'+nexoStoreT('empty')+'</div>';return;}
-  grid.innerHTML=list.map(p=>`
+  grid.innerHTML=list.map((p,idx)=>`
     <div class="product-card">
       <div class="product-image"><img src="${nexoStoreImageFor(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src=nexoStoreImages.default;"></div>
       <div class="product-info">
@@ -186,21 +196,41 @@ function renderProducts(list){
         <div class="product-price">$${p.price.toFixed(2)}</div>
         <div class="product-stock">${nexoStoreT('stock')}: ${p.stock}</div>
         <div class="product-features">${p.features || nexoProductFeatures(p)}</div>
-        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">${nexoStoreT('addCart')}</button>
+        <button class="add-to-cart-btn" onclick="addToCartByIndex(${idx})">${nexoStoreT('addCart')}</button>
       </div>
     </div>`).join('');
 }
-function filterProducts(){
-  const search=document.getElementById('searchInput').value;
-  const maxRaw=document.getElementById('priceFilter').value;
-  const max=maxRaw===''?Infinity:Number(maxRaw);
-  const cat=document.getElementById('categoryFilter').value;
-  products=buildProducts(search,max,cat);
-  renderProducts(products);
+let nexoSearchTimer=null;
+async function filterProducts(){
+  clearTimeout(nexoSearchTimer);
+  nexoSearchTimer = setTimeout(async()=>{
+    const search=document.getElementById('searchInput').value.trim();
+    const maxRaw=document.getElementById('priceFilter').value;
+    const max=maxRaw===''?Infinity:Number(maxRaw);
+    const cat=document.getElementById('categoryFilter').value;
+    const grid=document.getElementById('productsGrid');
+    if(!search){ products=[]; renderProducts([]); return; }
+    grid.innerHTML='<div class="loading-note">'+nexoStoreT('loadingCj')+'</div>';
+    try{
+      const result=await fetchCjProducts(search,max,cat);
+      if(!result.ok){
+        products=[];
+        grid.innerHTML='<div class="api-note">'+nexoStoreT('cjApiNeeded')+'<br><small>'+nexoStoreT('cjApiNeededSub')+'</small></div>';
+        return;
+      }
+      products=result.products.filter(p => !Number.isFinite(max) || p.price <= max).slice(0,20);
+      renderProducts(products);
+    }catch(e){
+      products=[];
+      grid.innerHTML='<div class="api-note">'+nexoStoreT('cjApiNeeded')+'<br><small>'+nexoStoreT('cjApiError')+'</small></div>';
+    }
+  }, 350);
 }
+function addToCartByIndex(idx){ const p=products[idx]; if(!p)return; addProductToCart(p); }
 function addToCart(id){
-  const p=products.find(x=>x.id===id); if(!p)return;
-  const found=cart.find(x=>x.id===id);
+  const p=products.find(x=>String(x.id)===String(id)); if(!p)return; addProductToCart(p); }
+function addProductToCart(p){
+  const found=cart.find(x=>String(x.id)===String(p.id));
   if(found) found.quantity++; else cart.push({...p,image:nexoStoreImageFor(p),features:p.features || nexoProductFeatures(p),quantity:1});
   localStorage.setItem('nexoCart',JSON.stringify(cart)); updateCartCount();
 }
@@ -216,10 +246,9 @@ function renderCartItems(){
 function qty(id,chg){const i=cart.find(x=>x.id===id); if(!i)return; i.quantity+=chg; if(i.quantity<=0)cart=cart.filter(x=>x.id!==id); localStorage.setItem('nexoCart',JSON.stringify(cart));updateCartCount();renderCartItems();}
 function updateCartSummary(){
   const subtotal=cart.reduce((s,i)=>s+i.price*i.quantity,0);
-  const shipping=cart.reduce((s,i)=>s+Number(i.shippingAmazon||0)*i.quantity,0);
-  const vendor=cart.reduce((s,i)=>s+Number(i.vendorFee||0)*i.quantity,0);
-  const commission=(subtotal+shipping+vendor)*.30;
-  const total=subtotal+shipping+vendor+commission;
+  const shipping=cart.reduce((s,i)=>s+(Number(i.cjShippingCost ?? i.shippingAmazon ?? 0)*i.quantity),0);
+  const vendor=cart.reduce((s,i)=>s+(Number(i.cjHandlingFee ?? i.vendorFee ?? 0)*i.quantity),0);
+  const commission=subtotal*.30, total=subtotal+shipping+vendor+commission;
   document.getElementById('subtotal').textContent=subtotal.toFixed(2);
   document.getElementById('amazonShipping').textContent=shipping.toFixed(2);
   document.getElementById('vendorFees').textContent=vendor.toFixed(2);
@@ -233,14 +262,14 @@ document.addEventListener('DOMContentLoaded',()=>{products=[];document.getElemen
 <script id="nexo-store-i18n-complete">
 (function(){
   const dict={
-    es:{logoSubtitle:'Tienda',title:'Tienda nexo™',subtitle:'CJ Dropshipping primero • Amazon al final • Envíos Internacionales',instruction:'Coloque el <strong>Nombre del Producto</strong> a buscar como primera acción y después el <strong>Límite de Precio</strong> como segunda acción.<br>O escoja el producto, cárguelo al carrito, podrá ver el producto que compra y proceda a su pago mediante nexo™.<br>Una vez que seleccione el producto, ingrese en <strong>“VER PROVEEDOR ORIGINAL”</strong> para proceder a la compra directa internacional.',backBtn:'← Volver',cartTitle:'Ver Carrito',searchLabel:'🔍 Buscar',searchPlaceholder:'Nombre del producto...',categoryLabel:'📁 Categoría',allCategories:'Todas las categorías',catElectronics:'Electrónica',catAccessories:'Accesorios',catFashion:'Moda',catOffice:'Oficina',catBeauty:'Belleza',catHome:'Hogar',maxPriceLabel:'💲 Precio Máximo',maxPricePlaceholder:'Sin límite si queda vacío',hint:'Si no coloca precio máximo, se muestran productos sugeridos para la búsqueda.',empty:'Ingrese un producto para buscar primero en CJ Dropshipping. Amazon queda como proveedor final de respaldo.',provider:'Ver proveedor original CJ',reviews:'reseñas',stock:'Stock',featuresTitle:'Características',suggested:'Producto sugerido según búsqueda',originalProvider:'Proveedor original',priceFilter:'Precio máximo respetado por filtro nexo™',verify:'Verificar disponibilidad, talla/color, stock y envío en CJ Dropshipping',addCart:'+ Carrito',cartHeader:'🛒 Tu Carrito',cartEmpty:'Tu carrito está vacío',subtotalLbl:'Subtotal producto:',shippingLbl:'Gastos de envío CJ/Marketplace:',vendorLbl:'Gastos proveedor CJ/Marketplace:',commissionLbl:'Comisión nexo™:',totalLbl:'Total a Pagar:',checkoutBtn:'Proceder al Pago',footer1:'Plataforma de Intermediación Comercial Internacional',footer3:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal'},
-    en:{logoSubtitle:'Store',title:'nexo™ Store',subtitle:'CJ Dropshipping first • Amazon at the end • International shipping',instruction:'Enter the <strong>Product Name</strong> first and then the <strong>Price Limit</strong> as the second action.<br>Or choose the product, add it to the cart, review what you are buying and proceed to payment through nexo™.<br>After selecting the product, open <strong>“VIEW ORIGINAL PROVIDER”</strong> to proceed with the direct international purchase.',backBtn:'← Back',cartTitle:'View Cart',searchLabel:'🔍 Search',searchPlaceholder:'Product name...',categoryLabel:'📁 Category',allCategories:'All categories',catElectronics:'Electronics',catAccessories:'Accessories',catFashion:'Fashion',catOffice:'Office',catBeauty:'Beauty',catHome:'Home',maxPriceLabel:'💲 Maximum Price',maxPricePlaceholder:'No limit if left empty',hint:'If no maximum price is entered, suggested products for the search are shown.',empty:'Enter a product to search first in CJ Dropshipping. Amazon remains as the final backup provider.',provider:'View original CJ provider',reviews:'reviews',stock:'Stock',featuresTitle:'Features',suggested:'Suggested product based on search',originalProvider:'Original provider',priceFilter:'Maximum price respected by nexo™ filter',verify:'Verify availability, size/color, stock and shipping with CJ Dropshipping',addCart:'+ Cart',cartHeader:'🛒 Your Cart',cartEmpty:'Your cart is empty',subtotalLbl:'Product subtotal:',shippingLbl:'CJ/Marketplace shipping costs:',vendorLbl:'CJ provider/marketplace charges:',commissionLbl:'nexo™ commission:',totalLbl:'Total to Pay:',checkoutBtn:'Proceed to Payment',footer1:'International Commercial Intermediation Platform',footer3:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice'},
-    pt:{logoSubtitle:'Loja',title:'Loja nexo™',subtitle:'CJ Dropshipping primeiro • Amazon no final • Envios internacionais',instruction:'Coloque o <strong>Nome do Produto</strong> como primeira ação e depois o <strong>Limite de Preço</strong> como segunda ação.<br>Ou escolha o produto, adicione ao carrinho, veja o produto comprado e prossiga ao pagamento através da nexo™.<br>Depois de selecionar o produto, entre em <strong>“VER FORNECEDOR ORIGINAL”</strong> para proceder à compra internacional direta.',backBtn:'← Voltar',cartTitle:'Ver Carrinho',searchLabel:'🔍 Buscar',searchPlaceholder:'Nome do produto...',categoryLabel:'📁 Categoria',allCategories:'Todas as categorias',catElectronics:'Eletrônicos',catAccessories:'Acessórios',catFashion:'Moda',catOffice:'Escritório',catBeauty:'Beleza',catHome:'Casa',maxPriceLabel:'💲 Preço Máximo',maxPricePlaceholder:'Sem limite se ficar vazio',hint:'Se não colocar preço máximo, serão mostrados produtos sugeridos para a busca.',empty:'Insira um produto para buscar primeiro na CJ Dropshipping. A Amazon fica como fornecedor final de respaldo.',provider:'Ver fornecedor original CJ',reviews:'avaliações',stock:'Estoque',featuresTitle:'Características',suggested:'Produto sugerido conforme a busca',originalProvider:'Fornecedor original',priceFilter:'Preço máximo respeitado pelo filtro nexo™',verify:'Verifique disponibilidade, tamanho/cor, estoque e envio na CJ Dropshipping',addCart:'+ Carrinho',cartHeader:'🛒 Seu Carrinho',cartEmpty:'Seu carrinho está vazio',subtotalLbl:'Subtotal do produto:',shippingLbl:'Custos de envio CJ/Marketplace:',vendorLbl:'Custos do fornecedor CJ/Marketplace:',commissionLbl:'Comissão nexo™:',totalLbl:'Total a Pagar:',checkoutBtn:'Prosseguir para Pagamento',footer1:'Plataforma de Intermediação Comercial Internacional',footer3:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal'},
-    it:{logoSubtitle:'Negozio',title:'Negozio nexo™',subtitle:'CJ Dropshipping prima • Amazon alla fine • Spedizioni internazionali',instruction:'Inserisci il <strong>Nome del Prodotto</strong> come prima azione e poi il <strong>Limite di Prezzo</strong> come seconda azione.<br>Oppure scegli il prodotto, aggiungilo al carrello, verifica il prodotto acquistato e procedi al pagamento tramite nexo™.<br>Dopo aver selezionato il prodotto, entra in <strong>“VEDI FORNITORE ORIGINALE”</strong> per procedere all’acquisto internazionale diretto.',backBtn:'← Indietro',cartTitle:'Vedi Carrello',searchLabel:'🔍 Cerca',searchPlaceholder:'Nome del prodotto...',categoryLabel:'📁 Categoria',allCategories:'Tutte le categorie',catElectronics:'Elettronica',catAccessories:'Accessori',catFashion:'Moda',catOffice:'Ufficio',catBeauty:'Bellezza',catHome:'Casa',maxPriceLabel:'💲 Prezzo Massimo',maxPricePlaceholder:'Nessun limite se vuoto',hint:'Se non inserisci un prezzo massimo, vengono mostrati prodotti suggeriti per la ricerca.',empty:'Inserisci un prodotto per cercare prima su CJ Dropshipping. Amazon resta come fornitore finale di riserva.',provider:'Vedi fornitore originale CJ',reviews:'recensioni',stock:'Disponibilità',featuresTitle:'Caratteristiche',suggested:'Prodotto suggerito in base alla ricerca',originalProvider:'Fornitore originale',priceFilter:'Prezzo massimo rispettato dal filtro nexo™',verify:'Verifica disponibilità, taglia/colore, stock e spedizione su CJ Dropshipping',addCart:'+ Carrello',cartHeader:'🛒 Il tuo Carrello',cartEmpty:'Il carrello è vuoto',subtotalLbl:'Subtotale prodotto:',shippingLbl:'Costi di spedizione CJ/Marketplace:',vendorLbl:'Costi fornitore CJ/Marketplace:',commissionLbl:'Commissione nexo™:',totalLbl:'Totale da Pagare:',checkoutBtn:'Procedi al Pagamento',footer1:'Piattaforma di Intermediazione Commerciale Internazionale',footer3:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale'},
-    fr:{logoSubtitle:'Boutique',title:'Boutique nexo™',subtitle:'CJ Dropshipping d’abord • Amazon à la fin • Expéditions internationales',instruction:'Saisissez le <strong>Nom du Produit</strong> comme première action puis la <strong>Limite de Prix</strong> comme deuxième action.<br>Ou choisissez le produit, ajoutez-le au panier, vérifiez le produit acheté et procédez au paiement via nexo™.<br>Une fois le produit sélectionné, cliquez sur <strong>“VOIR LE FOURNISSEUR ORIGINAL”</strong> pour procéder à l’achat international direct.',backBtn:'← Retour',cartTitle:'Voir Panier',searchLabel:'🔍 Rechercher',searchPlaceholder:'Nom du produit...',categoryLabel:'📁 Catégorie',allCategories:'Toutes les catégories',catElectronics:'Électronique',catAccessories:'Accessoires',catFashion:'Mode',catOffice:'Bureau',catBeauty:'Beauté',catHome:'Maison',maxPriceLabel:'💲 Prix Maximum',maxPricePlaceholder:'Sans limite si vide',hint:'Si aucun prix maximum n’est indiqué, des produits suggérés pour la recherche sont affichés.',empty:'Saisissez un produit pour rechercher d’abord sur CJ Dropshipping. Amazon reste le fournisseur final de secours.',provider:'Voir fournisseur original CJ',reviews:'avis',stock:'Stock',featuresTitle:'Caractéristiques',suggested:'Produit suggéré selon la recherche',originalProvider:'Fournisseur original',priceFilter:'Prix maximum respecté par le filtre nexo™',verify:'Vérifiez la disponibilité, taille/couleur, stock et livraison sur CJ Dropshipping',addCart:'+ Panier',cartHeader:'🛒 Votre Panier',cartEmpty:'Votre panier est vide',subtotalLbl:'Sous-total produit :',shippingLbl:'Frais de livraison CJ/Marketplace :',vendorLbl:'Frais fournisseur CJ/Marketplace :',commissionLbl:'Commission nexo™ :',totalLbl:'Total à Payer :',checkoutBtn:'Procéder au Paiement',footer1:'Plateforme d’Intermédiation Commerciale Internationale',footer3:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions Légales'}
+    es:{logoSubtitle:'Tienda',title:'Tienda nexo™',subtitle:'20 Productos multi-proveedor • Envíos Internacionales',instruction:'Ingrese el producto que desea comprar y defina el presupuesto máximo que desea invertir. nexo™ buscará primero productos reales en CJ Dropshipping, mostrará precio, imagen y costos del proveedor, y mantendrá Amazon solo como respaldo final.',backBtn:'← Volver',cartTitle:'Ver Carrito',searchLabel:'🔍 Buscar',searchPlaceholder:'Nombre del producto...',categoryLabel:'📁 Categoría',allCategories:'Todas las categorías',catElectronics:'Electrónica',catAccessories:'Accesorios',catFashion:'Moda',catOffice:'Oficina',catBeauty:'Belleza',catHome:'Hogar',maxPriceLabel:'💲 Precio Máximo',maxPricePlaceholder:'Sin límite si queda vacío',hint:'Si no coloca precio máximo, se muestran productos sugeridos para la búsqueda.',empty:'Busque el producto que desea comprar y coloque el presupuesto máximo que quiere invertir. nexo™ priorizará opciones reales de CJ Dropshipping dentro de ese monto y mantendrá Amazon solo como respaldo final.',provider:'Ver proveedor original',reviews:'reseñas',stock:'Stock',featuresTitle:'Características',suggested:'Producto sugerido según búsqueda',originalProvider:'Proveedor original',priceFilter:'Precio máximo respetado por filtro nexo™',verify:'Verificar disponibilidad, talla/color y envío en proveedor original',addCart:'+ Carrito',cartHeader:'🛒 Tu Carrito',cartEmpty:'Tu carrito está vacío',subtotalLbl:'Subtotal producto:',shippingLbl:'Gastos de envío CJ/Marketplace:',vendorLbl:'Gastos proveedor/marketplace CJ:',commissionLbl:'Comisión nexo™:',totalLbl:'Total a Pagar:',checkoutBtn:'Proceder al Pago',loadingCj:'Consultando productos reales en CJ Dropshipping...',cjApiNeeded:'Para mostrar productos reales de CJ Dropshipping falta activar la API oficial de CJ en Vercel.',cjApiNeededSub:'En CJ debe obtener: My CJ → Authorization → API → API Key. Luego agregar CJ_API_KEY en Vercel y redeploy.',cjApiError:'No se pudo consultar el endpoint /api/cj-products.',footer1:'Plataforma de Intermediación Comercial Internacional',footer3:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal'},
+    en:{logoSubtitle:'Store',title:'nexo™ Store',subtitle:'20 multi-provider products • International shipping',instruction:'Enter the product you want to buy and set the maximum budget you want to invest. nexo™ will first search real CJ Dropshipping products, show provider price, image and costs, and keep Amazon only as the final backup.',backBtn:'← Back',cartTitle:'View Cart',searchLabel:'🔍 Search',searchPlaceholder:'Product name...',categoryLabel:'📁 Category',allCategories:'All categories',catElectronics:'Electronics',catAccessories:'Accessories',catFashion:'Fashion',catOffice:'Office',catBeauty:'Beauty',catHome:'Home',maxPriceLabel:'💲 Maximum Price',maxPricePlaceholder:'No limit if left empty',hint:'If no maximum price is entered, suggested products for the search are shown.',empty:'Search for the product you want to buy and enter your maximum budget. nexo™ will prioritize real CJ Dropshipping options within that amount and keep Amazon only as a final backup.',provider:'View original provider',reviews:'reviews',stock:'Stock',featuresTitle:'Features',suggested:'Suggested product based on search',originalProvider:'Original provider',priceFilter:'Maximum price respected by nexo™ filter',verify:'Verify availability, size/color and shipping with the original provider',addCart:'+ Cart',cartHeader:'🛒 Your Cart',cartEmpty:'Your cart is empty',subtotalLbl:'Product subtotal:',shippingLbl:'CJ/Marketplace shipping costs:',vendorLbl:'CJ provider/marketplace charges:',commissionLbl:'nexo™ commission:',totalLbl:'Total to Pay:',checkoutBtn:'Proceed to Payment',loadingCj:'Checking real CJ Dropshipping products...',cjApiNeeded:'To display real CJ Dropshipping products, the official CJ API must be activated in Vercel.',cjApiNeededSub:'In CJ get: My CJ → Authorization → API → API Key. Then add CJ_API_KEY in Vercel and redeploy.',cjApiError:'Could not query /api/cj-products endpoint.',footer1:'International Commercial Intermediation Platform',footer3:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice'},
+    pt:{logoSubtitle:'Loja',title:'Loja nexo™',subtitle:'20 produtos multi-fornecedor • Envios internacionais',instruction:'Informe o produto que deseja comprar e defina o orçamento máximo que deseja investir. A nexo™ buscará primeiro produtos reais na CJ Dropshipping, mostrará preço, imagem e custos do fornecedor, e manterá a Amazon apenas como respaldo final.',backBtn:'← Voltar',cartTitle:'Ver Carrinho',searchLabel:'🔍 Buscar',searchPlaceholder:'Nome do produto...',categoryLabel:'📁 Categoria',allCategories:'Todas as categorias',catElectronics:'Eletrônicos',catAccessories:'Acessórios',catFashion:'Moda',catOffice:'Escritório',catBeauty:'Beleza',catHome:'Casa',maxPriceLabel:'💲 Preço Máximo',maxPricePlaceholder:'Sem limite se ficar vazio',hint:'Se não colocar preço máximo, serão mostrados produtos sugeridos para a busca.',empty:'Busque o produto que deseja comprar e informe o orçamento máximo. A nexo™ priorizará opções reais da CJ Dropshipping dentro desse valor e manterá a Amazon apenas como respaldo final.',provider:'Ver fornecedor original',reviews:'avaliações',stock:'Estoque',featuresTitle:'Características',suggested:'Produto sugerido conforme a busca',originalProvider:'Fornecedor original',priceFilter:'Preço máximo respeitado pelo filtro nexo™',verify:'Verifique disponibilidade, tamanho/cor e envio no fornecedor original',addCart:'+ Carrinho',cartHeader:'🛒 Seu Carrinho',cartEmpty:'Seu carrinho está vazio',subtotalLbl:'Subtotal do produto:',shippingLbl:'Custos de envio CJ/Marketplace:',vendorLbl:'Custos do fornecedor/marketplace CJ:',commissionLbl:'Comissão nexo™:',totalLbl:'Total a Pagar:',checkoutBtn:'Prosseguir para Pagamento',loadingCj:'Consultando productos reales en CJ Dropshipping...',cjApiNeeded:'Para mostrar productos reales de CJ Dropshipping falta activar la API oficial de CJ en Vercel.',cjApiNeededSub:'En CJ debe obtener: My CJ → Authorization → API → API Key. Luego agregar CJ_API_KEY en Vercel y redeploy.',cjApiError:'No se pudo consultar el endpoint /api/cj-products.',loadingCj:'Consultando produtos reais na CJ Dropshipping...',cjApiNeeded:'Para mostrar produtos reais da CJ Dropshipping, falta ativar a API oficial da CJ na Vercel.',cjApiNeededSub:'Na CJ obtenha: My CJ → Authorization → API → API Key. Depois adicione CJ_API_KEY na Vercel e faça redeploy.',cjApiError:'Não foi possível consultar o endpoint /api/cj-products.',footer1:'Plataforma de Intermediação Comercial Internacional',footer3:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal'},
+    it:{logoSubtitle:'Negozio',title:'Negozio nexo™',subtitle:'20 prodotti multi-fornitore • Spedizioni internazionali',instruction:'Inserisci il prodotto che desideri acquistare e definisci il budget massimo che vuoi investire. nexo™ cercherà prima prodotti reali su CJ Dropshipping, mostrando prezzo, immagine e costi del fornitore, mantenendo Amazon solo come supporto finale.',backBtn:'← Indietro',cartTitle:'Vedi Carrello',searchLabel:'🔍 Cerca',searchPlaceholder:'Nome del prodotto...',categoryLabel:'📁 Categoria',allCategories:'Tutte le categorie',catElectronics:'Elettronica',catAccessories:'Accessori',catFashion:'Moda',catOffice:'Ufficio',catBeauty:'Bellezza',catHome:'Casa',maxPriceLabel:'💲 Prezzo Massimo',maxPricePlaceholder:'Nessun limite se vuoto',hint:'Se non inserisci un prezzo massimo, vengono mostrati prodotti suggeriti per la ricerca.',empty:'Cerca il prodotto che desideri acquistare e inserisci il budget massimo. nexo™ darà priorità alle opzioni reali di CJ Dropshipping entro tale importo e manterrà Amazon solo come supporto finale.',provider:'Vedi fornitore originale',reviews:'recensioni',stock:'Disponibilità',featuresTitle:'Caratteristiche',suggested:'Prodotto suggerito in base alla ricerca',originalProvider:'Fornitore originale',priceFilter:'Prezzo massimo rispettato dal filtro nexo™',verify:'Verifica disponibilità, taglia/colore e spedizione presso il fornitore originale',addCart:'+ Carrello',cartHeader:'🛒 Il tuo Carrello',cartEmpty:'Il carrello è vuoto',subtotalLbl:'Subtotale prodotto:',shippingLbl:'Costi di spedizione CJ/Marketplace:',vendorLbl:'Costi fornitore/marketplace CJ:',commissionLbl:'Commissione nexo™:',totalLbl:'Totale da Pagare:',checkoutBtn:'Procedi al Pagamento',loadingCj:'Consultazione prodotti reali su CJ Dropshipping...',cjApiNeeded:'Per mostrare prodotti reali di CJ Dropshipping manca l’attivazione dell’API ufficiale CJ su Vercel.',cjApiNeededSub:'In CJ ottieni: My CJ → Authorization → API → API Key. Poi aggiungi CJ_API_KEY in Vercel e ridistribuisci.',cjApiError:'Impossibile interrogare l’endpoint /api/cj-products.',footer1:'Piattaforma di Intermediazione Commerciale Internazionale',footer3:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale'},
+    fr:{logoSubtitle:'Boutique',title:'Boutique nexo™',subtitle:'20 produits multi-fournisseurs • Expéditions internationales',instruction:'Saisissez le produit que vous souhaitez acheter et, si vous avez un budget défini, indiquez le montant maximum à rechercher. nexo™ cherchera d’abord des options réelles sur CJ Dropshipping, affichera le prix et l’image du fournisseur et gardera Amazon comme solution finale de secours.',backBtn:'← Retour',cartTitle:'Voir Panier',searchLabel:'🔍 Rechercher',searchPlaceholder:'Nom du produit...',categoryLabel:'📁 Catégorie',allCategories:'Toutes les catégories',catElectronics:'Électronique',catAccessories:'Accessoires',catFashion:'Mode',catOffice:'Bureau',catBeauty:'Beauté',catHome:'Maison',maxPriceLabel:'💲 Prix Maximum',maxPricePlaceholder:'Sans limite si vide',hint:'Si aucun prix maximum n’est indiqué, des produits suggérés pour la recherche sont affichés.',empty:'Recherchez le produit que vous souhaitez acheter et indiquez votre budget maximum. nexo™ priorisera les options réelles de CJ Dropshipping dans ce montant et gardera Amazon uniquement comme solution de secours finale.',provider:'Voir fournisseur original',reviews:'avis',stock:'Stock',featuresTitle:'Caractéristiques',suggested:'Produit suggéré selon la recherche',originalProvider:'Fournisseur original',priceFilter:'Prix maximum respecté par le filtre nexo™',verify:'Vérifiez la disponibilité, taille/couleur et livraison auprès du fournisseur original',addCart:'+ Panier',cartHeader:'🛒 Votre Panier',cartEmpty:'Votre panier est vide',subtotalLbl:'Sous-total produit :',shippingLbl:'Frais de livraison CJ/Marketplace :',vendorLbl:'Frais fournisseur/marketplace CJ :',commissionLbl:'Commission nexo™ :',totalLbl:'Total à Payer :',checkoutBtn:'Procéder au Paiement',loadingCj:'Consultation des produits réels sur CJ Dropshipping...',cjApiNeeded:'Pour afficher les produits réels de CJ Dropshipping, il faut activer l’API officielle CJ dans Vercel.',cjApiNeededSub:'Dans CJ, obtenez : My CJ → Authorization → API → API Key. Ajoutez ensuite CJ_API_KEY dans Vercel et redéployez.',cjApiError:'Impossible de consulter l’endpoint /api/cj-products.',footer1:'Plateforme d’Intermédiation Commerciale Internationale',footer3:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions Légales'}
   };
   function lang(){return localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||'es'}
-  window.nexoStoreT=function(k){const d=dict[lang()]||dict.es; const fall={stockCJ:'Disponible / verificar stock real en CJ'}; return d[k]||dict.es[k]||fall[k]||k};
+  window.nexoStoreT=function(k){const d=dict[lang()]||dict.es; return d[k]||dict.es[k]||k};
   window.applyNexoStoreI18n=function(){const d=dict[lang()]||dict.es; document.documentElement.lang=lang(); document.querySelectorAll('[data-i18n-store]').forEach(el=>{const k=el.getAttribute('data-i18n-store'); if(d[k]) el.textContent=d[k];}); document.querySelectorAll('[data-i18n-placeholder-store]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder-store'); if(d[k]) el.placeholder=d[k];}); document.querySelectorAll('[data-i18n-title-store]').forEach(el=>{const k=el.getAttribute('data-i18n-title-store'); if(d[k]) el.title=d[k];}); const inst=document.getElementById('storeInstruction'); if(inst) inst.innerHTML=d.instruction; const foot=document.querySelector('footer'); if(foot) foot.innerHTML='<strong>nexo™</strong> – '+d.footer1+'<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>'+d.footer3+'<br>© 2026 nexo™ – '+d.rights+'<br><a href="aviso-legal.html">'+d.legal+'</a>'; };
   window.addEventListener('DOMContentLoaded',()=>{window.applyNexoStoreI18n(); setTimeout(window.applyNexoStoreI18n,200);});
 })();
