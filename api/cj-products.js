@@ -131,38 +131,74 @@ function normalizeCj(raw, idx){
 }
 
 
-function translateSearchTerm(q){
+
+function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,' ').replace(/\s+/g,' ').trim();}
+function searchProfile(q){
   const clean = String(q || '').trim();
-  const key = clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const map = {
-    'cordon':'shoelaces',
-    'cordones':'shoelaces',
-    'cordones zapatos':'shoelaces',
-    'cordones para zapatos':'shoelaces',
-    'zapatos':'shoes',
-    'zapatillas':'sneakers',
-    'tenis':'sneakers',
-    'audifonos':'earbuds',
-    'auriculares':'earbuds',
-    'reloj':'watch',
-    'reloj inteligente':'smartwatch',
-    'celular':'phone case',
-    'telefono':'phone case',
-    'funda iphone':'iphone case',
-    'cargador':'charger',
-    'cable':'usb cable',
-    'mochila':'backpack',
-    'bolso':'bag',
-    'cartera':'handbag',
-    'camisa':'shirt',
-    'pantalon':'pants',
-    'laptop':'laptop',
-    'portatil':'laptop',
-    'computadora':'laptop',
-    'mouse':'mouse',
-    'teclado':'keyboard'
+  const key = norm(clean);
+  const profiles = {
+    'cordon':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
+    'cordones':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
+    'cordones zapatos':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
+    'cordones para zapatos':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
+    'zapatos':{query:'shoes', any:['shoe','shoes','sneaker','sneakers','footwear'], es:'zapatos'},
+    'zapatillas':{query:'sneakers', any:['sneaker','sneakers','shoe','shoes'], es:'zapatillas'},
+    'tenis':{query:'sneakers', any:['sneaker','sneakers','shoe','shoes'], es:'tenis'},
+    'audifonos':{query:'earbuds', any:['earbud','earbuds','earphone','headphone','headset'], es:'audífonos'},
+    'auriculares':{query:'earbuds', any:['earbud','earbuds','earphone','headphone','headset'], es:'auriculares'},
+    'reloj':{query:'watch', any:['watch','wristwatch'], es:'reloj'},
+    'reloj inteligente':{query:'smartwatch', any:['smartwatch','smart watch'], es:'reloj inteligente'},
+    'celular':{query:'phone', any:['phone','mobile','cellphone'], es:'celular'},
+    'telefono':{query:'phone', any:['phone','mobile','cellphone'], es:'teléfono'},
+    'funda iphone':{query:'iphone case', any:['iphone case','phone case','case'], es:'funda iphone'},
+    'cargador':{query:'charger', any:['charger','charging'], es:'cargador'},
+    'cable':{query:'usb cable', any:['cable','usb'], es:'cable'},
+    'mochila':{query:'backpack', any:['backpack','bag','rucksack'], es:'mochila'},
+    'bolso':{query:'bag', any:['bag','handbag','purse'], es:'bolso'},
+    'cartera':{query:'handbag', any:['handbag','purse','bag'], es:'cartera'},
+    'camisa':{query:'shirt', any:['shirt','blouse'], es:'camisa'},
+    'pantalon':{query:'pants', any:['pants','trousers'], es:'pantalón'},
+    'laptop':{query:'laptop', any:['laptop','notebook computer'], es:'laptop'},
+    'portatil':{query:'laptop', any:['laptop','notebook computer'], es:'portátil'},
+    'computadora':{query:'laptop', any:['laptop','computer','pc'], es:'computadora'},
+    'mouse':{query:'mouse', any:['mouse'], es:'mouse'},
+    'teclado':{query:'keyboard', any:['keyboard'], es:'teclado'}
   };
-  return map[key] || clean;
+  const profile = profiles[key] || {query:clean, any:key.split(' ').filter(Boolean), es:clean};
+  profile.raw = clean;
+  profile.key = key;
+  return profile;
+}
+function translateSearchTerm(q){ return searchProfile(q).query; }
+function productText(raw){
+  return norm([raw.productNameEn, raw.productName, raw.nameEn, raw.name, raw.title, raw.categoryName, raw.oneCategoryName, raw.twoCategoryName, raw.threeCategoryName].filter(Boolean).join(' '));
+}
+function isRelevant(raw, profile){
+  const txt = productText(raw);
+  if(!profile.any || !profile.any.length) return true;
+  return profile.any.some(term => txt.includes(norm(term)));
+}
+function relevanceScore(raw, profile){
+  const txt = productText(raw);
+  let score = 0;
+  for(const term of (profile.any||[])){
+    const n=norm(term);
+    if(txt === n) score += 100;
+    else if(txt.startsWith(n+' ')) score += 60;
+    else if(txt.includes(n)) score += 30;
+  }
+  return score;
+}
+function localizeName(name, lang){
+  let out = String(name||'');
+  const packs = {
+    es:[['Shoelaces','Cordones'],['Shoe Laces','Cordones'],['Laces','Cordones'],['Shoes','Zapatos'],['Sneakers','Zapatillas'],['Women','Mujer'],['Men','Hombre'],['Kids','Niños'],['Bag','Bolsa'],['Bags','Bolsas'],['Black','Negro'],['White','Blanco'],['Red','Rojo'],['Blue','Azul'],['Green','Verde'],['Leather','Cuero'],['Fashion','Moda'],['Casual','Casual'],['Sports','Deportivo'],['Laptop','Laptop'],['Case','Funda'],['Watch','Reloj'],['Smartwatch','Reloj inteligente'],['Phone','Teléfono'],['Charger','Cargador'],['Cable','Cable']],
+    pt:[['Shoelaces','Cadarços'],['Shoe Laces','Cadarços'],['Laces','Cadarços'],['Shoes','Sapatos'],['Sneakers','Tênis'],['Women','Mulher'],['Men','Homem'],['Kids','Crianças'],['Bag','Bolsa'],['Bags','Bolsas'],['Black','Preto'],['White','Branco'],['Red','Vermelho'],['Blue','Azul'],['Green','Verde'],['Leather','Couro'],['Fashion','Moda'],['Sports','Esportivo'],['Case','Capa'],['Watch','Relógio'],['Smartwatch','Relógio inteligente'],['Phone','Telefone'],['Charger','Carregador']],
+    it:[['Shoelaces','Lacci'],['Shoe Laces','Lacci'],['Laces','Lacci'],['Shoes','Scarpe'],['Sneakers','Sneakers'],['Women','Donna'],['Men','Uomo'],['Kids','Bambini'],['Bag','Borsa'],['Bags','Borse'],['Black','Nero'],['White','Bianco'],['Red','Rosso'],['Blue','Blu'],['Green','Verde'],['Leather','Pelle'],['Fashion','Moda'],['Sports','Sportivo'],['Case','Custodia'],['Watch','Orologio'],['Smartwatch','Smartwatch'],['Phone','Telefono'],['Charger','Caricatore']],
+    fr:[['Shoelaces','Lacets'],['Shoe Laces','Lacets'],['Laces','Lacets'],['Shoes','Chaussures'],['Sneakers','Baskets'],['Women','Femme'],['Men','Homme'],['Kids','Enfants'],['Bag','Sac'],['Bags','Sacs'],['Black','Noir'],['White','Blanc'],['Red','Rouge'],['Blue','Bleu'],['Green','Vert'],['Leather','Cuir'],['Fashion','Mode'],['Sports','Sport'],['Case','Étui'],['Watch','Montre'],['Smartwatch','Montre intelligente'],['Phone','Téléphone'],['Charger','Chargeur']]
+  };
+  for(const [a,b] of (packs[lang]||[])) out = out.replace(new RegExp('\\b'+a+'\\b','gi'), b);
+  return out;
 }
 
 function extractList(data){
@@ -194,6 +230,7 @@ export default async function handler(req,res){
   if(req.method !== 'GET') return res.status(405).json({ok:false,error:'Método no permitido'});
 
   const q = String(req.query.q || req.query.keyWord || req.query.keyword || '').trim();
+  const lang = String(req.query.lang || req.query.language || 'es').toLowerCase().slice(0,2);
   const maxPrice = Number(req.query.maxPrice || req.query.max || 0);
   const minPrice = Number(req.query.minPrice || req.query.min || 0);
   const size = Math.min(Math.max(Number(req.query.size || 20), 1), 100);
@@ -205,10 +242,11 @@ export default async function handler(req,res){
 
   try{
     const token = await getCjAccessToken();
-    const translatedQ = translateSearchTerm(q);
+    const profile = searchProfile(q);
+    const translatedQ = profile.query;
 
     async function queryListV2(includeBudget=true){
-      const params = new URLSearchParams({page:String(page), size:String(size), keyWord:translatedQ});
+      const params = new URLSearchParams({page:String(page), size:String(Math.max(size,50)), keyWord:translatedQ});
       // CJ API oficial: startSellPrice/endSellPrice. features debe ser enable_category/enable_description, no texto libre.
       if(includeBudget && Number.isFinite(minPrice) && minPrice > 0) params.set('startSellPrice', String(minPrice));
       if(includeBudget && Number.isFinite(maxPrice) && maxPrice > 0) params.set('endSellPrice', String(maxPrice));
@@ -221,7 +259,7 @@ export default async function handler(req,res){
     }
 
     async function queryListV1(includeBudget=true){
-      const params = new URLSearchParams({pageNum:String(page), pageSize:String(size), productNameEn:translatedQ});
+      const params = new URLSearchParams({pageNum:String(page), pageSize:String(Math.max(size,50)), productNameEn:translatedQ});
       if(includeBudget && Number.isFinite(minPrice) && minPrice > 0) params.set('minPrice', String(minPrice));
       if(includeBudget && Number.isFinite(maxPrice) && maxPrice > 0) params.set('maxPrice', String(maxPrice));
       params.set('searchType', '0');
@@ -244,9 +282,28 @@ export default async function handler(req,res){
       outOfBudget = true;
     }
 
-    let products = result.list.map(normalizeCj).filter(p => p.price > 0);
-    if(!outOfBudget && Number.isFinite(maxPrice) && maxPrice > 0) products = products.filter(p => p.price <= maxPrice);
-    products = products.slice(0, size).map(p => ({...p, outOfBudget}));
+    let relevantRaw = result.list.filter(x => isRelevant(x, profile));
+    // Si CJ devolvió mezcla, usamos solo coincidencias reales del producto pedido.
+    // Nunca mostramos productos aleatorios porque daña la confianza del cliente.
+    if(!relevantRaw.length){
+      relevantRaw = [];
+    }
+    let products = relevantRaw
+      .map((raw, idx) => ({ raw, idx, score: relevanceScore(raw, profile) }))
+      .sort((a,b)=>b.score-a.score)
+      .map(x => normalizeCj(x.raw, x.idx))
+      .filter(p => p.price > 0)
+      .map(p => ({...p, name: localizeName(p.name, lang), title: localizeName(p.title || p.name, lang)}));
+
+    // Orden comercial solicitado: dentro del presupuesto elegido, mostrar primero el mayor precio cercano al presupuesto
+    // y luego bajar. Ej.: presupuesto 1.00 => 0.99, 0.87, 0.75...
+    if(!outOfBudget && Number.isFinite(maxPrice) && maxPrice > 0) {
+      products = products.filter(p => p.price <= maxPrice);
+    }
+    products = products
+      .sort((a,b)=> Number(b.price||0) - Number(a.price||0))
+      .slice(0, size)
+      .map(p => ({...p, outOfBudget, requestedProduct:q, cjSearchTerm:translatedQ}));
 
     return res.status(200).json({
       ok:true,

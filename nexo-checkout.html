@@ -1058,6 +1058,28 @@ function applyCheckoutLanguage(){
 
         // SELECCIONAR MÉTODO DE PAGO
         
+function nexoPayText(key){
+    const lang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || currentLang || 'es').slice(0,2);
+    const D = {
+      es:{
+        cardTitle:'Pago real con tarjeta mediante PayPal seguro',
+        cardText:'nexo™ no guarda números de tarjeta ni CVV. Al confirmar, se abrirá PayPal Business para pagar de forma real y segura con PayPal o tarjeta, según disponibilidad de PayPal en el país del cliente.',
+        cardBtn:'Continuar con tarjeta / PayPal seguro',
+        bankTitle:'Transferencia bancaria / ACH / Wire / Land Bank',
+        bankText:'Registre el banco o referencia del cliente para seguimiento. El cobro real se procesará mediante PayPal seguro si PayPal habilita cuenta bancaria/ACH/Wire; si usa transferencia directa, el pedido queda pendiente hasta confirmar el abono.',
+        bankHolder:'Titular de la cuenta bancaria', bankName:'Banco del cliente', bankNamePh:'Ej.: Land Bank, Bank of America, etc.', bankRef:'Referencia / número de operación (opcional)', transferType:'Tipo de transferencia', bankBtn:'Continuar con transferencia / pago seguro',
+        paypalBtn:'Continuar con PayPal', payoneerText:'Payoneer queda registrado como método de operación empresarial. Para cobro real al cliente, se abrirá PayPal seguro o se confirmará manualmente si corresponde.', payoneerBtn:'Continuar con Payoneer'
+      },
+      en:{
+        cardTitle:'Real card payment through secure PayPal', cardText:'nexo™ does not store card numbers or CVV. After confirmation, PayPal Business will open so the customer can pay securely with PayPal or card, depending on PayPal availability in the customer country.', cardBtn:'Continue with card / secure PayPal',
+        bankTitle:'Bank transfer / ACH / Wire / Land Bank', bankText:'Register the customer bank or reference for tracking. The real charge will be processed through secure PayPal if PayPal enables bank account/ACH/Wire; if using a direct transfer, the order remains pending until funds are confirmed.', bankHolder:'Bank account holder', bankName:'Customer bank', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Reference / operation number (optional)', transferType:'Transfer type', bankBtn:'Continue with transfer / secure payment', paypalBtn:'Continue with PayPal', payoneerText:'Payoneer is recorded as an enterprise operation method. For real customer collection, secure PayPal will open or manual confirmation will apply when needed.', payoneerBtn:'Continue with Payoneer'
+      },
+      pt:{cardTitle:'Pagamento real com cartão via PayPal seguro', cardText:'nexo™ não guarda números de cartão nem CVV. Ao confirmar, o PayPal Business será aberto para pagar de forma real e segura com PayPal ou cartão, conforme disponibilidade do PayPal no país do cliente.', cardBtn:'Continuar com cartão / PayPal seguro', bankTitle:'Transferência bancária / ACH / Wire / Land Bank', bankText:'Registre o banco ou referência do cliente para acompanhamento. A cobrança real será processada via PayPal seguro se o PayPal habilitar conta bancária/ACH/Wire; se usar transferência direta, o pedido fica pendente até confirmar o crédito.', bankHolder:'Titular da conta bancária', bankName:'Banco do cliente', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Referência / número da operação (opcional)', transferType:'Tipo de transferência', bankBtn:'Continuar com transferência / pagamento seguro', paypalBtn:'Continuar com PayPal', payoneerText:'Payoneer fica registrado como método de operação empresarial. Para cobrança real do cliente, será aberto o PayPal seguro ou confirmação manual quando aplicável.', payoneerBtn:'Continuar com Payoneer'},
+      it:{cardTitle:'Pagamento reale con carta tramite PayPal sicuro', cardText:'nexo™ non conserva numeri di carta né CVV. Alla conferma, si aprirà PayPal Business per pagare in modo reale e sicuro con PayPal o carta, secondo la disponibilità di PayPal nel paese del cliente.', cardBtn:'Continua con carta / PayPal sicuro', bankTitle:'Bonifico bancario / ACH / Wire / Land Bank', bankText:'Registra la banca o il riferimento del cliente per il monitoraggio. L’addebito reale sarà processato tramite PayPal sicuro se PayPal abilita conto bancario/ACH/Wire; se usa un bonifico diretto, l’ordine resta in sospeso fino alla conferma dell’accredito.', bankHolder:'Intestatario del conto bancario', bankName:'Banca del cliente', bankNamePh:'Es.: Land Bank, Bank of America, ecc.', bankRef:'Riferimento / numero operazione (opzionale)', transferType:'Tipo di bonifico', bankBtn:'Continua con bonifico / pagamento sicuro', paypalBtn:'Continua con PayPal', payoneerText:'Payoneer viene registrato come metodo operativo aziendale. Per l’incasso reale dal cliente, si aprirà PayPal sicuro o si applicherà conferma manuale se necessario.', payoneerBtn:'Continua con Payoneer'},
+      fr:{cardTitle:'Paiement réel par carte via PayPal sécurisé', cardText:'nexo™ ne conserve ni numéros de carte ni CVV. À la confirmation, PayPal Business s’ouvrira afin que le client paie réellement et en sécurité avec PayPal ou carte, selon la disponibilité PayPal dans son pays.', cardBtn:'Continuer avec carte / PayPal sécurisé', bankTitle:'Virement bancaire / ACH / Wire / Land Bank', bankText:'Enregistrez la banque ou la référence du client pour le suivi. Le débit réel sera traité via PayPal sécurisé si PayPal active compte bancaire/ACH/Wire ; en cas de virement direct, la commande reste en attente jusqu’à confirmation des fonds.', bankHolder:'Titulaire du compte bancaire', bankName:'Banque du client', bankNamePh:'Ex. : Land Bank, Bank of America, etc.', bankRef:'Référence / numéro d’opération (facultatif)', transferType:'Type de virement', bankBtn:'Continuer avec virement / paiement sécurisé', paypalBtn:'Continuer avec PayPal', payoneerText:'Payoneer est enregistré comme méthode d’opération d’entreprise. Pour l’encaissement réel client, PayPal sécurisé s’ouvrira ou une confirmation manuelle sera appliquée si nécessaire.', payoneerBtn:'Continuer avec Payoneer'}
+    };
+    return (D[lang] || D.es)[key] || D.es[key] || key;
+}
 function selectPayment(methodId, btnEl=null) {
     selectedPayment = methodId;
     document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
@@ -1071,66 +1093,63 @@ function selectPayment(methodId, btnEl=null) {
     if (methodId === 'card') {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <div class="form-group">
-                    <label class="form-label">Nombre como aparece en la tarjeta</label>
-                    <input type="text" class="form-input" id="cardHolder" placeholder="Nombre del titular">
+                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-top:6px;">
+                    <strong>${nexoPayText('cardTitle')}</strong><br>${nexoPayText('cardText')}
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Número de Tarjeta</label>
-                    <input type="text" class="form-input" placeholder="1234 5678 8765 4567" id="cardNumber" inputmode="numeric" maxlength="19">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">MM/AA</label>
-                    <input type="text" class="form-input" placeholder="11/32" id="cardExpiry" inputmode="numeric" maxlength="5">
-                </div>
-                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:12px;font-size:12px;line-height:1.5;margin-top:6px;">
-                    No se solicita CVV en nexo™. El cobro real se abrirá en PayPal seguro, donde el cliente podrá pagar con PayPal o tarjeta si PayPal lo habilita.
-                </div>
-                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con tarjeta / PayPal seguro</button>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('cardBtn')}</button>
             </div>
         `;
-        attachCardFormatters();
     } else if (methodId === 'bank') {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <div class="form-group">
-                    <label class="form-label">Titular de la cuenta bancaria</label>
-                    <input type="text" class="form-input" id="bankHolder" placeholder="Nombre del titular">
+                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-bottom:12px;">
+                    <strong>${nexoPayText('bankTitle')}</strong><br>${nexoPayText('bankText')}
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Banco del cliente</label>
-                    <input type="text" class="form-input" id="bankName" placeholder="Nombre del banco">
+                    <label class="form-label">${nexoPayText('bankHolder')}</label>
+                    <input type="text" class="form-input" id="bankHolder" placeholder="${nexoPayText('bankHolder')}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">${nexoPayText('bankName')}</label>
+                    <input type="text" class="form-input" id="bankName" placeholder="${nexoPayText('bankNamePh')}">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group">
-                        <label class="form-label">Número de ruta / Routing / ABA</label>
-                        <input type="text" class="form-input" id="bankRouting" placeholder="Número de ruta">
+                        <label class="form-label">Routing / ABA / SWIFT</label>
+                        <input type="text" class="form-input" id="bankRouting" placeholder="Routing / ABA / SWIFT">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Número de cuenta</label>
-                        <input type="text" class="form-input" id="bankAccount" placeholder="Cuenta bancaria">
+                        <label class="form-label">Account / Cuenta</label>
+                        <input type="text" class="form-input" id="bankAccount" placeholder="Account / Cuenta">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Tipo de transferencia</label>
+                    <label class="form-label">${nexoPayText('bankRef')}</label>
+                    <input type="text" class="form-input" id="bankReference" placeholder="${nexoPayText('bankRef')}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">${nexoPayText('transferType')}</label>
                     <select class="form-select" id="transferType">
-                        <option value="ACH">ACH sin costo</option>
-                        <option value="Wire">Wire / transferencia por cable con costo del banco o empresa wire</option>
+                        <option value="ACH">ACH</option>
+                        <option value="Wire">Wire</option>
+                        <option value="Land Bank">Land Bank</option>
+                        <option value="Other Bank">Other Bank</option>
                     </select>
                 </div>
-                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con transferencia</button>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('bankBtn')}</button>
             </div>
         `;
     } else if (methodId === 'payoneer') {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con Payoneer</button>
+                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-top:6px;">${nexoPayText('payoneerText')}</div>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('payoneerBtn')}</button>
             </div>
         `;
     } else {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">Continuar con PayPal</button>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('paypalBtn')}</button>
             </div>
         `;
     }
@@ -1365,10 +1384,8 @@ const t = ctt();
                         orderData.paypalEmail = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
             if(orderData.paymentMethod === 'card'){
                 orderData.cardPayment = {
-                    holder: (document.getElementById('cardHolder')?.value || '').trim(),
-                    cardNumberMasked: (document.getElementById('cardNumber')?.value || '').replace(/\s/g,'').replace(/.(?=.{4})/g,'•'),
-                    expiry: (document.getElementById('cardExpiry')?.value || '').trim(),
-                    destination: 'PayPal Checkout real nexo™ - no se almacena CVV'
+                    destination: 'PayPal Checkout real nexo™',
+                    security: 'nexo™ no almacena número de tarjeta ni CVV; el cobro real se realiza en PayPal seguro.'
                 };
             }
             if(orderData.paymentMethod === 'bank'){
@@ -1378,7 +1395,8 @@ const t = ctt();
                     routingNumber: (document.getElementById('bankRouting')?.value || '').trim(),
                     accountNumberMasked: (document.getElementById('bankAccount')?.value || '').trim().replace(/.(?=.{4})/g,'•'),
                     rail: (document.getElementById('transferType')?.value || 'ACH'),
-                    destination: 'Verificación interna nexo™'
+                    reference: (document.getElementById('bankReference')?.value || '').trim(),
+                    destination: 'Pago seguro PayPal / verificación interna nexo™ si usa transferencia directa'
                 };
             }
             orderData.currency = 'USD';

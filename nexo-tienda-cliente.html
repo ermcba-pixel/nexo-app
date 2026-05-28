@@ -146,7 +146,13 @@ async function fetchCjProducts(search,maxPrice,catSel){
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false) return {ok:false, status:data.status || 'error', message:data.message || data.error || 'CJ API no disponible', setup:data.setup || []};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), outOfBudget: !!data.outOfBudget, message:data.message||''};
+  const budget = Number(maxPrice);
+  let list = (data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0);
+  if(Number.isFinite(budget) && budget > 0 && !data.outOfBudget){
+    list = list.filter(p => Number(p.price) <= budget);
+  }
+  list = list.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+  return {ok:true, products:list, outOfBudget: !!data.outOfBudget, message:data.message||''};
 }
 
 const nexoStoreImages = {
