@@ -139,6 +139,7 @@ async function fetchCjProducts(search,maxPrice,catSel){
   if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
   if(catSel) params.set('category', catSel);
   params.set('size','20');
+  params.set('lang', (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es').slice(0,2));
   const ctrl = new AbortController();
   const timeout = setTimeout(()=>ctrl.abort(), 12000);
   const res = await fetch('/api/cj-products?'+params.toString()+'&v=CJREAL20260527', {cache:'no-store', signal: ctrl.signal});
