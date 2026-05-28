@@ -130,6 +130,41 @@ function normalizeCj(raw, idx){
   };
 }
 
+
+function translateSearchTerm(q){
+  const clean = String(q || '').trim();
+  const key = clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const map = {
+    'cordon':'shoelaces',
+    'cordones':'shoelaces',
+    'cordones zapatos':'shoelaces',
+    'cordones para zapatos':'shoelaces',
+    'zapatos':'shoes',
+    'zapatillas':'sneakers',
+    'tenis':'sneakers',
+    'audifonos':'earbuds',
+    'auriculares':'earbuds',
+    'reloj':'watch',
+    'reloj inteligente':'smartwatch',
+    'celular':'phone case',
+    'telefono':'phone case',
+    'funda iphone':'iphone case',
+    'cargador':'charger',
+    'cable':'usb cable',
+    'mochila':'backpack',
+    'bolso':'bag',
+    'cartera':'handbag',
+    'camisa':'shirt',
+    'pantalon':'pants',
+    'laptop':'laptop',
+    'portatil':'laptop',
+    'computadora':'laptop',
+    'mouse':'mouse',
+    'teclado':'keyboard'
+  };
+  return map[key] || clean;
+}
+
 function extractList(data){
   const d = data?.data ?? data;
   if(Array.isArray(d)) return d;
@@ -153,9 +188,11 @@ export default async function handler(req,res){
 
   try{
     const token = await getCjAccessToken();
-    const params = new URLSearchParams({page:String(page), size:String(size), keyWord:q});
-    if(Number.isFinite(minPrice) && minPrice > 0) params.set('minPrice', String(minPrice));
-    if(Number.isFinite(maxPrice) && maxPrice > 0) params.set('maxPrice', String(maxPrice));
+    const translatedQ = translateSearchTerm(q);
+    const params = new URLSearchParams({page:String(page), size:String(size), keyWord:translatedQ});
+    // CJ API oficial usa startSellPrice/endSellPrice, no minPrice/maxPrice.
+    if(Number.isFinite(minPrice) && minPrice > 0) params.set('startSellPrice', String(minPrice));
+    if(Number.isFinite(maxPrice) && maxPrice > 0) params.set('endSellPrice', String(maxPrice));
     params.set('features', 'product,category');
 
     const data = await fetchJson(`${CJ_BASE}/product/listV2?${params.toString()}`, {
@@ -171,6 +208,7 @@ export default async function handler(req,res){
       ok:true,
       source:'cj-dropshipping-api',
       query:q,
+      cjQuery:translatedQ,
       count:products.length,
       products,
       message: products.length ? 'Productos reales CJ obtenidos correctamente' : 'CJ no devolvió productos para esa búsqueda/presupuesto'
