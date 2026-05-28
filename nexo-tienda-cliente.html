@@ -32,7 +32,7 @@
     .modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5)}.modal-content{background:#fff;margin:4% auto;padding:30px;border-radius:20px;width:94%;max-width:1100px;max-height:84vh;overflow:auto}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid rgba(74,107,109,.1);padding-bottom:16px}.close-btn{background:0;border:0;font-size:28px;cursor:pointer}
     .cart-item{display:grid;grid-template-columns:1fr 120px 120px;gap:14px;padding:14px;background:var(--light);border-radius:10px;margin-bottom:10px;align-items:center;min-width:760px}.qty-btn{background:var(--accent);color:#fff;border:0;width:24px;height:24px;border-radius:4px;cursor:pointer;font-weight:900}.cart-summary{background:var(--light);border-radius:12px;padding:16px;margin-top:18px}.summary-row{display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;font-weight:700}.summary-row.total{border-top:1px solid #cad8d8;padding-top:10px;font-size:16px;color:var(--accent);font-weight:900}
     .checkout-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:0;border-radius:10px;font-weight:900;margin-top:16px;cursor:pointer}
-    .provider-link{display:inline-block;background:rgba(74,107,109,.08);border:1px solid rgba(74,107,109,.18);border-radius:7px;padding:6px 8px;text-decoration:none;cursor:pointer}.provider-link:hover{background:rgba(122,199,66,.18)}
+    .provider-link{display:inline-flex;align-items:center;justify-content:center;width:100%;background:rgba(74,107,109,.08);border:1px solid rgba(74,107,109,.18);border-radius:7px;padding:9px 8px;text-decoration:none;cursor:pointer;position:relative;z-index:20;pointer-events:auto;font-family:inherit;line-height:1.15}.provider-link:hover{background:rgba(122,199,66,.18)}
     footer{margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88)}
     footer a{color:#fff;font-weight:800;text-decoration:underline}
     footer a:hover{color:var(--accent)}
@@ -45,7 +45,10 @@
 
   
     .nexo-search-instruction{display:none!important}
-  </style>
+  
+.variant-link-btn{width:100%;border:1px solid rgba(74,107,109,.22);background:#eaf4ea;color:#4A6B6D;border-radius:9px;padding:10px 12px;font-weight:900;cursor:pointer;line-height:1.2;text-align:center;display:block;margin:8px 0;}
+.variant-link-btn:hover{background:#dff0d8;box-shadow:0 0 0 2px rgba(122,199,66,.22);}
+</style>
 </head>
 <body>
   <div class="store-container">
@@ -211,7 +214,7 @@ function renderProducts(list){
       <div class="product-image"><img src="${nexoStoreImageFor(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src=nexoStoreImages.default;"></div>
       <div class="product-info">
         <div class="provider">${p.providerLogo} ${p.provider}</div>
-        <button type="button" class="provider-link" onclick="openNexoProviderOptions(${p.id})">${nexoStoreT('provider')}</button>
+        <button type="button" class="provider-link variant-link-btn" data-variant-index="${idx}" onclick="nexoOpenVariantSafe(${idx}); return false;">${nexoStoreT('provider')}</button>
         <div class="product-name">${p.name}</div>
         <div class="product-rating">★★★★★ (128 ${nexoStoreT('reviews')})</div>
         <div class="product-price">$${p.price.toFixed(2)}</div>
@@ -242,6 +245,7 @@ async function filterProducts(){
       }
       products=result.products.slice(0,20);
       renderProducts(products);
+      try{ const st=JSON.parse(localStorage.getItem('nexoStoreReturnState')||'null'); if(st && st.scrollY){ setTimeout(()=>window.scrollTo(0, Number(st.scrollY)||0),150); } }catch(e){}
       if(result.outOfBudget && products.length){
         const grid=document.getElementById('productsGrid');
         grid.insertAdjacentHTML('afterbegin','<div class="api-note" style="grid-column:1/-1">'+(result.message || 'CJ devolvió productos reales, pero superan el presupuesto máximo colocado. Aumente el presupuesto para comprar ese producto.')+'</div>');
@@ -254,15 +258,50 @@ async function filterProducts(){
 }
 function addToCartByIndex(idx){ const p=products[idx]; if(!p)return; addProductToCart(p); }
 
+
+function nexoOpenVariantSafe(idx){
+  const p = Array.isArray(products) ? products[idx] : null;
+  if(!p){ alert('Producto no cargado. Vuelva a buscar el producto.'); return false; }
+  openNexoProviderOptionsPayload(p);
+  return false;
+}
+
+function openNexoProviderOptionsByIndex(idx, ev){
+  if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+  const p = products[idx];
+  if(!p) return false;
+  openNexoProviderOptionsPayload(p);
+  return false;
+}
 function openNexoProviderOptions(id){
-  const p=products.find(x=>x.id===id); if(!p) return;
+  const p=products.find(x=>String(x.id)===String(id));
+  if(!p) return;
+  openNexoProviderOptionsPayload(p);
+}
+function openNexoProviderOptionsPayload(p){
   try{
+    const searchValue = document.getElementById('searchInput')?.value || '';
+    const maxRaw = document.getElementById('priceFilter')?.value || '';
+    const cat = document.getElementById('categoryFilter')?.value || '';
     localStorage.setItem('nexoSelectedProviderProduct', JSON.stringify(p));
     localStorage.setItem('nexoProviderOptions', JSON.stringify(products));
-    localStorage.setItem('nexoStoreReturnState', JSON.stringify({search:document.getElementById('searchInput')?.value||'', maxRaw:document.getElementById('priceFilter')?.value||'', cat:document.getElementById('categoryFilter')?.value||''}));
+    localStorage.setItem('nexoStoreReturnState', JSON.stringify({search:searchValue, maxRaw, cat, scrollY: window.scrollY || 0}));
   }catch(e){}
-  location.href='nexo-opciones-proveedor.html';
+  window.location.href='nexo-opciones-proveedor.html';
 }
+
+
+// Respaldo de clic para que "Ver variantes del producto" funcione aunque Vercel/navegador bloquee el onclick inline.
+document.addEventListener('click', function(ev){
+  const btn = ev.target.closest && ev.target.closest('[data-variant-index]');
+  if(!btn) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  const idx = Number(btn.getAttribute('data-variant-index'));
+  const p = products && products[idx];
+  if(p) openNexoProviderOptionsPayload(p);
+  return false;
+}, true);
 
 function addToCart(id){
   const p=products.find(x=>String(x.id)===String(id)); if(!p)return; addProductToCart(p); }

@@ -930,12 +930,7 @@ function validarLogin(){
 
     if(pass === "Lolo1234@"){
         localStorage.setItem('nexoAdminAuth','ok');
-        localStorage.setItem('nexoAdminRole','superadministrador');
-        localStorage.setItem('nexoAdminEmail','ermcba@hotmail.com');
-        sessionStorage.setItem('nexoAdminAuth','ok');
-        sessionStorage.setItem('nexoAdminRole','superadministrador');
-        sessionStorage.setItem('nexoAdminEmail','ermcba@hotmail.com');
-        window.location.href = 'nexo-admin-panel.html?v=SUPERADMINOK20260527';
+        window.location.href = 'nexo-admin-panel.html';
         return false;
     }
 
