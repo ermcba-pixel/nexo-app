@@ -1145,20 +1145,20 @@ function selectPayment(methodId, btnEl=null) {
             <div class="payment-fields-panel">
                 <div class="form-group">
                     <label class="form-label">NOMBRE COMO APARECE EN LA TARJETA</label>
-                    <input type="text" class="form-input" id="cardHolder" name="nexo_card_holder" placeholder="Nombre del titular" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true">
+                    <input type="text" class="form-input" id="cardHolder" name="nexo_pago_ref_1" placeholder="Nombre del titular" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                 </div>
                 <div class="form-group">
                     <label class="form-label">NÚMERO DE TARJETA</label>
-                    <input type="text" class="form-input" id="cardNumber" name="nexo_card_reference" placeholder="1234 5678 8765 4567" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true">
+                    <input type="text" class="form-input" id="cardNumber" name="nexo_pago_ref_2" placeholder="Número de tarjeta" inputmode="numeric" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group">
                         <label class="form-label">MM/AA</label>
-                        <input type="text" class="form-input" id="cardExpiry" name="nexo_card_exp" placeholder="11/32" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true">
+                        <input type="text" class="form-input" id="cardExpiry" name="nexo_pago_ref_3" placeholder="MM/AA" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
                     <div class="form-group">
                         <label class="form-label">CVV</label>
-                        <input type="password" class="form-input" id="cardCvv" name="nexo_security_code" placeholder="123" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true">
+                        <input type="password" class="form-input" id="cardCvv" name="nexo_pago_ref_4" placeholder="CVV" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
                 </div>
                 ${nexoLegalBlockPage()}
@@ -1829,5 +1829,46 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <script src="nexo-legal-i18n.js"></script>
+
+<style id="nexo-horizontal-cart-final-fix">
+/* carrito horizontal definitivo */
+.cart-section{max-width:1120px;margin-left:auto!important;margin-right:auto!important;}
+.cart-items{display:flex!important;flex-direction:column!important;gap:14px!important;}
+.cart-item{display:grid!important;grid-template-columns:120px minmax(260px,1fr) minmax(170px,.7fr) 135px!important;align-items:center!important;gap:18px!important;width:100%!important;min-height:128px!important;}
+.cart-item-icon{width:112px!important;height:96px!important;}
+.cart-item-main{min-width:0!important;}
+.cart-item-name{font-size:13px!important;line-height:1.25!important;}
+.cart-item-features{max-height:78px!important;overflow:auto!important;}
+.cart-item-costs{min-width:160px!important;}
+.cart-item-actions{min-width:126px!important;}
+@media(max-width:900px){.cart-item{grid-template-columns:95px 1fr!important}.cart-item-costs,.cart-item-actions{grid-column:1 / -1!important}.cart-item-icon{width:90px!important;height:78px!important}}
+</style>
+<script id="nexo-checkout-final-runtime-fix">
+(function(){
+  function normalizeCartCosts(){
+    try{
+      const cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
+      let changed=false;
+      cart.forEach(it=>{
+        const ship=Number(it.cjShippingCost ?? it.shippingAmazon ?? it.shippingCost ?? it.envio ?? it.costo_envio_usd ?? 0);
+        const vendor=Number(it.cjHandlingFee ?? it.vendorFee ?? it.handlingFee ?? it.costo_operativo_cj ?? 0);
+        if(!Number.isNaN(ship) && it.shippingAmazon!==ship){ it.shippingAmazon=ship; it.cjShippingCost=ship; changed=true; }
+        if(!Number.isNaN(vendor) && it.vendorFee!==vendor){ it.vendorFee=vendor; it.cjHandlingFee=vendor; changed=true; }
+      });
+      if(changed) localStorage.setItem('nexoCart',JSON.stringify(cart));
+    }catch(e){}
+  }
+  function removePaymentAutofillWarning(){
+    document.querySelectorAll('[name^="nexo_pago_ref_"]').forEach(el=>{
+      el.setAttribute('autocomplete','new-password');
+      el.setAttribute('data-form-type','other');
+      el.setAttribute('data-lpignore','true');
+    });
+  }
+  document.addEventListener('DOMContentLoaded',()=>{normalizeCartCosts(); removePaymentAutofillWarning(); setTimeout(removePaymentAutofillWarning,300);});
+  window.addEventListener('load',()=>{normalizeCartCosts(); removePaymentAutofillWarning();});
+})();
+</script>
+
 </body>
 </html>
