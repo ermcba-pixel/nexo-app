@@ -145,7 +145,7 @@ async function fetchCjProducts(search,maxPrice,catSel){
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false) return {ok:false, status:data.status || 'error', message:data.message || data.error || 'CJ API no disponible', setup:data.setup || []};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0)};
+  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), outOfBudget: !!data.outOfBudget, message:data.message||''};
 }
 
 const nexoStoreImages = {
@@ -222,8 +222,12 @@ async function filterProducts(){
         grid.innerHTML='<div class="api-note">'+nexoStoreT('cjApiNeeded')+'<br><small>'+nexoStoreT('cjApiNeededSub')+'</small><br><small>Detalle: '+String(result.message||'')+'<br>Prueba técnica: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>'; if(window.forceNexoFooter) window.forceNexoFooter();
         return;
       }
-      products=result.products.filter(p => !Number.isFinite(max) || p.price <= max).slice(0,20);
-      renderProducts(products); if(window.forceNexoFooter) window.forceNexoFooter();
+      products=result.products.slice(0,20);
+      renderProducts(products);
+      if(result.outOfBudget && products.length){
+        const grid=document.getElementById('productsGrid');
+        grid.insertAdjacentHTML('afterbegin','<div class="api-note" style="grid-column:1/-1">'+(result.message || 'CJ devolvió productos reales, pero superan el presupuesto máximo colocado. Aumente el presupuesto para comprar ese producto.')+'</div>');
+      } if(window.forceNexoFooter) window.forceNexoFooter();
     }catch(e){
       products=[];
       grid.innerHTML='<div class="api-note">'+nexoStoreT('cjApiNeeded')+'<br><small>'+nexoStoreT('cjApiError')+'</small><br><small>Detalle: '+String(e.message||e)+'<br>Prueba técnica: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>'; if(window.forceNexoFooter) window.forceNexoFooter();

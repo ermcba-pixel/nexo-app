@@ -168,7 +168,24 @@ function translateSearchTerm(q){
 function extractList(data){
   const d = data?.data ?? data;
   if(Array.isArray(d)) return d;
-  return d?.list || d?.content || d?.records || d?.products || d?.data || d?.result || [];
+
+  // CJ Product List V2 devuelve: data.content[0].productList
+  if(Array.isArray(d?.content)){
+    const out=[];
+    for(const block of d.content){
+      if(Array.isArray(block?.productList)) out.push(...block.productList);
+      else if(block && typeof block === 'object' && (block.id || block.pid || block.productId || block.nameEn || block.productNameEn)) out.push(block);
+    }
+    if(out.length) return out;
+  }
+
+  if(Array.isArray(d?.productList)) return d.productList;
+  if(Array.isArray(d?.list)) return d.list;
+  if(Array.isArray(d?.records)) return d.records;
+  if(Array.isArray(d?.products)) return d.products;
+  if(Array.isArray(d?.data)) return d.data;
+  if(Array.isArray(d?.result)) return d.result;
+  return [];
 }
 
 export default async function handler(req,res){
@@ -189,29 +206,61 @@ export default async function handler(req,res){
   try{
     const token = await getCjAccessToken();
     const translatedQ = translateSearchTerm(q);
-    const params = new URLSearchParams({page:String(page), size:String(size), keyWord:translatedQ});
-    // CJ API oficial usa startSellPrice/endSellPrice, no minPrice/maxPrice.
-    if(Number.isFinite(minPrice) && minPrice > 0) params.set('startSellPrice', String(minPrice));
-    if(Number.isFinite(maxPrice) && maxPrice > 0) params.set('endSellPrice', String(maxPrice));
-    params.set('features', 'product,category');
 
-    const data = await fetchJson(`${CJ_BASE}/product/listV2?${params.toString()}`, {
-      method:'GET',
-      headers:{'CJ-Access-Token': token, 'Content-Type':'application/json'}
-    }, 20000);
+    async function queryListV2(includeBudget=true){
+      const params = new URLSearchParams({page:String(page), size:String(size), keyWord:translatedQ});
+      // CJ API oficial: startSellPrice/endSellPrice. features debe ser enable_category/enable_description, no texto libre.
+      if(includeBudget && Number.isFinite(minPrice) && minPrice > 0) params.set('startSellPrice', String(minPrice));
+      if(includeBudget && Number.isFinite(maxPrice) && maxPrice > 0) params.set('endSellPrice', String(maxPrice));
+      params.set('features', 'enable_category');
+      const data = await fetchJson(`${CJ_BASE}/product/listV2?${params.toString()}`, {
+        method:'GET',
+        headers:{'CJ-Access-Token': token, 'Content-Type':'application/json'}
+      }, 20000);
+      return {data, list: extractList(data), endpoint:'listV2', cjQuery:translatedQ};
+    }
 
-    let products = extractList(data).map(normalizeCj).filter(p => p.price > 0);
-    if(Number.isFinite(maxPrice) && maxPrice > 0) products = products.filter(p => p.price <= maxPrice);
-    products = products.slice(0, size);
+    async function queryListV1(includeBudget=true){
+      const params = new URLSearchParams({pageNum:String(page), pageSize:String(size), productNameEn:translatedQ});
+      if(includeBudget && Number.isFinite(minPrice) && minPrice > 0) params.set('minPrice', String(minPrice));
+      if(includeBudget && Number.isFinite(maxPrice) && maxPrice > 0) params.set('maxPrice', String(maxPrice));
+      params.set('searchType', '0');
+      const data = await fetchJson(`${CJ_BASE}/product/list?${params.toString()}`, {
+        method:'GET',
+        headers:{'CJ-Access-Token': token, 'Content-Type':'application/json'}
+      }, 20000);
+      return {data, list: extractList(data), endpoint:'list', cjQuery:translatedQ};
+    }
+
+    let result = await queryListV2(true);
+    if(!result.list.length) result = await queryListV1(true);
+
+    // Si el usuario puso un presupuesto demasiado bajo y CJ no devuelve nada, mostramos productos reales igual
+    // marcados como fuera del presupuesto para que no parezca que el sistema falla.
+    let outOfBudget = false;
+    if(!result.list.length && maxPrice > 0){
+      result = await queryListV2(false);
+      if(!result.list.length) result = await queryListV1(false);
+      outOfBudget = true;
+    }
+
+    let products = result.list.map(normalizeCj).filter(p => p.price > 0);
+    if(!outOfBudget && Number.isFinite(maxPrice) && maxPrice > 0) products = products.filter(p => p.price <= maxPrice);
+    products = products.slice(0, size).map(p => ({...p, outOfBudget}));
 
     return res.status(200).json({
       ok:true,
       source:'cj-dropshipping-api',
+      endpoint:result.endpoint,
       query:q,
       cjQuery:translatedQ,
+      maxPrice:Number.isFinite(maxPrice) ? maxPrice : 0,
+      outOfBudget,
       count:products.length,
       products,
-      message: products.length ? 'Productos reales CJ obtenidos correctamente' : 'CJ no devolvió productos para esa búsqueda/presupuesto'
+      message: products.length
+        ? (outOfBudget ? 'CJ tiene productos reales, pero superan el presupuesto indicado' : 'Productos reales CJ obtenidos correctamente')
+        : 'CJ no devolvió productos para esa búsqueda'
     });
   }catch(err){
     return res.status(err.status || 500).json({
