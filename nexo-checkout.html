@@ -149,24 +149,22 @@
 
         .cart-items {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: 1fr;
             gap: 16px;
         }
 
         .cart-item {
             background: var(--white);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: 140px 1.3fr .8fr .8fr auto;
+            gap: 16px;
+            align-items: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
-        .cart-item-icon {
-            font-size: 40px;
-            text-align: center;
-        }
+        .cart-item-icon {font-size:40px;text-align:center}.cart-item-icon img{width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;}
 
         .cart-item-provider {
             font-size: 10px;
@@ -520,6 +518,7 @@
 
         .cart-item-features{font-size:10px;color:#4A6B6D;line-height:1.4;background:#f5fbf9;border-radius:6px;padding:7px;margin-top:2px;}
 
+@media(max-width:900px){.cart-item{grid-template-columns:1fr!important}.cart-item-icon img{width:100%;height:160px}.cart-item-controls{justify-content:flex-start!important}}
 </style>
 </head>
 <body>
@@ -1062,7 +1061,7 @@ function nexoPayText(key){
     const lang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || currentLang || 'es').slice(0,2);
     const D = {
       es:{
-        cardTitle:'Pago real con tarjeta mediante PayPal seguro',
+        cardName:'Nombre como aparece en la tarjeta', cardNamePh:'Nombre del titular', cardNumber:'Número de tarjeta', cardSecureNote:'Los datos de tarjeta se registran para seguimiento interno del pedido; el cobro real se ejecuta mediante pasarela segura PayPal/Stripe habilitada para nexo™.', cardTitle:'Pago real con tarjeta mediante PayPal seguro',
         cardText:'nexo™ no guarda números de tarjeta ni CVV. Al confirmar, se abrirá PayPal Business para pagar de forma real y segura con PayPal o tarjeta, según disponibilidad de PayPal en el país del cliente.',
         cardBtn:'Continuar con tarjeta / PayPal seguro',
         bankTitle:'Transferencia bancaria / ACH / Wire / Land Bank',
@@ -1071,7 +1070,7 @@ function nexoPayText(key){
         paypalBtn:'Continuar con PayPal', payoneerText:'Payoneer queda registrado como método de operación empresarial. Para cobro real al cliente, se abrirá PayPal seguro o se confirmará manualmente si corresponde.', payoneerBtn:'Continuar con Payoneer'
       },
       en:{
-        cardTitle:'Real card payment through secure PayPal', cardText:'nexo™ does not store card numbers or CVV. After confirmation, PayPal Business will open so the customer can pay securely with PayPal or card, depending on PayPal availability in the customer country.', cardBtn:'Continue with card / secure PayPal',
+        cardName:'Name as it appears on the card', cardNamePh:'Cardholder name', cardNumber:'Card number', cardSecureNote:'Card data is recorded for internal order tracking; the real charge is processed through the secure PayPal/Stripe gateway enabled for nexo™.', cardTitle:'Real card payment through secure PayPal', cardText:'nexo™ does not store card numbers or CVV. After confirmation, PayPal Business will open so the customer can pay securely with PayPal or card, depending on PayPal availability in the customer country.', cardBtn:'Continue with card / secure PayPal',
         bankTitle:'Bank transfer / ACH / Wire / Land Bank', bankText:'Register the customer bank or reference for tracking. The real charge will be processed through secure PayPal if PayPal enables bank account/ACH/Wire; if using a direct transfer, the order remains pending until funds are confirmed.', bankHolder:'Bank account holder', bankName:'Customer bank', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Reference / operation number (optional)', transferType:'Transfer type', bankBtn:'Continue with transfer / secure payment', paypalBtn:'Continue with PayPal', payoneerText:'Payoneer is recorded as an enterprise operation method. For real customer collection, secure PayPal will open or manual confirmation will apply when needed.', payoneerBtn:'Continue with Payoneer'
       },
       pt:{cardTitle:'Pagamento real com cartão via PayPal seguro', cardText:'nexo™ não guarda números de cartão nem CVV. Ao confirmar, o PayPal Business será aberto para pagar de forma real e segura com PayPal ou cartão, conforme disponibilidade do PayPal no país do cliente.', cardBtn:'Continuar com cartão / PayPal seguro', bankTitle:'Transferência bancária / ACH / Wire / Land Bank', bankText:'Registre o banco ou referência do cliente para acompanhamento. A cobrança real será processada via PayPal seguro se o PayPal habilitar conta bancária/ACH/Wire; se usar transferência direta, o pedido fica pendente até confirmar o crédito.', bankHolder:'Titular da conta bancária', bankName:'Banco do cliente', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Referência / número da operação (opcional)', transferType:'Tipo de transferência', bankBtn:'Continuar com transferência / pagamento seguro', paypalBtn:'Continuar com PayPal', payoneerText:'Payoneer fica registrado como método de operação empresarial. Para cobrança real do cliente, será aberto o PayPal seguro ou confirmação manual quando aplicável.', payoneerBtn:'Continuar com Payoneer'},
@@ -1093,8 +1092,26 @@ function selectPayment(methodId, btnEl=null) {
     if (methodId === 'card') {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-top:6px;">
-                    <strong>${nexoPayText('cardTitle')}</strong><br>${nexoPayText('cardText')}
+                <div class="form-group">
+                    <label class="form-label">${nexoPayText('cardName')}</label>
+                    <input type="text" class="form-input" id="cardHolder" placeholder="${nexoPayText('cardNamePh')}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">${nexoPayText('cardNumber')}</label>
+                    <input type="text" class="form-input" id="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 8765 4567">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">MM/AA</label>
+                        <input type="text" class="form-input" id="cardExpiry" autocomplete="cc-exp" placeholder="11/32">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV</label>
+                        <input type="password" class="form-input" id="cardCvv" autocomplete="cc-csc" placeholder="123">
+                    </div>
+                </div>
+                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.55;margin-top:8px;">
+                    ${nexoPayText('cardSecureNote')}
                 </div>
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('cardBtn')}</button>
             </div>
