@@ -1,15 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagos, comisiones y reembolsos | nexo</title>
-<style>:root{--primary:#4A6B6D;--secondary:#5A7C7E;--white:#fff;--dark:#2D3E3F;--accent:#7AC742;--line:#e5eeee}*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--dark)}.wrap{max-width:1040px;margin:28px auto;padding:0 18px}.card{background:var(--white);border-radius:24px;box-shadow:0 18px 40px rgba(0,0,0,.18);padding:34px}h1{margin:20px 0;color:var(--primary);font-size:34px}h2{color:var(--primary);margin-top:30px;border-top:1px solid var(--line);padding-top:20px}p,li{line-height:1.65;font-size:16px}.btn{display:inline-block;background:var(--dark);color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700}.note{background:#f5f9ef;border-left:4px solid var(--accent);padding:14px 16px;border-radius:12px;margin:18px 0}.footer-note{margin-top:34px;text-align:center;color:#475;font-size:13px;border-top:1px solid var(--line);padding-top:18px}</style>
-</head><body><div class="wrap"><div class="card"><a class="btn" href="index.html">← Volver al portal</a><h1>Política de pagos, comisiones y reembolsos – nexo</h1><div class="note">nexo™ actúa como intermediario. Las devoluciones y reembolsos dependen de las condiciones del proveedor internacional y del medio de pago utilizado.</div>
-<h2>1. Modalidades de pago</h2><p>La plataforma puede permitir pagos mediante tarjetas, PayPal, Payoneer, transferencias bancarias internacionales u otros medios habilitados según disponibilidad operativa.</p>
-<h2>2. Estructura del pago</h2><p>El pago incluye costo del producto o servicio, costos logísticos si aplican y comisión de intermediación de nexo™.</p>
-<h2>3. Moneda</h2><p>Las operaciones se realizan en USD. Para efectos fiscales en Bolivia, los importes podrán convertirse a moneda local al tipo de cambio oficial o de referencia aplicable.</p>
-<h2>4. Confirmación</h2><p>La orden se procesa una vez confirmado el pago por la pasarela o medio de pago correspondiente.</p>
-<h2>5. Reembolsos</h2><p>Los reembolsos se evaluarán caso por caso y dependerán del proveedor internacional, marketplace, operador logístico y medio de pago utilizado. nexo™ no garantiza devoluciones si el proveedor no las acepta.</p>
-<h2>6. Comisión de intermediación</h2><p>nexo™ retiene una comisión por su servicio de intermediación internacional. La devolución de esta comisión se evaluará caso por caso según el estado de la orden y la gestión realizada.</p>
-<h2>7. Procedimiento</h2><p>El cliente debe presentar su solicitud mediante el canal oficial de soporte, indicando número de pedido, producto, motivo y evidencias.</p>
-<div class="footer-note">nexo – Plataforma de Intermediación Comercial Internacional<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>© 2026 nexo™ – Todos los derechos reservados</div></div></div><script src="nexo-legal-i18n.js"></script></body></html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nexo™</title>
+<style>
+:root{--primary:#4A6B6D;--secondary:#5A7C7E;--light:#E8F0F0;--white:#fff;--dark:#2D3E3F;--accent:#7AC742;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--dark);padding:36px 18px;}
+.page{max-width:1120px;margin:0 auto;background:var(--white);border-radius:28px;padding:42px;box-shadow:0 25px 70px rgba(0,0,0,.22);}
+.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:28px;}
+.back{background:var(--dark);color:#fff;text-decoration:none;border-radius:10px;padding:14px 22px;font-weight:900;}
+.brand{font-weight:900;font-size:18px}
+.langs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 28px}
+.langs button{border:2px solid var(--primary);background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer}
+.langs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+h1{font-size:38px;color:var(--primary);margin:0 0 24px}
+h2{font-size:25px;color:var(--primary);margin:28px 0 12px}
+p,li{font-size:18px;line-height:1.75}
+ul{padding-left:24px}
+.footer{margin-top:36px;padding-top:18px;border-top:1px solid #dbe7e5;text-align:center;font-size:13px;color:#607476}
+@media(max-width:720px){.page{padding:26px}.top{flex-direction:column;align-items:flex-start}h1{font-size:30px}p,li{font-size:16px}}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="top">
+    <a class="back" id="backBtn" href="index.html">← Volver al portal</a>
+    <div class="brand">nexo Servicios Generales y Empresariales</div>
+  </div>
+  <div class="langs">
+    <button data-lang="es">Español</button>
+    <button data-lang="en">English</button>
+    <button data-lang="pt">Português</button>
+    <button data-lang="it">Italiano</button>
+    <button data-lang="fr">Français</button>
+  </div>
+  <h1 id="pageTitle"></h1>
+  <div id="pageBody"></div>
+  <div class="footer" id="pageFooter"></div>
+</main>
+<script>
+const PAGE_DATA = {"es": ["Reembolsos", [["Condiciones", ["Los reembolsos se revisan según estado del pedido, proveedor, logística, confirmación de pago y política aplicable."]], ["Solicitud", ["El cliente debe enviar el número de pedido, correo registrado y descripción del caso por el canal de atención de nexo."]]]], "en": ["Refunds", [["Conditions", ["Refunds are reviewed according to order status, provider, logistics, payment confirmation and applicable policy."]], ["Request", ["The customer must send the order number, registered email and case description through nexo support channels."]]]], "pt": ["Reembolsos", [["Condições", ["Os reembolsos são revisados conforme o estado do pedido, fornecedor, logística, confirmação de pagamento e política aplicável."]], ["Solicitação", ["O cliente deve enviar número do pedido, e-mail cadastrado e descrição do caso pelo canal de atendimento da nexo."]]]], "it": ["Rimborsi", [["Condizioni", ["I rimborsi sono esaminati in base allo stato dell’ordine, al fornitore, alla logistica, alla conferma di pagamento e alla politica applicabile."]], ["Richiesta", ["Il cliente deve inviare numero d’ordine, email registrata e descrizione del caso tramite il canale di assistenza nexo."]]]], "fr": ["Remboursements", [["Conditions", ["Les remboursements sont examinés selon l’état de la commande, le fournisseur, la logistique, la confirmation de paiement et la politique applicable."]], ["Demande", ["Le client doit envoyer le numéro de commande, l’e-mail enregistré et la description du cas via le canal de support nexo."]]]]};
+function getLang(){
+  const p = new URLSearchParams(location.search).get('lang');
+  return (p || localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es').slice(0,2).toLowerCase();
+}
+function setLang(lang){
+  localStorage.setItem('nexoLang', lang);
+  localStorage.setItem('nexo_language', lang);
+  history.replaceState(null,'', location.pathname + '?lang=' + encodeURIComponent(lang));
+  applyLang();
+}
+function applyLang(){
+  const lang = getLang();
+  const d = PAGE_DATA[lang] || PAGE_DATA.es;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.langs button').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+  document.getElementById('backBtn').textContent = {
+    es:'← Volver al portal', en:'← Back to portal', pt:'← Voltar ao portal', it:'← Torna al portale', fr:'← Retour au portail'
+  }[lang] || '← Volver al portal';
+  document.getElementById('pageTitle').textContent = d[0];
+  document.getElementById('pageBody').innerHTML = d[1].map(section => {
+    const title = section[0];
+    const lines = section[1];
+    return '<section><h2>'+title+'</h2>' + lines.map(x=>'<p>'+x+'</p>').join('') + '</section>';
+  }).join('');
+  document.getElementById('pageFooter').innerHTML = {
+    es:'nexo™ – Plataforma de Intermediación Comercial Internacional<br>© 2026 nexo™ – Todos los derechos reservados',
+    en:'nexo™ – International Commercial Intermediation Platform<br>© 2026 nexo™ – All rights reserved',
+    pt:'nexo™ – Plataforma de Intermediação Comercial Internacional<br>© 2026 nexo™ – Todos os direitos reservados',
+    it:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale<br>© 2026 nexo™ – Tutti i diritti riservati',
+    fr:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale<br>© 2026 nexo™ – Tous droits réservés'
+  }[lang] || '';
+}
+document.querySelectorAll('.langs button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+applyLang();
+</script>
+</body>
+</html>

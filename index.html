@@ -421,15 +421,19 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
                 <p class="portal-description">
                     Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
                 </p>
-                <div class="nexo-left-legal-card" data-nexo-legal-footer="1">
-                    <strong>nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
-                    nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
-                    nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
-                    © 2026 nexo™ – Todos los derechos reservados<br>
-                    <a href="aviso-legal.html">Aviso Legal</a> | <a href="terminos-condiciones.html">Términos y Condiciones</a> | <a href="politica-privacidad.html">Privacidad</a> | <a href="politica-cookies.html">Cookies</a> | <a href="reembolsos.html">Reembolsos</a>
+                <div class="nexo-left-legal-card" data-nexo-left-legal="1">
+                    <strong id="leftLegalTitle">nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
+                    <span id="leftLegalCompany">nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia</span><br>
+                    <span id="leftLegalDesc">nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</span><br>
+                    <span id="leftLegalCopy">© 2026 nexo™ – Todos los derechos reservados</span><br>
+                    <a id="leftLegalNotice" href="aviso-legal.html">Aviso Legal</a> |
+                    <a id="leftLegalTerms" href="terminos-condiciones.html">Términos y Condiciones</a> |
+                    <a id="leftLegalPrivacy" href="politica-privacidad.html">Privacidad</a> |
+                    <a id="leftLegalCookies" href="politica-cookies.html">Cookies</a> |
+                    <a id="leftLegalRefunds" href="reembolsos.html">Reembolsos</a>
                 </div>
 
-            </div>
+</div>
         </div>
 
         <!-- CONTENT DERECHO -->
@@ -745,6 +749,152 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
   document.addEventListener('DOMContentLoaded',()=>{nexoApplyLegalI18n(); setTimeout(nexoApplyLegalI18n,200); setTimeout(nexoApplyLegalI18n,700);});
   document.addEventListener('click',e=>{ if(e.target.closest('button,a')) setTimeout(nexoApplyLegalI18n,60);},true);
   window.addEventListener('storage',nexoApplyLegalI18n);
+})();
+</script>
+
+
+<script id="nexo-index-legal-left-final-fix">
+(function(){
+  const LEGAL_INDEX = {
+    es:{
+      title:'nexo™ – Plataforma de Intermediación Comercial Internacional',
+      company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
+      desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',
+      copy:'© 2026 nexo™ – Todos los derechos reservados',
+      legal:'Aviso Legal', terms:'Términos y Condiciones', privacy:'Privacidad', cookies:'Cookies', refunds:'Reembolsos'
+    },
+    en:{
+      title:'nexo™ – International Commercial Intermediation Platform',
+      company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',
+      desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',
+      copy:'© 2026 nexo™ – All rights reserved',
+      legal:'Legal Notice', terms:'Terms and Conditions', privacy:'Privacy', cookies:'Cookies', refunds:'Refunds'
+    },
+    pt:{
+      title:'nexo™ – Plataforma de Intermediação Comercial Internacional',
+      company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',
+      desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',
+      copy:'© 2026 nexo™ – Todos os direitos reservados',
+      legal:'Aviso Legal', terms:'Termos e Condições', privacy:'Privacidade', cookies:'Cookies', refunds:'Reembolsos'
+    },
+    it:{
+      title:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale',
+      company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',
+      desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',
+      copy:'© 2026 nexo™ – Tutti i diritti riservati',
+      legal:'Avviso Legale', terms:'Termini e Condizioni', privacy:'Privacy', cookies:'Cookie', refunds:'Rimborsi'
+    },
+    fr:{
+      title:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale',
+      company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',
+      desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',
+      copy:'© 2026 nexo™ – Tous droits réservés',
+      legal:'Mentions légales', terms:'Conditions générales', privacy:'Confidentialité', cookies:'Cookies', refunds:'Remboursements'
+    }
+  };
+
+  function currentLang(){
+    return (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es').slice(0,2).toLowerCase();
+  }
+
+  function setText(id, value){
+    const el = document.getElementById(id);
+    if(el) el.textContent = value;
+  }
+
+  function applyIndexLegal(){
+    const t = LEGAL_INDEX[currentLang()] || LEGAL_INDEX.es;
+
+    setText('leftLegalTitle', t.title);
+    setText('leftLegalCompany', t.company);
+    setText('leftLegalDesc', t.desc);
+    setText('leftLegalCopy', t.copy);
+    setText('leftLegalNotice', t.legal);
+    setText('leftLegalTerms', t.terms);
+    setText('leftLegalPrivacy', t.privacy);
+    setText('leftLegalCookies', t.cookies);
+    setText('leftLegalRefunds', t.refunds);
+
+    // Si existe otro footer legal visible en index, también queda sincronizado.
+    document.querySelectorAll('footer.nexo-legal-footer[data-nexo-legal-footer="1"]').forEach(footer=>{
+      footer.innerHTML = `<strong>nexo™</strong> – ${t.title.replace('nexo™ – ','')}<br>
+        ${t.company}<br>
+        ${t.desc}<br>
+        ${t.copy}<br>
+        <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+          <a href="aviso-legal.html">${t.legal}</a><span>&nbsp;|&nbsp;</span>
+          <a href="terminos-condiciones.html">${t.terms}</a><span>&nbsp;|&nbsp;</span>
+          <a href="politica-privacidad.html">${t.privacy}</a><span>&nbsp;|&nbsp;</span>
+          <a href="politica-cookies.html">${t.cookies}</a><span>&nbsp;|&nbsp;</span>
+          <a href="reembolsos.html">${t.refunds}</a>
+        </div>`;
+    });
+  }
+
+  const previousSetLanguage = window.setLanguage;
+  window.setLanguage = function(lang, ev){
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang);
+    if(typeof previousSetLanguage === 'function'){
+      try { previousSetLanguage(lang, ev); } catch(e) {}
+    }
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang === lang));
+    setTimeout(applyIndexLegal, 0);
+    setTimeout(applyIndexLegal, 80);
+    return false;
+  };
+
+  const previousApplyPortalLanguage = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof previousApplyPortalLanguage === 'function'){
+      try { previousApplyPortalLanguage(); } catch(e) {}
+    }
+    applyIndexLegal();
+  };
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    applyIndexLegal();
+    setTimeout(applyIndexLegal, 100);
+    setTimeout(applyIndexLegal, 500);
+  });
+  window.addEventListener('storage', applyIndexLegal);
+})();
+</script>
+
+
+<script id="nexo-legal-links-carry-lang-final">
+(function(){
+  function currentLang(){
+    return (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es').slice(0,2).toLowerCase();
+  }
+  function patchLegalLinks(){
+    const files = ['aviso-legal.html','terminos-condiciones.html','politica-privacidad.html','politica-cookies.html','reembolsos.html'];
+    const lang = currentLang();
+    document.querySelectorAll('a[href]').forEach(a=>{
+      const href = a.getAttribute('href') || '';
+      const clean = href.split('?')[0].split('#')[0];
+      if(files.includes(clean)){
+        a.setAttribute('href', clean + '?lang=' + encodeURIComponent(lang));
+      }
+    });
+  }
+  const oldSetLanguage = window.setLanguage;
+  window.setLanguage = function(lang, ev){
+    if(typeof oldSetLanguage === 'function'){
+      try { oldSetLanguage(lang, ev); } catch(e) {}
+    } else {
+      localStorage.setItem('nexoLang', lang);
+      localStorage.setItem('nexo_language', lang);
+    }
+    setTimeout(patchLegalLinks, 0);
+    setTimeout(patchLegalLinks, 80);
+    return false;
+  };
+  document.addEventListener('DOMContentLoaded', ()=>{
+    patchLegalLinks();
+    setTimeout(patchLegalLinks, 200);
+    setTimeout(patchLegalLinks, 700);
+  });
 })();
 </script>
 
