@@ -422,11 +422,15 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
                     Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
                 </p>
                 <div class="nexo-left-legal-card">
-                    <strong>nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
-                    nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
-                    nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
-                    © 2026 nexo™ – Todos los derechos reservados<br>
-                    <a href="aviso-legal.html">Aviso Legal</a> | <a href="terminos-condiciones.html">Términos y Condiciones</a> | <a href="politica-privacidad.html">Privacidad</a> | <a href="politica-cookies.html">Cookies</a> | <a href="reembolsos.html">Reembolsos</a>
+                    <strong id="leftLegalTitle">nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
+                    <span id="leftLegalCompany">nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia</span><br>
+                    <span id="leftLegalDesc">nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</span><br>
+                    <span id="leftLegalCopy">© 2026 nexo™ – Todos los derechos reservados</span><br>
+                    <a href="aviso-legal.html" id="leftLegal1">Aviso Legal</a> |
+                    <a href="terminos-condiciones.html" id="leftLegal2">Términos y Condiciones</a> |
+                    <a href="politica-privacidad.html" id="leftLegal3">Privacidad</a> |
+                    <a href="politica-cookies.html" id="leftLegal4">Cookies</a> |
+                    <a href="reembolsos.html" id="leftLegal5">Reembolsos</a>
                 </div>
 
             </div>
@@ -553,6 +557,25 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
     var lt = document.querySelector('.language-title'); if(lt) lt.textContent = t.lang;
     var ht = document.querySelector('.portal-title'); if(ht) ht.innerHTML = t.header;
     var hd = document.querySelector('.portal-description'); if(hd) hd.textContent = t.desc;
+
+    const legalLeft = {
+      es:{title:'nexo™ – Plataforma de Intermediación Comercial Internacional', company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia', desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.', copy:'© 2026 nexo™ – Todos los derechos reservados', l1:'Aviso Legal', l2:'Términos y Condiciones', l3:'Privacidad', l4:'Cookies', l5:'Reembolsos'},
+      en:{title:'nexo™ – International Commercial Intermediation Platform', company:'nexo General and Business Services – Tax ID/NIT: 774651015 – Bolivia', desc:'nexo™ acts exclusively as an intermediary between customers and international suppliers.', copy:'© 2026 nexo™ – All rights reserved', l1:'Legal Notice', l2:'Terms & Conditions', l3:'Privacy', l4:'Cookies', l5:'Refunds'},
+      pt:{title:'nexo™ – Plataforma de Intermediação Comercial Internacional', company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia', desc:'nexo™ atua exclusivamente como intermediário entre clientes e fornecedores internacionais.', copy:'© 2026 nexo™ – Todos os direitos reservados', l1:'Aviso Legal', l2:'Termos e Condições', l3:'Privacidade', l4:'Cookies', l5:'Reembolsos'},
+      it:{title:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale', company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia', desc:'nexo™ agisce esclusivamente come intermediario tra clienti e fornitori internazionali.', copy:'© 2026 nexo™ – Tutti i diritti riservati', l1:'Avviso Legale', l2:'Termini e Condizioni', l3:'Privacy', l4:'Cookie', l5:'Rimborsi'},
+      fr:{title:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale', company:'nexo Services Généraux et Entreprises – NIT: 774651015 – Bolivie', desc:'nexo™ agit exclusivement comme intermédiaire entre clients et fournisseurs internationaux.', copy:'© 2026 nexo™ – Tous droits réservés', l1:'Mentions légales', l2:'Conditions générales', l3:'Confidentialité', l4:'Cookies', l5:'Remboursements'}
+    };
+    const ll = legalLeft[lang] || legalLeft.es;
+    const setLeftText = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
+    setLeftText('leftLegalTitle', ll.title);
+    setLeftText('leftLegalCompany', ll.company);
+    setLeftText('leftLegalDesc', ll.desc);
+    setLeftText('leftLegalCopy', ll.copy);
+    setLeftText('leftLegal1', ll.l1);
+    setLeftText('leftLegal2', ll.l2);
+    setLeftText('leftLegal3', ll.l3);
+    setLeftText('leftLegal4', ll.l4);
+    setLeftText('leftLegal5', ll.l5);
     document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang===lang));
   }
   document.addEventListener('DOMContentLoaded', applyPortalLanguage);
