@@ -317,7 +317,6 @@
                         <div>
                             <label class="form-label">📧 Correo Electrónico</label>
                             <input type="email" class="form-input" id="loginEmail" placeholder="tu@email.com">
-                            <div class="password-help" id="emailUserHelp">Tu E-Mail es tu correo electrónico registrado.</div>
                         </div>
                     </div>
                     <div class="form-row full">
@@ -328,7 +327,7 @@
                         </div>
                     </div>
                     <button type="button" class="btn-login" id="loginBtn" onclick="loginClient(event)">Ingresar a Tienda</button>
-                    <div class="toggle-form" id="loginLinks">¿Aún no tienes cuenta? <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">Regístrate aquí</a><br><a href="#" id="forgotUserLink" onclick="return showEmailIsUser();">¿Cuál es mi E-Mail?</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">¿Olvidaste tu contraseña?</a></div>
+                    <div class="toggle-form" id="loginLinks">¿Aún no tienes cuenta? <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">Regístrate aquí</a><br><a href="#" id="forgotUserLink" onclick="return openRecoveryModal('user');">¿Te olvidaste tu usuario?</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">¿Olvidaste tu contraseña?</a></div>
                 </div>
             </div>
 
@@ -753,46 +752,33 @@
             }, 450);
         }
 
-        async function loginClient(e) {
+        function loginClient(e) {
             if (e) e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const saved = JSON.parse(localStorage.getItem('nexoClientProfile') || 'null');
 
             if (!email || !password) {
-                showAlert('Ingresa correo electrónico y contraseña.', 'error');
+                showAlert('Ingresa correo y contraseña.', 'error');
                 return;
-            }
-
-            try {
-                const remote = await nexoFindClientByEmailPassword(email, password);
-                if (remote && remote.email) {
-                    setSavedClientProfile(remote);
-                    sessionStorage.setItem('clientEmail', remote.email);
-                    sessionStorage.setItem('clientName', remote.fullName || '');
-                    sessionStorage.setItem('nexoActiveClient', JSON.stringify(remote));
-                    showAlert('✅ Ingreso habilitado. Abriendo tienda...', 'success');
-                    setTimeout(() => { window.location.href = 'nexo-tienda-cliente.html'; }, 450);
-                    return;
-                }
-            } catch(err) {
-                console.warn('No se pudo validar en Supabase, usando respaldo local:', err);
             }
 
             if (saved && saved.email) {
                 if (saved.email.toLowerCase() !== email.toLowerCase() || saved.password !== password) {
-                    showAlert('Correo electrónico o contraseña incorrectos.', 'error');
+                    showAlert('Correo o contraseña incorrectos.', 'error');
                     return;
                 }
                 sessionStorage.setItem('clientEmail', saved.email);
                 sessionStorage.setItem('clientName', saved.fullName || '');
                 sessionStorage.setItem('nexoActiveClient', JSON.stringify(saved));
-                showAlert('✅ Ingreso habilitado. Abriendo tienda...', 'success');
-                setTimeout(() => { window.location.href = 'nexo-tienda-cliente.html'; }, 450);
-                return;
+            } else {
+                sessionStorage.setItem('clientEmail', email);
             }
 
-            showAlert('Correo electrónico o contraseña incorrectos.', 'error');
+            showAlert('✅ Ingreso habilitado. Abriendo tienda...', 'success');
+            setTimeout(() => {
+                window.location.href = 'nexo-tienda-cliente.html';
+            }, 450);
         }
 
         function goBack(e) {
@@ -821,11 +807,11 @@
 function hardTranslateClientLogin(){
   const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
   const M = {
-    es:{title:'INGRESO A TIENDA', email:'Correo Electrónico', pass:'Contraseña', btn:'INGRESAR A TIENDA', back:'← Volver al Portal', noacc:'¿Aún no tienes cuenta?', reg:'Regístrate aquí', forgotu:'¿Cuál es mi E-Mail?', forgotp:'¿Olvidaste tu contraseña?'},
-    en:{title:'STORE LOGIN', email:'Email Address', pass:'Password', btn:'ENTER STORE', back:'← Back to Portal', noacc:"Don't have an account?", reg:'Register here', forgotu:'What is my E-Mail?', forgotp:'Forgot your password?'},
-    pt:{title:'ENTRADA NA LOJA', email:'Correio Eletrônico', pass:'Senha', btn:'ENTRAR NA LOJA', back:'← Voltar ao Portal', noacc:'Ainda não tem conta?', reg:'Registre-se aqui', forgotu:'Qual é meu E-Mail?', forgotp:'Esqueceu sua senha?'},
-    it:{title:'ACCESSO AL NEGOZIO', email:'Email', pass:'Password', btn:'ENTRA NEL NEGOZIO', back:'← Torna al Portale', noacc:'Non hai un account?', reg:'Registrati qui', forgotu:'Qual è la mia E-Mail?', forgotp:'Hai dimenticato la password?'},
-    fr:{title:'CONNEXION À LA BOUTIQUE', email:'Adresse e-mail', pass:'Mot de passe', btn:'ENTRER DANS LA BOUTIQUE', back:'← Retour au Portail', noacc:"Vous n'avez pas de compte ?", reg:'Inscrivez-vous ici', forgotu:'Quel est mon e-mail ?', forgotp:'Mot de passe oublié ?'}
+    es:{title:'INGRESO A TIENDA', email:'Correo Electrónico', pass:'Contraseña', btn:'INGRESAR A TIENDA', back:'← Volver al Portal', noacc:'¿Aún no tienes cuenta?', reg:'Regístrate aquí', forgotu:'¿Te olvidaste tu usuario?', forgotp:'¿Olvidaste tu contraseña?'},
+    en:{title:'STORE LOGIN', email:'Email Address', pass:'Password', btn:'ENTER STORE', back:'← Back to Portal', noacc:"Don't have an account?", reg:'Register here', forgotu:'Forgot your username?', forgotp:'Forgot your password?'},
+    pt:{title:'ENTRADA NA LOJA', email:'Correio Eletrônico', pass:'Senha', btn:'ENTRAR NA LOJA', back:'← Voltar ao Portal', noacc:'Ainda não tem conta?', reg:'Registre-se aqui', forgotu:'Esqueceu seu usuário?', forgotp:'Esqueceu sua senha?'},
+    it:{title:'ACCESSO AL NEGOZIO', email:'Email', pass:'Password', btn:'ENTRA NEL NEGOZIO', back:'← Torna al Portale', noacc:'Non hai un account?', reg:'Registrati qui', forgotu:'Hai dimenticato il tuo utente?', forgotp:'Hai dimenticato la password?'},
+    fr:{title:'CONNEXION À LA BOUTIQUE', email:'Adresse e-mail', pass:'Mot de passe', btn:'ENTRER DANS LA BOUTIQUE', back:'← Retour au Portail', noacc:"Vous n'avez pas de compte ?", reg:'Inscrivez-vous ici', forgotu:'Utilisateur oublié ?', forgotp:'Mot de passe oublié ?'}
   };
   const t = M[lang] || M.es;
   document.querySelectorAll('h1,h2,h3,label,div,span,p,a,button').forEach(el=>{
@@ -838,7 +824,7 @@ function hardTranslateClientLogin(){
   });
   const wrap = document.querySelector('.login-links') || document.getElementById('loginLinksWrap') || document.getElementById('loginLinksText');
   if (wrap) {
-    wrap.innerHTML = `${t.noacc} <a href="#" onclick="toggleForms();return false;">${t.reg}</a><br><a href="#" onclick="return showEmailIsUser();">${t.forgotu}</a> · <a href="#" onclick="return openRecoveryModal('pass');">${t.forgotp}</a>`;
+    wrap.innerHTML = `${t.noacc} <a href="#" onclick="toggleForms();return false;">${t.reg}</a><br><a href="#" onclick="alert('En preparación');return false;">${t.forgotu}</a> · <a href="#" onclick="alert('En preparación');return false;">${t.forgotp}</a>`;
   }
 }
 
@@ -847,11 +833,11 @@ window.addEventListener('DOMContentLoaded', function(){ setTimeout(hardTranslate
 
 <script>
 const loginTexts = {
-  es:{title:'Ingreso a Tienda', email:'📧 Correo Electrónico', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', btn:'Ingresar a Tienda', back:'← Volver al Portal', side:'Tienda Digital - Acceso Cliente Directo', noAccount:'¿Aún no tienes cuenta?', register:'Regístrate aquí', forgotUser:'¿Cuál es mi E-Mail?', forgotPass:'¿Olvidaste tu contraseña?', forgotUserMsg:'Tu E-Mail es el correo electrónico con el que te registraste.', forgotPassMsg:'La recuperación de contraseña está en preparación.'},
-  en:{title:'Store Login', email:'📧 Email Address', pass:'🔐 Password', passPh:'Minimum 8 characters', btn:'Enter Store', back:'← Back to Portal', side:'Digital Store - Direct Client Access', noAccount:"Don't have an account?", register:'Register here', forgotUser:'What is my E-Mail?', forgotPass:'Forgot your password?', forgotUserMsg:'Your E-Mail is the email address you registered with.', forgotPassMsg:'Password recovery is in preparation.'},
-  pt:{title:'Acesso à Loja', email:'📧 E-mail', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', btn:'Entrar na Loja', back:'← Voltar ao Portal', side:'Loja Digital - Acesso Direto do Cliente', noAccount:'Ainda não tem conta?', register:'Cadastre-se aqui', forgotUser:'Qual é meu E-Mail?', forgotPass:'Esqueceu sua senha?', forgotUserMsg:'Seu E-Mail é o endereço usado no cadastro.', forgotPassMsg:'A recuperação de senha está em preparação.'},
-  it:{title:'Accesso al Negozio', email:'📧 Email', pass:'🔐 Password', passPh:'Minimo 8 caratteri', btn:'Entra nel Negozio', back:'← Torna al Portale', side:'Negozio Digitale - Accesso Diretto Cliente', noAccount:'Non hai un account?', register:'Registrati qui', forgotUser:'Qual è la mia E-Mail?', forgotPass:'Hai dimenticato la password?', forgotUserMsg:'La tua E-Mail è l’indirizzo usato per la registrazione.', forgotPassMsg:'Il recupero password è in preparazione.'},
-  fr:{title:'Accès Boutique', email:'📧 E-mail', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', btn:'Entrer dans la Boutique', back:'← Retour au Portail', side:'Boutique Digitale - Accès Client Direct', noAccount:"Vous n'avez pas de compte ?", register:'Inscrivez-vous ici', forgotUser:'Quel est mon e-mail ?', forgotPass:'Vous avez oublié votre mot de passe ?', forgotUserMsg:'Votre E-Mail est l’adresse utilisée lors de l’inscription.', forgotPassMsg:'La récupération du mot de passe est en préparation.'}
+  es:{title:'Ingreso a Tienda', email:'📧 Correo Electrónico', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', btn:'Ingresar a Tienda', back:'← Volver al Portal', side:'Tienda Digital - Acceso Cliente Directo', noAccount:'¿Aún no tienes cuenta?', register:'Regístrate aquí', forgotUser:'¿Te olvidaste tu usuario?', forgotPass:'¿Olvidaste tu contraseña?', forgotUserMsg:'Tu usuario es el correo con el que te registraste.', forgotPassMsg:'La recuperación de contraseña está en preparación.'},
+  en:{title:'Store Login', email:'📧 Email Address', pass:'🔐 Password', passPh:'Minimum 8 characters', btn:'Enter Store', back:'← Back to Portal', side:'Digital Store - Direct Client Access', noAccount:"Don't have an account?", register:'Register here', forgotUser:'Forgot your username?', forgotPass:'Forgot your password?', forgotUserMsg:'Your username is the email you registered with.', forgotPassMsg:'Password recovery is in preparation.'},
+  pt:{title:'Acesso à Loja', email:'📧 E-mail', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', btn:'Entrar na Loja', back:'← Voltar ao Portal', side:'Loja Digital - Acesso Direto do Cliente', noAccount:'Ainda não tem conta?', register:'Cadastre-se aqui', forgotUser:'Esqueceu seu usuário?', forgotPass:'Esqueceu sua senha?', forgotUserMsg:'Seu usuário é o e-mail usado no cadastro.', forgotPassMsg:'A recuperação de senha está em preparação.'},
+  it:{title:'Accesso al Negozio', email:'📧 Email', pass:'🔐 Password', passPh:'Minimo 8 caratteri', btn:'Entra nel Negozio', back:'← Torna al Portale', side:'Negozio Digitale - Accesso Diretto Cliente', noAccount:'Non hai un account?', register:'Registrati qui', forgotUser:'Hai dimenticato il tuo utente?', forgotPass:'Hai dimenticato la password?', forgotUserMsg:'Il tuo utente è l’e-mail con cui ti sei registrato.', forgotPassMsg:'Il recupero password è in preparazione.'},
+  fr:{title:'Accès Boutique', email:'📧 E-mail', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', btn:'Entrer dans la Boutique', back:'← Retour au Portail', side:'Boutique Digitale - Accès Client Direct', noAccount:"Vous n'avez pas de compte ?", register:'Inscrivez-vous ici', forgotUser:'Vous avez oublié votre identifiant ?', forgotPass:'Vous avez oublié votre mot de passe ?', forgotUserMsg:'Votre identifiant est l’e-mail utilisé lors de l’inscription.', forgotPassMsg:'La récupération du mot de passe est en préparation.'}
 };
 let currentLoginTexts = loginTexts.es;
 function applyLoginLanguage(){
@@ -867,8 +853,7 @@ function applyLoginLanguage(){
   const btn = document.getElementById('loginBtn'); if(btn) btn.textContent = t.btn;
   const back = document.querySelector('.back-btn'); if(back) back.textContent = t.back;
   const sidep = document.querySelector('.login-header p'); if(sidep) sidep.textContent = t.side;
-  const links = document.getElementById('loginLinks'); if(links) links.innerHTML = `${t.noAccount} <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">${t.register}</a><br><a href="#" id="forgotUserLink" onclick="return showEmailIsUser();">${t.forgotUser}</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">${t.forgotPass}</a>`;
-  const emailHelp = document.getElementById('emailUserHelp'); if(emailHelp) emailHelp.textContent = (loginI18n[getCurrentLang()]?.forgotUserMsg || 'Tu E-Mail es tu correo electrónico registrado.');
+  const links = document.getElementById('loginLinks'); if(links) links.innerHTML = `${t.noAccount} <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">${t.register}</a><br><a href="#" id="forgotUserLink" onclick="return openRecoveryModal('user');">${t.forgotUser}</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">${t.forgotPass}</a>`;
 }
 function toggleLoginPassword(){
   const el=document.getElementById('loginPassword'); const eye=document.getElementById('toggleLoginPass');
@@ -964,181 +949,125 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 <script>
-let currentRecoveryMode = 'mail';
+let currentRecoveryMode = 'user';
 
 const recoveryTexts = {
   es: {
-    userInfo: 'Tu E-Mail de cliente es tu correo electrónico registrado. Ingresa siempre con tu email y contraseña.',
-    mailTitle: 'Recuperar E-Mail registrado',
-    mailNote: 'Ingresa tu contraseña registrada. Si coincide con la cuenta guardada, nexo™ mostrará el E-Mail asociado para que puedas ingresar.',
-    f1Mail: 'Contraseña registrada',
-    mailOk: 'Tu E-Mail registrado es: ',
-    wrongMailPass: 'La contraseña no coincide con la cuenta registrada.',
-    passTitle: 'Recuperar / actualizar contraseña',
-    passNote: 'Ingresa tu correo electrónico registrado y escribe tu nueva contraseña. En nexo™ el usuario del cliente es siempre su email.',
-    f1Pass: 'Correo electrónico registrado',
+    userTitle: 'Actualizar usuario',
+    userNote: 'Para cambiar tu usuario, escribe tu contraseña actual y repite tu nuevo usuario.',
+    passTitle: 'Actualizar contraseña',
+    passNote: 'Para cambiar tu contraseña, escribe tu usuario actual y repite tu nueva contraseña.',
+    f1User: 'Contraseña actual',
+    f2User: 'Nuevo usuario',
+    f3User: 'Repite nuevo usuario',
+    f1Pass: 'Usuario actual',
     f2Pass: 'Nueva contraseña',
     f3Pass: 'Repite nueva contraseña',
     save: 'Guardar y volver',
     cancel: 'Cancelar',
-    noProfile: 'No existe una cuenta registrada en este navegador. Primero crea tu cuenta o usa el correo con el que te registraste.',
-    wrongUser: 'El correo electrónico no coincide con la cuenta registrada.',
+    noProfile: 'No existe una cuenta registrada en este navegador. Primero crea tu cuenta.',
+    wrongPassword: 'La contraseña actual no coincide.',
+    wrongUser: 'El usuario actual no coincide.',
+    mismatchUser: 'Los dos campos del nuevo usuario no coinciden.',
     mismatchPass: 'Los dos campos de la nueva contraseña no coinciden.',
     shortPass: 'La nueva contraseña debe tener al menos 8 caracteres.',
     emptyFields: 'Completa los tres campos.',
-    passOk: 'Contraseña actualizada correctamente. Ya puedes ingresar con tu correo electrónico y tu nueva contraseña.'
+    userOk: 'Usuario actualizado correctamente. Ya puedes ingresar con tu nuevo usuario.',
+    passOk: 'Contraseña actualizada correctamente. Ya puedes ingresar con tu nueva contraseña.'
   },
   en: {
-    userInfo: 'Your customer username is your registered email address. Always sign in with your email and password.',
-    mailTitle: 'Recover registered E-Mail',
-    mailNote: 'Enter your registered password. If it matches the saved account, nexo™ will show the associated E-Mail so you can sign in.',
-    f1Mail: 'Registered password',
-    mailOk: 'Your registered E-Mail is: ',
-    wrongMailPass: 'The password does not match the registered account.',
-    passTitle: 'Recover / update password',
-    passNote: 'Enter your registered email address and your new password. In nexo™, the customer username is always the email.',
-    f1Pass: 'Registered email address',
+    userTitle: 'Update username',
+    userNote: 'To change your username, enter your current password and repeat your new username.',
+    passTitle: 'Update password',
+    passNote: 'To change your password, enter your current username and repeat your new password.',
+    f1User: 'Current password',
+    f2User: 'New username',
+    f3User: 'Repeat new username',
+    f1Pass: 'Current username',
     f2Pass: 'New password',
     f3Pass: 'Repeat new password',
     save: 'Save and return',
     cancel: 'Cancel',
-    noProfile: 'There is no registered account in this browser. Please create your account first or use the email you registered with.',
-    wrongUser: 'The email address does not match the registered account.',
+    noProfile: 'There is no registered account in this browser. Please create your account first.',
+    wrongPassword: 'The current password does not match.',
+    wrongUser: 'The current username does not match.',
+    mismatchUser: 'The two new username fields do not match.',
     mismatchPass: 'The two new password fields do not match.',
     shortPass: 'The new password must be at least 8 characters.',
     emptyFields: 'Complete all three fields.',
-    passOk: 'Password updated successfully. You can now sign in with your email and new password.'
+    userOk: 'Username updated successfully. You can now sign in with your new username.',
+    passOk: 'Password updated successfully. You can now sign in with your new password.'
   },
   pt: {
-    userInfo: 'Seu usuário de cliente é o e-mail cadastrado. Entre sempre com seu e-mail e senha.',
-    mailTitle: 'Recuperar E-Mail cadastrado',
-    mailNote: 'Informe sua senha cadastrada. Se coincidir com a conta salva, o nexo™ mostrará o E-Mail associado para entrar.',
-    f1Mail: 'Senha cadastrada',
-    mailOk: 'Seu E-Mail cadastrado é: ',
-    wrongMailPass: 'A senha não confere com a conta registrada.',
-    passTitle: 'Recuperar / atualizar senha',
-    passNote: 'Informe seu e-mail cadastrado e sua nova senha. No nexo™, o usuário do cliente é sempre o e-mail.',
-    f1Pass: 'E-mail cadastrado',
+    userTitle: 'Atualizar usuário',
+    userNote: 'Para alterar seu usuário, informe sua senha atual e repita o novo usuário.',
+    passTitle: 'Atualizar senha',
+    passNote: 'Para alterar sua senha, informe seu usuário atual e repita a nova senha.',
+    f1User: 'Senha atual',
+    f2User: 'Novo usuário',
+    f3User: 'Repita o novo usuário',
+    f1Pass: 'Usuário atual',
     f2Pass: 'Nova senha',
     f3Pass: 'Repita a nova senha',
     save: 'Salvar e voltar',
     cancel: 'Cancelar',
-    noProfile: 'Não existe conta registrada neste navegador. Primeiro crie sua conta ou use o e-mail cadastrado.',
-    wrongUser: 'O e-mail não confere com a conta registrada.',
+    noProfile: 'Não existe conta registrada neste navegador. Primeiro crie sua conta.',
+    wrongPassword: 'A senha atual não confere.',
+    wrongUser: 'O usuário atual não confere.',
+    mismatchUser: 'Os dois campos do novo usuário não coincidem.',
     mismatchPass: 'Os dois campos da nova senha não coincidem.',
     shortPass: 'A nova senha deve ter pelo menos 8 caracteres.',
     emptyFields: 'Preencha os três campos.',
-    passOk: 'Senha atualizada com sucesso. Agora você já pode entrar com seu e-mail e a nova senha.'
+    userOk: 'Usuário atualizado com sucesso. Agora você já pode entrar com o novo usuário.',
+    passOk: 'Senha atualizada com sucesso. Agora você já pode entrar com a nova senha.'
   },
   it: {
-    userInfo: 'Il tuo utente cliente è l’e-mail registrata. Accedi sempre con e-mail e password.',
-    mailTitle: 'Recupera E-Mail registrata',
-    mailNote: 'Inserisci la password registrata. Se coincide con l’account salvato, nexo™ mostrerà l’E-Mail associata.',
-    f1Mail: 'Password registrata',
-    mailOk: 'La tua E-Mail registrata è: ',
-    wrongMailPass: 'La password non corrisponde all’account registrato.',
-    passTitle: 'Recupera / aggiorna password',
-    passNote: 'Inserisci l’e-mail registrata e la nuova password. In nexo™, l’utente cliente è sempre l’e-mail.',
-    f1Pass: 'E-mail registrata',
+    userTitle: 'Aggiorna utente',
+    userNote: 'Per cambiare il tuo utente, inserisci la password attuale e ripeti il nuovo utente.',
+    passTitle: 'Aggiorna password',
+    passNote: 'Per cambiare la tua password, inserisci il tuo utente attuale e ripeti la nuova password.',
+    f1User: 'Password attuale',
+    f2User: 'Nuovo utente',
+    f3User: 'Ripeti nuovo utente',
+    f1Pass: 'Utente attuale',
     f2Pass: 'Nuova password',
     f3Pass: 'Ripeti nuova password',
     save: 'Salva e torna',
     cancel: 'Annulla',
-    noProfile: 'Non esiste un account registrato in questo browser. Prima crea il tuo account o usa l’e-mail registrata.',
-    wrongUser: 'L’e-mail non corrisponde all’account registrato.',
+    noProfile: 'Non esiste un account registrato in questo browser. Prima crea il tuo account.',
+    wrongPassword: 'La password attuale non corrisponde.',
+    wrongUser: 'L’utente attuale non corrisponde.',
+    mismatchUser: 'I due campi del nuovo utente non coincidono.',
     mismatchPass: 'I due campi della nuova password non coincidono.',
     shortPass: 'La nuova password deve avere almeno 8 caratteri.',
     emptyFields: 'Completa tutti e tre i campi.',
-    passOk: 'Password aggiornata correttamente. Ora puoi accedere con la tua e-mail e la nuova password.'
+    userOk: 'Utente aggiornato correttamente. Ora puoi accedere con il nuovo utente.',
+    passOk: 'Password aggiornata correttamente. Ora puoi accedere con la nuova password.'
   },
   fr: {
-    userInfo: 'Votre identifiant client est votre adresse e-mail enregistrée. Connectez-vous toujours avec votre e-mail et votre mot de passe.',
-    mailTitle: 'Récupérer l’E-Mail enregistré',
-    mailNote: 'Saisissez votre mot de passe enregistré. S’il correspond au compte sauvegardé, nexo™ affichera l’E-Mail associé.',
-    f1Mail: 'Mot de passe enregistré',
-    mailOk: 'Votre E-Mail enregistré est : ',
-    wrongMailPass: 'Le mot de passe ne correspond pas au compte enregistré.',
-    passTitle: 'Récupérer / mettre à jour le mot de passe',
-    passNote: 'Saisissez votre e-mail enregistré et votre nouveau mot de passe. Dans nexo™, l’identifiant client est toujours l’e-mail.',
-    f1Pass: 'Adresse e-mail enregistrée',
+    userTitle: 'Mettre à jour l’identifiant',
+    userNote: 'Pour modifier votre identifiant, saisissez votre mot de passe actuel et répétez le nouvel identifiant.',
+    passTitle: 'Mettre à jour le mot de passe',
+    passNote: 'Pour modifier votre mot de passe, saisissez votre identifiant actuel et répétez le nouveau mot de passe.',
+    f1User: 'Mot de passe actuel',
+    f2User: 'Nouvel identifiant',
+    f3User: 'Répétez le nouvel identifiant',
+    f1Pass: 'Identifiant actuel',
     f2Pass: 'Nouveau mot de passe',
     f3Pass: 'Répétez le nouveau mot de passe',
     save: 'Enregistrer et revenir',
     cancel: 'Annuler',
-    noProfile: 'Aucun compte enregistré dans ce navigateur. Créez d’abord votre compte ou utilisez l’e-mail enregistré.',
-    wrongUser: 'L’adresse e-mail ne correspond pas au compte enregistré.',
+    noProfile: 'Aucun compte enregistré dans ce navigateur. Créez d’abord votre compte.',
+    wrongPassword: 'Le mot de passe actuel ne correspond pas.',
+    wrongUser: 'L’identifiant actuel ne correspond pas.',
+    mismatchUser: 'Les deux champs du nouvel identifiant ne correspondent pas.',
     mismatchPass: 'Les deux champs du nouveau mot de passe ne correspondent pas.',
     shortPass: 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
     emptyFields: 'Remplissez les trois champs.',
-    passOk: 'Mot de passe mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre e-mail et votre nouveau mot de passe.'
+    userOk: 'Identifiant mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre nouvel identifiant.',
+    passOk: 'Mot de passe mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.'
   }
-}
-
-
-async function nexoFindClientByPassword(password){
-  const URL='https://ujqbbniptflzytdankwp.supabase.co';
-  const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
-  const pass = String(password || '').trim();
-  if(!pass) return null;
-  const endpoint = URL + '/rest/v1/clientes?select=*&password=eq.' + encodeURIComponent(pass) + '&limit=1';
-  const r = await fetch(endpoint, {
-    method:'GET',
-    headers:{apikey:KEY, Authorization:'Bearer '+KEY, 'Content-Type':'application/json'}
-  });
-  if(!r.ok) throw new Error(await r.text());
-  const data = await r.json();
-  if(!Array.isArray(data) || !data.length) return null;
-  const row = data[0];
-  return {
-    id: row.id,
-    email: row.email || '',
-    password: row.password || pass,
-    fullName: [row.nombre, row.apellido].filter(Boolean).join(' '),
-    name: row.nombre || '',
-    lastName: row.apellido || '',
-    documentId: row.documento || '',
-    country: row.pais || '',
-    areaCode: row.codigo_area || '',
-    phone: row.telefono || '',
-    postalCode: row.codigo_postal || '',
-    region: row.region || '',
-    city: row.ciudad || '',
-    address: row.direccion || ''
-  };
-}
-
-async function nexoFindClientByEmailPassword(email, password){
-  const URL='https://ujqbbniptflzytdankwp.supabase.co';
-  const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
-  const cleanEmail = String(email || '').trim().toLowerCase();
-  const pass = String(password || '').trim();
-  if(!cleanEmail || !pass) return null;
-  const endpoint = URL + '/rest/v1/clientes?select=*&email=eq.' + encodeURIComponent(cleanEmail) + '&password=eq.' + encodeURIComponent(pass) + '&limit=1';
-  const r = await fetch(endpoint, {
-    method:'GET',
-    headers:{apikey:KEY, Authorization:'Bearer '+KEY, 'Content-Type':'application/json'}
-  });
-  if(!r.ok) throw new Error(await r.text());
-  const data = await r.json();
-  if(!Array.isArray(data) || !data.length) return null;
-  const row = data[0];
-  return {
-    id: row.id,
-    email: row.email || cleanEmail,
-    password: row.password || pass,
-    fullName: [row.nombre, row.apellido].filter(Boolean).join(' '),
-    name: row.nombre || '',
-    lastName: row.apellido || '',
-    documentId: row.documento || '',
-    country: row.pais || '',
-    areaCode: row.codigo_area || '',
-    phone: row.telefono || '',
-    postalCode: row.codigo_postal || '',
-    region: row.region || '',
-    city: row.ciudad || '',
-    address: row.direccion || ''
-  };
-}
+};
 
 function getRecoveryLang(){
   const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
@@ -1161,59 +1090,33 @@ function setRecoveryStatus(msg, type){
   box.className = 'recovery-status ' + (type === 'ok' ? 'ok' : 'err');
   box.textContent = msg;
 }
-function showEmailIsUser(){
-  return openRecoveryModal('mail');
-}
 function openRecoveryModal(mode){
-  currentRecoveryMode = mode === 'mail' ? 'mail' : 'pass';
+  currentRecoveryMode = mode || 'user';
   const lang = getRecoveryLang();
-  const t = recoveryTexts[lang] || recoveryTexts.es;
+  const t = recoveryTexts[lang];
   const modal = document.getElementById('recoveryModal');
   if(!modal) return false;
+
+  document.getElementById('recoveryTitle').textContent = mode === 'user' ? t.userTitle : t.passTitle;
+  document.getElementById('recoveryNote').textContent = mode === 'user' ? t.userNote : t.passNote;
+  document.getElementById('recoveryLabel1').textContent = mode === 'user' ? t.f1User : t.f1Pass;
+  document.getElementById('recoveryLabel2').textContent = mode === 'user' ? t.f2User : t.f2Pass;
+  document.getElementById('recoveryLabel3').textContent = mode === 'user' ? t.f3User : t.f3Pass;
+  document.getElementById('recoverySaveBtn').textContent = t.save;
+  document.getElementById('recoveryCancelBtn').textContent = t.cancel;
 
   const f1 = document.getElementById('recoveryField1');
   const f2 = document.getElementById('recoveryField2');
   const f3 = document.getElementById('recoveryField3');
-  const l1 = document.getElementById('recoveryLabel1');
-  const l2 = document.getElementById('recoveryLabel2');
-  const l3 = document.getElementById('recoveryLabel3');
-
-  if(currentRecoveryMode === 'mail'){
-    document.getElementById('recoveryTitle').textContent = t.mailTitle;
-    document.getElementById('recoveryNote').textContent = t.mailNote;
-    l1.textContent = t.f1Mail;
-    l2.parentElement.style.display = 'none';
-    l3.parentElement.style.display = 'none';
-    f1.value = '';
-    f1.type = 'password';
-    f1.placeholder = 'Mínimo 8 caracteres';
-    f2.value = '';
-    f3.value = '';
-  } else {
-    document.getElementById('recoveryTitle').textContent = t.passTitle;
-    document.getElementById('recoveryNote').textContent = t.passNote;
-    l1.textContent = t.f1Pass;
-    l2.textContent = t.f2Pass;
-    l3.textContent = t.f3Pass;
-    l2.parentElement.style.display = '';
-    l3.parentElement.style.display = '';
-    f1.value = ''; f2.value = ''; f3.value = '';
-    f1.type = 'email';
-    f2.type = 'password';
-    f3.type = 'password';
-    f1.placeholder = 'tu@email.com';
-    f2.placeholder = 'Mínimo 8 caracteres';
-    f3.placeholder = 'Mínimo 8 caracteres';
-  }
-
-  document.getElementById('recoverySaveBtn').textContent = t.save;
-  document.getElementById('recoveryCancelBtn').textContent = t.cancel;
+  f1.value = ''; f2.value = ''; f3.value = '';
+  f1.type = mode === 'user' ? 'password' : 'text';
+  f2.type = mode === 'user' ? 'text' : 'password';
+  f3.type = mode === 'user' ? 'text' : 'password';
   document.getElementById('recoveryStatus').className = 'recovery-status';
   document.getElementById('recoveryStatus').textContent = '';
 
   modal.style.display = 'flex';
   modal.classList.add('show');
-  setTimeout(()=>f1.focus(), 50);
   return false;
 }
 function closeRecoveryModal(){
@@ -1223,84 +1126,83 @@ function closeRecoveryModal(){
     modal.style.display = 'none';
   }
 }
-async function submitRecovery(){
+function submitRecovery(){
   const lang = getRecoveryLang();
-  const t = recoveryTexts[lang] || recoveryTexts.es;
-
-  if(currentRecoveryMode === 'mail'){
-    const pass = (document.getElementById('recoveryField1').value || '').trim();
-    if(!pass){
-      setRecoveryStatus(t.emptyFields, 'err');
-      return false;
-    }
-
-    let profile = null;
-    try{
-      profile = await nexoFindClientByPassword(pass);
-    }catch(err){
-      console.warn('No se pudo consultar Supabase para recuperar E-Mail:', err);
-    }
-
-    if(!profile || !profile.email){
-      const localProfile = getSavedClientProfile();
-      if(localProfile && (localProfile.password || '') === pass) profile = localProfile;
-    }
-
-    if(!profile || !profile.email){
-      setRecoveryStatus(t.wrongMailPass || 'La contraseña no coincide con la cuenta registrada.', 'err');
-      return false;
-    }
-
-    setSavedClientProfile(profile);
-    setRecoveryStatus((t.mailOk || 'Tu E-Mail registrado es: ') + profile.email, 'ok');
-    const loginEmail = document.getElementById('loginEmail');
-    if(loginEmail) loginEmail.value = profile.email;
-    return false;
-  }
-
+  const t = recoveryTexts[lang];
   const profile = getSavedClientProfile();
   if(!profile || !profile.email){
     setRecoveryStatus(t.noProfile, 'err');
     return false;
   }
 
-  const email = (document.getElementById('recoveryField1').value || '').trim().toLowerCase();
-  const newPass = (document.getElementById('recoveryField2').value || '').trim();
-  const repeatPass = (document.getElementById('recoveryField3').value || '').trim();
+  const f1 = (document.getElementById('recoveryField1').value || '').trim();
+  const f2 = (document.getElementById('recoveryField2').value || '').trim();
+  const f3 = (document.getElementById('recoveryField3').value || '').trim();
 
-  if(!email || !newPass || !repeatPass){
+  if(!f1 || !f2 || !f3){
     setRecoveryStatus(t.emptyFields, 'err');
     return false;
   }
-  if((profile.email || '').toLowerCase() !== email){
-    setRecoveryStatus(t.wrongUser, 'err');
-    return false;
-  }
-  if(newPass !== repeatPass){
-    setRecoveryStatus(t.mismatchPass, 'err');
-    return false;
-  }
-  if(newPass.length < 8){
-    setRecoveryStatus(t.shortPass, 'err');
-    return false;
-  }
 
-  profile.password = newPass;
-  setSavedClientProfile(profile);
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
-  if(loginEmail) loginEmail.value = profile.email;
-  if(loginPassword) loginPassword.value = profile.password;
-  setRecoveryStatus(t.passOk, 'ok');
+  if(currentRecoveryMode === 'user'){
+    if((profile.password || '') !== f1){
+      setRecoveryStatus(t.wrongPassword, 'err');
+      return false;
+    }
+    if(f2.toLowerCase() !== f3.toLowerCase()){
+      setRecoveryStatus(t.mismatchUser, 'err');
+      return false;
+    }
+    profile.email = f2;
+    setSavedClientProfile(profile);
+    const loginEmail = document.getElementById('loginEmail');
+    if(loginEmail) loginEmail.value = profile.email;
+    setRecoveryStatus(t.userOk, 'ok');
+  } else {
+    if((profile.email || '').toLowerCase() !== f1.toLowerCase()){
+      setRecoveryStatus(t.wrongUser, 'err');
+      return false;
+    }
+    if(f2 !== f3){
+      setRecoveryStatus(t.mismatchPass, 'err');
+      return false;
+    }
+    if(f2.length < 8){
+      setRecoveryStatus(t.shortPass, 'err');
+      return false;
+    }
+    profile.password = f2;
+    setSavedClientProfile(profile);
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    if(loginEmail) loginEmail.value = profile.email;
+    if(loginPassword) loginPassword.value = profile.password;
+    setRecoveryStatus(t.passOk, 'ok');
+  }
 
   setTimeout(function(){
     closeRecoveryModal();
     const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
     if(loginForm && loginForm.classList.contains('hide')) toggleForms();
   }, 900);
 
   return false;
 }
+document.addEventListener('DOMContentLoaded', function(){
+  const modal = document.getElementById('recoveryModal');
+  if(modal){
+    modal.addEventListener('click', function(e){
+      if(e.target === modal) closeRecoveryModal();
+    });
+  }
+});
+</script>
+
+
+
+
+<script>
 function renderLivePasswordRules(inputId, boxId){
   const input = document.getElementById(inputId);
   const box = document.getElementById(boxId);
