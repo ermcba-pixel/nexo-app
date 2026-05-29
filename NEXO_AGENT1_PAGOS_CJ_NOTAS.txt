@@ -1,0 +1,20 @@
+nexo™ – integración Agente 1 / PayPal Advanced / CJ Dropshipping
+
+Cambios incluidos:
+1. El checkout ya no redirige tarjeta, ACH/Wire ni Payoneer al PayPal clásico.
+2. Se agregó /api/agent1-intake-payment para que Agente 1 reciba el pedido y lo deje listo para captura server-side.
+3. Se agregó /api/paypal-client-config como base de PayPal Advanced Checkout/Card Fields.
+4. Se agregó /api/cj-shipping-quote para intentar flete real CJ por producto/destino.
+5. Se preserva nexoClientProfile en checkout para no perder dirección del cliente.
+6. PayPal como método explícito puede seguir usando PayPal Orders API.
+7. Para débito real invisible de tarjeta se debe tener habilitado PayPal Advanced Credit/Debit Card Payments en PayPal Business.
+8. Para ACH/Wire automático se requiere que PayPal/Payoneer habiliten ese rail por API; mientras tanto queda en intake de Agente 1.
+Variables Vercel mínimas:
+- PAYPAL_ENV=live
+- PAYPAL_CLIENT_ID
+- PAYPAL_CLIENT_SECRET
+- CJ_API_KEY
+Opcionales:
+- NEXT_PUBLIC_PAYPAL_CLIENT_ID
+- PAYPAL_WEBHOOK_ID
+- CJ_ACCESS_TOKEN
