@@ -1505,15 +1505,15 @@ const t = ctt();
                 return;
             }
 
-            // COBRO REAL: tarjetas, ACH/Wire y Payoneer también pasan por pago seguro PayPal.
-            // Así el cliente puede pagar con tarjeta/cuenta bancaria cuando PayPal lo permita y nexo recibe el cobro real.
+            // Tarjeta, ACH/Wire y Payoneer NO deben abrir PayPal clásico al cliente.
+            // Se registra la operación para Agente 1 y se continúa a confirmación interna nexo™.
             if(orderData.paymentMethod !== 'paypal'){
-                orderData.estado_pago = 'redireccionado_pago_seguro_paypal';
-                orderData.estado_compra = 'pendiente_pago_seguro';
-                orderData.estado_agente = 'esperando_cobro_cliente';
+                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_recibida_agente_1' : (orderData.paymentMethod === 'bank' ? 'transferencia_recibida_agente_1' : 'payoneer_recibido_agente_1');
+                orderData.estado_compra = 'pedido_cerrado_agente_1';
+                orderData.estado_agente = 'pendiente_procesamiento_backend';
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                if(btnText) btnText.textContent = 'Abriendo pago seguro...';
-                await startNexoPagoSeguro(orderData);
+                try{ await fetch('/api/agent1-intake-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(orderData)}); }catch(e){}
+                window.location.href = 'nexo-confirmacion.html';
                 return;
             }
 
