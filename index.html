@@ -421,7 +421,7 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
                 <p class="portal-description">
                     Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
                 </p>
-                <div class="nexo-left-legal-card">
+                <div class="nexo-left-legal-card" data-nexo-legal-footer="1">
                     <strong>nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
                     nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
                     nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
@@ -716,5 +716,37 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
 </script>
 
 <script src="nexo-legal-i18n.js"></script>
+
+<script id="nexo-legal-footer-i18n-final">
+(function(){
+  const LEGAL={
+    es:{title:'Plataforma de Intermediación Comercial Internacional',company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal',terms:'Términos y Condiciones',privacy:'Privacidad',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condiciones legales de compra nexo™',buyDesc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'International Commercial Intermediation Platform',company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice',terms:'Terms and Conditions',privacy:'Privacy',cookies:'Cookies',refunds:'Refunds',buyTitle:'nexo™ legal purchase conditions',buyDesc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Plataforma de Intermediação Comercial Internacional',company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal',terms:'Termos e Condições',privacy:'Privacidade',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condições legais de compra nexo™',buyDesc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Piattaforma di Intermediazione Commerciale Internazionale',company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale',terms:'Termini e Condizioni',privacy:'Privacy',cookies:'Cookie',refunds:'Rimborsi',buyTitle:'Condizioni legali di acquisto nexo™',buyDesc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Plateforme d’Intermédiation Commerciale Internationale',company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions légales',terms:'Conditions générales',privacy:'Confidentialité',cookies:'Cookies',refunds:'Remboursements',buyTitle:'Conditions légales d’achat nexo™',buyDesc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  function lang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||document.documentElement.lang||'es').slice(0,2).toLowerCase();}
+  function a(href,txt){return `<a href="${href}">${txt}</a>`;}
+  function legalHTML(t){return `<strong>nexo™</strong> – ${t.title}<br>${t.company}<br>${t.desc}<br>© 2026 nexo™ – ${t.rights}<br><span class="nexo-footer-links">${a('aviso-legal.html',t.legal)} | ${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('politica-cookies.html',t.cookies)} | ${a('reembolsos.html',t.refunds)}</span>`;}
+  window.nexoApplyLegalI18n=function(){
+    const t=LEGAL[lang()]||LEGAL.es;
+    document.querySelectorAll('[data-nexo-legal-footer], .nexo-left-legal-card, .nexo-left-legal, footer#nexoFooter, footer.nexo-footer, footer.nexo-legal-footer').forEach(el=>{el.innerHTML=legalHTML(t);});
+    document.querySelectorAll('.page-legal-block').forEach(el=>{
+      const checked = el.querySelector('input')?.checked ? 'checked' : '';
+      el.innerHTML = `<p style="margin:0 0 8px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 12px 0;">${t.buyDesc}</p><p style="margin:0 0 12px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" ${checked} style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label>`;
+    });
+    const modalLegal=document.querySelector('#confirmationModal .nexo-checkout-legal');
+    if(modalLegal){
+      const chk = document.getElementById('nexoLegalAccept')?.checked ? 'checked' : '';
+      modalLegal.innerHTML = `<p style="margin:0 0 10px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 10px 0;">${t.buyDesc}</p><p style="margin:0 0 10px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;"><input type="checkbox" id="nexoLegalAccept" ${chk} required style="margin-top:3px;min-width:18px;min-height:18px;"><span>${t.accept}</span></label><div id="nexoLegalWarning" style="display:none;margin-top:10px;color:#c62828;font-weight:800;">${lang()==='en'?'You must accept the legal conditions to continue.':lang()==='fr'?'Vous devez accepter les conditions légales pour continuer.':lang()==='pt'?'Você deve aceitar as condições legais para continuar.':lang()==='it'?'Devi accettare le condizioni legali per continuare.':'Para continuar debes aceptar las condiciones legales de la compra.'}</div>`;
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>{nexoApplyLegalI18n(); setTimeout(nexoApplyLegalI18n,200); setTimeout(nexoApplyLegalI18n,700);});
+  document.addEventListener('click',e=>{ if(e.target.closest('button,a')) setTimeout(nexoApplyLegalI18n,60);},true);
+  window.addEventListener('storage',nexoApplyLegalI18n);
+})();
+</script>
+
 </body>
 </html>

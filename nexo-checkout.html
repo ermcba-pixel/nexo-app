@@ -149,22 +149,24 @@
 
         .cart-items {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 16px;
         }
 
         .cart-item {
             background: var(--white);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 16px;
-            display: grid;
-            grid-template-columns: 140px 1.3fr .8fr .8fr auto;
-            gap: 16px;
-            align-items: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
-        .cart-item-icon {font-size:40px;text-align:center}.cart-item-icon img{width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;}
+        .cart-item-icon {
+            font-size: 40px;
+            text-align: center;
+        }
 
         .cart-item-provider {
             font-size: 10px;
@@ -518,7 +520,6 @@
 
         .cart-item-features{font-size:10px;color:#4A6B6D;line-height:1.4;background:#f5fbf9;border-radius:6px;padding:7px;margin-top:2px;}
 
-@media(max-width:900px){.cart-item{grid-template-columns:1fr!important}.cart-item-icon img{width:100%;height:160px}.cart-item-controls{justify-content:flex-start!important}}
 </style>
 </head>
 <body>
@@ -1061,21 +1062,21 @@ function nexoPayText(key){
     const lang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || currentLang || 'es').slice(0,2);
     const D = {
       es:{
-        cardName:'Nombre como aparece en la tarjeta', cardNamePh:'Nombre del titular', cardNumber:'Número de tarjeta', cardSecureNote:'Los datos de tarjeta se registran para seguimiento interno del pedido; el cobro real se ejecuta mediante pasarela segura PayPal/Stripe habilitada para nexo™.', cardTitle:'Pago real con tarjeta mediante PayPal seguro',
+        cardTitle:'Pago real con tarjeta mediante PayPal seguro',
         cardText:'nexo™ no guarda números de tarjeta ni CVV. Al confirmar, se abrirá PayPal Business para pagar de forma real y segura con PayPal o tarjeta, según disponibilidad de PayPal en el país del cliente.',
         cardBtn:'Continuar con tarjeta / PayPal seguro',
         bankTitle:'Transferencia bancaria / ACH / Wire / Land Bank',
         bankText:'Registre el banco o referencia del cliente para seguimiento. El cobro real se procesará mediante PayPal seguro si PayPal habilita cuenta bancaria/ACH/Wire; si usa transferencia directa, el pedido queda pendiente hasta confirmar el abono.',
         bankHolder:'Titular de la cuenta bancaria', bankName:'Banco del cliente', bankNamePh:'Ej.: Land Bank, Bank of America, etc.', bankRef:'Referencia / número de operación (opcional)', transferType:'Tipo de transferencia', bankBtn:'Continuar con transferencia / pago seguro',
-        paypalBtn:'Continuar con PayPal', payoneerText:'Payoneer queda registrado como método de operación empresarial. Para cobro real al cliente, se abrirá PayPal seguro o se confirmará manualmente si corresponde.', payoneerBtn:'Continuar con Payoneer'
+        paypalBtn:'Continuar con PayPal', payoneerText:'', payoneerBtn:'Continuar con Payoneer'
       },
       en:{
-        cardName:'Name as it appears on the card', cardNamePh:'Cardholder name', cardNumber:'Card number', cardSecureNote:'Card data is recorded for internal order tracking; the real charge is processed through the secure PayPal/Stripe gateway enabled for nexo™.', cardTitle:'Real card payment through secure PayPal', cardText:'nexo™ does not store card numbers or CVV. After confirmation, PayPal Business will open so the customer can pay securely with PayPal or card, depending on PayPal availability in the customer country.', cardBtn:'Continue with card / secure PayPal',
-        bankTitle:'Bank transfer / ACH / Wire / Land Bank', bankText:'Register the customer bank or reference for tracking. The real charge will be processed through secure PayPal if PayPal enables bank account/ACH/Wire; if using a direct transfer, the order remains pending until funds are confirmed.', bankHolder:'Bank account holder', bankName:'Customer bank', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Reference / operation number (optional)', transferType:'Transfer type', bankBtn:'Continue with transfer / secure payment', paypalBtn:'Continue with PayPal', payoneerText:'Payoneer is recorded as an enterprise operation method. For real customer collection, secure PayPal will open or manual confirmation will apply when needed.', payoneerBtn:'Continue with Payoneer'
+        cardTitle:'Real card payment through secure PayPal', cardText:'nexo™ does not store card numbers or CVV. After confirmation, PayPal Business will open so the customer can pay securely with PayPal or card, depending on PayPal availability in the customer country.', cardBtn:'Continue with card / secure PayPal',
+        bankTitle:'Bank transfer / ACH / Wire / Land Bank', bankText:'Register the customer bank or reference for tracking. The real charge will be processed through secure PayPal if PayPal enables bank account/ACH/Wire; if using a direct transfer, the order remains pending until funds are confirmed.', bankHolder:'Bank account holder', bankName:'Customer bank', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Reference / operation number (optional)', transferType:'Transfer type', bankBtn:'Continue with transfer / secure payment', paypalBtn:'Continue with PayPal', payoneerText:'', payoneerBtn:'Continue with Payoneer'
       },
-      pt:{cardTitle:'Pagamento real com cartão via PayPal seguro', cardText:'nexo™ não guarda números de cartão nem CVV. Ao confirmar, o PayPal Business será aberto para pagar de forma real e segura com PayPal ou cartão, conforme disponibilidade do PayPal no país do cliente.', cardBtn:'Continuar com cartão / PayPal seguro', bankTitle:'Transferência bancária / ACH / Wire / Land Bank', bankText:'Registre o banco ou referência do cliente para acompanhamento. A cobrança real será processada via PayPal seguro se o PayPal habilitar conta bancária/ACH/Wire; se usar transferência direta, o pedido fica pendente até confirmar o crédito.', bankHolder:'Titular da conta bancária', bankName:'Banco do cliente', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Referência / número da operação (opcional)', transferType:'Tipo de transferência', bankBtn:'Continuar com transferência / pagamento seguro', paypalBtn:'Continuar com PayPal', payoneerText:'Payoneer fica registrado como método de operação empresarial. Para cobrança real do cliente, será aberto o PayPal seguro ou confirmação manual quando aplicável.', payoneerBtn:'Continuar com Payoneer'},
-      it:{cardTitle:'Pagamento reale con carta tramite PayPal sicuro', cardText:'nexo™ non conserva numeri di carta né CVV. Alla conferma, si aprirà PayPal Business per pagare in modo reale e sicuro con PayPal o carta, secondo la disponibilità di PayPal nel paese del cliente.', cardBtn:'Continua con carta / PayPal sicuro', bankTitle:'Bonifico bancario / ACH / Wire / Land Bank', bankText:'Registra la banca o il riferimento del cliente per il monitoraggio. L’addebito reale sarà processato tramite PayPal sicuro se PayPal abilita conto bancario/ACH/Wire; se usa un bonifico diretto, l’ordine resta in sospeso fino alla conferma dell’accredito.', bankHolder:'Intestatario del conto bancario', bankName:'Banca del cliente', bankNamePh:'Es.: Land Bank, Bank of America, ecc.', bankRef:'Riferimento / numero operazione (opzionale)', transferType:'Tipo di bonifico', bankBtn:'Continua con bonifico / pagamento sicuro', paypalBtn:'Continua con PayPal', payoneerText:'Payoneer viene registrato come metodo operativo aziendale. Per l’incasso reale dal cliente, si aprirà PayPal sicuro o si applicherà conferma manuale se necessario.', payoneerBtn:'Continua con Payoneer'},
-      fr:{cardTitle:'Paiement réel par carte via PayPal sécurisé', cardText:'nexo™ ne conserve ni numéros de carte ni CVV. À la confirmation, PayPal Business s’ouvrira afin que le client paie réellement et en sécurité avec PayPal ou carte, selon la disponibilité PayPal dans son pays.', cardBtn:'Continuer avec carte / PayPal sécurisé', bankTitle:'Virement bancaire / ACH / Wire / Land Bank', bankText:'Enregistrez la banque ou la référence du client pour le suivi. Le débit réel sera traité via PayPal sécurisé si PayPal active compte bancaire/ACH/Wire ; en cas de virement direct, la commande reste en attente jusqu’à confirmation des fonds.', bankHolder:'Titulaire du compte bancaire', bankName:'Banque du client', bankNamePh:'Ex. : Land Bank, Bank of America, etc.', bankRef:'Référence / numéro d’opération (facultatif)', transferType:'Type de virement', bankBtn:'Continuer avec virement / paiement sécurisé', paypalBtn:'Continuer avec PayPal', payoneerText:'Payoneer est enregistré comme méthode d’opération d’entreprise. Pour l’encaissement réel client, PayPal sécurisé s’ouvrira ou une confirmation manuelle sera appliquée si nécessaire.', payoneerBtn:'Continuer avec Payoneer'}
+      pt:{cardTitle:'Pagamento real com cartão via PayPal seguro', cardText:'nexo™ não guarda números de cartão nem CVV. Ao confirmar, o PayPal Business será aberto para pagar de forma real e segura com PayPal ou cartão, conforme disponibilidade do PayPal no país do cliente.', cardBtn:'Continuar com cartão / PayPal seguro', bankTitle:'Transferência bancária / ACH / Wire / Land Bank', bankText:'Registre o banco ou referência do cliente para acompanhamento. A cobrança real será processada via PayPal seguro se o PayPal habilitar conta bancária/ACH/Wire; se usar transferência direta, o pedido fica pendente até confirmar o crédito.', bankHolder:'Titular da conta bancária', bankName:'Banco do cliente', bankNamePh:'Ex.: Land Bank, Bank of America, etc.', bankRef:'Referência / número da operação (opcional)', transferType:'Tipo de transferência', bankBtn:'Continuar com transferência / pagamento seguro', paypalBtn:'Continuar com PayPal', payoneerText:'', payoneerBtn:'Continuar com Payoneer'},
+      it:{cardTitle:'Pagamento reale con carta tramite PayPal sicuro', cardText:'nexo™ non conserva numeri di carta né CVV. Alla conferma, si aprirà PayPal Business per pagare in modo reale e sicuro con PayPal o carta, secondo la disponibilità di PayPal nel paese del cliente.', cardBtn:'Continua con carta / PayPal sicuro', bankTitle:'Bonifico bancario / ACH / Wire / Land Bank', bankText:'Registra la banca o il riferimento del cliente per il monitoraggio. L’addebito reale sarà processato tramite PayPal sicuro se PayPal abilita conto bancario/ACH/Wire; se usa un bonifico diretto, l’ordine resta in sospeso fino alla conferma dell’accredito.', bankHolder:'Intestatario del conto bancario', bankName:'Banca del cliente', bankNamePh:'Es.: Land Bank, Bank of America, ecc.', bankRef:'Riferimento / numero operazione (opzionale)', transferType:'Tipo di bonifico', bankBtn:'Continua con bonifico / pagamento sicuro', paypalBtn:'Continua con PayPal', payoneerText:'', payoneerBtn:'Continua con Payoneer'},
+      fr:{cardTitle:'Paiement réel par carte via PayPal sécurisé', cardText:'nexo™ ne conserve ni numéros de carte ni CVV. À la confirmation, PayPal Business s’ouvrira afin que le client paie réellement et en sécurité avec PayPal ou carte, selon la disponibilité PayPal dans son pays.', cardBtn:'Continuer avec carte / PayPal sécurisé', bankTitle:'Virement bancaire / ACH / Wire / Land Bank', bankText:'Enregistrez la banque ou la référence du client pour le suivi. Le débit réel sera traité via PayPal sécurisé si PayPal active compte bancaire/ACH/Wire ; en cas de virement direct, la commande reste en attente jusqu’à confirmation des fonds.', bankHolder:'Titulaire du compte bancaire', bankName:'Banque du client', bankNamePh:'Ex. : Land Bank, Bank of America, etc.', bankRef:'Référence / numéro d’opération (facultatif)', transferType:'Type de virement', bankBtn:'Continuer avec virement / paiement sécurisé', paypalBtn:'Continuer avec PayPal', payoneerText:'', payoneerBtn:'Continuer avec Payoneer'}
     };
     return (D[lang] || D.es)[key] || D.es[key] || key;
 }
@@ -1092,26 +1093,8 @@ function selectPayment(methodId, btnEl=null) {
     if (methodId === 'card') {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <div class="form-group">
-                    <label class="form-label">${nexoPayText('cardName')}</label>
-                    <input type="text" class="form-input" id="cardHolder" placeholder="${nexoPayText('cardNamePh')}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">${nexoPayText('cardNumber')}</label>
-                    <input type="text" class="form-input" id="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 8765 4567">
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div class="form-group">
-                        <label class="form-label">MM/AA</label>
-                        <input type="text" class="form-input" id="cardExpiry" autocomplete="cc-exp" placeholder="11/32">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">CVV</label>
-                        <input type="password" class="form-input" id="cardCvv" autocomplete="cc-csc" placeholder="123">
-                    </div>
-                </div>
-                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.55;margin-top:8px;">
-                    ${nexoPayText('cardSecureNote')}
+                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-top:6px;">
+                    <strong>${nexoPayText('cardTitle')}</strong><br>${nexoPayText('cardText')}
                 </div>
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('cardBtn')}</button>
             </div>
@@ -1211,8 +1194,8 @@ function selectPayment(methodId, btnEl=null) {
                     <div class="cart-item-name">${item.name}</div>
                     ${item.features ? `<div class="cart-item-features">${item.features}</div>` : ''}
                     <div class="cart-item-price">$${item.price.toFixed(2)}</div>
-                    <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
-                    <div class="cart-item-shipping">🏪 Vendedor: $${(item.vendorFee || 0).toFixed(2)}</div>
+                    <div class="cart-item-shipping">📫 Envío: $${(getItemShippingCost(item)/Number(item.quantity||1)||0).toFixed(2)}</div>
+                    <div class="cart-item-shipping">🏪 Vendedor: $${(getItemVendorCost(item)/Number(item.quantity||1)||0).toFixed(2)}</div>
                     <div class="cart-item-controls">
                         <button class="cart-item-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
                         <div class="cart-item-qty">${item.quantity}</div>
@@ -1248,8 +1231,8 @@ function selectPayment(methodId, btnEl=null) {
 
         // CALCULAR TOTALES
         function getItemProductCost(item){ return Number(item.cjProductCost ?? item.price ?? 0) * Number(item.quantity ?? 1); }
-        function getItemShippingCost(item){ return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? 0) * Number(item.quantity ?? 1); }
-        function getItemVendorCost(item){ return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? 0) * Number(item.quantity ?? 1); }
+        function getItemShippingCost(item){ return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? item.shippingPrice ?? item.logisticPrice ?? item.logisticsPrice ?? item.freight ?? item.postage ?? 0) * Number(item.quantity ?? item.cantidad ?? 1); }
+        function getItemVendorCost(item){ return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? item.serviceFee ?? item.platformFee ?? item.operationalCost ?? 0) * Number(item.quantity ?? item.cantidad ?? 1); }
 
         // CALCULAR TOTALES
         function calculateTotals() {
@@ -1325,7 +1308,7 @@ const t = ctt();
 
             const legalAccept = document.getElementById('nexoLegalAccept');
             const legalWarning = document.getElementById('nexoLegalWarning');
-            if(legalAccept) legalAccept.checked = false;
+            if(legalAccept){ const pg=document.getElementById('nexoLegalAcceptPage'); legalAccept.checked = pg ? !!pg.checked : false; }
             if(legalWarning) legalWarning.style.display = 'none';
             applyCheckoutLanguage(); document.getElementById('confirmationModal').style.display = 'block';
         }
@@ -1540,12 +1523,13 @@ const t = ctt();
             // COBRO REAL: tarjetas, ACH/Wire y Payoneer también pasan por pago seguro PayPal.
             // Así el cliente puede pagar con tarjeta/cuenta bancaria cuando PayPal lo permita y nexo recibe el cobro real.
             if(orderData.paymentMethod !== 'paypal'){
-                orderData.estado_pago = 'redireccionado_pago_seguro_paypal';
-                orderData.estado_compra = 'pendiente_pago_seguro';
-                orderData.estado_agente = 'esperando_cobro_cliente';
+                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_pendiente_agente_1' : (orderData.paymentMethod === 'bank' ? 'transferencia_pendiente_agente_1' : 'payoneer_pendiente_agente_1');
+                orderData.estado_compra = 'pedido_cerrado_agente_1_automatico';
+                orderData.estado_agente = 'pendiente_cobro_cliente_y_pago_cj';
+                orderData.confirmationNote = 'Pedido registrado en nexo™. El Agente 1 procesa el cobro elegido, registra el abono en PayPal Business de nexo™ y compra al proveedor con los datos de envío del cliente.';
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                if(btnText) btnText.textContent = 'Abriendo pago seguro...';
-                await startNexoPagoSeguro(orderData);
+                localStorage.removeItem('nexoCart');
+                window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
                 return;
             }
 
@@ -1789,5 +1773,62 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </script>
 
 <script src="nexo-legal-i18n.js"></script>
+
+<script id="nexo-checkout-final-fixes">
+(function(){
+  function currentLang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||'es').slice(0,2).toLowerCase();}
+  const LP={
+    es:{title:'Condiciones legales de compra nexo™',desc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',terms:'Términos y Condiciones',privacy:'Privacidad',refunds:'Reembolsos',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'nexo™ legal purchase conditions',desc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',terms:'Terms and Conditions',privacy:'Privacy',refunds:'Refunds',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Condições legais de compra nexo™',desc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',terms:'Termos e Condições',privacy:'Privacidade',refunds:'Reembolsos',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Condizioni legali di acquisto nexo™',desc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',terms:'Termini e Condizioni',privacy:'Privacy',refunds:'Rimborsi',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Conditions légales d’achat nexo™',desc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',terms:'Conditions générales',privacy:'Confidentialité',refunds:'Remboursements',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  window.nexoLegalBlockPage=function(){ const t=LP[currentLang()]||LP.es; return `<div class="nexo-checkout-legal page-legal-block" style="margin:18px 0;padding:18px 20px;border:1px solid rgba(74,107,109,.28);border-radius:16px;background:#f6faf9;color:#2D3E3F;font-size:14px;line-height:1.6;"><p style="margin:0 0 8px 0;"><strong>${t.title}</strong></p><p style="margin:0 0 12px 0;">${t.desc}</p><p style="margin:0 0 12px 0;"><a href="terminos-condiciones.html" target="_blank">${t.terms}</a> | <a href="politica-privacidad.html" target="_blank">${t.privacy}</a> | <a href="reembolsos.html" target="_blank">${t.refunds}</a></p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label></div>`; };
+  const oldGetShip = window.getItemShippingCost;
+  window.getItemShippingCost=function(item){return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? item.shippingPrice ?? item.logisticPrice ?? item.logisticsPrice ?? item.freight ?? item.postage ?? 0) * Number(item.quantity ?? item.cantidad ?? 1);};
+  window.getItemVendorCost=function(item){return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? item.serviceFee ?? item.platformFee ?? item.operationalCost ?? 0) * Number(item.quantity ?? item.cantidad ?? 1);};
+  // Mantener pago interno para tarjeta, transferencia y Payoneer. PayPal sí abre PayPal.
+  const originalStart = window.startNexoPagoSeguro;
+  window.nexoFinishInternal=function(orderData){
+    try{localStorage.setItem('nexoLastOrder', JSON.stringify(orderData)); localStorage.removeItem('nexoCart');}catch(e){}
+    window.location.href='nexo-confirmacion.html?pedido_id='+encodeURIComponent(orderData.supabase_id||orderData.id)+'&invoice='+encodeURIComponent(orderData.factura_numero||orderData.id)+'&pago='+encodeURIComponent(orderData.estado_pago||'pendiente_agente1')+'&agente1=automatico';
+  };
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{ if(typeof selectPayment==='function') selectPayment(selectedPayment||'paypal'); if(typeof calculateTotals==='function') calculateTotals();},120);});
+})();
+</script>
+
+
+<script id="nexo-legal-footer-i18n-final">
+(function(){
+  const LEGAL={
+    es:{title:'Plataforma de Intermediación Comercial Internacional',company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal',terms:'Términos y Condiciones',privacy:'Privacidad',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condiciones legales de compra nexo™',buyDesc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'International Commercial Intermediation Platform',company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice',terms:'Terms and Conditions',privacy:'Privacy',cookies:'Cookies',refunds:'Refunds',buyTitle:'nexo™ legal purchase conditions',buyDesc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Plataforma de Intermediação Comercial Internacional',company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal',terms:'Termos e Condições',privacy:'Privacidade',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condições legais de compra nexo™',buyDesc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Piattaforma di Intermediazione Commerciale Internazionale',company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale',terms:'Termini e Condizioni',privacy:'Privacy',cookies:'Cookie',refunds:'Rimborsi',buyTitle:'Condizioni legali di acquisto nexo™',buyDesc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Plateforme d’Intermédiation Commerciale Internationale',company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions légales',terms:'Conditions générales',privacy:'Confidentialité',cookies:'Cookies',refunds:'Remboursements',buyTitle:'Conditions légales d’achat nexo™',buyDesc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  function lang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||document.documentElement.lang||'es').slice(0,2).toLowerCase();}
+  function a(href,txt){return `<a href="${href}">${txt}</a>`;}
+  function legalHTML(t){return `<strong>nexo™</strong> – ${t.title}<br>${t.company}<br>${t.desc}<br>© 2026 nexo™ – ${t.rights}<br><span class="nexo-footer-links">${a('aviso-legal.html',t.legal)} | ${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('politica-cookies.html',t.cookies)} | ${a('reembolsos.html',t.refunds)}</span>`;}
+  window.nexoApplyLegalI18n=function(){
+    const t=LEGAL[lang()]||LEGAL.es;
+    document.querySelectorAll('[data-nexo-legal-footer], .nexo-left-legal-card, .nexo-left-legal, footer#nexoFooter, footer.nexo-footer, footer.nexo-legal-footer').forEach(el=>{el.innerHTML=legalHTML(t);});
+    document.querySelectorAll('.page-legal-block').forEach(el=>{
+      const checked = el.querySelector('input')?.checked ? 'checked' : '';
+      el.innerHTML = `<p style="margin:0 0 8px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 12px 0;">${t.buyDesc}</p><p style="margin:0 0 12px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" ${checked} style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label>`;
+    });
+    const modalLegal=document.querySelector('#confirmationModal .nexo-checkout-legal');
+    if(modalLegal){
+      const chk = document.getElementById('nexoLegalAccept')?.checked ? 'checked' : '';
+      modalLegal.innerHTML = `<p style="margin:0 0 10px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 10px 0;">${t.buyDesc}</p><p style="margin:0 0 10px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;"><input type="checkbox" id="nexoLegalAccept" ${chk} required style="margin-top:3px;min-width:18px;min-height:18px;"><span>${t.accept}</span></label><div id="nexoLegalWarning" style="display:none;margin-top:10px;color:#c62828;font-weight:800;">${lang()==='en'?'You must accept the legal conditions to continue.':lang()==='fr'?'Vous devez accepter les conditions légales pour continuer.':lang()==='pt'?'Você deve aceitar as condições legais para continuar.':lang()==='it'?'Devi accettare le condizioni legali per continuare.':'Para continuar debes aceptar las condiciones legales de la compra.'}</div>`;
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>{nexoApplyLegalI18n(); setTimeout(nexoApplyLegalI18n,200); setTimeout(nexoApplyLegalI18n,700);});
+  document.addEventListener('click',e=>{ if(e.target.closest('button,a')) setTimeout(nexoApplyLegalI18n,60);},true);
+  window.addEventListener('storage',nexoApplyLegalI18n);
+})();
+</script>
+
 </body>
 </html>
