@@ -421,12 +421,16 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
                 <p class="portal-description">
                     Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
                 </p>
-                <div class="nexo-left-legal-card">
-                    <strong>nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
-                    nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
-                    nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
-                    © 2026 nexo™ – Todos los derechos reservados<br>
-                    <a href="aviso-legal.html">Aviso Legal</a> | <a href="terminos-condiciones.html">Términos y Condiciones</a> | <a href="politica-privacidad.html">Privacidad</a> | <a href="politica-cookies.html">Cookies</a> | <a href="reembolsos.html">Reembolsos</a>
+                <div class="nexo-left-legal-card" id="nexoLeftLegalCard">
+                    <strong id="leftLegalTitle">nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
+                    <span id="leftLegalCompany">nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia</span><br>
+                    <span id="leftLegalDesc">nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</span><br>
+                    <span id="leftLegalCopy">© 2026 nexo™ – Todos los derechos reservados</span><br>
+                    <a id="leftLegal1" href="aviso-legal.html">Aviso Legal</a> |
+                    <a id="leftLegal2" href="terminos-condiciones.html">Términos y Condiciones</a> |
+                    <a id="leftLegal3" href="politica-privacidad.html">Privacidad</a> |
+                    <a id="leftLegal4" href="politica-cookies.html">Cookies</a> |
+                    <a id="leftLegal5" href="reembolsos.html">Reembolsos</a>
                 </div>
 
             </div>
@@ -553,6 +557,26 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
     var lt = document.querySelector('.language-title'); if(lt) lt.textContent = t.lang;
     var ht = document.querySelector('.portal-title'); if(ht) ht.innerHTML = t.header;
     var hd = document.querySelector('.portal-description'); if(hd) hd.textContent = t.desc;
+
+    var legalLeft = {
+      es:{title:'nexo™ – Plataforma de Intermediación Comercial Internacional',company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',copy:'© 2026 nexo™ – Todos los derechos reservados',l1:'Aviso Legal',l2:'Términos y Condiciones',l3:'Privacidad',l4:'Cookies',l5:'Reembolsos'},
+      en:{title:'nexo™ – International Commercial Intermediation Platform',company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',desc:'nexo™ acts exclusively as an intermediary between customers and international suppliers.',copy:'© 2026 nexo™ – All rights reserved',l1:'Legal Notice',l2:'Terms and Conditions',l3:'Privacy',l4:'Cookies',l5:'Refunds'},
+      pt:{title:'nexo™ – Plataforma de Intermediação Comercial Internacional',company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',desc:'nexo™ atua exclusivamente como intermediário entre clientes e fornecedores internacionais.',copy:'© 2026 nexo™ – Todos os direitos reservados',l1:'Aviso Legal',l2:'Termos e Condições',l3:'Privacidade',l4:'Cookies',l5:'Reembolsos'},
+      it:{title:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale',company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',desc:'nexo™ agisce esclusivamente come intermediario tra clienti e fornitori internazionali.',copy:'© 2026 nexo™ – Tutti i diritti riservati',l1:'Avviso Legale',l2:'Termini e Condizioni',l3:'Privacy',l4:'Cookie',l5:'Rimborsi'},
+      fr:{title:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale',company:'nexo Services Généraux et Entreprises – NIT: 774651015 – Bolivie',desc:'nexo™ agit exclusivement comme intermédiaire entre clients et fournisseurs internationaux.',copy:'© 2026 nexo™ – Tous droits réservés',l1:'Mentions légales',l2:'Conditions générales',l3:'Confidentialité',l4:'Cookies',l5:'Remboursements'}
+    };
+    var ll = legalLeft[lang] || legalLeft.es;
+    var setHtml = function(id, val){ var el=document.getElementById(id); if(el) el.innerHTML = val; };
+    setHtml('leftLegalTitle', ll.title);
+    setHtml('leftLegalCompany', ll.company);
+    setHtml('leftLegalDesc', ll.desc);
+    setHtml('leftLegalCopy', ll.copy);
+    setHtml('leftLegal1', ll.l1);
+    setHtml('leftLegal2', ll.l2);
+    setHtml('leftLegal3', ll.l3);
+    setHtml('leftLegal4', ll.l4);
+    setHtml('leftLegal5', ll.l5);
+
     document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang===lang));
   }
   document.addEventListener('DOMContentLoaded', applyPortalLanguage);
@@ -716,5 +740,39 @@ body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
 </script>
 
 <script src="nexo-legal-i18n.js"></script>
+
+<script id="nexo-index-left-legal-final-force">
+(function(){
+  function langNow(){ return localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; }
+  const L = {
+    es:['nexo™ – Plataforma de Intermediación Comercial Internacional','nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia','nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.','© 2026 nexo™ – Todos los derechos reservados','Aviso Legal','Términos y Condiciones','Privacidad','Cookies','Reembolsos'],
+    en:['nexo™ – International Commercial Intermediation Platform','nexo General and Business Services – TAX ID: 774651015 – Bolivia','nexo™ acts exclusively as an intermediary between customers and international suppliers.','© 2026 nexo™ – All rights reserved','Legal Notice','Terms and Conditions','Privacy','Cookies','Refunds'],
+    pt:['nexo™ – Plataforma de Intermediação Comercial Internacional','nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia','nexo™ atua exclusivamente como intermediário entre clientes e fornecedores internacionais.','© 2026 nexo™ – Todos os direitos reservados','Aviso Legal','Termos e Condições','Privacidade','Cookies','Reembolsos'],
+    it:['nexo™ – Piattaforma di Intermediazione Commerciale Internazionale','nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia','nexo™ agisce esclusivamente come intermediario tra clienti e fornitori internazionali.','© 2026 nexo™ – Tutti i diritti riservati','Avviso Legale','Termini e Condizioni','Privacy','Cookie','Rimborsi'],
+    fr:['nexo™ – Plateforme d’Intermédiation Commerciale Internationale','nexo Services Généraux et Entreprises – NIT: 774651015 – Bolivie','nexo™ agit exclusivement comme intermédiaire entre clients et fournisseurs internationaux.','© 2026 nexo™ – Tous droits réservés','Mentions légales','Conditions générales','Confidentialité','Cookies','Remboursements']
+  };
+  function forceLeftLegal(){
+    const d = L[langNow()] || L.es;
+    const card = document.querySelector('.nexo-left-legal-card');
+    if(!card) return;
+    card.innerHTML = `<strong id="leftLegalTitle">${d[0]}</strong><br>
+      <span id="leftLegalCompany">${d[1]}</span><br>
+      <span id="leftLegalDesc">${d[2]}</span><br>
+      <span id="leftLegalCopy">${d[3]}</span><br>
+      <a id="leftLegal1" href="aviso-legal.html">${d[4]}</a> |
+      <a id="leftLegal2" href="terminos-condiciones.html">${d[5]}</a> |
+      <a id="leftLegal3" href="politica-privacidad.html">${d[6]}</a> |
+      <a id="leftLegal4" href="politica-cookies.html">${d[7]}</a> |
+      <a id="leftLegal5" href="reembolsos.html">${d[8]}</a>`;
+  }
+  document.addEventListener('click', function(e){
+    const b = e.target.closest && e.target.closest('.lang-btn,[data-lang]');
+    if(b) setTimeout(forceLeftLegal, 30);
+  }, true);
+  window.addEventListener('storage', forceLeftLegal);
+  document.addEventListener('DOMContentLoaded', function(){ forceLeftLegal(); setTimeout(forceLeftLegal,150); setTimeout(forceLeftLegal,700); });
+})();
+</script>
+
 </body>
 </html>
