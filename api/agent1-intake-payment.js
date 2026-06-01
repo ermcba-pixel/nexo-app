@@ -34,10 +34,13 @@ export default async function handler(req,res){
     const commission = money(order.commission || order?.totals?.commission);
     const total = money(order.total || order?.totals?.total);
 
+    const payoneerUrl = process.env.PAYONEER_PAYMENT_URL || process.env.PAYONEER_CHECKOUT_URL || '';
+    const methodStatus = paymentMethod === 'card' ? 'tarjeta_pendiente_pasarela_directa' : (paymentMethod === 'bank' ? 'transferencia_registrada_pendiente_confirmacion' : (paymentMethod === 'payoneer' ? (payoneerUrl ? 'payoneer_redireccionando_checkout' : 'payoneer_url_no_configurada') : 'pendiente_captura_server_side'));
+
     const intake = {
       ok:true,
       id,
-      status:'pendiente_captura_server_side',
+      status: methodStatus,
       agentStatus:'agente_1_listo_para_captura_y_compra_cj',
       paymentMethod,
       totals:{subtotal, shipping, vendorFees, commission, total},
@@ -45,8 +48,9 @@ export default async function handler(req,res){
       provider:'CJ Dropshipping',
       cjReady:Boolean(process.env.CJ_API_KEY),
       paypalAdvancedReady:Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
+      payoneerUrl: paymentMethod === 'payoneer' ? payoneerUrl : '',
       next:[
-        'capturar pago del cliente por PayPal Advanced/Complete Payments',
+        'capturar pago del cliente por pasarela directa habilitada',
         'confirmar webhook de pago aprobado',
         'crear orden CJ con datos de cliente y envío',
         'registrar tracking y comisión neta'
@@ -66,13 +70,13 @@ export default async function handler(req,res){
     }
     if(paymentMethod === 'card'){
       intake.card = {
-        mode:'PayPal Advanced Card Fields / server-side capture',
+        mode:'Pasarela tarjeta server-side / PayPal Advanced Card Payments si está habilitado',
         storesCardData:false,
         cvvStored:false
       };
     }
     if(paymentMethod === 'payoneer'){
-      intake.payoneer = {mode:'Payoneer registrado como rail operativo; captura final debe confirmarse por backend autorizado'};
+      intake.payoneer = {mode:'Payoneer Checkout/API', configured:Boolean(payoneerUrl), checkoutUrl:payoneerUrl || null};
     }
 
     // Intento opcional de registrar en Supabase si existen variables del proyecto.

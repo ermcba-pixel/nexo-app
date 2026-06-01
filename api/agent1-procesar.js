@@ -7,13 +7,6 @@ function cors(res){
 }
 function num(v){ const n=Number(v||0); return Number.isFinite(n)?Number(n.toFixed(2)):0; }
 function safe(s){ return encodeURIComponent(String(s||'')); }
-function providerName(row){
-  const txt = JSON.stringify(row || {}).toLowerCase();
-  if(txt.includes('cj') || txt.includes('cjdropshipping')) return 'CJ Dropshipping';
-  if(txt.includes('amazon')) return 'Amazon / Marketplace';
-  return row.proveedor || row.provider || 'Proveedor internacional';
-}
-function isCJ(row){ return providerName(row).toLowerCase().includes('cj'); }
 function amazonUrl(row){
   const tag = row.amazon_tag || process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
   const asin = row.amazon_asin && !String(row.amazon_asin).includes('PENDIENTE') ? row.amazon_asin : '';
@@ -35,37 +28,24 @@ export default async function handler(req,res){
     const processed=[];
     const amazonProduction = String(process.env.AMAZON_AUTO_PURCHASE_ENABLED || '').toLowerCase() === 'true';
     for(const p of rows || []){
-      const provider = providerName(p);
-      const cj = isCJ(p);
-      const link = cj ? (p.producto_url || p.provider_url || 'CJ Dropshipping API') : amazonUrl(p);
+      const link = amazonUrl(p);
       const commission = num(p.comision_nexo_usd || p.ganancia_nexo || 0);
       const providerCost = num((p.costo_producto_usd||0) + (p.costo_envio_usd||0) + (p.costo_proveedor||0));
-      const estadoAgente = cj ? 'compra_cj_lista_api' : (amazonProduction ? 'compra_amazon_lista_api' : 'cola_compra_proveedor');
-      const estadoCompra = cj ? 'pendiente_ejecucion_cj_api' : (amazonProduction ? 'pendiente_ejecucion_amazon_api' : 'pendiente_compra_asistida_amazon');
+      const estadoAgente = amazonProduction ? 'compra_amazon_lista_api' : 'cola_compra_proveedor';
+      const estadoCompra = amazonProduction ? 'pendiente_ejecucion_amazon_api' : 'pendiente_compra_asistida_amazon';
       await sb(`pedidos?id=eq.${safe(p.id)}`, {method:'PATCH', body:JSON.stringify({
         estado:'pagado_en_proceso',
         estado_agente: estadoAgente,
         estado_compra: estadoCompra,
         estado_envio:'En preparación',
-        proveedor_estado: cj ? 'pendiente_orden_cj' : 'pendiente_compra_proveedor',
-        proveedor: provider,
-        tracking: p.tracking || (cj ? 'PENDIENTE_CJ' : 'PENDIENTE_AMAZON')
+        proveedor_estado:'pendiente_compra_proveedor',
+        tracking: p.tracking || 'PENDIENTE_AMAZON'
       })});
-      await sb('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id:p.id,courier:provider,tracking:cj?'PENDIENTE_CJ':'PENDIENTE_AMAZON',tracking_url:link,estado_envio:'En preparación',fecha_estimada_entrega:p.fecha_estimada_entrega||''}])}).catch(()=>{});
-      let cjOrder = null;
-      if(cj){
-        try{
-          const proto = req.headers['x-forwarded-proto'] || 'https';
-          const host = req.headers.host;
-          const cr = await fetch(`${proto}://${host}/api/agent1-cj-order`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...p, paymentVerified:true, estado_pago:'paypal_pagado_capturado'})});
-          cjOrder = await cr.json().catch(()=>({ok:false,error:'cj_json_failed'}));
-          await logAgent(p.id,'agente1_cj_preparado',cjOrder?.ok?'cj_api_ready':'cj_pendiente',`CJ Dropshipping: ${cjOrder?.message || cjOrder?.estado || 'orden preparada'}`);
-        }catch(e){ cjOrder = {ok:false,error:e.message||String(e)}; }
-      }
-      await logAgent(p.id,'agente1_toma_pedido',estadoAgente,`Pago confirmado. Proveedor: ${provider}. Costo proveedor estimado USD ${providerCost}. Comisión nexo USD ${commission}. Link/API: ${link}`);
-      processed.push({pedido_id:p.id, proveedor:provider, estado_agente:estadoAgente, provider_url:link, comision_nexo_usd:commission, proveedor_total_usd:providerCost, cjOrder});
+      await sb('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id:p.id,courier:'Amazon / Marketplace',tracking:'PENDIENTE_AMAZON',tracking_url:link,estado_envio:'En preparación',fecha_estimada_entrega:p.fecha_estimada_entrega||''}])}).catch(()=>{});
+      await logAgent(p.id,'agente1_toma_pedido',estadoAgente,`Pago confirmado. Costo proveedor estimado USD ${providerCost}. Comisión nexo USD ${commission}. Link proveedor: ${link}`);
+      processed.push({pedido_id:p.id, estado_agente:estadoAgente, amazon_url:link, comision_nexo_usd:commission, proveedor_total_usd:providerCost});
     }
-    return res.status(200).json({ok:true,processed_count:processed.length,processed,next:'PayPal webhook/capture confirma pago; Agente 1 procesa CJ por API cuando CJ_API_KEY está configurada y deja Amazon en cola hasta autorización de compra API.'});
+    return res.status(200).json({ok:true,processed_count:processed.length,processed,next:'PayPal webhook/capture confirma pago; Agente 1 deja compra en cola operativa hasta API Amazon autorizada.'});
   }catch(e){
     return res.status(e.statusCode||500).json({ok:false,error:e.message||String(e),detail:e.detail||null});
   }
