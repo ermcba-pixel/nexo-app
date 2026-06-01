@@ -1291,8 +1291,10 @@ function selectPayment(methodId, btnEl=null) {
                 item.name = item.name || item.nombre || item.producto || item.title || 'Producto nexo™';
                 item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? 0);
                 item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
-                item.shippingAmazon = Number(item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
-                item.vendorFee = Number(item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
+                item.shippingAmazon = Number(item.cjShippingCost ?? item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
+                item.vendorFee = Number(item.cjHandlingFee ?? item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
+                if (typeof estimateCjShipping === 'function' && (!item.shippingAmazon || item.shippingAmazon <= 0)) item.shippingAmazon = estimateCjShipping(item);
+                if (typeof estimateCjHandling === 'function' && (!item.vendorFee || item.vendorFee <= 0)) item.vendorFee = estimateCjHandling(item);
                 item.provider = item.provider || item.proveedor || item.vendor || 'Proveedor externo';
                 item.providerLogo = item.providerLogo || '🏪';
                 return `
@@ -1345,8 +1347,27 @@ function selectPayment(methodId, btnEl=null) {
 
         // CALCULAR TOTALES
         function getItemProductCost(item){ return Number(item.cjProductCost ?? item.price ?? 0) * Number(item.quantity ?? 1); }
-        function getItemShippingCost(item){ return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? 0) * Number(item.quantity ?? 1); }
-        function getItemVendorCost(item){ return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? 0) * Number(item.quantity ?? 1); }
+        function isCjItem(item){
+            const src = String(item.provider || item.proveedor || item.vendor || item.source || item.category || '').toLowerCase();
+            return src.includes('cj') || src.includes('dropshipping') || !!(item.cjProductId || item.pid || item.cjSku || item.variantSku);
+        }
+        function getRealShippingValue(item){ return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? item.envio ?? item.costo_envio_usd ?? 0) || 0; }
+        function getRealVendorValue(item){ return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? item.costo_operativo_cj ?? 0) || 0; }
+        function estimateCjShipping(item){
+            // Estimación operativa temporal: se reemplaza automáticamente por la cotización real de CJ cuando la API devuelve flete por país/dirección.
+            const unit = Number(item.cjProductCost ?? item.price ?? 0) || 0;
+            const qty = Number(item.quantity ?? 1) || 1;
+            if(!isCjItem(item)) return 0;
+            return Number(Math.max(3.90, unit * 0.45, 2.40 * qty).toFixed(2));
+        }
+        function estimateCjHandling(item){
+            const unit = Number(item.cjProductCost ?? item.price ?? 0) || 0;
+            const qty = Number(item.quantity ?? 1) || 1;
+            if(!isCjItem(item)) return 0;
+            return Number(Math.max(0.75, unit * qty * 0.08).toFixed(2));
+        }
+        function getItemShippingCost(item){ const real=getRealShippingValue(item); return (real>0 ? real : estimateCjShipping(item)) * Number(item.quantity ?? 1); }
+        function getItemVendorCost(item){ const real=getRealVendorValue(item); return (real>0 ? real : estimateCjHandling(item)) * Number(item.quantity ?? 1); }
 
         // CALCULAR TOTALES
         function calculateTotals() {
@@ -1966,9 +1987,23 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
           item.shippingAmazon = Number(data.shippingCost);
           item.cjHandlingFee = Number(data.handlingFee || item.cjHandlingFee || item.vendorFee || 0);
           item.vendorFee = Number(data.handlingFee || item.vendorFee || 0);
+          item.cjShippingEstimated = false;
           item.cjShippingQuote = data;
           changed = true;
         } else {
+          // Si CJ aún no devuelve flete por falta de variante/dirección completa, no dejamos $0.00:
+          // Agente 1 registra una estimación y la reemplaza por el flete real al crear/pagar la orden CJ.
+          if(typeof estimateCjShipping === 'function' && Number(item.cjShippingCost || item.shippingAmazon || 0) <= 0){
+            item.cjShippingCost = estimateCjShipping(item);
+            item.shippingAmazon = item.cjShippingCost;
+            item.cjShippingEstimated = true;
+            changed = true;
+          }
+          if(typeof estimateCjHandling === 'function' && Number(item.cjHandlingFee || item.vendorFee || 0) <= 0){
+            item.cjHandlingFee = estimateCjHandling(item);
+            item.vendorFee = item.cjHandlingFee;
+            changed = true;
+          }
           item.cjShippingPending = true;
           item.cjShippingQuote = data || {ok:false};
         }
