@@ -148,48 +148,24 @@
         }
 
         .cart-items {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
         }
 
         .cart-item {
             background: var(--white);
-            border-radius: 12px;
-            padding: 14px 16px;
-            display: grid;
-            grid-template-columns: 120px minmax(240px, 1fr) 130px 120px;
-            align-items: center;
-            gap: 16px;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .cart-item-icon {
-            width: 110px;
-            height: 95px;
             font-size: 40px;
             text-align: center;
-        }
-
-        .cart-item-main {
-            display:flex;
-            flex-direction:column;
-            gap:7px;
-            min-width:0;
-        }
-
-        .cart-item-costs {
-            display:flex;
-            flex-direction:column;
-            gap:8px;
-            min-width:120px;
-        }
-
-        .cart-item-actions {
-            display:flex;
-            flex-direction:column;
-            gap:10px;
-            align-items:stretch;
         }
 
         .cart-item-provider {
@@ -530,15 +506,8 @@
             }
 
             .cart-items {
-                display:flex;
-                flex-direction:column;
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
-            .cart-item {
-                grid-template-columns: 88px 1fr;
-                align-items:start;
-            }
-            .cart-item-icon{width:82px;height:78px;}
-            .cart-item-costs,.cart-item-actions{grid-column:1 / -1;}
 
             .phone-group {
                 grid-template-columns: 80px 1fr;
@@ -550,6 +519,69 @@
         .payment-btn.active{background:#7ac742!important;color:#0c2b2d!important;border-color:#7ac742!important;}
 
         .cart-item-features{font-size:10px;color:#4A6B6D;line-height:1.4;background:#f5fbf9;border-radius:6px;padding:7px;margin-top:2px;}
+
+
+/* ===== nexo checkout limpio: producto seleccionado horizontal ===== */
+.cart-items{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:14px !important;
+}
+.cart-item{
+    background:var(--white);
+    border-radius:12px;
+    padding:14px 16px;
+    display:grid !important;
+    grid-template-columns:120px minmax(260px,1fr) 135px 125px !important;
+    align-items:center !important;
+    gap:16px !important;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.cart-item-icon{
+    width:110px !important;
+    height:95px !important;
+    background:#fff;
+    overflow:hidden;
+    font-size:0!important;
+}
+.cart-item-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    border-radius:12px;
+}
+.cart-item-main{display:flex;flex-direction:column;gap:7px;min-width:0;}
+.cart-item-costs{display:flex;flex-direction:column;gap:8px;min-width:120px;}
+.cart-item-actions{display:flex;flex-direction:column;gap:10px;align-items:stretch;}
+.cart-item-features{
+    font-size:10px;
+    color:#4A6B6D;
+    line-height:1.4;
+    background:#f5fbf9;
+    border-radius:6px;
+    padding:7px;
+    margin-top:2px;
+}
+.payment-btn.active{background:#7ac742!important;color:#0c2b2d!important;border-color:#7ac742!important;}
+.nexo-checkout-legal.page-legal-block{
+    margin:18px 0;
+    padding:18px 20px;
+    border:1px solid rgba(74,107,109,.28);
+    border-radius:16px;
+    background:#f6faf9;
+    color:#2D3E3F;
+    font-size:14px;
+    line-height:1.6;
+}
+@media (max-width: 768px){
+    .cart-item{
+        grid-template-columns:88px 1fr !important;
+        align-items:start !important;
+    }
+    .cart-item-icon{width:82px!important;height:78px!important;}
+    .cart-item-costs,.cart-item-actions{grid-column:1 / -1;}
+}
 
 </style>
 </head>
@@ -1093,9 +1125,9 @@ function nexoPayText(key){
     const lang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || currentLang || 'es').slice(0,2);
     const D = {
       es:{
-        cardTitle:'Datos de tarjeta de crédito/débito',
-        cardText:'Complete los datos de tarjeta para registrar el método de pago del cliente. El cobro real se ejecuta mediante pasarela segura habilitada para nexo™ y queda asociado al pedido del Agente 1.',
-        cardBtn:'Continuar con tarjeta',
+        cardTitle:'Pago real con tarjeta mediante PayPal seguro',
+        cardText:'nexo™ no guarda números de tarjeta ni CVV. Al confirmar, se abrirá PayPal Business para pagar de forma real y segura con PayPal o tarjeta, según disponibilidad de PayPal en el país del cliente.',
+        cardBtn:'Continuar con tarjeta / PayPal seguro',
         bankTitle:'Transferencia bancaria / ACH / Wire / Land Bank',
         bankText:'Registre el banco o referencia del cliente para seguimiento. El cobro real se procesará mediante PayPal seguro si PayPal habilita cuenta bancaria/ACH/Wire; si usa transferencia directa, el pedido queda pendiente hasta confirmar el abono.',
         bankHolder:'Titular de la cuenta bancaria', bankName:'Banco del cliente', bankNamePh:'Ej.: Land Bank, Bank of America, etc.', bankRef:'Referencia / número de operación (opcional)', transferType:'Tipo de transferencia', bankBtn:'Continuar con transferencia / pago seguro',
@@ -1114,7 +1146,7 @@ function nexoPayText(key){
 
 function nexoLegalBlockPage(){
     return `
-      <div class="nexo-checkout-legal page-legal-block" style="margin:18px 0;padding:18px 20px;border:1px solid rgba(74,107,109,.28);border-radius:16px;background:#f6faf9;color:#2D3E3F;font-size:14px;line-height:1.6;">
+      <div class="nexo-checkout-legal page-legal-block">
         <p style="margin:0 0 8px 0;"><strong>Condiciones legales de compra nexo™</strong></p>
         <p style="margin:0 0 12px 0;">nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.</p>
         <p style="margin:0 0 12px 0;"><a href="terminos-condiciones.html" target="_blank">Términos y Condiciones</a> | <a href="politica-privacidad.html" target="_blank">Privacidad</a> | <a href="reembolsos.html" target="_blank">Reembolsos</a></p>
@@ -1145,26 +1177,27 @@ function selectPayment(methodId, btnEl=null) {
             <div class="payment-fields-panel">
                 <div class="form-group">
                     <label class="form-label">NOMBRE COMO APARECE EN LA TARJETA</label>
-                    <input type="text" class="form-input" id="cardHolder" name="nexo_pago_ref_1" placeholder="Nombre del titular" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
+                    <input type="text" class="form-input" id="cardHolder" name="nexo_pago_ref_1" placeholder="Nombre del titular" autocomplete="new-password" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly')">
                 </div>
                 <div class="form-group">
                     <label class="form-label">NÚMERO DE TARJETA</label>
-                    <input type="text" class="form-input" id="cardNumber" name="nexo_pago_ref_2" placeholder="Número de tarjeta" inputmode="numeric" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
+                    <input type="text" class="form-input" id="cardNumber" name="nexo_pago_ref_2" placeholder="Número de tarjeta" inputmode="numeric" autocomplete="new-password" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly')">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group">
                         <label class="form-label">MM/AA</label>
-                        <input type="text" class="form-input" id="cardExpiry" name="nexo_pago_ref_3" placeholder="MM/AA" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
+                        <input type="text" class="form-input" id="cardExpiry" name="nexo_pago_ref_3" placeholder="MM/AA" autocomplete="new-password" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
                     <div class="form-group">
                         <label class="form-label">CVV</label>
-                        <input type="password" class="form-input" id="cardCvv" name="nexo_pago_ref_4" placeholder="CVV" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
+                        <input type="password" class="form-input" id="cardCvv" name="nexo_pago_ref_4" placeholder="CVV" autocomplete="new-password" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
                 </div>
                 ${nexoLegalBlockPage()}
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('cardBtn')}</button>
             </div>
         `;
+        attachCardFormatters?.();
     } else if (methodId === 'bank') {
         details.innerHTML = `
             <div class="payment-fields-panel">
@@ -1209,6 +1242,7 @@ function selectPayment(methodId, btnEl=null) {
     } else if (methodId === 'payoneer') {
         details.innerHTML = `
             <div class="payment-fields-panel">
+                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-top:6px;">${nexoPayText('payoneerText')}</div>
                 ${nexoLegalBlockPage()}
                 <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('payoneerBtn')}</button>
             </div>
@@ -1249,12 +1283,12 @@ function selectPayment(methodId, btnEl=null) {
                 item.id = item.id ?? idx;
                 item.icon = item.icon || item.emoji || '📦';
                 item.name = item.name || item.nombre || item.producto || item.title || 'Producto nexo™';
-                item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? 0);
-                item.quantity = Number(item.quantity ?? item.cantidad ?? 1);
-                item.shippingAmazon = Number(item.shippingAmazon ?? item.envio ?? item.costo_envio_usd ?? 0);
-                item.vendorFee = Number(item.vendorFee ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
-                item.provider = item.provider || item.proveedor || item.vendor || 'Proveedor externo';
-                item.providerLogo = item.providerLogo || '🏪';
+                item.price = Number(item.price ?? item.precio ?? item.precio_usd ?? item.productPrice ?? 0);
+                item.quantity = Number(item.quantity ?? item.cantidad ?? item.qty ?? 1);
+                item.provider = item.provider || item.proveedor || item.vendor || 'CJ Dropshipping';
+                item.providerLogo = item.providerLogo || (String(item.provider).toLowerCase().includes('cj') ? '🇨🇳' : '🏪');
+                const shipUnit = Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? item.shippingPrice ?? item.logisticPrice ?? item.logisticsPrice ?? item.freight ?? item.postage ?? item.envio ?? item.costo_envio_usd ?? 0);
+                const vendorUnit = Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? item.serviceFee ?? item.platformFee ?? item.operationalCost ?? item.gasto_vendedor ?? item.vendor_fee ?? 0);
                 return `
                 <div class="cart-item">
                     <div class="cart-item-icon"><img src="${nexoCartImage(item)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=nexoCheckoutImages.default;"></div>
@@ -1265,8 +1299,8 @@ function selectPayment(methodId, btnEl=null) {
                     </div>
                     <div class="cart-item-costs">
                         <div class="cart-item-price">$${item.price.toFixed(2)}</div>
-                        <div class="cart-item-shipping">📫 Envío: $${(item.shippingAmazon || 0).toFixed(2)}</div>
-                        <div class="cart-item-shipping">🏪 Vendedor: $${(item.vendorFee || 0).toFixed(2)}</div>
+                        <div class="cart-item-shipping">📫 Envío CJ: $${shipUnit.toFixed(2)}</div>
+                        <div class="cart-item-shipping">🏪 Costos CJ: $${vendorUnit.toFixed(2)}</div>
                     </div>
                     <div class="cart-item-actions">
                         <div class="cart-item-controls">
@@ -1304,9 +1338,9 @@ function selectPayment(methodId, btnEl=null) {
         }
 
         // CALCULAR TOTALES
-        function getItemProductCost(item){ return Number(item.cjProductCost ?? item.price ?? 0) * Number(item.quantity ?? 1); }
-        function getItemShippingCost(item){ return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? 0) * Number(item.quantity ?? 1); }
-        function getItemVendorCost(item){ return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? 0) * Number(item.quantity ?? 1); }
+        function getItemProductCost(item){ return Number(item.cjProductCost ?? item.price ?? item.precio ?? item.precio_usd ?? item.productPrice ?? 0) * Number(item.quantity ?? item.cantidad ?? item.qty ?? 1); }
+        function getItemShippingCost(item){ return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? item.shippingPrice ?? item.logisticPrice ?? item.logisticsPrice ?? item.freight ?? item.postage ?? item.envio ?? item.costo_envio_usd ?? 0) * Number(item.quantity ?? item.cantidad ?? item.qty ?? 1); }
+        function getItemVendorCost(item){ return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? item.serviceFee ?? item.platformFee ?? item.operationalCost ?? item.gasto_vendedor ?? item.vendor_fee ?? item.costo_operativo_cj ?? 0) * Number(item.quantity ?? item.cantidad ?? item.qty ?? 1); }
 
         // CALCULAR TOTALES
         function calculateTotals() {
@@ -1390,7 +1424,7 @@ const t = ctt();
 
         async function startNexoPagoSeguro(orderData){
             // PAYPAL REAL: el cliente paga a PayPal Business de nexo.
-            // El Agente 1 espera confirmación/captura PayPal y luego prepara la compra CJ Dropshipping.
+            // El Agente 1 espera confirmación/captura PayPal y luego deja preparada la compra Amazon.
             const amount = Number(orderData.total || 0).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&metodo=paypal&paypal=return`;
@@ -1433,8 +1467,8 @@ const t = ctt();
             const btnText = document.getElementById('confirmBuyText');
             const oldBtnText = btnText ? btnText.textContent : '';
             const legalAccept = document.getElementById('nexoLegalAccept');
-            const legalAcceptPage = document.getElementById('nexoLegalAcceptPage');
             const legalWarning = document.getElementById('nexoLegalWarning');
+            const legalAcceptPage = document.getElementById('nexoLegalAcceptPage');
             if(!(legalAccept && legalAccept.checked) && !(legalAcceptPage && legalAcceptPage.checked)){
                 if(legalWarning) legalWarning.style.display = 'block';
                 alert('Para continuar debes aceptar los términos, privacidad y condición de intermediación de nexo™.');
@@ -1553,7 +1587,7 @@ const t = ctt();
                 cliente_cobra_en: 'PayPal Checkout real nexo™',
                 proveedor_pago_con:'CJ Dropshipping API / Wallet CJ después de confirmación PayPal',
                 margen_empresa:'Comisión nexo™ calculada sobre precio proveedor y registrada en el pedido',
-                providers:['CJ Dropshipping','AliExpress','Amazon Business','Temu','SHEIN']
+                providers:['Amazon','AliExpress','Temu','Shein','CJ Dropshipping','Marketplace']
             };
             try {
                 const queue = JSON.parse(localStorage.getItem('nexoProviderPaymentQueue') || '[]');
@@ -1595,31 +1629,16 @@ const t = ctt();
                 return;
             }
 
-            // COBRO INTERNO AGENTE 1: tarjeta, ACH/Wire y Payoneer NO redirigen al cliente a PayPal clásico.
-            // El backend registra la intención de cobro y deja el pedido listo para captura server-side/PayPal Advanced.
+            // COBRO REAL INTERNO: tarjeta, ACH/Wire y Payoneer no redirigen a PayPal.
+            // El pedido queda en cola del Agente 1 para cobro/validación y compra CJ con costos reales.
             if(orderData.paymentMethod !== 'paypal'){
-                orderData.estado_pago = 'intake_agente_1_recibido';
-                orderData.estado_compra = 'pendiente_captura_server_side';
-                orderData.estado_agente = 'agente_1_preparando_cobro_y_orden_cj';
+                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_pendiente_agente_1' : (orderData.paymentMethod === 'bank' ? 'transferencia_pendiente_agente_1' : 'payoneer_pendiente_agente_1');
+                orderData.estado_compra = 'pedido_cerrado_agente_1_automatico';
+                orderData.estado_agente = 'pendiente_cobro_cliente_y_pago_cj';
+                orderData.confirmationNote = 'Pedido registrado en nexo™. El Agente 1 procesa el cobro elegido, registra el abono en PayPal Business de nexo™ y compra al proveedor CJ con los datos de envío del cliente.';
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                if(btnText) btnText.textContent = 'Procesando con Agente 1...';
-                try{
-                    const r = await fetch('/api/agent1-intake-payment', {
-                        method:'POST',
-                        headers:{'Content-Type':'application/json'},
-                        body: JSON.stringify(orderData)
-                    });
-                    const data = await r.json().catch(()=>({}));
-                    orderData.agent1Intake = data;
-                    orderData.estado_pago = data?.status || orderData.estado_pago;
-                    orderData.estado_agente = data?.agentStatus || orderData.estado_agente;
-                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                }catch(e){
-                    console.warn('Agente 1 intake no disponible; pedido queda en cola local.', e);
-                    orderData.agent1Intake = {ok:false, localQueue:true, message:'Pendiente de sincronización backend'};
-                    localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                }
-                window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&metodo=' + encodeURIComponent(orderData.paymentMethod) + '&agent1=intake';
+                localStorage.removeItem('nexoCart');
+                window.location.href = 'nexo-confirmacion.html?pedido_id=' + encodeURIComponent(orderData.supabase_id || orderData.id) + '&invoice=' + encodeURIComponent(orderData.factura_numero || orderData.id) + '&pago=' + encodeURIComponent(orderData.estado_pago) + '&agente1=automatico';
                 return;
             }
 
@@ -1640,7 +1659,7 @@ const t = ctt();
                 agentQueue.push({
                     pedido_id: orderData.supabase_id || orderData.id,
                     fecha: new Date().toISOString(),
-                    estado: 'pendiente_cobro_paypal_y_compra_cj',
+                    estado: 'pendiente_cobro_paypal_y_compra_amazon',
                     automatico: true,
                     sin_aprobacion_manual: true,
                     cobrar_en: 'PayPal Business nexo™',
@@ -1817,7 +1836,7 @@ function nexoPublicCleanup(){
       nexo_language: localStorage.getItem('nexo_language')
     };
     const removeKeys = [
-      'nexoLastPurchase','nexoLastOrder','lastPurchase','nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
     ];
     removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
@@ -1844,97 +1863,79 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 </footer>
 
 
+<script>
+(function(){
+  function nexoCheckoutLegalOk(){
+    var cb=document.getElementById('nexoLegalAccept');
+    if(cb && !cb.checked){ alert('Debes aceptar los términos legales de nexo™ para continuar.'); return false; }
+    return true;
+  }
+  document.addEventListener('click', function(e){
+    var el=e.target;
+    if(!el) return;
+    var txt=(el.textContent||el.value||'').toLowerCase();
+    if((el.tagName==='BUTTON' || el.tagName==='A') && (txt.includes('pagar') || txt.includes('confirmar') || txt.includes('paypal'))){
+      if(!nexoCheckoutLegalOk()){ e.preventDefault(); e.stopPropagation(); }
+    }
+  }, true);
+})();
+</script>
+
 <script src="nexo-legal-i18n.js"></script>
 
-<style id="nexo-horizontal-cart-final-fix">
-/* carrito horizontal definitivo */
-.cart-section{max-width:1120px;margin-left:auto!important;margin-right:auto!important;}
-.cart-items{display:flex!important;flex-direction:column!important;gap:14px!important;}
-.cart-item{display:grid!important;grid-template-columns:120px minmax(260px,1fr) minmax(170px,.7fr) 135px!important;align-items:center!important;gap:18px!important;width:100%!important;min-height:128px!important;}
-.cart-item-icon{width:112px!important;height:96px!important;}
-.cart-item-main{min-width:0!important;}
-.cart-item-name{font-size:13px!important;line-height:1.25!important;}
-.cart-item-features{max-height:78px!important;overflow:auto!important;}
-.cart-item-costs{min-width:160px!important;}
-.cart-item-actions{min-width:126px!important;}
-@media(max-width:900px){.cart-item{grid-template-columns:95px 1fr!important}.cart-item-costs,.cart-item-actions{grid-column:1 / -1!important}.cart-item-icon{width:90px!important;height:78px!important}}
-</style>
-<script id="nexo-checkout-final-runtime-fix">
+<script id="nexo-checkout-final-fixes">
 (function(){
-  function normalizeCartCosts(){
-    try{
-      const cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
-      let changed=false;
-      cart.forEach(it=>{
-        const ship=Number(it.cjShippingCost ?? it.shippingAmazon ?? it.shippingCost ?? it.envio ?? it.costo_envio_usd ?? 0);
-        const vendor=Number(it.cjHandlingFee ?? it.vendorFee ?? it.handlingFee ?? it.costo_operativo_cj ?? 0);
-        if(!Number.isNaN(ship) && it.shippingAmazon!==ship){ it.shippingAmazon=ship; it.cjShippingCost=ship; changed=true; }
-        if(!Number.isNaN(vendor) && it.vendorFee!==vendor){ it.vendorFee=vendor; it.cjHandlingFee=vendor; changed=true; }
-      });
-      if(changed) localStorage.setItem('nexoCart',JSON.stringify(cart));
-    }catch(e){}
-  }
-  function removePaymentAutofillWarning(){
-    document.querySelectorAll('[name^="nexo_pago_ref_"]').forEach(el=>{
-      el.setAttribute('autocomplete','new-password');
-      el.setAttribute('data-form-type','other');
-      el.setAttribute('data-lpignore','true');
-    });
-  }
-  document.addEventListener('DOMContentLoaded',()=>{normalizeCartCosts(); removePaymentAutofillWarning(); setTimeout(removePaymentAutofillWarning,300);});
-  window.addEventListener('load',()=>{normalizeCartCosts(); removePaymentAutofillWarning();});
+  function currentLang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||'es').slice(0,2).toLowerCase();}
+  const LP={
+    es:{title:'Condiciones legales de compra nexo™',desc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',terms:'Términos y Condiciones',privacy:'Privacidad',refunds:'Reembolsos',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'nexo™ legal purchase conditions',desc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',terms:'Terms and Conditions',privacy:'Privacy',refunds:'Refunds',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Condições legais de compra nexo™',desc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',terms:'Termos e Condições',privacy:'Privacidade',refunds:'Reembolsos',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Condizioni legali di acquisto nexo™',desc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',terms:'Termini e Condizioni',privacy:'Privacy',refunds:'Rimborsi',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Conditions légales d’achat nexo™',desc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',terms:'Conditions générales',privacy:'Confidentialité',refunds:'Remboursements',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  window.nexoLegalBlockPage=function(){ const t=LP[currentLang()]||LP.es; return `<div class="nexo-checkout-legal page-legal-block" style="margin:18px 0;padding:18px 20px;border:1px solid rgba(74,107,109,.28);border-radius:16px;background:#f6faf9;color:#2D3E3F;font-size:14px;line-height:1.6;"><p style="margin:0 0 8px 0;"><strong>${t.title}</strong></p><p style="margin:0 0 12px 0;">${t.desc}</p><p style="margin:0 0 12px 0;"><a href="terminos-condiciones.html" target="_blank">${t.terms}</a> | <a href="politica-privacidad.html" target="_blank">${t.privacy}</a> | <a href="reembolsos.html" target="_blank">${t.refunds}</a></p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label></div>`; };
+  const oldGetShip = window.getItemShippingCost;
+  window.getItemShippingCost=function(item){return Number(item.cjShippingCost ?? item.shippingAmazon ?? item.shippingCost ?? item.shippingPrice ?? item.logisticPrice ?? item.logisticsPrice ?? item.freight ?? item.postage ?? 0) * Number(item.quantity ?? item.cantidad ?? 1);};
+  window.getItemVendorCost=function(item){return Number(item.cjHandlingFee ?? item.vendorFee ?? item.handlingFee ?? item.serviceFee ?? item.platformFee ?? item.operationalCost ?? 0) * Number(item.quantity ?? item.cantidad ?? 1);};
+  // Mantener pago interno para tarjeta, transferencia y Payoneer. PayPal sí abre PayPal.
+  const originalStart = window.startNexoPagoSeguro;
+  window.nexoFinishInternal=function(orderData){
+    try{localStorage.setItem('nexoLastOrder', JSON.stringify(orderData)); localStorage.removeItem('nexoCart');}catch(e){}
+    window.location.href='nexo-confirmacion.html?pedido_id='+encodeURIComponent(orderData.supabase_id||orderData.id)+'&invoice='+encodeURIComponent(orderData.factura_numero||orderData.id)+'&pago='+encodeURIComponent(orderData.estado_pago||'pendiente_agente1')+'&agente1=automatico';
+  };
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{ if(typeof selectPayment==='function') selectPayment(selectedPayment||'paypal'); if(typeof calculateTotals==='function') calculateTotals();},120);});
 })();
 </script>
 
 
-<script id="nexo-agent1-cj-shipping-realizer">
+<script id="nexo-legal-footer-i18n-final">
 (function(){
-  async function refreshCjShippingQuotes(){
-    try{
-      const cart = JSON.parse(localStorage.getItem('nexoCart') || '[]');
-      if(!Array.isArray(cart) || !cart.length) return;
-      const profile = JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}');
-      const country = document.getElementById('countrySelect')?.value || profile.countryCode || profile.country || '';
-      const city = document.getElementById('city')?.value || profile.city || '';
-      const zipCode = document.getElementById('zipCode')?.value || profile.zipCode || profile.postalCode || '';
-      let changed = false;
-      for(const item of cart){
-        const hasRealShipping = Number(item.cjShippingCost || item.shippingAmazon || item.shippingCost || 0) > 0;
-        if(hasRealShipping) continue;
-        if(!item.cjProductId && !item.pid && !item.productId) continue;
-        const r = await fetch('/api/cj-shipping-quote', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({item, destination:{country, city, zipCode, quantity:item.quantity || 1}})
-        });
-        const data = await r.json().catch(()=>({}));
-        if(data && data.ok && Number(data.shippingCost) > 0){
-          item.cjShippingCost = Number(data.shippingCost);
-          item.shippingAmazon = Number(data.shippingCost);
-          item.cjHandlingFee = Number(data.handlingFee || item.cjHandlingFee || item.vendorFee || 0);
-          item.vendorFee = Number(data.handlingFee || item.vendorFee || 0);
-          item.cjShippingQuote = data;
-          changed = true;
-        } else {
-          item.cjShippingPending = true;
-          item.cjShippingQuote = data || {ok:false};
-        }
-      }
-      if(changed){
-        localStorage.setItem('nexoCart', JSON.stringify(cart));
-        if(typeof loadCart === 'function') loadCart();
-        if(typeof calculateTotals === 'function') calculateTotals();
-      }
-    }catch(e){ console.warn('CJ shipping quote pendiente', e); }
-  }
-  window.nexoRefreshCjShippingQuotes = refreshCjShippingQuotes;
-  document.addEventListener('DOMContentLoaded', function(){
-    setTimeout(refreshCjShippingQuotes, 450);
-    ['countrySelect','city','zipCode','shippingPriority'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.addEventListener('change', refreshCjShippingQuotes);
+  const LEGAL={
+    es:{title:'Plataforma de Intermediación Comercial Internacional',company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal',terms:'Términos y Condiciones',privacy:'Privacidad',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condiciones legales de compra nexo™',buyDesc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'International Commercial Intermediation Platform',company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice',terms:'Terms and Conditions',privacy:'Privacy',cookies:'Cookies',refunds:'Refunds',buyTitle:'nexo™ legal purchase conditions',buyDesc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Plataforma de Intermediação Comercial Internacional',company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal',terms:'Termos e Condições',privacy:'Privacidade',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condições legais de compra nexo™',buyDesc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Piattaforma di Intermediazione Commerciale Internazionale',company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale',terms:'Termini e Condizioni',privacy:'Privacy',cookies:'Cookie',refunds:'Rimborsi',buyTitle:'Condizioni legali di acquisto nexo™',buyDesc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Plateforme d’Intermédiation Commerciale Internationale',company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions légales',terms:'Conditions générales',privacy:'Confidentialité',cookies:'Cookies',refunds:'Remboursements',buyTitle:'Conditions légales d’achat nexo™',buyDesc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  function lang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||document.documentElement.lang||'es').slice(0,2).toLowerCase();}
+  function a(href,txt){return `<a href="${href}">${txt}</a>`;}
+  function legalHTML(t){return `<strong>nexo™</strong> – ${t.title}<br>${t.company}<br>${t.desc}<br>© 2026 nexo™ – ${t.rights}<br><span class="nexo-footer-links">${a('aviso-legal.html',t.legal)} | ${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('politica-cookies.html',t.cookies)} | ${a('reembolsos.html',t.refunds)}</span>`;}
+  window.nexoApplyLegalI18n=function(){
+    const t=LEGAL[lang()]||LEGAL.es;
+    document.querySelectorAll('[data-nexo-legal-footer], .nexo-left-legal-card, .nexo-left-legal, footer#nexoFooter, footer.nexo-footer, footer.nexo-legal-footer').forEach(el=>{el.innerHTML=legalHTML(t);});
+    document.querySelectorAll('.page-legal-block').forEach(el=>{
+      const checked = el.querySelector('input')?.checked ? 'checked' : '';
+      el.innerHTML = `<p style="margin:0 0 8px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 12px 0;">${t.buyDesc}</p><p style="margin:0 0 12px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" ${checked} style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label>`;
     });
-  });
+    const modalLegal=document.querySelector('#confirmationModal .nexo-checkout-legal');
+    if(modalLegal){
+      const chk = document.getElementById('nexoLegalAccept')?.checked ? 'checked' : '';
+      modalLegal.innerHTML = `<p style="margin:0 0 10px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 10px 0;">${t.buyDesc}</p><p style="margin:0 0 10px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;"><input type="checkbox" id="nexoLegalAccept" ${chk} required style="margin-top:3px;min-width:18px;min-height:18px;"><span>${t.accept}</span></label><div id="nexoLegalWarning" style="display:none;margin-top:10px;color:#c62828;font-weight:800;">${lang()==='en'?'You must accept the legal conditions to continue.':lang()==='fr'?'Vous devez accepter les conditions légales pour continuer.':lang()==='pt'?'Você deve aceitar as condições legais para continuar.':lang()==='it'?'Devi accettare le condizioni legali per continuare.':'Para continuar debes aceptar las condiciones legales de la compra.'}</div>`;
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>{nexoApplyLegalI18n(); setTimeout(nexoApplyLegalI18n,200); setTimeout(nexoApplyLegalI18n,700);});
+  document.addEventListener('click',e=>{ if(e.target.closest('button,a')) setTimeout(nexoApplyLegalI18n,60);},true);
+  window.addEventListener('storage',nexoApplyLegalI18n);
 })();
 </script>
 
