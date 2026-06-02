@@ -575,6 +575,18 @@ body{
 }
 </style>
 
+
+<style id="nexo-admin-footer-white-links">
+.nexo-legal-footer a,
+.nexo-legal-footer a:visited,
+.nexo-legal-footer a:hover,
+.nexo-legal-footer a:active{
+  color:#ffffff !important;
+  text-decoration:underline !important;
+  font-weight:700 !important;
+}
+</style>
+
 </head>
 <body>
     <!-- HEADER -->
@@ -635,7 +647,7 @@ body{
                 <div class="menu-item" onclick="switchSection('paymentdata', this)">
                     <span class="menu-icon">🧾</span> Datos de pagos
                 </div>
-                <div class="menu-item superadmin-only" onclick="switchSection('supabaseclear', this)">
+                <div class="menu-item" onclick="switchSection('supabaseclear', this)">
                     <span class="menu-icon">🧹</span> Borrar bases Supabase
                 </div>
             </div>
@@ -1497,6 +1509,18 @@ body{
 }
 </style>
 
+
+<style id="nexo-admin-footer-white-links">
+.nexo-legal-footer a,
+.nexo-legal-footer a:visited,
+.nexo-legal-footer a:hover,
+.nexo-legal-footer a:active{
+  color:#ffffff !important;
+  text-decoration:underline !important;
+  font-weight:700 !important;
+}
+</style>
+
 </head>
             <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
                 <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${esc(title)}</h1>
@@ -1507,6 +1531,8 @@ body{
                 </table>
                 ${summaryHtml}
             
+
+
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -2157,6 +2183,26 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
     if(!table || !(window.nexoTicketsCache||[]).length) return;
     table.innerHTML = window.nexoTicketsCache.map((t,idx)=>`<tr><td>${t.fecha_creacion?new Date(t.fecha_creacion).toLocaleString('es-BO'):''}</td><td>${t.nombre_cliente||''}</td><td>${t.asunto||''}</td><td>${t.tipo_reclamo||''}</td><td>${t.estado||'Nuevo'}</td><td>${t.prioridad||'Media'}</td><td><button class="ticket-response-btn" onclick="nexoResponderTicketReal(${idx})">Responder</button></td></tr>`).join('');
   };
+})();
+</script>
+
+
+<script id="nexo-admin-clean-visible-final">
+(function(){
+  function fixAdmin(){
+    document.querySelectorAll("[onclick*='supabaseclear']").forEach(el=>{
+      el.classList.remove('superadmin-only');
+      el.style.display = 'flex';
+    });
+    document.querySelectorAll('.nexo-legal-footer a').forEach(a=>{
+      a.style.color = '#ffffff';
+      a.style.textDecoration = 'underline';
+      a.style.fontWeight = '700';
+    });
+  }
+  document.addEventListener('DOMContentLoaded', fixAdmin);
+  setTimeout(fixAdmin, 100);
+  setTimeout(fixAdmin, 800);
 })();
 </script>
 
