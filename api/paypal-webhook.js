@@ -39,9 +39,33 @@ async function processPaid(pedidoId, info, rawEvent){
   await sb(`pedidos?id=eq.${encodeURIComponent(pedidoId)}`, {method:'PATCH', body:JSON.stringify({estado_pago:'paypal_pagado_capturado', estado:'pagado', estado_agente:'pago_confirmado', estado_compra:'pendiente_agente_1', estado_envio:'En preparación'})});
   await sb('pagos', {method:'POST', body:JSON.stringify([{pedido_id:pedidoId, metodo:'paypal', estado:'capturado', monto_usd:info.amount, moneda:info.currency, paypal_capture_id:info.captureId, paypal_order_id:rawEvent?.resource?.supplementary_data?.related_ids?.order_id || ''}])}).catch(()=>{});
   await logAgent(pedidoId,'paypal_webhook_pago_confirmado','pago_confirmado',`PayPal confirmó pago/captura ${info.captureId || ''} por ${info.amount} ${info.currency}`);
+  await emitInvoiceIfPaid(pedidoId, 'paypal');
   await fetch(`${process.env.NEXO_PUBLIC_URL || ''}/api/agent1-procesar`.replace(/^\/api/, `${process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : ''}/api`), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({limit:5})}).catch(()=>{});
   return {updated:true,pedido_id:pedidoId};
 }
+
+async function emitInvoiceIfPaid(pedidoId, metodo='paypal'){
+  try{
+    const rows = await sb(`pedidos?id=eq.${encodeURIComponent(pedidoId)}&select=*`, {headers:{Prefer:''}}).catch(()=>[]);
+    const p = Array.isArray(rows) ? rows[0] : null;
+    if(!p) return;
+    const existing = await sb(`facturas?pedido_id=eq.${encodeURIComponent(pedidoId)}&select=id&limit=1`, {headers:{Prefer:''}}).catch(()=>[]);
+    if(existing && existing[0]) return;
+    const pais = String(p.cliente_pais || '').toLowerCase();
+    const numeroFiscal = pais.includes('bolivia') ? (p.cliente_documento || '') : '99001';
+    await sb('facturas', {method:'POST', body:JSON.stringify([{
+      pedido_id: pedidoId,
+      cliente_id: p.cliente_id || null,
+      numero_factura: p.factura_numero || p.id || pedidoId,
+      numero_fiscal: numeroFiscal,
+      cliente_nombre: `${p.cliente_nombre || ''} ${p.cliente_apellido || ''}`.trim() || p.cliente_email || 'Cliente nexo',
+      cliente_documento: p.cliente_documento || '',
+      total_usd: p.total_cliente_usd || p.precio_usd || 0,
+      metodo_pago: metodo
+    }])});
+  }catch(e){}
+}
+
 export default async function handler(req,res){
   cors(res);
   if(req.method==='OPTIONS') return res.status(200).end();

@@ -35,6 +35,29 @@ async function getAccessToken(){
   return data.access_token;
 }
 
+
+async function emitInvoiceIfPaid(pedidoId, metodo='paypal'){
+  try{
+    const rows = await sb(`pedidos?id=eq.${encodeURIComponent(pedidoId)}&select=*`, {headers:{Prefer:''}}).catch(()=>[]);
+    const p = Array.isArray(rows) ? rows[0] : null;
+    if(!p) return;
+    const existing = await sb(`facturas?pedido_id=eq.${encodeURIComponent(pedidoId)}&select=id&limit=1`, {headers:{Prefer:''}}).catch(()=>[]);
+    if(existing && existing[0]) return;
+    const pais = String(p.cliente_pais || '').toLowerCase();
+    const numeroFiscal = pais.includes('bolivia') ? (p.cliente_documento || '') : '99001';
+    await sb('facturas', {method:'POST', body:JSON.stringify([{
+      pedido_id: pedidoId,
+      cliente_id: p.cliente_id || null,
+      numero_factura: p.factura_numero || p.id || pedidoId,
+      numero_fiscal: numeroFiscal,
+      cliente_nombre: `${p.cliente_nombre || ''} ${p.cliente_apellido || ''}`.trim() || p.cliente_email || 'Cliente nexo',
+      cliente_documento: p.cliente_documento || '',
+      total_usd: p.total_cliente_usd || p.precio_usd || 0,
+      metodo_pago: metodo
+    }])});
+  }catch(e){}
+}
+
 export default async function handler(req,res){
   cors(res);
   if(req.method==='OPTIONS') return res.status(200).end();
@@ -84,6 +107,7 @@ export default async function handler(req,res){
           }])
         }).catch(()=>{});
         await logAgent(pedidoId,'paypal_capture_confirmado','pago_confirmado',`PayPal capturado: ${info.captureId || orderId} por ${info.amount} ${info.currency}`);
+        await emitInvoiceIfPaid(pedidoId, 'paypal');
         supabaseUpdate = {ok:true,pedidoId,estado_pago:'paypal_pagado_capturado'};
       }catch(e){
         supabaseUpdate = {ok:false,pedidoId,error:e.message||String(e)};

@@ -8,6 +8,10 @@ async function rest(path, options={}){
   return data;
 }
 const num=v=>Number(Number(v||0).toFixed(2));
+function isPaidOrder(o){
+  const st=String(o.estado_pago||o.payment_status||'').toLowerCase();
+  return Boolean(o.paymentConfirmed || o.pago_confirmado || st.includes('capturado') || st.includes('pagado') || st.includes('completed'));
+}
 function extractAsin(url){
   const u=String(url||'');
   const m=u.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})(?:[/?]|$)/i) || u.match(/[?&]asin=([A-Z0-9]{10})(?:&|$)/i);
@@ -35,14 +39,16 @@ export default async function handler(req,res){
       cliente_id, cliente_email:clienteRow.email, cliente_nombre:nombre, cliente_apellido:apellido, cliente_documento:clienteRow.documento, cliente_telefono:c.phone||o.phone||'', cliente_pais:clienteRow.pais, cliente_ciudad:clienteRow.ciudad, cliente_direccion:clienteRow.direccion,
       producto:items.map(i=>`${i.name||i.nombre||'Producto'} x${i.quantity||1}`).join(' | ')||first.name||'Pedido nexo™', producto_url:firstUrl, producto_nombre:first.name||first.nombre||'Producto nexo™', proveedor:first.provider||'Amazon', cantidad:items.reduce((a,i)=>a+Number(i.quantity||1),0)||1,
       precio_usd:total, costo_producto_usd:subtotal, costo_envio_usd:envio, costo_proveedor:vendor, comision_nexo_usd:commission, ganancia_nexo:commission, impuesto_it_usd:num(o.itf||o.totals?.itf), impuesto_iue_usd:num(o.iue||o.totals?.iue), total_cliente_usd:total,
-      moneda:'USD', metodo_pago:o.paymentMethod||'card', estado:'pendiente', estado_pago:o.estado_pago||'pendiente', estado_compra:'pendiente_agente_1', estado_envio:'En preparación', tracking:'PENDIENTE_AMAZON', fecha_estimada_entrega:o.deliveryEstimate||'', prioridad_envio:o.deliveryLabel||o.shippingPriority||'', observaciones:o.note||'', estado_agente:'pendiente', amazon_tag:'nexo08-20', amazon_asin:firstAsin, factura_numero:invoiceNumber
+      moneda:'USD', metodo_pago:o.paymentMethod||'card', estado:isPaidOrder(o)?'pagado':'pendiente', estado_pago:o.estado_pago||'pendiente', estado_compra:o.estado_compra || (isPaidOrder(o)?'pendiente_agente_1':'pendiente_confirmacion_pago'), estado_envio:'En preparación', tracking:'PENDIENTE_CJ', fecha_estimada_entrega:o.deliveryEstimate||'', prioridad_envio:o.deliveryLabel||o.shippingPriority||'', observaciones:o.note||'', estado_agente:'pendiente', amazon_tag:'nexo08-20', amazon_asin:firstAsin, factura_numero:invoiceNumber
     };
     const pedido=await rest('pedidos', {method:'POST', body:JSON.stringify([pedidoRow])}); const pedido_id=pedido?.[0]?.id;
     await rest('pagos', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, metodo:pedidoRow.metodo_pago, estado:pedidoRow.estado_pago, monto_usd:total, moneda:'USD'}])}).catch(()=>{});
     const numeroFiscal = clienteRow.pais && String(clienteRow.pais).toLowerCase().includes('bolivia') ? (clienteRow.documento || '') : '99001';
-    await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: numeroFiscal, cliente_nombre:String(o.fullName||c.fullName||'').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
-    await rest('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id, courier:'Amazon / Marketplace', tracking:'PENDIENTE_AMAZON', tracking_url:firstUrl, estado_envio:'En preparación', fecha_estimada_entrega:pedidoRow.fecha_estimada_entrega}])}).catch(()=>{});
-    await rest('logs_agente1', {method:'POST', body:JSON.stringify([{pedido_id, accion:'pedido_registrado', estado:'pendiente', detalle:'Pedido registrado desde checkout nexo™'}])}).catch(()=>{});
+    if(isPaidOrder(o)){
+      await rest('facturas', {method:'POST', body:JSON.stringify([{pedido_id, cliente_id, numero_factura:pedidoRow.factura_numero, numero_fiscal: numeroFiscal, cliente_nombre:String(o.fullName||c.fullName||'').trim(), cliente_documento:clienteRow.documento, total_usd:total, metodo_pago:pedidoRow.metodo_pago}])}).catch(()=>{});
+    }
+    await rest('tracking_envios', {method:'POST', body:JSON.stringify([{pedido_id, courier:'CJ Dropshipping / Marketplace', tracking:'PENDIENTE_CJ', tracking_url:firstUrl, estado_envio:'Pendiente de pago confirmado', fecha_estimada_entrega:pedidoRow.fecha_estimada_entrega}])}).catch(()=>{});
+    await rest('logs_agent1', {method:'POST', body:JSON.stringify([{pedido_id, accion:'pedido_registrado', estado:pedidoRow.estado_pago, detalle:'Pedido registrado desde checkout nexo™; factura solo después de pago confirmado'}])}).catch(()=>{});
     // Vincular clicks de afiliado Amazon previos con el pedido y cliente reales.
     if(firstUrl){
       const safeUrl = encodeURIComponent(firstUrl);

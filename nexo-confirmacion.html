@@ -282,9 +282,38 @@ const confirmI18n={
  fr:{confTitle:'Achat Confirmé !',confDesc:'Votre commande a été traitée avec succès. Vous recevrez un e-mail avec les détails de votre achat.',invoiceLabel:'Numéro de Facture',purchaseLabel:'Date d’Achat :',clientLabel:'Client :',emailLabel:'E-mail :',itemsLabel:'Articles :',paymentLabel:'Mode de Paiement :',deliveryLabel:'Livraison :',totalLabel:'Total Payé :',emailNote1:'📧 Vérifiez votre e-mail (y compris spam) pour la facture et les détails d’expédition.',emailNote2:'📱 Vous pouvez suivre votre commande avec le numéro de facture.',btnContinue:'🛒 Continuer les Achats',btnPortal:'🏠 Aller au Portail',itemsWord:'articles',pay:{credit:'💳 Carte Bancaire',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Virement Bancaire'}}
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
+            const metodoParam = (params.get('metodo') || purchase.paymentMethod || '').toLowerCase();
+            const pendingParam = params.get('pendiente') === '1' || String(params.get('estado_pago') || '').includes('pendiente') || String(purchase.estado_pago || '').includes('pendiente') || String(purchase.estado_pago || '').includes('registrada');
+            const paypalToken = params.get('token');
+            if(params.get('paypal') === 'return' && paypalToken){
+              document.getElementById('confTitle').textContent = 'Verificando pago PayPal...';
+              document.getElementById('confDesc').textContent = 'Estamos confirmando la captura real del pago antes de emitir la factura.';
+              try{
+                const r = await fetch('/api/paypal-capture-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:paypalToken,pedidoId:params.get('pedido_id') || purchase.supabase_id || purchase.id})});
+                const data = await r.json().catch(()=>({}));
+                if(r.ok && data.ok){
+                  purchase.estado_pago = 'paypal_pagado_capturado'; purchase.paymentConfirmed = true;
+                  localStorage.setItem('nexoLastOrder', JSON.stringify(purchase));
+                } else {
+                  purchase.estado_pago = 'paypal_pendiente_verificacion';
+                  localStorage.setItem('nexoLastOrder', JSON.stringify(purchase));
+                }
+              }catch(e){ purchase.estado_pago = 'paypal_pendiente_verificacion'; }
+            }
+            const isPending = pendingParam || ['bank','transferencia'].includes(metodoParam) || String(purchase.estado_pago||'').includes('pendiente') || String(purchase.estado_pago||'').includes('registrada');
+            if(isPending && !purchase.paymentConfirmed){
+              document.querySelector('.success-icon').textContent = '⏳';
+              document.getElementById('confTitle').textContent = metodoParam === 'bank' || metodoParam === 'transferencia' ? 'Pedido registrado - pago pendiente' : 'Pedido registrado - verificando pago';
+              document.getElementById('confDesc').textContent = metodoParam === 'bank' || metodoParam === 'transferencia' ? 'Tus datos de transferencia fueron guardados. El pedido queda pendiente hasta confirmar el abono bancario.' : 'El pedido fue registrado, pero la factura final se emitirá solo cuando la pasarela confirme el débito.';
+              document.getElementById('invoiceLabel').textContent = 'Número de pedido';
+              document.getElementById('totalLabel').textContent = 'Total pendiente:';
+              const bp=document.getElementById('btnPrint'); if(bp) bp.style.display='none';
+              const bd=document.getElementById('btnPdf'); if(bd) bd.style.display='none';
+            }
+
             const invoiceId = params.get('invoice') || purchase.factura_numero || purchase.invoice || purchase.id || params.get('pedido_id');
             if (invoiceId) {
                 document.getElementById('invoiceId').textContent = invoiceId;
@@ -307,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const firstItem = (purchase.items && purchase.items[0]) || {};
             const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';
             document.getElementById('itemCount').textContent = productName;
-            document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
+            document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || (purchase.paymentMethod==='card'?t.pay.credit:null) || purchase.paymentMethod || '-');
             if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
                 const note = document.querySelector('.email-note');
                 if(note){ note.innerHTML += '<br><strong>Estado operativo:</strong> pedido registrado; confirmación de pago en proceso.'; }

@@ -84,10 +84,10 @@ export default async function handler(req,res){
       const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       if(url && key){
-        await fetch(`${url}/rest/v1/agent1_payment_intake`, {
+        await fetch(`${url}/rest/v1/agent1_orders`, {
           method:'POST',
           headers:{apikey:key, Authorization:`Bearer ${key}`, 'Content-Type':'application/json', Prefer:'return=minimal'},
-          body: JSON.stringify({pedido_id:id, metodo:paymentMethod, total, estado:intake.status, payload:intake})
+          body: JSON.stringify({pedido_id:id, proveedor:'CJ Dropshipping', estado:intake.status, costo_producto:subtotal, costo_envio:shipping, comision_nexo:commission, payload:intake})
         }).catch(()=>null);
       }
     }catch(e){}

@@ -60,6 +60,7 @@ export default async function handler(req,res){
       return res.status(400).json({ok:false,error:'Monto inválido para PayPal'});
     }
     const orderData = body.orderData || body || {};
+    const paymentMethod = String(body.paymentMethod || orderData.paymentMethod || 'paypal').toLowerCase();
     const pedidoId = String(orderData.supabase_id || orderData.id || body.pedidoId || ('NEXO-' + Date.now())).slice(0,120);
     const origin = String(req.headers.origin || req.headers.referer || '').replace(/\/$/, '') || `https://${req.headers.host}`;
     const returnUrl = body.returnUrl || `${origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&metodo=paypal&paypal=return`;
@@ -77,7 +78,7 @@ export default async function handler(req,res){
       application_context:{
         brand_name:'nexo',
         locale:'es-BO',
-        landing_page:'LOGIN',
+        landing_page: paymentMethod === 'card' ? 'BILLING' : 'LOGIN',
         user_action:'PAY_NOW',
         shipping_preference:'GET_FROM_FILE',
         return_url:returnUrl,
@@ -101,7 +102,7 @@ export default async function handler(req,res){
     try{
       await sb(`pedidos?id=eq.${encodeURIComponent(pedidoId)}`, {
         method:'PATCH',
-        body:JSON.stringify({estado_pago:'paypal_orden_creada', estado_agente:'esperando_pago_paypal', estado_compra:'pendiente_pago_paypal'})
+        body:JSON.stringify({estado_pago: paymentMethod === 'card' ? 'tarjeta_checkout_paypal_creado' : 'paypal_orden_creada', estado_agente: paymentMethod === 'card' ? 'esperando_captura_tarjeta' : 'esperando_pago_paypal', estado_compra: paymentMethod === 'card' ? 'pendiente_pago_tarjeta' : 'pendiente_pago_paypal'})
       });
       await logAgent(pedidoId,'paypal_order_creada','esperando_pago',`Orden PayPal ${data.id} creada. Cliente redirigido a PayPal Business.`);
     }catch(e){ /* no rompe redirección PayPal */ }
