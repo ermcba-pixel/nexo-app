@@ -805,7 +805,7 @@
             const hasUpper = /[A-Z]/.test(password);
             const hasLower = /[a-z]/.test(password);
             const hasNumber = /[0-9]/.test(password);
-            const hasSymbol = /[!@#$%^&*]/.test(password);
+            const hasSymbol = /[^A-Za-z0-9]/.test(password);
             const isLongEnough = password.length >= 8;
 
             updateReq('req-upper', hasUpper);
@@ -834,7 +834,7 @@
                 document.getElementById('strengthText').className = 'strength-text medium';
             } else {
                 for (let i = 0; i < strength; i++) bars[i].classList.add('strong');
-                document.getElementById('strengthText').textContent = 'Fuerte';
+                document.getElementById('strengthText').textContent = 'Muy fuerte';
                 document.getElementById('strengthText').className = 'strength-text strong';
             }
 
