@@ -1093,9 +1093,9 @@ function nexoPayText(key){
     const lang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || currentLang || 'es').slice(0,2);
     const D = {
       es:{
-        cardTitle:'Tarjeta directa dentro de nexo™',
-        cardText:'Pago real con tarjeta mediante PayPal Advanced/Card Fields embebido. El cliente no inicia sesión en PayPal y nexo™ no guarda número completo ni CVV.',
-        cardBtn:'Pagar con tarjeta dentro de nexo',
+        cardTitle:'Datos de tarjeta de crédito/débito',
+        cardText:'Pago real con tarjeta mediante checkout seguro autorizado. nexo™ no guarda CVV ni tarjeta completa; solo conserva marca/últimos 4 para precargar datos. La factura se emite únicamente cuando la pasarela confirme el débito.',
+        cardBtn:'Pagar con tarjeta',
         bankTitle:'Transferencia bancaria / ACH / Wire',
         bankText:'Registre los datos bancarios o referencia para seguimiento y conciliación. La información se guarda protegida en Supabase; NO se emite factura pagada hasta confirmar el abono bancario.',
         bankHolder:'Titular de la cuenta bancaria', bankName:'Banco del cliente', bankNamePh:'Ej.: Bank of America, BNB, banco del cliente, etc.', bankRef:'Referencia / número de operación (opcional)', transferType:'Tipo de transferencia', bankBtn:'Continuar con transferencia / pago seguro',
@@ -1170,101 +1170,6 @@ async function nexoSavePaymentProfileServer(profile){
   }catch(e){ console.warn('Perfil de pago pendiente de sincronizar en Supabase', e); }
 }
 
-
-let nexoPaypalSdkPromise = null;
-let nexoPaypalCardFields = null;
-let nexoPaypalCardOrderData = null;
-let nexoPaypalCardOrderId = null;
-
-function nexoSetCardStatus(msg, isError=false){
-  const el=document.getElementById('nexoPaypalCardStatus');
-  if(el){ el.textContent=msg; el.style.color=isError?'#8a1f1f':'#557272'; }
-  const er=document.getElementById('paypal-card-errors');
-  if(er){ er.style.display=isError?'block':'none'; er.textContent=isError?msg:''; }
-}
-
-async function nexoLoadPayPalSdk(){
-  if(window.paypal && window.paypal.CardFields) return window.paypal;
-  if(nexoPaypalSdkPromise) return nexoPaypalSdkPromise;
-  nexoPaypalSdkPromise = (async()=>{
-    const cfgRes = await fetch('/api/paypal-client-config', {cache:'no-store'});
-    const cfg = await cfgRes.json().catch(()=>({}));
-    if(!cfg.ok || !cfg.clientId) throw new Error('Falta PAYPAL_CLIENT_ID LIVE en Vercel.');
-    const existing=document.getElementById('paypal-sdk-v6-card-fields');
-    if(existing){
-      await new Promise((resolve,reject)=>{ existing.addEventListener('load',resolve,{once:true}); existing.addEventListener('error',reject,{once:true}); setTimeout(resolve,1200); });
-      return window.paypal;
-    }
-    const s=document.createElement('script');
-    s.id='paypal-sdk-v6-card-fields';
-    s.src=`https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(cfg.clientId)}&currency=${encodeURIComponent(cfg.currency||'USD')}&intent=capture&components=card-fields,buttons&enable-funding=card&disable-funding=paylater,venmo`;
-    s.async=true;
-    document.head.appendChild(s);
-    await new Promise((resolve,reject)=>{ s.onload=resolve; s.onerror=()=>reject(new Error('No se pudo cargar PayPal JS SDK V6.')); });
-    if(!window.paypal || !window.paypal.CardFields) throw new Error('PayPal Card Fields no está disponible para esta cuenta LIVE.');
-    return window.paypal;
-  })();
-  return nexoPaypalSdkPromise;
-}
-
-async function renderNexoPayPalCardFields(){
-  if(selectedPayment !== 'card') return;
-  try{
-    nexoSetCardStatus('Cargando campos seguros de tarjeta...');
-    const paypal = await nexoLoadPayPalSdk();
-    if(!document.getElementById('paypal-card-number')) return;
-    nexoPaypalCardFields = paypal.CardFields({
-      createOrder: async () => {
-        const od = nexoPaypalCardOrderData || orderData || {};
-        const amount = Number(od.total || 0).toFixed(2);
-        const pedidoId = od.supabase_id || od.id || ('NEXO-' + Date.now());
-        const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(od.factura_numero || pedidoId)}&metodo=card&paypal=cardfields`;
-        const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=card`;
-        const r = await fetch('/api/paypal-create-order', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount,pedidoId,orderData:od,paymentMethod:'card',fundingSource:'card',returnUrl:successUrl,cancelUrl})});
-        const data = await r.json().catch(()=>({}));
-        if(!r.ok || !data.ok || !data.orderId) throw new Error(data.error || 'No se pudo crear la orden de tarjeta PayPal.');
-        nexoPaypalCardOrderId = data.orderId;
-        od.paypalOrderId = data.orderId;
-        od.estado_pago = 'tarjeta_segura_creada_sin_redirect';
-        localStorage.setItem('nexoLastOrder', JSON.stringify(od));
-        return data.orderId;
-      },
-      onApprove: async (data) => {
-        const od = nexoPaypalCardOrderData || orderData || {};
-        const pedidoId = od.supabase_id || od.id;
-        nexoSetCardStatus('Tarjeta aprobada. Capturando pago real...');
-        const r = await fetch('/api/paypal-capture-order', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:data.orderID || nexoPaypalCardOrderId,pedidoId,pedido_id:pedidoId,metodo:'card'})});
-        const cap = await r.json().catch(()=>({}));
-        if(!r.ok || !cap.ok) throw new Error(cap.error || 'PayPal no confirmó la captura de tarjeta.');
-        od.estado='pagado';
-        od.estado_pago='tarjeta_pagada_capturada_paypal_advanced';
-        od.estado_compra='pendiente_agente_1';
-        od.estado_agente='pago_confirmado';
-        od.captureResult=cap;
-        localStorage.setItem('nexoLastOrder', JSON.stringify(od));
-        window.location.href = `nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId||'')}&invoice=${encodeURIComponent(od.factura_numero || pedidoId || '')}&pago=aprobado&metodo=card&capture=paypal_advanced`;
-      },
-      onError: (err) => {
-        console.error('PayPal Card Fields error', err);
-        nexoSetCardStatus('PayPal no permitió tarjeta directa en esta cuenta/transacción. Revisa elegibilidad Advanced Cards o usa PayPal como respaldo.', true);
-        const btn=document.getElementById('confirmBuyText'); if(btn) btn.textContent='Confirmar compra';
-      }
-    });
-    if(!nexoPaypalCardFields.isEligible || !nexoPaypalCardFields.isEligible()){
-      nexoSetCardStatus('Tarjeta directa no elegible todavía en esta cuenta LIVE. PayPal debe aprobar Advanced Credit/Debit Card Payments.', true);
-      return;
-    }
-    nexoPaypalCardFields.NameField().render('#paypal-card-name');
-    nexoPaypalCardFields.NumberField().render('#paypal-card-number');
-    nexoPaypalCardFields.ExpiryField().render('#paypal-card-expiry');
-    nexoPaypalCardFields.CVVField().render('#paypal-card-cvv');
-    nexoSetCardStatus('Tarjeta segura lista. El cliente no verá login PayPal.');
-  }catch(e){
-    console.error(e);
-    nexoSetCardStatus(e.message || String(e), true);
-  }
-}
-
 function selectPayment(methodId, btnEl=null) {
     selectedPayment = methodId;
     document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
@@ -1278,35 +1183,28 @@ function selectPayment(methodId, btnEl=null) {
     if (methodId === 'card') {
         details.innerHTML = `
             <div class="payment-fields-panel">
-                <div style="background:#f4f9ef;border-left:4px solid #7AC742;border-radius:10px;padding:14px;font-size:13px;line-height:1.55;margin-bottom:14px;">
-                    <strong>Tarjeta directa dentro de nexo™</strong><br>
-                    El cliente no inicia sesión en PayPal. Los datos de tarjeta se capturan en campos seguros de PayPal Advanced/Card Fields. nexo™ no guarda número completo ni CVV.
-                </div>
-                <div id="nexoPaypalCardStatus" style="font-size:13px;font-weight:800;color:#557272;margin-bottom:10px;">Preparando tarjeta segura...</div>
                 <div class="form-group">
                     <label class="form-label">NOMBRE COMO APARECE EN LA TARJETA</label>
-                    <div id="paypal-card-name" class="form-input" style="height:50px;padding:12px;background:#fff;"></div>
+                    <input type="text" class="form-input" id="cardHolder" name="nexo_pago_ref_1" placeholder="Nombre del titular" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                 </div>
                 <div class="form-group">
                     <label class="form-label">NÚMERO DE TARJETA</label>
-                    <div id="paypal-card-number" class="form-input" style="height:50px;padding:12px;background:#fff;"></div>
+                    <input type="text" class="form-input" id="cardNumber" name="nexo_pago_ref_2" placeholder="Número de tarjeta" inputmode="numeric" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group">
                         <label class="form-label">MM/AA</label>
-                        <div id="paypal-card-expiry" class="form-input" style="height:50px;padding:12px;background:#fff;"></div>
+                        <input type="text" class="form-input" id="cardExpiry" name="nexo_pago_ref_3" placeholder="MM/AA" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
                     <div class="form-group">
                         <label class="form-label">CVV</label>
-                        <div id="paypal-card-cvv" class="form-input" style="height:50px;padding:12px;background:#fff;"></div>
+                        <input type="password" class="form-input" id="cardCvv" name="nexo_pago_ref_4" placeholder="CVV" autocomplete="new-password" autocorrect="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
                     </div>
                 </div>
-                <div id="paypal-card-errors" style="display:none;background:#fff3f3;border-left:4px solid #e54848;border-radius:10px;padding:12px;margin-top:10px;color:#8a1f1f;font-weight:800;font-size:13px;"></div>
                 ${nexoLegalBlockPage()}
-                <button type="button" class="checkout-btn" id="nexoCardPayButton" style="margin-top:10px;" onclick="openConfirmationModal()">Pagar con tarjeta dentro de nexo</button>
+                <button type="button" class="checkout-btn" style="margin-top:10px;" onclick="openConfirmationModal()">${nexoPayText('cardBtn')}</button>
             </div>
         `;
-        setTimeout(()=>renderNexoPayPalCardFields(), 80);
     } else if (methodId === 'bank') {
         details.innerHTML = `
             <div class="payment-fields-panel">
@@ -1552,29 +1450,26 @@ const t = ctt();
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
         async function startNexoPagoSeguro(orderData){
+            // PAYPAL REAL: el cliente paga a PayPal Business de nexo.
+            // El Agente 1 espera confirmación/captura PayPal y luego prepara la compra CJ Dropshipping.
             const amount = Number(orderData.total || 0).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}&paypal=return`;
             const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}`;
 
-            if(orderData.paymentMethod === 'card'){
-                // Tarjeta DIRECTA: no se redirige al login PayPal. Se usan PayPal Advanced/Card Fields embebidos.
-                nexoPaypalCardOrderData = orderData;
-                if(!nexoPaypalCardFields){ await renderNexoPayPalCardFields(); }
-                if(!nexoPaypalCardFields || !nexoPaypalCardFields.isEligible || !nexoPaypalCardFields.isEligible()){
-                    throw new Error('Tarjeta directa no elegible todavía. PayPal debe aprobar Advanced Credit/Debit Card Payments para esta cuenta LIVE.');
-                }
-                nexoSetCardStatus('Procesando tarjeta dentro de nexo...');
-                await nexoPaypalCardFields.submit();
-                return;
-            }
-
-            // PayPal elegido explícitamente: redirección normal a PayPal Business.
             try {
                 const r = await fetch('/api/paypal-create-order', {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({amount,pedidoId,orderData,paymentMethod:'paypal',fundingSource:'paypal',returnUrl: successUrl,cancelUrl})
+                    body: JSON.stringify({
+                        amount,
+                        pedidoId,
+                        orderData,
+                        paymentMethod: orderData.paymentMethod || 'paypal',
+                        fundingSource: orderData.paymentMethod === 'card' ? 'card' : 'paypal',
+                        returnUrl: successUrl,
+                        cancelUrl
+                    })
                 });
                 const data = await r.json().catch(()=>({}));
                 if(r.ok && data.ok && data.approvalUrl){
@@ -1590,6 +1485,7 @@ const t = ctt();
                 console.warn('No se pudo crear orden PayPal API, se usará fallback PayPal Standard.', e);
             }
 
+            // Fallback operativo: PayPal Standard directo a la cuenta empresarial de nexo.
             const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
             const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(fallbackSuccessUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
             window.location.href = paypalLiveUrl;
@@ -1790,13 +1686,12 @@ const t = ctt();
             if(orderData.paymentMethod === 'paypal' || orderData.paymentMethod === 'card'){
                 // PayPal y tarjeta solo emiten factura después de captura real por PayPal/webhook.
                 // Para tarjeta se abre PayPal Business Checkout con preferencia de tarjeta; no se simula débito.
-                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_directa_embebida_paypal_advanced' : 'paypal_redireccionado_cliente';
-                orderData.estado_compra = orderData.paymentMethod === 'card' ? 'pendiente_captura_tarjeta_directa' : 'pendiente_pago_paypal';
-                orderData.estado_agente = orderData.paymentMethod === 'card' ? 'esperando_captura_tarjeta_directa' : 'esperando_pago_paypal';
+                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_redireccionada_a_checkout_seguro' : 'paypal_redireccionado_cliente';
+                orderData.estado_compra = orderData.paymentMethod === 'card' ? 'pendiente_pago_tarjeta' : 'pendiente_pago_paypal';
+                orderData.estado_agente = orderData.paymentMethod === 'card' ? 'esperando_captura_tarjeta' : 'esperando_pago_paypal';
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                if(btnText) btnText.textContent = orderData.paymentMethod === 'card' ? 'Procesando tarjeta dentro de nexo...' : 'Abriendo PayPal seguro...';
-                try { await startNexoPagoSeguro(orderData); }
-                catch(e){ alert(e.message || String(e)); if(btnText) btnText.textContent = oldBtnText || 'Confirmar compra'; }
+                if(btnText) btnText.textContent = orderData.paymentMethod === 'card' ? 'Abriendo pago seguro con tarjeta...' : 'Abriendo PayPal seguro...';
+                await startNexoPagoSeguro(orderData);
                 return;
             }
 

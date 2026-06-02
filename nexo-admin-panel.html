@@ -988,6 +988,7 @@ body{
                                     <th>TIPO</th>
                                     <th>ESTADO</th>
                                     <th>PRIORIDAD</th>
+                                    <th>CANAL</th>
                                     <th>RESPONDER</th>
                                 </tr>
                             </thead>
@@ -1530,27 +1531,6 @@ body{
                     <tbody>${rowsHtml}</tbody>
                 </table>
                 ${summaryHtml}
-            
-
-<script id="nexo-admin-clean-visible-final">
-(function(){
-  function fixAdmin(){
-    document.querySelectorAll("[onclick*='supabaseclear']").forEach(el=>{
-      el.classList.remove('superadmin-only');
-      el.style.display = 'flex';
-    });
-    document.querySelectorAll('.nexo-legal-footer a').forEach(a=>{
-      a.style.color = '#ffffff';
-      a.style.textDecoration = 'underline';
-      a.style.fontWeight = '700';
-    });
-  }
-  document.addEventListener('DOMContentLoaded', fixAdmin);
-  setTimeout(fixAdmin, 100);
-  setTimeout(fixAdmin, 800);
-})();
-</script>
-
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -2221,6 +2201,97 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
   document.addEventListener('DOMContentLoaded', fixAdmin);
   setTimeout(fixAdmin, 100);
   setTimeout(fixAdmin, 800);
+})();
+</script>
+
+
+<script id="nexo-admin-supabase-final-direct-fix">
+(function(){
+  'use strict';
+  var URL='https://ujqbbniptflzytdankwp.supabase.co';
+  var KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+  var cache={clientes:[],pedidos:[],pagos:[],productos:[],facturas:[],tracking_envios:[],tickets:[],afiliados_amazon:[],logs_agente1:[]};
+  var loaded=false, loading=null;
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function money(v){return 'US$ '+Number(v||0).toFixed(2);}
+  function cell(v){return '<td>'+esc(v)+'</td>';}
+  function getDate(o){return o.creado_en||o.fecha_creacion||o.fecha_registro||o.timestamp||o.created_at||'';}
+  function sortByDate(rows){return (rows||[]).slice().sort(function(a,b){return new Date(getDate(b)||0)-new Date(getDate(a)||0);});}
+  async function rest(table){
+    try{
+      var r=await fetch(URL+'/rest/v1/'+table+'?select=*&limit=500',{cache:'no-store',headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
+      var txt=await r.text();
+      if(!r.ok){console.warn('Supabase '+table+':',txt);return [];}
+      return txt?JSON.parse(txt):[];
+    }catch(e){console.warn('Supabase '+table+':',e);return [];}
+  }
+  async function loadAll(){
+    if(loaded) return cache;
+    if(loading) return loading;
+    loading=Promise.all(['clientes','pedidos','pagos','productos','facturas','tracking_envios','tickets','afiliados_amazon','logs_agente1'].map(rest)).then(function(all){
+      cache.clientes=all[0]||[]; cache.pedidos=sortByDate(all[1]||[]); cache.pagos=sortByDate(all[2]||[]); cache.productos=all[3]||[]; cache.facturas=all[4]||[]; cache.tracking_envios=sortByDate(all[5]||[]); cache.tickets=sortByDate(all[6]||[]); cache.afiliados_amazon=all[7]||[]; cache.logs_agente1=all[8]||[];
+      window.nexoAdminRealCache=cache; window.nexoOrdersCache=cache.pedidos; window.nexoCustomersCache=cache.clientes; window.nexoTicketsCache=cache.tickets;
+      loaded=true; return cache;
+    }).finally(function(){loading=null;});
+    return loading;
+  }
+  function msgBody(id, colspan, msg, error){var el=document.getElementById(id); if(el) el.innerHTML='<tr><td colspan="'+colspan+'" style="text-align:center;color:'+(error?'#e74c3c':'#6f8284')+';font-weight:800;">'+esc(msg)+'</td></tr>';}
+  window.fetchNexoAdminData=async function(){loaded=false; return loadAll();};
+  window.loadDashboard=async function(){
+    await loadAll();
+    var orders=cache.pedidos, clients=cache.clientes;
+    var revenue=orders.reduce(function(a,o){return a+Number(o.total_cliente_usd||o.total_usd||o.precio_usd||o.total||0);},0);
+    var pending=orders.filter(function(o){return String(o.estado_pago||o.estado||'').toLowerCase().includes('pend');}).length;
+    [['totalOrders',orders.length],['activeClients',clients.length],['totalRevenue',money(revenue)],['pendingOrders',pending]].forEach(function(p){var el=document.getElementById(p[0]); if(el) el.textContent=p[1];});
+  };
+  window.loadOrders=async function(){
+    msgBody('ordersTable',6,'Cargando pedidos reales desde Supabase...');
+    await loadAll(); var rows=cache.pedidos, tb=document.getElementById('ordersTable'); if(!tb)return;
+    if(!rows.length){msgBody('ordersTable',6,'Sin pedidos reales registrados todavía.');return;}
+    tb.innerHTML=rows.map(function(o){return '<tr>'+cell(o.factura_numero||String(o.id||'').slice(0,12))+cell(((o.cliente_nombre||o.nombre||'')+' '+(o.cliente_apellido||o.apellido||'')).trim())+cell(o.cliente_email||o.email||'')+cell(money(o.total_cliente_usd||o.total_usd||o.precio_usd||o.total))+cell(o.estado_pago||o.estado||'pendiente')+cell(getDate(o)?new Date(getDate(o)).toLocaleString('es-BO'):'-')+'</tr>';}).join('');
+  };
+  window.renderCustomers=async function(){
+    msgBody('customersTable',8,'Cargando clientes reales desde Supabase...');
+    await loadAll(); var tb=document.getElementById('customersTable'); if(!tb)return;
+    var head=tb.parentElement&&tb.parentElement.querySelector('thead tr');
+    if(head) head.innerHTML='<th>NOMBRE</th><th>EMAIL</th><th>TELÉFONO</th><th>PAÍS</th><th>CIUDAD</th><th>DIRECCIÓN</th><th>DOCUMENTO</th><th>PEDIDOS</th>';
+    if(!cache.clientes.length){msgBody('customersTable',8,'No hay clientes registrados.');return;}
+    var counts={}; cache.pedidos.forEach(function(o){var k=String(o.cliente_id||o.cliente_email||o.email||'').toLowerCase(); if(k) counts[k]=(counts[k]||0)+1;});
+    tb.innerHTML=cache.clientes.map(function(c){var k1=String(c.id||'').toLowerCase(),k2=String(c.email||'').toLowerCase();return '<tr>'+cell(((c.nombre||'')+' '+(c.apellido||'')).trim()||c.nombre_completo||c.fullName)+cell(c.email)+cell(((c.codigo_area||c.areaCode||'')+' '+(c.telefono||c.phone||'')).trim())+cell(c.pais||c.country)+cell(c.ciudad||c.city)+cell(c.direccion||c.address)+cell(c.documento||c.documento_id||c.documentNumber)+cell(counts[k1]||counts[k2]||0)+'</tr>';}).join('');
+  };
+  window.renderPayments=async function(){
+    await loadAll(); var sec=document.getElementById('payments'); if(!sec)return;
+    var rows=cache.pagos.length?cache.pagos:cache.pedidos.map(function(o){return {factura:o.factura_numero||o.id,cliente_nombre:((o.cliente_nombre||'')+' '+(o.cliente_apellido||'')).trim(),metodo:o.metodo_pago||o.paymentMethod,monto_usd:o.monto_usd||o.total_cliente_usd||o.total,estado:o.estado_pago||o.estado};});
+    var by={card:0,bank:0,paypal:0,payoneer:0}; rows.forEach(function(p){var k=String(p.metodo||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer')||k.includes('ach'))by.bank++; else by.card++;});
+    var cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card;cards[1].textContent=by.bank;cards[2].textContent=by.paypal;cards[3].textContent=by.payoneer;}
+    var box=document.getElementById('paymentsTableWrap'); if(!box){box=document.createElement('div');box.id='paymentsTableWrap';box.className='section-box';sec.appendChild(box);}
+    box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>'+(rows.length?rows.map(function(p){return '<tr>'+cell(p.factura||p.pedido_id||'')+cell(p.cliente_nombre||p.cliente||'')+cell(String(p.metodo||'').toUpperCase())+cell(money(p.monto_usd||p.total_usd||p.monto||0))+cell(p.estado||'')+'</tr>';}).join(''):'<tr><td colspan="5">Sin pagos registrados</td></tr>')+'</tbody></table></div>';
+  };
+  window.renderShipments=async function(){
+    await loadAll(); var box=document.getElementById('shipmentsPanel'); if(!box)return;
+    var rows=cache.tracking_envios.length?cache.tracking_envios:cache.pedidos.map(function(o){return {pedido_id:o.factura_numero||o.id,cliente:((o.cliente_nombre||'')+' '+(o.cliente_apellido||'')).trim(),destino:o.cliente_ciudad||o.ciudad||o.destino,fecha_estimada_entrega:o.fecha_estimada_entrega||o.deliveryEstimate,estado_envio:o.estado_envio||o.estado||'En preparación'};});
+    box.innerHTML='<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th><th>Acción</th></tr></thead><tbody>'+(rows.length?rows.map(function(r){var estado=String(r.estado_envio||'En preparación');var accion=estado.toLowerCase().includes('reclamo')?'<button class="ticket-response-btn">Enviar</button>':'';return '<tr>'+cell(r.pedido_id)+cell(r.cliente)+cell(r.destino)+cell(r.fecha_estimada_entrega)+cell(estado)+'<td>'+accion+'</td></tr>';}).join(''):'<tr><td colspan="6">Sin envíos registrados</td></tr>')+'</tbody></table>';
+  };
+  window.renderProducts=async function(){
+    await loadAll(); var box=document.getElementById('productsPanel'); if(!box)return; var rows=cache.productos;
+    box.innerHTML='<table class="table"><thead><tr><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead><tbody>'+(rows.length?rows.map(function(p){return '<tr>'+cell(p.nombre||p.name)+cell(p.proveedor||p.provider)+cell(money(p.precio_usd||p.price))+cell(p.stock||'')+cell(p.estado||'')+'</tr>';}).join(''):'<tr><td colspan="5">Sin productos registrados</td></tr>')+'</tbody></table>';
+  };
+  function channel(t){return t.canal||t.ticket_canal||t.channel||(/whatsapp/i.test((t.mensaje||'')+(t.asunto||''))?'WhatsApp':(/tel|celular|llamada/i.test((t.mensaje||'')+(t.asunto||''))?'Celular':'Email'));}
+  window.loadTickets=async function(){
+    msgBody('ticketsTable',8,'Cargando tickets reales desde Supabase...'); await loadAll(); window.nexoTicketsCache=cache.tickets; var tb=document.getElementById('ticketsTable'); if(!tb)return;
+    var head=tb.parentElement&&tb.parentElement.querySelector('thead tr'); if(head) head.innerHTML='<th>FECHA</th><th>CLIENTE</th><th>ASUNTO</th><th>TIPO</th><th>ESTADO</th><th>PRIORIDAD</th><th>CANAL</th><th>RESPONDER</th>';
+    var q=String((document.getElementById('ticketSearch')||{}).value||'').toLowerCase().trim(); var st=String((document.getElementById('ticketStatusFilter')||{}).value||'');
+    var rows=cache.tickets.filter(function(t){var s=[t.nombre_cliente,t.email,t.asunto,t.tipo_reclamo,t.mensaje,channel(t)].join(' ').toLowerCase();return (!q||s.includes(q))&&(!st||String(t.estado||'Nuevo')===st);});
+    if(!rows.length){msgBody('ticketsTable',8,'No hay tickets para mostrar.');return;}
+    window.nexoTicketsCache=rows;
+    tb.innerHTML=rows.map(function(t,i){return '<tr>'+cell(getDate(t)?new Date(getDate(t)).toLocaleString('es-BO'):'')+cell(t.nombre_cliente)+cell(t.asunto)+cell(t.tipo_reclamo)+cell(t.estado||'Nuevo')+cell(t.prioridad||'Media')+cell(channel(t))+'<td><button class="ticket-response-btn" onclick="openTicketDetail('+i+')">Responder</button></td></tr>';}).join('');
+  };
+  window.switchSection=function(sectionId, element){
+    document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');}); var target=document.getElementById(sectionId); if(target)target.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(function(i){i.classList.remove('active');}); if(element)element.classList.add('active');
+    if(sectionId==='dashboard')loadDashboard(); else if(sectionId==='orders')loadOrders(); else if(sectionId==='customers')renderCustomers(); else if(sectionId==='payments')renderPayments(); else if(sectionId==='shipments')renderShipments(); else if(sectionId==='products')renderProducts(); else if(sectionId==='tickets')loadTickets(); else if(sectionId==='users'&&typeof renderUsers==='function')renderUsers(); else if(sectionId==='reports'&&typeof applyReportFilters==='function')applyReportFilters(); else if(sectionId==='paymentdata'&&typeof renderPaymentSensitiveData==='function')renderPaymentSensitiveData(); else if(sectionId==='supabaseclear'&&typeof enforceSuperAdminOnly==='function')enforceSuperAdminOnly();
+  };
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){loadDashboard();},150);});
 })();
 </script>
 

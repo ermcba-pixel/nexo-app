@@ -65,7 +65,6 @@ export default async function handler(req,res){
   if(req.method!=='POST') return res.status(405).json({ok:false,error:'Método no permitido'});
   try{
     const orderId = String(req.body?.orderId || req.body?.token || '').trim();
-    const metodoPago = String(req.body?.metodo || req.body?.paymentMethod || 'paypal').toLowerCase();
     if(!orderId) return res.status(400).json({ok:false,error:'Falta orderId/token PayPal'});
     const token = await getAccessToken();
     const r = await fetch(`${PAYPAL_BASE}/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
@@ -88,7 +87,7 @@ export default async function handler(req,res){
           method:'PATCH',
           body:JSON.stringify({
             estado:'pagado',
-            estado_pago: metodoPago === 'card' ? 'tarjeta_pagada_capturada_paypal_advanced' : 'paypal_pagado_capturado',
+            estado_pago:'paypal_pagado_capturado',
             estado_compra:'pendiente_agente_1',
             estado_agente:'pago_confirmado',
             estado_envio:'En preparación'
@@ -98,7 +97,7 @@ export default async function handler(req,res){
           method:'POST',
           body:JSON.stringify([{
             pedido_id:pedidoId,
-            metodo: metodoPago === 'card' ? 'card' : 'paypal',
+            metodo:'paypal',
             estado:'capturado',
             monto_usd:info.amount,
             moneda:info.currency,
@@ -107,9 +106,9 @@ export default async function handler(req,res){
             fecha_pago:new Date().toISOString()
           }])
         }).catch(()=>{});
-        await logAgent(pedidoId, metodoPago === 'card' ? 'tarjeta_paypal_advanced_capturada' : 'paypal_capture_confirmado','pago_confirmado',`PayPal capturado: ${info.captureId || orderId} por ${info.amount} ${info.currency}`);
-        await emitInvoiceIfPaid(pedidoId, metodoPago === 'card' ? 'card' : 'paypal');
-        supabaseUpdate = {ok:true,pedidoId,estado_pago: metodoPago === 'card' ? 'tarjeta_pagada_capturada_paypal_advanced' : 'paypal_pagado_capturado'};
+        await logAgent(pedidoId,'paypal_capture_confirmado','pago_confirmado',`PayPal capturado: ${info.captureId || orderId} por ${info.amount} ${info.currency}`);
+        await emitInvoiceIfPaid(pedidoId, 'paypal');
+        supabaseUpdate = {ok:true,pedidoId,estado_pago:'paypal_pagado_capturado'};
       }catch(e){
         supabaseUpdate = {ok:false,pedidoId,error:e.message||String(e)};
       }
