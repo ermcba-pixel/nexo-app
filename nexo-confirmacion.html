@@ -26,20 +26,24 @@
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            justify-content: flex-start;
+            gap: 28px;
+            padding: 28px 20px 36px;
             margin: 0;
         }
 
         .confirmation-card {
             background: var(--white);
             border-radius: 30px;
-            padding: 60px 40px;
+            padding: 52px 40px 44px;
+            width: min(600px, 100%);
             max-width: 600px;
             text-align: center;
             box-shadow: 0 30px 80px rgba(0,0,0,0.25);
             animation: slideDown 0.5s ease-out;
+            overflow: visible;
         }
 
         @keyframes slideDown {
@@ -202,6 +206,31 @@
         }
     
 @page{size:auto;margin:10mm;}@media print{html,body{background:#fff!important;padding:0!important;margin:0!important;display:block!important;min-height:auto!important}.confirmation-card{box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:720px!important;margin:0 auto!important;padding:20px 24px!important}.action-buttons,.email-note,footer,.nexo-legal-footer{display:none!important}.invoice-section{break-inside:avoid}.success-icon{font-size:42px!important}.confirmation-card p{margin-bottom:12px!important}}
+
+        /* Fix final: factura completa, botones visibles y footer debajo */
+        .action-buttons{
+            width:100%;
+            display:grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap:14px;
+            margin-top:26px;
+        }
+        .action-buttons .btn{
+            width:100%;
+            min-height:54px;
+            white-space:normal;
+            line-height:1.2;
+        }
+        .nexo-legal-footer{
+            flex:none !important;
+            display:block !important;
+            align-self:center !important;
+        }
+        @media (max-width: 640px){
+            .confirmation-card{padding:38px 24px 34px;}
+            .action-buttons{grid-template-columns:1fr;}
+        }
+
 </style>
 </head>
 <body>
@@ -282,38 +311,9 @@ const confirmI18n={
  fr:{confTitle:'Achat Confirmé !',confDesc:'Votre commande a été traitée avec succès. Vous recevrez un e-mail avec les détails de votre achat.',invoiceLabel:'Numéro de Facture',purchaseLabel:'Date d’Achat :',clientLabel:'Client :',emailLabel:'E-mail :',itemsLabel:'Articles :',paymentLabel:'Mode de Paiement :',deliveryLabel:'Livraison :',totalLabel:'Total Payé :',emailNote1:'📧 Vérifiez votre e-mail (y compris spam) pour la facture et les détails d’expédition.',emailNote2:'📱 Vous pouvez suivre votre commande avec le numéro de facture.',btnContinue:'🛒 Continuer les Achats',btnPortal:'🏠 Aller au Portail',itemsWord:'articles',pay:{credit:'💳 Carte Bancaire',paypal:'🅿️ PayPal',payoneer:'📱 Payoneer',applepay:'🍎 Apple Pay',bank:'🏦 Virement Bancaire'}}
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es'; const t = confirmI18n[lang] || confirmI18n.es; ['confTitle','confDesc','invoiceLabel','purchaseLabel','clientLabel','emailLabel','paymentLabel','deliveryLabel','totalLabel','emailNote1','emailNote2','btnContinue','btnPortal'].forEach(id=>document.getElementById(id).textContent=t[id]); const purchase = JSON.parse(localStorage.getItem('nexoLastOrder') || localStorage.getItem('lastPurchase') || '{}');
-            const metodoParam = (params.get('metodo') || purchase.paymentMethod || '').toLowerCase();
-            const pendingParam = params.get('pendiente') === '1' || String(params.get('estado_pago') || '').includes('pendiente') || String(purchase.estado_pago || '').includes('pendiente') || String(purchase.estado_pago || '').includes('registrada');
-            const paypalToken = params.get('token');
-            if(params.get('paypal') === 'return' && paypalToken){
-              document.getElementById('confTitle').textContent = 'Verificando pago PayPal...';
-              document.getElementById('confDesc').textContent = 'Estamos confirmando la captura real del pago antes de emitir la factura.';
-              try{
-                const r = await fetch('/api/paypal-capture-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:paypalToken,pedidoId:params.get('pedido_id') || purchase.supabase_id || purchase.id})});
-                const data = await r.json().catch(()=>({}));
-                if(r.ok && data.ok){
-                  purchase.estado_pago = 'paypal_pagado_capturado'; purchase.paymentConfirmed = true;
-                  localStorage.setItem('nexoLastOrder', JSON.stringify(purchase));
-                } else {
-                  purchase.estado_pago = 'paypal_pendiente_verificacion';
-                  localStorage.setItem('nexoLastOrder', JSON.stringify(purchase));
-                }
-              }catch(e){ purchase.estado_pago = 'paypal_pendiente_verificacion'; }
-            }
-            const isPending = pendingParam || ['bank','transferencia'].includes(metodoParam) || String(purchase.estado_pago||'').includes('pendiente') || String(purchase.estado_pago||'').includes('registrada');
-            if(isPending && !purchase.paymentConfirmed){
-              document.querySelector('.success-icon').textContent = '⏳';
-              document.getElementById('confTitle').textContent = metodoParam === 'bank' || metodoParam === 'transferencia' ? 'Pedido registrado - pago pendiente' : 'Pedido registrado - verificando pago';
-              document.getElementById('confDesc').textContent = metodoParam === 'bank' || metodoParam === 'transferencia' ? 'Tus datos de transferencia fueron guardados. El pedido queda pendiente hasta confirmar el abono bancario.' : 'El pedido fue registrado, pero la factura final se emitirá solo cuando la pasarela confirme el débito.';
-              document.getElementById('invoiceLabel').textContent = 'Número de pedido';
-              document.getElementById('totalLabel').textContent = 'Total pendiente:';
-              const bp=document.getElementById('btnPrint'); if(bp) bp.style.display='none';
-              const bd=document.getElementById('btnPdf'); if(bd) bd.style.display='none';
-            }
-
             const invoiceId = params.get('invoice') || purchase.factura_numero || purchase.invoice || purchase.id || params.get('pedido_id');
             if (invoiceId) {
                 document.getElementById('invoiceId').textContent = invoiceId;
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const firstItem = (purchase.items && purchase.items[0]) || {};
             const productName = purchase.producto_nombre || purchase.productName || purchase.product || firstItem.name || firstItem.title || '-';
             document.getElementById('itemCount').textContent = productName;
-            document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || (purchase.paymentMethod==='card'?t.pay.credit:null) || purchase.paymentMethod || '-');
+            document.getElementById('paymentMethod').textContent = (t.pay[purchase.paymentMethod] || purchase.paymentMethod || '-');
             if(purchase.payment_status === 'pendiente_confirmacion_operativa' || purchase.supabase_status === 'pendiente_sincronizacion'){
                 const note = document.querySelector('.email-note');
                 if(note){ note.innerHTML += '<br><strong>Estado operativo:</strong> pedido registrado; confirmación de pago en proceso.'; }
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
 
 
 
-<footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
+<footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="width:min(600px,100%);margin:0 auto;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);border-radius:0;">
   <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
   nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
   nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>

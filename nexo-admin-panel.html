@@ -551,6 +551,30 @@
 
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style id="nexo-bottom-color-fix">
+body{
+    background:#5f8182 !important;
+}
+.main-content,
+.content-area,
+.dashboard-content{
+    background:#dfe9e5 !important;
+}
+</style>
+
+
+<style id="nexo-footer-links-white-fix">
+.nexo-legal-footer a,
+.nexo-legal-footer a:visited,
+.nexo-legal-footer a:hover,
+.nexo-legal-footer a:active{
+    color:#ffffff !important;
+    text-decoration:underline !important;
+    font-weight:700 !important;
+}
+</style>
+
 </head>
 <body>
     <!-- HEADER -->
@@ -1449,7 +1473,31 @@ function getClientProfile() {
             const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${esc(c)}</td>`).join('')}</tr>`).join('');
             const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(x => `<div style="margin:4px 0;"><strong>${esc(x.label)}:</strong> ${esc(x.value)}</div>`).join('')}</div>` : '';
             const heads = tableHeaders.map(h => `<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">${esc(h)}</th>`).join('');
-            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${esc(title)}</title></head>
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${esc(title)}</title>
+<style id="nexo-bottom-color-fix">
+body{
+    background:#5f8182 !important;
+}
+.main-content,
+.content-area,
+.dashboard-content{
+    background:#dfe9e5 !important;
+}
+</style>
+
+
+<style id="nexo-footer-links-white-fix">
+.nexo-legal-footer a,
+.nexo-legal-footer a:visited,
+.nexo-legal-footer a:hover,
+.nexo-legal-footer a:active{
+    color:#ffffff !important;
+    text-decoration:underline !important;
+    font-weight:700 !important;
+}
+</style>
+
+</head>
             <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
                 <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${esc(title)}</h1>
                 <div style="margin-bottom:18px;color:#5A7C7E;">${esc(subtitle)}</div>
@@ -1467,8 +1515,6 @@ function getClientProfile() {
             w.focus();
             w.print();
         }
-
-
 
         // AGENTE 3 COMERCIAL - POLÍTICAS NUMERADAS INTEGRADAS SIN ROMPER EL PANEL
         function agente3PlanComercial(){
@@ -2088,53 +2134,6 @@ async function clearSupabaseBases(){
 }
 window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.superadmin-only').forEach(el=>{ if(!nexoIsSuperAdmin()) el.style.display='none'; }); });
 </script>
-
-<script src="nexo-legal-i18n.js"></script>
-
-<script>
-(function(){
-  function cleanRawAdminText(){
-    try{
-      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-      const bad=[]; let n;
-      while(n=walker.nextNode()){
-        const t=(n.nodeValue||'').trim();
-        if(t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('function getCompanyInfoForReports')) bad.push(n);
-      }
-      bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
-    }catch(e){}
-  }
-  document.addEventListener('DOMContentLoaded', cleanRawAdminText);
-  setTimeout(cleanRawAdminText,500); setTimeout(cleanRawAdminText,1500);
-})();
-</script>
-
-<script>
-(function(){
-  function cleanRawAdminText(){
-    try{
-      document.querySelectorAll('body, body *').forEach(function(el){
-        if(!el.children.length){
-          const t=(el.textContent||'').trim();
-          if(t.includes('${ticketSafe') || t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('const rowsHtml') || t.includes('document.write(html)')){
-            el.textContent=''; el.style.display='none';
-          }
-        }
-      });
-      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-      const bad=[]; let n;
-      while(n=walker.nextNode()){
-        const t=(n.nodeValue||'').trim();
-        if(t.includes('${ticketSafe') || t.includes('${title}') || t.includes('tableHeaders.map') || t.includes('function exportTaxTemplate') || t.includes('document.write(html)')) bad.push(n);
-      }
-      bad.forEach(n=>{ if(n.parentNode) n.parentNode.removeChild(n); });
-    }catch(e){}
-  }
-  document.addEventListener('DOMContentLoaded', cleanRawAdminText);
-  setTimeout(cleanRawAdminText,200); setTimeout(cleanRawAdminText,800); setTimeout(cleanRawAdminText,1800);
-})();
-</script>
-
 <script>
 (function(){
   async function nexoResponderTicketReal(index){
