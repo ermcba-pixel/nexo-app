@@ -1519,44 +1519,8 @@ function getClientProfile() {
             const rowsHtml = tableRows.map(r => `<tr>${r.map(c => `<td style="padding:8px;border:1px solid #d9e2e1;">${esc(c)}</td>`).join('')}</tr>`).join('');
             const summaryHtml = summaryRows.length ? `<div style="margin-top:16px;">${summaryRows.map(x => `<div style="margin:4px 0;"><strong>${esc(x.label)}:</strong> ${esc(x.value)}</div>`).join('')}</div>` : '';
             const heads = tableHeaders.map(h => `<th style="padding:8px;border:1px solid #d9e2e1;background:#eef4f3;text-align:left;">${esc(h)}</th>`).join('');
-            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${esc(title)}</title>
-<style id="nexo-bottom-color-fix">
-body{
-    background:#5f8182 !important;
-}
-.main-content,
-.content-area,
-.dashboard-content{
-    background:#dfe9e5 !important;
-}
-</style>
-
-
-<style id="nexo-footer-links-white-fix">
-.nexo-legal-footer a,
-.nexo-legal-footer a:visited,
-.nexo-legal-footer a:hover,
-.nexo-legal-footer a:active{
-    color:#ffffff !important;
-    text-decoration:underline !important;
-    font-weight:700 !important;
-}
-</style>
-
-
-<style id="nexo-admin-footer-white-links">
-.nexo-legal-footer a,
-.nexo-legal-footer a:visited,
-.nexo-legal-footer a:hover,
-.nexo-legal-footer a:active{
-  color:#ffffff !important;
-  text-decoration:underline !important;
-  font-weight:700 !important;
-}
-</style>
-
-</head>
-            <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;">
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${esc(title)}</title></head>
+            <body style="font-family:Segoe UI,Arial,sans-serif;padding:28px;color:#2D3E3F;background:#fff;">
                 <h1 style="margin:0 0 6px 0;color:#4A6B6D;">${esc(title)}</h1>
                 <div style="margin-bottom:18px;color:#5A7C7E;">${esc(subtitle)}</div>
                 <table style="border-collapse:collapse;width:100%;font-size:12px;">
@@ -1564,157 +1528,7 @@ body{
                     <tbody>${rowsHtml}</tbody>
                 </table>
                 ${summaryHtml}
-
-<script id="nexo-ticket-canal-final-fix">
-(function(){
-  function safe(v){
-    return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-    });
-  }
-  function rawPhone(t){
-    return String(t.telefono || t.celular || t.whatsapp || t.phone || t.celular_whatsapp || t.numero_contacto || '').replace(/[^\d+]/g,'');
-  }
-  function getChannel(t){
-    const raw = String(t.canal || t.ticket_canal || t.canal_preferido || t.contact_channel || t.medio_contacto || '').trim();
-    const text = (raw + ' ' + (t.mensaje || '') + ' ' + (t.asunto || '')).toLowerCase();
-    if(text.includes('whatsapp')) return 'WhatsApp';
-    if(text.includes('celular') || text.includes('telefono') || text.includes('teléfono') || text.includes('llamada')) return 'Celular';
-    if(text.includes('mail') || text.includes('email') || text.includes('correo')) return 'Email';
-    return raw || 'Email';
-  }
-  function replyButtons(t, index){
-    const ch = getChannel(t).toLowerCase();
-    const phone = rawPhone(t);
-    const email = String(t.email || t.correo || '').trim();
-    const msg = encodeURIComponent('Hola ' + (t.nombre_cliente || '') + ', respondemos a tu ticket nexo: ' + (t.asunto || 'Soporte'));
-    const subject = encodeURIComponent('Respuesta ticket nexo - ' + (t.asunto || 'Soporte'));
-    const body = encodeURIComponent('Estimado/a ' + (t.nombre_cliente || '') + ',\n\nEn atención a su ticket, le informamos lo siguiente:\n\n');
-    let out = '';
-    if(ch.includes('whatsapp')){
-      out += phone ? '<a class="btn btn-primary" target="_blank" href="https://wa.me/' + safe(phone.replace(/^\+/,'')) + '?text=' + msg + '">Responder por WhatsApp</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay número WhatsApp registrado en el ticket\')">Responder por WhatsApp</button>';
-    } else if(ch.includes('celular') || ch.includes('llamada')){
-      out += phone ? '<a class="btn btn-primary" href="tel:' + safe(phone) + '">Llamar al celular</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay celular registrado en el ticket\')">Llamar al celular</button>';
-    } else {
-      out += email ? '<a class="btn btn-primary" href="mailto:' + safe(email) + '?subject=' + subject + '&body=' + body + '">Responder por Email</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay email registrado en el ticket\')">Responder por Email</button>';
-    }
-    out += ' <button class="btn btn-secondary" onclick="nexoResponderTicketReal(' + index + ')">Guardar respuesta en Supabase</button>';
-    return out;
-  }
-  window.openTicketDetail = function(index){
-    const t = (window.nexoTicketsCache || [])[index];
-    if(!t) return;
-    const box = document.getElementById('ticketDetailBox');
-    const content = document.getElementById('ticketDetailContent');
-    const channel = getChannel(t);
-    const phone = rawPhone(t);
-    if(box) box.style.display = 'block';
-    if(content){
-      content.innerHTML =
-        '<div class="ticket-detail-grid">' +
-          '<div><span class="info-label">Cliente</span><div class="info-value highlight">' + safe(t.nombre_cliente || '') + '</div></div>' +
-          '<div><span class="info-label">Canal solicitado</span><div class="info-value highlight">' + safe(channel) + '</div></div>' +
-          '<div><span class="info-label">Email</span><div class="info-value">' + safe(t.email || '') + '</div></div>' +
-          '<div><span class="info-label">Celular / WhatsApp</span><div class="info-value">' + safe(phone || '-') + '</div></div>' +
-          '<div><span class="info-label">Estado</span><div class="info-value">' + safe(t.estado || 'Nuevo') + '</div></div>' +
-          '<div><span class="info-label">Prioridad</span><div class="info-value">' + safe(t.prioridad || 'Media') + '</div></div>' +
-        '</div>' +
-        '<div class="ticket-message">' + safe(t.mensaje || '') + '</div>' +
-        '<div class="button-group">' + replyButtons(t,index) + '</div>';
-      box.scrollIntoView({behavior:'smooth', block:'start'});
-    }
-  };
-  const previousLoadTickets = window.loadTickets;
-  window.loadTickets = async function(){
-    if(typeof previousLoadTickets === 'function') await previousLoadTickets();
-    const table = document.getElementById('ticketsTable');
-    const rows = window.nexoTicketsCache || [];
-    if(!table || !rows.length) return;
-    table.innerHTML = rows.map(function(t,idx){
-      const fecha = t.fecha_creacion ? new Date(t.fecha_creacion).toLocaleString('es-BO') : '';
-      const ch = getChannel(t);
-      return '<tr>' +
-        '<td>' + safe(fecha) + '</td>' +
-        '<td>' + safe(t.nombre_cliente || '') + '</td>' +
-        '<td>' + safe(t.asunto || '') + '</td>' +
-        '<td>' + safe(t.tipo_reclamo || '') + '</td>' +
-        '<td>' + safe(t.estado || 'Nuevo') + '</td>' +
-        '<td>' + safe(t.prioridad || 'Media') + '</td>' +
-        '<td>' + safe(ch) + '</td>' +
-        '<td><button class="ticket-response-btn" onclick="openTicketDetail(' + idx + ')">Responder</button></td>' +
-      '</tr>';
-    }).join('');
-  };
-})();
-</script>
-
-
-<script id="nexo-siat-users-fixes-v4">
-(function(){
-  'use strict';
-  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
-  function money(v){var n=Number(v||0); return 'Bs '+n.toFixed(2);}
-  function table(rows, heads){
-    var h='<thead><tr>'+heads.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr></thead>';
-    var b='<tbody>'+(rows.length?rows.join(''):'<tr><td colspan="'+heads.length+'" style="text-align:center;color:#64748b;">Sin registros todavía.</td></tr>')+'</tbody>';
-    return '<div style="overflow:auto;"><table class="table">'+h+b+'</table></div>';
-  }
-  window.logout=function(){
-    try{ localStorage.removeItem('nexoAdminAuth'); sessionStorage.removeItem('nexoAdminAuth'); }catch(e){}
-    window.location.href='nexo-admin-login.html';
-  };
-  window.renderUsers=function(){
-    var box=document.getElementById('usersPanel'); if(!box)return;
-    var adminEmail=localStorage.getItem('nexoAdminEmail')||'ermcba@hotmail.com';
-    box.innerHTML='<div class="section-box-title">Usuarios administrativos</div>'+table([
-      '<tr><td>Superadministrador</td><td>'+esc(adminEmail)+'</td><td>Control total</td><td><button class="action-btn" onclick="changeAdminPassword()">Asignar clave</button></td></tr>',
-      '<tr><td>Admin</td><td>admin@nexo</td><td>Panel general</td><td><button class="action-btn" onclick="alert('Usuario Admin listo para Supabase Auth')">Configurar</button></td></tr>',
-      '<tr><td>Operador</td><td>operador@nexo</td><td>Pedidos y soporte</td><td><button class="action-btn" onclick="alert('Usuario Operador listo para Supabase Auth')">Configurar</button></td></tr>',
-      '<tr><td>Finanzas</td><td>finanzas@nexo</td><td>Pagos, caja, SIAT y reportes</td><td><button class="action-btn" onclick="alert('Usuario Finanzas listo para Supabase Auth')">Configurar</button></td></tr>'
-    ],['Rol','Correo','Permisos','Acciones']);
-  };
-  window.renderSIATPanel=function(kind){
-    var box=document.getElementById('siatPanel'); if(!box)return;
-    if(kind==='config'){
-      box.innerHTML='<b>Configuración SIAT</b><p>Datos registrados en Supabase: NIT 774651015, software nexo, versión 1.0.1, modalidad Electrónica en Línea, sistema propio, proceso masivo activo.</p>'+table([
-        '<tr><td>Ambiente</td><td>PILOTO hasta aprobación SIAT</td></tr>',
-        '<tr><td>Tipo sistema</td><td>PROPIO</td></tr>',
-        '<tr><td>Proceso masivo</td><td>SÍ</td></tr>',
-        '<tr><td>Registro de compras</td><td>NO</td></tr>'
-      ],['Campo','Valor']);
-    } else if(kind==='masiva'){
-      box.innerHTML='<b>Facturación masiva</b><p>El módulo tomará pedidos pagados, validará NIT/CI, generará XML, firmará, enviará paquete SIAT y guardará respuesta.</p>'+table([
-        '<tr><td>PENDIENTE</td><td>Conectar API CUIS/CUFD</td></tr>',
-        '<tr><td>PENDIENTE</td><td>Generador XML oficial</td></tr>',
-        '<tr><td>PENDIENTE</td><td>Firma digital</td></tr>'
-      ],['Estado','Tarea']);
-    } else if(kind==='facturas'){
-      box.innerHTML='<b>Facturas emitidas</b><p>Respaldo oficial en Supabase: tabla siat_facturas, items, XML firmado, QR, PDF URL, estado SIAT y auditoría.</p>'+table([],['N°','Fecha','Cliente','NIT/CI','CUF','Total','Estado SIAT','PDF/XML']);
-    } else if(kind==='iva'){
-      box.innerHTML='<b>Registro IVA</b><p>Se consolida en siat_registro_ventas_iva y vistas de control para cierre mensual.</p>'+table([],['Periodo','Facturas válidas','Anuladas','Total Bs','IVA base','Estado']);
-    } else if(kind==='eventos'){
-      box.innerHTML='<b>Eventos significativos y contingencias</b><p>Respaldo en siat_eventos_significativos y siat_contingencias para cortes de internet, inaccesibilidad SIAT, fallas de software/hardware y energía.</p>'+table([],['Inicio','Fin','Tipo evento','CUFD','Estado','Acción']);
-    } else {
-      box.innerHTML='<b>Auditoría fiscal</b><p>Trazabilidad completa en siat_auditoria_fiscal: pedido, pago, factura, usuario, acción, fecha y datos técnicos.</p>'+table([],['Fecha','Usuario','Acción','Tabla','Registro','Resultado']);
-    }
-  };
-  var oldSwitch=window.switchSection;
-  window.switchSection=function(sectionId, element){
-    document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
-    var t=document.getElementById(sectionId); if(t)t.classList.add('active');
-    document.querySelectorAll('.menu-item').forEach(function(i){i.classList.remove('active');}); if(element)element.classList.add('active');
-    if(sectionId==='siat'){renderSIATPanel('config');return;}
-    if(sectionId==='users'){renderUsers();return;}
-    if(typeof oldSwitch==='function'){try{return oldSwitch(sectionId, element);}catch(e){console.warn(e);}}
-  };
-  document.addEventListener('DOMContentLoaded',function(){
-    var btn=document.querySelector('.logout-btn'); if(btn) btn.onclick=window.logout;
-    if(document.getElementById('users') && document.getElementById('users').classList.contains('active')) renderUsers();
-  });
-})();
-</script>
-
-</body></html>`;
+            </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
             w.document.write(html);
@@ -2750,9 +2564,9 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
     var adminEmail=localStorage.getItem('nexoAdminEmail')||'ermcba@hotmail.com';
     box.innerHTML='<div class="section-box-title">Usuarios administrativos</div>'+table([
       '<tr><td>Superadministrador</td><td>'+esc(adminEmail)+'</td><td>Control total</td><td><button class="action-btn" onclick="changeAdminPassword()">Asignar clave</button></td></tr>',
-      '<tr><td>Admin</td><td>admin@nexo</td><td>Panel general</td><td><button class="action-btn" onclick="alert('Usuario Admin listo para Supabase Auth')">Configurar</button></td></tr>',
-      '<tr><td>Operador</td><td>operador@nexo</td><td>Pedidos y soporte</td><td><button class="action-btn" onclick="alert('Usuario Operador listo para Supabase Auth')">Configurar</button></td></tr>',
-      '<tr><td>Finanzas</td><td>finanzas@nexo</td><td>Pagos, caja, SIAT y reportes</td><td><button class="action-btn" onclick="alert('Usuario Finanzas listo para Supabase Auth')">Configurar</button></td></tr>'
+      '<tr><td>Admin</td><td>admin@nexo</td><td>Panel general</td><td><button class="action-btn" onclick="alert(&quot;Usuario Admin listo para Supabase Auth&quot;)">Configurar</button></td></tr>',
+      '<tr><td>Operador</td><td>operador@nexo</td><td>Pedidos y soporte</td><td><button class="action-btn" onclick="alert(&quot;Usuario Operador listo para Supabase Auth&quot;)">Configurar</button></td></tr>',
+      '<tr><td>Finanzas</td><td>finanzas@nexo</td><td>Pagos, caja, SIAT y reportes</td><td><button class="action-btn" onclick="alert(&quot;Usuario Finanzas listo para Supabase Auth&quot;)">Configurar</button></td></tr>'
     ],['Rol','Correo','Permisos','Acciones']);
   };
   window.renderSIATPanel=function(kind){
