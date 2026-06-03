@@ -632,6 +632,10 @@ body{
                 <div class="menu-item" onclick="switchSection('reports', this)">
                     <span class="menu-icon">📈</span> Reportes
                 </div>
+                <div class="menu-item" onclick="switchSection('siat', this)">
+                    <span class="menu-icon">🏛️</span> Impuestos SIAT
+                </div>
+
                 <div class="menu-item" onclick="switchSection('marketing', this)">
                     <span class="menu-icon">📢</span> Agente 3 Comercial
                 </div>
@@ -672,6 +676,68 @@ body{
                 <a class="back-link" href="nexo-portal-principal.html" onclick="window.location.href='nexo-portal-principal.html'; return false;">← Volver al portal</a>
                 <span class="super-badge">Superadministrador</span>
             </div>
+
+            
+            <!-- SIAT -->
+            <div class="section" id="siat">
+                <h1 class="page-title">🏛️ IMPUESTOS SIAT BOLIVIA</h1>
+                <p class="page-subtitle">Control fiscal electrónico y facturación masiva</p>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:20px;">
+                    <div class="card">
+                        <h3>⚙️ Configuración SIAT</h3>
+                        <p>Configuración CUIS, CUFD, certificados y homologación.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🧾 Facturación masiva</h3>
+                        <p>Generación masiva de facturas electrónicas conforme normativa Bolivia.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>📄 Facturas emitidas</h3>
+                        <p>Consulta de CUF, XML, PDF, QR y estado SIAT.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>📚 Registro IVA</h3>
+                        <p>Libro de ventas, auditoría fiscal y conciliación tributaria.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🚨 Eventos significativos</h3>
+                        <p>Contingencias, internet caído y sincronización posterior.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔎 Auditoría fiscal</h3>
+                        <p>Trazabilidad completa de pedidos, pagos y facturación SIAT.</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:25px;">
+                    <h3>Estado actual de cumplimiento</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-top:15px;">
+                        <tr>
+                            <td style="padding:10px;border-bottom:1px solid #ccc;">Estructura fiscal Supabase</td>
+                            <td style="padding:10px;border-bottom:1px solid #ccc;color:green;font-weight:bold;">IMPLEMENTADA</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;border-bottom:1px solid #ccc;">Modalidad Facturación Electrónica en Línea</td>
+                            <td style="padding:10px;border-bottom:1px solid #ccc;color:#f39c12;font-weight:bold;">EN PROCESO</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;border-bottom:1px solid #ccc;">Homologación SIAT</td>
+                            <td style="padding:10px;border-bottom:1px solid #ccc;color:#f39c12;font-weight:bold;">PENDIENTE</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;">Firma digital y XML fiscal</td>
+                            <td style="padding:10px;color:#f39c12;font-weight:bold;">PENDIENTE</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
 
             <!-- DASHBOARD -->
             <div class="section active" id="dashboard">
@@ -1531,6 +1597,90 @@ body{
                     <tbody>${rowsHtml}</tbody>
                 </table>
                 ${summaryHtml}
+
+<script id="nexo-ticket-canal-final-fix">
+(function(){
+  function safe(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function rawPhone(t){
+    return String(t.telefono || t.celular || t.whatsapp || t.phone || t.celular_whatsapp || t.numero_contacto || '').replace(/[^\d+]/g,'');
+  }
+  function getChannel(t){
+    const raw = String(t.canal || t.ticket_canal || t.canal_preferido || t.contact_channel || t.medio_contacto || '').trim();
+    const text = (raw + ' ' + (t.mensaje || '') + ' ' + (t.asunto || '')).toLowerCase();
+    if(text.includes('whatsapp')) return 'WhatsApp';
+    if(text.includes('celular') || text.includes('telefono') || text.includes('teléfono') || text.includes('llamada')) return 'Celular';
+    if(text.includes('mail') || text.includes('email') || text.includes('correo')) return 'Email';
+    return raw || 'Email';
+  }
+  function replyButtons(t, index){
+    const ch = getChannel(t).toLowerCase();
+    const phone = rawPhone(t);
+    const email = String(t.email || t.correo || '').trim();
+    const msg = encodeURIComponent('Hola ' + (t.nombre_cliente || '') + ', respondemos a tu ticket nexo: ' + (t.asunto || 'Soporte'));
+    const subject = encodeURIComponent('Respuesta ticket nexo - ' + (t.asunto || 'Soporte'));
+    const body = encodeURIComponent('Estimado/a ' + (t.nombre_cliente || '') + ',\n\nEn atención a su ticket, le informamos lo siguiente:\n\n');
+    let out = '';
+    if(ch.includes('whatsapp')){
+      out += phone ? '<a class="btn btn-primary" target="_blank" href="https://wa.me/' + safe(phone.replace(/^\+/,'')) + '?text=' + msg + '">Responder por WhatsApp</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay número WhatsApp registrado en el ticket\')">Responder por WhatsApp</button>';
+    } else if(ch.includes('celular') || ch.includes('llamada')){
+      out += phone ? '<a class="btn btn-primary" href="tel:' + safe(phone) + '">Llamar al celular</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay celular registrado en el ticket\')">Llamar al celular</button>';
+    } else {
+      out += email ? '<a class="btn btn-primary" href="mailto:' + safe(email) + '?subject=' + subject + '&body=' + body + '">Responder por Email</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay email registrado en el ticket\')">Responder por Email</button>';
+    }
+    out += ' <button class="btn btn-secondary" onclick="nexoResponderTicketReal(' + index + ')">Guardar respuesta en Supabase</button>';
+    return out;
+  }
+  window.openTicketDetail = function(index){
+    const t = (window.nexoTicketsCache || [])[index];
+    if(!t) return;
+    const box = document.getElementById('ticketDetailBox');
+    const content = document.getElementById('ticketDetailContent');
+    const channel = getChannel(t);
+    const phone = rawPhone(t);
+    if(box) box.style.display = 'block';
+    if(content){
+      content.innerHTML =
+        '<div class="ticket-detail-grid">' +
+          '<div><span class="info-label">Cliente</span><div class="info-value highlight">' + safe(t.nombre_cliente || '') + '</div></div>' +
+          '<div><span class="info-label">Canal solicitado</span><div class="info-value highlight">' + safe(channel) + '</div></div>' +
+          '<div><span class="info-label">Email</span><div class="info-value">' + safe(t.email || '') + '</div></div>' +
+          '<div><span class="info-label">Celular / WhatsApp</span><div class="info-value">' + safe(phone || '-') + '</div></div>' +
+          '<div><span class="info-label">Estado</span><div class="info-value">' + safe(t.estado || 'Nuevo') + '</div></div>' +
+          '<div><span class="info-label">Prioridad</span><div class="info-value">' + safe(t.prioridad || 'Media') + '</div></div>' +
+        '</div>' +
+        '<div class="ticket-message">' + safe(t.mensaje || '') + '</div>' +
+        '<div class="button-group">' + replyButtons(t,index) + '</div>';
+      box.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  };
+  const previousLoadTickets = window.loadTickets;
+  window.loadTickets = async function(){
+    if(typeof previousLoadTickets === 'function') await previousLoadTickets();
+    const table = document.getElementById('ticketsTable');
+    const rows = window.nexoTicketsCache || [];
+    if(!table || !rows.length) return;
+    table.innerHTML = rows.map(function(t,idx){
+      const fecha = t.fecha_creacion ? new Date(t.fecha_creacion).toLocaleString('es-BO') : '';
+      const ch = getChannel(t);
+      return '<tr>' +
+        '<td>' + safe(fecha) + '</td>' +
+        '<td>' + safe(t.nombre_cliente || '') + '</td>' +
+        '<td>' + safe(t.asunto || '') + '</td>' +
+        '<td>' + safe(t.tipo_reclamo || '') + '</td>' +
+        '<td>' + safe(t.estado || 'Nuevo') + '</td>' +
+        '<td>' + safe(t.prioridad || 'Media') + '</td>' +
+        '<td>' + safe(ch) + '</td>' +
+        '<td><button class="ticket-response-btn" onclick="openTicketDetail(' + idx + ')">Responder</button></td>' +
+      '</tr>';
+    }).join('');
+  };
+})();
+</script>
+
 </body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
@@ -2132,15 +2282,64 @@ function enforceSuperAdminOnly(){
   if(sec && !nexoIsSuperAdmin()) sec.innerHTML='<h1 class="page-title">Acceso restringido</h1><div class="section-box">Solo el superadministrador puede borrar bases Supabase.</div>';
 }
 function escAdmin(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
-function renderPaymentSensitiveData(){
+async function renderPaymentSensitiveData(){
+  const safeNum = v => Number(v || 0).toFixed(2);
+  const normalizeCard = (o) => {
+    const cp = o.cardPayment || o.card || o.payload?.card || {};
+    return {
+      id:o.id || o.factura_numero || o.pedido_id || o.payload?.pedido_id || '',
+      fecha:o.timestamp || o.fecha || o.updated_at || o.creado_en || '',
+      cliente:o.fullName || o.customer?.fullName || o.cliente_nombre || o.payload?.cliente?.fullName || '',
+      email:o.email || o.customer?.email || o.cliente_email || o.payload?.cliente?.email || '',
+      titular:cp.holder || cp.titular || '',
+      tarjeta:cp.cardNumberMasked || cp.maskedNumber || cp.numberMasked || o.card_number_masked || (o.card_last4 ? '••••••••••••' + o.card_last4 : ''),
+      vence:cp.expiry || cp.expiryDate || o.card_expiry || '',
+      monto:o.total || o.totals?.total || o.monto_usd || o.payload?.total || 0,
+      estado:o.estado_pago || o.estado || o.payload?.estado_pago || 'pendiente'
+    };
+  };
+  const normalizeBank = (o) => {
+    const bp = o.bankPayment || o.bank || o.payload?.bank || {};
+    return {
+      id:o.id || o.factura_numero || o.pedido_id || o.payload?.pedido_id || '',
+      fecha:o.timestamp || o.fecha || o.updated_at || o.creado_en || '',
+      cliente:o.fullName || o.customer?.fullName || o.cliente_nombre || o.payload?.cliente?.fullName || '',
+      email:o.email || o.customer?.email || o.cliente_email || o.payload?.cliente?.email || '',
+      titular:bp.holder || bp.titular || '',
+      banco:bp.bankName || o.bank_name || '',
+      ruta:bp.routingNumber || o.bank_routing || '',
+      cuenta:bp.accountNumberMasked || o.bank_account_masked || '',
+      tipo:bp.rail || bp.type || '',
+      monto:o.total || o.totals?.total || o.monto_usd || o.payload?.total || 0,
+      estado:o.estado_pago || o.estado || o.payload?.estado_pago || 'pendiente'
+    };
+  };
+  let cards = [];
+  let banks = [];
+  try{
+    const r = await fetch('/api/nexo-admin-data?ts=' + Date.now(), {cache:'no-store'});
+    const data = await r.json().catch(()=>({}));
+    if(data && data.ok){
+      const profiles = data.client_payment_profiles || [];
+      cards = cards.concat(profiles.filter(x => String(x.metodo||'').toLowerCase()==='card').map(normalizeCard));
+      banks = banks.concat(profiles.filter(x => String(x.metodo||'').toLowerCase()==='bank').map(normalizeBank));
+      const pagos = data.pagos || [];
+      cards = cards.concat(pagos.filter(x => String(x.metodo||'').toLowerCase().includes('card') && (x.payload?.card || x.card_number_masked)).map(normalizeCard));
+      banks = banks.concat(pagos.filter(x => String(x.metodo||'').toLowerCase().includes('bank') && (x.payload?.bank || x.bank_account_masked)).map(normalizeBank));
+    }
+  }catch(e){ console.warn('No se pudo leer perfiles de pago desde Supabase', e); }
   const orders=JSON.parse(localStorage.getItem('nexoOrders')||'[]');
   const last=JSON.parse(localStorage.getItem('nexoLastOrder')||'null');
   const all=[...orders]; if(last && !all.some(o=>o.id===last.id)) all.push(last);
-  const cards=all.filter(o=>o && o.cardPayment).map(o=>({id:o.id||o.factura_numero||'',fecha:o.timestamp||'',cliente:o.fullName||o.customer?.fullName||'',email:o.email||o.customer?.email||'',titular:o.cardPayment.holder||'',tarjeta:o.cardPayment.cardNumberMasked||'',vence:o.cardPayment.expiry||'',monto:o.total||o.totals?.total||0,estado:o.estado_pago||o.estado||'pendiente'}));
-  const banks=all.filter(o=>o && o.bankPayment).map(o=>({id:o.id||o.factura_numero||'',fecha:o.timestamp||'',cliente:o.fullName||o.customer?.fullName||'',email:o.email||o.customer?.email||'',titular:o.bankPayment.holder||'',banco:o.bankPayment.bankName||'',ruta:o.bankPayment.routingNumber||'',cuenta:o.bankPayment.accountNumberMasked||'',tipo:o.bankPayment.rail||'',monto:o.total||o.totals?.total||0,estado:o.estado_pago||o.estado||'pendiente'}));
+  cards = cards.concat(all.filter(o=>o && o.cardPayment).map(normalizeCard));
+  banks = banks.concat(all.filter(o=>o && o.bankPayment).map(normalizeBank));
+  const seenCard = new Set();
+  cards = cards.filter(r => { const k=[r.email,r.tarjeta,r.vence,r.id].join('|'); if(seenCard.has(k)) return false; seenCard.add(k); return true; });
+  const seenBank = new Set();
+  banks = banks.filter(r => { const k=[r.email,r.ruta,r.cuenta,r.id].join('|'); if(seenBank.has(k)) return false; seenBank.add(k); return true; });
   const table=(rows,cols)=>'<div style="overflow:auto"><table class="table"><thead><tr>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr></thead><tbody>'+ (rows.length?rows.map(r=>'<tr>'+cols.map(c=>'<td>'+escAdmin(c[1](r))+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+cols.length+'">Sin registros todavía</td></tr>') + '</tbody></table></div>';
-  const cw=document.getElementById('cardPaymentDataWrap'); if(cw) cw.innerHTML=table(cards,[['Pedido',r=>r.id],['Fecha',r=>r.fecha],['Cliente',r=>r.cliente],['Email',r=>r.email],['Titular',r=>r.titular],['Tarjeta sin CVV',r=>r.tarjeta],['Vence',r=>r.vence],['Monto USD',r=>Number(r.monto||0).toFixed(2)],['Estado',r=>r.estado]]);
-  const bw=document.getElementById('bankPaymentDataWrap'); if(bw) bw.innerHTML=table(banks,[['Pedido',r=>r.id],['Fecha',r=>r.fecha],['Cliente',r=>r.cliente],['Email',r=>r.email],['Titular',r=>r.titular],['Banco',r=>r.banco],['Ruta',r=>r.ruta],['Cuenta',r=>r.cuenta],['Tipo',r=>r.tipo],['Monto USD',r=>Number(r.monto||0).toFixed(2)],['Estado',r=>r.estado]]);
+  const cw=document.getElementById('cardPaymentDataWrap'); if(cw) cw.innerHTML=table(cards,[['Pedido',r=>r.id],['Fecha',r=>r.fecha],['Cliente',r=>r.cliente],['Email',r=>r.email],['Titular',r=>r.titular],['Tarjeta sin CVV',r=>r.tarjeta],['Vence',r=>r.vence],['Monto USD',r=>safeNum(r.monto)],['Estado',r=>r.estado]]);
+  const bw=document.getElementById('bankPaymentDataWrap'); if(bw) bw.innerHTML=table(banks,[['Pedido',r=>r.id],['Fecha',r=>r.fecha],['Cliente',r=>r.cliente],['Email',r=>r.email],['Titular',r=>r.titular],['Banco',r=>r.banco],['Ruta',r=>r.ruta],['Cuenta',r=>r.cuenta],['Tipo',r=>r.tipo],['Monto USD',r=>safeNum(r.monto)],['Estado',r=>r.estado]]);
 }
 async function clearSupabaseBases(){
   const out=document.getElementById('clearSupabaseResult');
@@ -2410,6 +2609,90 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
       '<div><span class="info-label">Prioridad</span><div class="info-value">'+esc(t.prioridad||'Media')+'</div></div>'+
       '</div><div class="ticket-message">'+esc(t.mensaje||'')+'</div><div class="button-group">'+buttons+'</div>';
     if(box) box.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+})();
+</script>
+
+
+<script id="nexo-ticket-canal-final-fix">
+(function(){
+  function safe(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function rawPhone(t){
+    return String(t.telefono || t.celular || t.whatsapp || t.phone || t.celular_whatsapp || t.numero_contacto || '').replace(/[^\d+]/g,'');
+  }
+  function getChannel(t){
+    const raw = String(t.canal || t.ticket_canal || t.canal_preferido || t.contact_channel || t.medio_contacto || '').trim();
+    const text = (raw + ' ' + (t.mensaje || '') + ' ' + (t.asunto || '')).toLowerCase();
+    if(text.includes('whatsapp')) return 'WhatsApp';
+    if(text.includes('celular') || text.includes('telefono') || text.includes('teléfono') || text.includes('llamada')) return 'Celular';
+    if(text.includes('mail') || text.includes('email') || text.includes('correo')) return 'Email';
+    return raw || 'Email';
+  }
+  function replyButtons(t, index){
+    const ch = getChannel(t).toLowerCase();
+    const phone = rawPhone(t);
+    const email = String(t.email || t.correo || '').trim();
+    const msg = encodeURIComponent('Hola ' + (t.nombre_cliente || '') + ', respondemos a tu ticket nexo: ' + (t.asunto || 'Soporte'));
+    const subject = encodeURIComponent('Respuesta ticket nexo - ' + (t.asunto || 'Soporte'));
+    const body = encodeURIComponent('Estimado/a ' + (t.nombre_cliente || '') + ',\n\nEn atención a su ticket, le informamos lo siguiente:\n\n');
+    let out = '';
+    if(ch.includes('whatsapp')){
+      out += phone ? '<a class="btn btn-primary" target="_blank" href="https://wa.me/' + safe(phone.replace(/^\+/,'')) + '?text=' + msg + '">Responder por WhatsApp</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay número WhatsApp registrado en el ticket\')">Responder por WhatsApp</button>';
+    } else if(ch.includes('celular') || ch.includes('llamada')){
+      out += phone ? '<a class="btn btn-primary" href="tel:' + safe(phone) + '">Llamar al celular</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay celular registrado en el ticket\')">Llamar al celular</button>';
+    } else {
+      out += email ? '<a class="btn btn-primary" href="mailto:' + safe(email) + '?subject=' + subject + '&body=' + body + '">Responder por Email</a>' : '<button class="btn btn-primary" onclick="alert(\'No hay email registrado en el ticket\')">Responder por Email</button>';
+    }
+    out += ' <button class="btn btn-secondary" onclick="nexoResponderTicketReal(' + index + ')">Guardar respuesta en Supabase</button>';
+    return out;
+  }
+  window.openTicketDetail = function(index){
+    const t = (window.nexoTicketsCache || [])[index];
+    if(!t) return;
+    const box = document.getElementById('ticketDetailBox');
+    const content = document.getElementById('ticketDetailContent');
+    const channel = getChannel(t);
+    const phone = rawPhone(t);
+    if(box) box.style.display = 'block';
+    if(content){
+      content.innerHTML =
+        '<div class="ticket-detail-grid">' +
+          '<div><span class="info-label">Cliente</span><div class="info-value highlight">' + safe(t.nombre_cliente || '') + '</div></div>' +
+          '<div><span class="info-label">Canal solicitado</span><div class="info-value highlight">' + safe(channel) + '</div></div>' +
+          '<div><span class="info-label">Email</span><div class="info-value">' + safe(t.email || '') + '</div></div>' +
+          '<div><span class="info-label">Celular / WhatsApp</span><div class="info-value">' + safe(phone || '-') + '</div></div>' +
+          '<div><span class="info-label">Estado</span><div class="info-value">' + safe(t.estado || 'Nuevo') + '</div></div>' +
+          '<div><span class="info-label">Prioridad</span><div class="info-value">' + safe(t.prioridad || 'Media') + '</div></div>' +
+        '</div>' +
+        '<div class="ticket-message">' + safe(t.mensaje || '') + '</div>' +
+        '<div class="button-group">' + replyButtons(t,index) + '</div>';
+      box.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  };
+  const previousLoadTickets = window.loadTickets;
+  window.loadTickets = async function(){
+    if(typeof previousLoadTickets === 'function') await previousLoadTickets();
+    const table = document.getElementById('ticketsTable');
+    const rows = window.nexoTicketsCache || [];
+    if(!table || !rows.length) return;
+    table.innerHTML = rows.map(function(t,idx){
+      const fecha = t.fecha_creacion ? new Date(t.fecha_creacion).toLocaleString('es-BO') : '';
+      const ch = getChannel(t);
+      return '<tr>' +
+        '<td>' + safe(fecha) + '</td>' +
+        '<td>' + safe(t.nombre_cliente || '') + '</td>' +
+        '<td>' + safe(t.asunto || '') + '</td>' +
+        '<td>' + safe(t.tipo_reclamo || '') + '</td>' +
+        '<td>' + safe(t.estado || 'Nuevo') + '</td>' +
+        '<td>' + safe(t.prioridad || 'Media') + '</td>' +
+        '<td>' + safe(ch) + '</td>' +
+        '<td><button class="ticket-response-btn" onclick="openTicketDetail(' + idx + ')">Responder</button></td>' +
+      '</tr>';
+    }).join('');
   };
 })();
 </script>

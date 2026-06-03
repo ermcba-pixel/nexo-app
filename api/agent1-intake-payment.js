@@ -35,7 +35,11 @@ export default async function handler(req,res){
     const total = money(order.total || order?.totals?.total);
 
     const payoneerUrl = process.env.PAYONEER_PAYMENT_URL || process.env.PAYONEER_CHECKOUT_URL || '';
-    const methodStatus = paymentMethod === 'card' ? 'tarjeta_pendiente_pasarela_directa' : (paymentMethod === 'bank' ? 'transferencia_registrada_pendiente_confirmacion' : (paymentMethod === 'payoneer' ? (payoneerUrl ? 'payoneer_redireccionando_checkout' : 'payoneer_url_no_configurada') : 'pendiente_captura_server_side'));
+    const methodStatus = paymentMethod === 'card'
+      ? 'tarjeta_pendiente_pasarela_directa'
+      : (paymentMethod === 'bank'
+        ? 'transferencia_datos_guardados_pendiente_pasarela_ach'
+        : (paymentMethod === 'payoneer' ? (payoneerUrl ? 'payoneer_redireccionando_checkout' : 'payoneer_url_no_configurada') : 'pendiente_captura_server_side'));
 
     const intake = {
       ok:true,
@@ -50,7 +54,8 @@ export default async function handler(req,res){
       paypalAdvancedReady:Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
       payoneerUrl: paymentMethod === 'payoneer' ? payoneerUrl : '',
       next:[
-        'capturar pago del cliente por pasarela directa habilitada',
+        'capturar pago del cliente solo cuando exista pasarela directa habilitada',
+        'para ACH/Wire: esperar pasarela bancaria autorizada o confirmación real de abono',
         'confirmar webhook de pago aprobado',
         'crear orden CJ con datos de cliente y envío',
         'registrar tracking y comisión neta'
@@ -71,7 +76,9 @@ export default async function handler(req,res){
     if(paymentMethod === 'card'){
       intake.card = {
         mode:'Pasarela tarjeta server-side / PayPal Advanced Card Payments si está habilitado',
-        storesCardData:false,
+        cardMasked: order?.cardPayment?.cardNumberMasked || order?.cardPayment?.maskedNumber || '',
+        expiry: order?.cardPayment?.expiry || order?.cardPayment?.expiryDate || '',
+        storesCardData:'solo mascara/ultimos4',
         cvvStored:false
       };
     }

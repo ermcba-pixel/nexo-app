@@ -28,6 +28,8 @@ export default async function handler(req,res){
       metodo,
       card_last4: body.card?.last4 || null,
       card_brand: body.card?.brand || null,
+      card_number_masked: body.card?.cardNumberMasked || body.card?.maskedNumber || body.card?.numberMasked || null,
+      card_expiry: body.card?.expiry || body.card?.expiryDate || null,
       bank_name: body.bank?.bankName || null,
       bank_routing: body.bank?.routingNumber || null,
       bank_account_masked: body.bank?.accountNumberMasked || null,

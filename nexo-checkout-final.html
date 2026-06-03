@@ -1033,7 +1033,7 @@ function applyCheckoutLanguage(){
         ];
 
         // MÉTODOS DE PAGO
-        // Todos los métodos visibles. El Agente 1 centraliza la operación en PayPal Business nexo™.
+        // Todos los métodos visibles. Tarjeta NO redirige a PayPal: queda en captura directa/Agente 1.
         const paymentMethods = [
             { id: 'paypal', name: 'PayPal', icon: '🅿️' },
             { id: 'card', name: 'Tarjeta de Crédito/Débito', icon: '💳' },
@@ -1041,14 +1041,14 @@ function applyCheckoutLanguage(){
             { id: 'payoneer', name: 'Payoneer', icon: '📱' }
         ];
 
-        let selectedPayment = 'paypal';
+        let selectedPayment = 'card';
         let orderData = null;
 
         // INICIALIZAR
         function init() {
             renderCountrySelect();
             renderPaymentMethods();
-            selectPayment('paypal');
+            selectPayment('card');
             loadCart();
             calculateTotals();
         }
@@ -1094,15 +1094,15 @@ function nexoPayText(key){
     const D = {
       es:{
         cardTitle:'Datos de tarjeta de crédito/débito',
-        cardText:'Pago real con tarjeta mediante checkout seguro autorizado. nexo™ no guarda CVV ni tarjeta completa; solo conserva marca/últimos 4 para precargar datos. La factura se emite únicamente cuando la pasarela confirme el débito.',
-        cardBtn:'Pagar con tarjeta',
+        cardText:'Pago con tarjeta dentro de nexo™. No se redirige al cliente a PayPal ni se exige cuenta PayPal. nexo™ no guarda CVV ni tarjeta completa; registra la intención para captura directa del Agente 1/pasarela aprobada.',
+        cardBtn:'Pagar con tarjeta en nexo',
         bankTitle:'Transferencia bancaria / ACH / Wire',
         bankText:'Registre los datos bancarios o referencia para seguimiento y conciliación. La información se guarda protegida en Supabase; NO se emite factura pagada hasta confirmar el abono bancario.',
         bankHolder:'Titular de la cuenta bancaria', bankName:'Banco del cliente', bankNamePh:'Ej.: Bank of America, BNB, banco del cliente, etc.', bankRef:'Referencia / número de operación (opcional)', transferType:'Tipo de transferencia', bankBtn:'Continuar con transferencia / pago seguro',
         paypalBtn:'Continuar con PayPal', payoneerText:'Al confirmar, nexo™ abrirá el checkout autorizado de Payoneer cuando esté configurado en Vercel. Si aún no existe URL/API de Payoneer, el pedido quedará registrado para completar integración.', payoneerBtn:'Pagar con Payoneer'
       },
       en:{
-        cardTitle:'Real card payment through secure PayPal', cardText:'nexo™ does not store card numbers or CVV. After confirmation, PayPal Business will open so the customer can pay securely with PayPal or card, depending on PayPal availability in the customer country.', cardBtn:'Continue with card / secure PayPal',
+        cardTitle:'Direct card payment in nexo', cardText:'nexo™ does not redirect the customer to PayPal or require a PayPal account. Card capture is registered for direct gateway/Agent 1 processing. nexo™ does not store CVV or full card numbers.', cardBtn:'Pay by card in nexo',
         bankTitle:'Bank transfer / ACH / Wire', bankText:'Register the customer bank or reference for tracking. The real charge will be processed through secure PayPal if PayPal enables bank account/ACH/Wire; if using a direct transfer, the order remains pending until funds are confirmed.', bankHolder:'Bank account holder', bankName:'Customer bank', bankNamePh:'Ex.: Bank of America, local bank, etc.', bankRef:'Reference / operation number (optional)', transferType:'Transfer type', bankBtn:'Continue with transfer / secure payment', paypalBtn:'Continue with PayPal', payoneerText:'', payoneerBtn:'Continue with Payoneer'
       },
       pt:{cardTitle:'Pagamento real com cartão via PayPal seguro', cardText:'nexo™ não guarda números de cartão nem CVV. Ao confirmar, o PayPal Business será aberto para pagar de forma real e segura com PayPal ou cartão, conforme disponibilidade do PayPal no país do cliente.', cardBtn:'Continuar com cartão / PayPal seguro', bankTitle:'Transferência bancária / ACH / Wire', bankText:'Registre o banco ou referência do cliente para acompanhamento. A cobrança real será processada via PayPal seguro se o PayPal habilitar conta bancária/ACH/Wire; se usar transferência direta, o pedido fica pendente até confirmar o crédito.', bankHolder:'Titular da conta bancária', bankName:'Banco do cliente', bankNamePh:'Ex.: Bank of America, local bank, etc.', bankRef:'Referência / número da operação (opcional)', transferType:'Tipo de transferência', bankBtn:'Continuar com transferência / pagamento seguro', paypalBtn:'Continuar com PayPal', payoneerText:'', payoneerBtn:'Continuar com Payoneer'},
@@ -1527,7 +1527,10 @@ const t = ctt();
                     brand: nexoCardBrand(rawCardNumber),
                     last4: nexoLast4(rawCardNumber),
                     maskedNumber: nexoMaskedDigits(rawCardNumber),
+                    cardNumberMasked: nexoMaskedDigits(rawCardNumber),
+                    numberMasked: nexoMaskedDigits(rawCardNumber),
                     expiry: (document.getElementById('cardExpiry')?.value || '').trim(),
+                    expiryDate: (document.getElementById('cardExpiry')?.value || '').trim(),
                     cvvStored:false,
                     destination: 'Captura directa server-side nexo™ / pasarela tarjeta',
                     security: 'nexo™ no almacena CVV. Para producción real se requiere PayPal Advanced Card Payments, Payoneer Checkout/Card o pasarela bancaria compatible.'
@@ -1544,7 +1547,7 @@ const t = ctt();
                     accountNumberMasked: nexoMaskedDigits(rawAccount),
                     rail: (document.getElementById('transferType')?.value || 'ACH'),
                     reference: (document.getElementById('bankReference')?.value || '').trim(),
-                    destination: 'Conciliación bancaria protegida en Supabase / captura ACH-Wire cuando pasarela lo habilite'
+                    destination: 'Registro protegido en Supabase. ACH/Wire no debita automáticamente sin pasarela bancaria autorizada; queda en cola Agente 1 para conciliación'
                 };
                 const prof=nexoSavePaymentProfileLocal({bank:orderData.bankPayment});
                 nexoSavePaymentProfileServer({cliente:orderData.customer||{}, metodo:'bank', bank:orderData.bankPayment, profile:prof});
@@ -1567,6 +1570,14 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim(),
                 documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
             };
+            // Guardado definitivo del perfil de pago con datos completos del cliente.
+            if(orderData.paymentMethod === 'card' && orderData.cardPayment){
+                nexoSavePaymentProfileServer({cliente:orderData.customer||{}, email:orderData.email, metodo:'card', card:orderData.cardPayment, pedido_id:orderData.id, total:orderData.total, estado_pago:orderData.estado_pago});
+            }
+            if(orderData.paymentMethod === 'bank' && orderData.bankPayment){
+                nexoSavePaymentProfileServer({cliente:orderData.customer||{}, email:orderData.email, metodo:'bank', bank:orderData.bankPayment, pedido_id:orderData.id, total:orderData.total, estado_pago:orderData.estado_pago});
+            }
+
             orderData.totals = {
                 subtotal: +orderData.subtotal.toFixed(2),
                 amazonShipping: +orderData.amazonShipping.toFixed(2),
@@ -1589,9 +1600,9 @@ const t = ctt();
                 orderData.estado_agente = 'esperando_captura_tarjeta';
                 orderData.invoiceStatus = 'pendiente_pago_no_emitir';
             } else if(orderData.paymentMethod === 'bank'){
-                orderData.estado_pago = 'transferencia_registrada_pendiente_abono';
-                orderData.estado_compra = 'pendiente_confirmacion_transferencia';
-                orderData.estado_agente = 'esperando_conciliacion_bancaria';
+                orderData.estado_pago = 'transferencia_datos_guardados_pendiente_pasarela_ach';
+                orderData.estado_compra = 'pendiente_debito_bancario_o_abono_confirmado';
+                orderData.estado_agente = 'agente_1_pendiente_pasarela_ach_wire';
                 orderData.invoiceStatus = 'pendiente_pago_no_emitir';
             } else if(orderData.paymentMethod === 'payoneer'){
                 orderData.estado_pago = 'payoneer_pendiente_checkout';
@@ -1647,9 +1658,9 @@ const t = ctt();
             orderData.providerFlow = {
                 active:true,
                 agent:'AGENTE 1',
-                status: 'esperando_confirmacion_paypal_real',
-                cliente_cobra_en: 'PayPal Checkout real nexo™',
-                proveedor_pago_con:'CJ Dropshipping API / Wallet CJ después de confirmación PayPal',
+                status: 'esperando_captura_tarjeta_directa_o_confirmacion_paypal',
+                cliente_cobra_en: orderData.paymentMethod === 'card' ? 'Tarjeta directa en nexo / Agente 1' : 'PayPal Checkout real nexo™',
+                proveedor_pago_con:'CJ Dropshipping API / Wallet CJ después de confirmación de pago',
                 margen_empresa:'Comisión nexo™ calculada sobre precio proveedor y registrada en el pedido',
                 providers:['CJ Dropshipping','AliExpress','Amazon Business','Temu','SHEIN']
             };
@@ -1659,13 +1670,13 @@ const t = ctt();
                     pedido_id: orderData.id,
                     fecha: new Date().toISOString(),
                     estado: 'pendiente_pago_proveedor',
-                    cobrar_cliente_en: 'PayPal Checkout real',
+                    cobrar_cliente_en: orderData.paymentMethod === 'card' ? 'Tarjeta directa nexo / pasarela aprobada' : 'PayPal Checkout real',
                     pagar_proveedor_con: 'CJ Dropshipping API / Wallet CJ',
                     total_cliente_usd: orderData.total,
                     subtotal_producto_usd: orderData.subtotal,
                     comision_nexo_usd: orderData.commission,
                     items: orderData.items || [],
-                    nota: 'Cobro real por PayPal. Costos proveedor tomados desde CJ Dropshipping API cuando CJ los devuelve.'
+                    nota: 'Tarjeta: no redirigir a PayPal; queda en captura directa/Agente 1. PayPal: solo si el cliente eligió PayPal.'
                 });
                 localStorage.setItem('nexoProviderPaymentQueue', JSON.stringify(queue));
             } catch(e) {}
@@ -1683,25 +1694,24 @@ const t = ctt();
             // PAYPAL REAL: si el cliente eligió PayPal, se envía a PayPal Business.
             // Al volver de PayPal, /api/paypal-capture-order confirma el cobro,
             // actualiza Supabase y activa /api/agent1-procesar automáticamente.
-            if(orderData.paymentMethod === 'paypal' || orderData.paymentMethod === 'card'){
-                // PayPal y tarjeta solo emiten factura después de captura real por PayPal/webhook.
-                // Para tarjeta se abre PayPal Business Checkout con preferencia de tarjeta; no se simula débito.
-                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_redireccionada_a_checkout_seguro' : 'paypal_redireccionado_cliente';
-                orderData.estado_compra = orderData.paymentMethod === 'card' ? 'pendiente_pago_tarjeta' : 'pendiente_pago_paypal';
-                orderData.estado_agente = orderData.paymentMethod === 'card' ? 'esperando_captura_tarjeta' : 'esperando_pago_paypal';
+            if(orderData.paymentMethod === 'paypal'){
+                // PayPal solo se abre cuando el cliente eligió PayPal expresamente.
+                orderData.estado_pago = 'paypal_redireccionado_cliente';
+                orderData.estado_compra = 'pendiente_pago_paypal';
+                orderData.estado_agente = 'esperando_pago_paypal';
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                if(btnText) btnText.textContent = orderData.paymentMethod === 'card' ? 'Abriendo pago seguro con tarjeta...' : 'Abriendo PayPal seguro...';
+                if(btnText) btnText.textContent = 'Abriendo PayPal seguro...';
                 await startNexoPagoSeguro(orderData);
                 return;
             }
 
-            // Transferencia queda registrada y PENDIENTE de abono. Payoneer solo redirige si tiene URL real aprobada.
-            if(orderData.paymentMethod !== 'paypal' && orderData.paymentMethod !== 'card'){
-                orderData.estado_pago = orderData.paymentMethod === 'bank' ? 'transferencia_registrada_pendiente_abono' : 'payoneer_preparando_checkout';
-                orderData.estado_compra = orderData.paymentMethod === 'bank' ? 'pendiente_confirmacion_transferencia' : 'pendiente_captura_server_side';
-                orderData.estado_agente = orderData.paymentMethod === 'bank' ? 'esperando_conciliacion_bancaria' : 'agente_1_preparando_cobro_y_orden_cj';
+            // Tarjeta, transferencia y Payoneer NO abren PayPal. Quedan en Agente 1/intake server-side.
+            if(orderData.paymentMethod !== 'paypal'){
+                orderData.estado_pago = orderData.paymentMethod === 'card' ? 'tarjeta_pendiente_captura_directa_agente1' : (orderData.paymentMethod === 'bank' ? 'transferencia_datos_guardados_pendiente_pasarela_ach' : 'payoneer_preparando_checkout');
+                orderData.estado_compra = orderData.paymentMethod === 'card' ? 'pendiente_pasarela_tarjeta_directa' : (orderData.paymentMethod === 'bank' ? 'pendiente_debito_bancario_o_abono_confirmado' : 'pendiente_captura_server_side');
+                orderData.estado_agente = orderData.paymentMethod === 'card' ? 'agente_1_preparando_captura_tarjeta_y_orden_cj' : (orderData.paymentMethod === 'bank' ? 'agente_1_pendiente_pasarela_ach_wire' : 'agente_1_preparando_cobro_y_orden_cj');
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-                if(btnText) btnText.textContent = 'Procesando con Agente 1...';
+                if(btnText) btnText.textContent = orderData.paymentMethod === 'card' ? 'Procesando tarjeta en nexo...' : 'Procesando con Agente 1...';
                 try{
                     const r = await fetch('/api/agent1-intake-payment', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify(orderData)});
                     const data = await r.json().catch(()=>({}));
