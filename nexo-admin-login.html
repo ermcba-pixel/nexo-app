@@ -718,12 +718,13 @@
                         id="passwordInput" 
                         class="form-input" 
                         placeholder="Mayús + minús + número + símbolo"
-                        onkeyup="checkPasswordStrength()"
+                        oninput="checkPasswordStrength()" onkeyup="checkPasswordStrength()"
                         style="padding-right:44px;"
                     ><button type="button" id="adminEyeBtn" onclick="toggleAdminPassword()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:18px;">👁️</button></div>
                     <div class="password-strength">
                         <div class="strength-bars">
-                            </div>
+                            <div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div>
+                        </div>
                         <div class="strength-text" id="strengthText">Muy débil</div>
                     </div>
                     <div class="requirements">
@@ -940,5 +941,24 @@ function validarLogin(){
 </script>
 
 <script src="nexo-legal-i18n.js"></script>
+
+<script id="nexo-login-strength-fix-v4">
+(function(){
+  function updateStrength(){
+    var input=document.getElementById('passwordInput'); if(!input) return;
+    var p=input.value||'';
+    var tests=[/[A-Z]/.test(p),/[a-z]/.test(p),/[0-9]/.test(p),/[^A-Za-z0-9]/.test(p),p.length>=8];
+    ['req-upper','req-lower','req-number','req-symbol','req-length'].forEach(function(id,i){var e=document.getElementById(id); if(e){e.classList.toggle('met',tests[i]);}});
+    var score=tests.filter(Boolean).length, txt=document.getElementById('strengthText');
+    var bars=document.querySelectorAll('.strength-bar');
+    if(!bars.length){var wrap=document.querySelector('.strength-bars'); if(wrap){for(var i=0;i<5;i++){var b=document.createElement('div');b.className='strength-bar';wrap.appendChild(b);} bars=document.querySelectorAll('.strength-bar');}}
+    bars.forEach(function(b,i){b.className='strength-bar'+(i<score?(score<=2?' weak':score<=4?' medium':' strong'):'');});
+    if(txt){txt.textContent=score<=2?'Muy débil':(score<=4?'Moderada':'Muy fuerte'); txt.className='strength-text '+(score<=2?'weak':score<=4?'medium':'strong');}
+  }
+  window.checkPasswordStrength=updateStrength;
+  document.addEventListener('DOMContentLoaded',function(){var i=document.getElementById('passwordInput'); if(i){i.addEventListener('input',updateStrength);i.addEventListener('change',updateStrength);updateStrength();}});
+})();
+</script>
+
 </body>
 </html>

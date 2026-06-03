@@ -635,7 +635,6 @@ body{
                 <div class="menu-item" onclick="switchSection('siat', this)">
                     <span class="menu-icon">🏛️</span> Impuestos SIAT
                 </div>
-
                 <div class="menu-item" onclick="switchSection('marketing', this)">
                     <span class="menu-icon">📢</span> Agente 3 Comercial
                 </div>
@@ -676,68 +675,6 @@ body{
                 <a class="back-link" href="nexo-portal-principal.html" onclick="window.location.href='nexo-portal-principal.html'; return false;">← Volver al portal</a>
                 <span class="super-badge">Superadministrador</span>
             </div>
-
-            
-            <!-- SIAT -->
-            <div class="section" id="siat">
-                <h1 class="page-title">🏛️ IMPUESTOS SIAT BOLIVIA</h1>
-                <p class="page-subtitle">Control fiscal electrónico y facturación masiva</p>
-
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:20px;">
-                    <div class="card">
-                        <h3>⚙️ Configuración SIAT</h3>
-                        <p>Configuración CUIS, CUFD, certificados y homologación.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>🧾 Facturación masiva</h3>
-                        <p>Generación masiva de facturas electrónicas conforme normativa Bolivia.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>📄 Facturas emitidas</h3>
-                        <p>Consulta de CUF, XML, PDF, QR y estado SIAT.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>📚 Registro IVA</h3>
-                        <p>Libro de ventas, auditoría fiscal y conciliación tributaria.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>🚨 Eventos significativos</h3>
-                        <p>Contingencias, internet caído y sincronización posterior.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>🔎 Auditoría fiscal</h3>
-                        <p>Trazabilidad completa de pedidos, pagos y facturación SIAT.</p>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top:25px;">
-                    <h3>Estado actual de cumplimiento</h3>
-                    <table style="width:100%;border-collapse:collapse;margin-top:15px;">
-                        <tr>
-                            <td style="padding:10px;border-bottom:1px solid #ccc;">Estructura fiscal Supabase</td>
-                            <td style="padding:10px;border-bottom:1px solid #ccc;color:green;font-weight:bold;">IMPLEMENTADA</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:10px;border-bottom:1px solid #ccc;">Modalidad Facturación Electrónica en Línea</td>
-                            <td style="padding:10px;border-bottom:1px solid #ccc;color:#f39c12;font-weight:bold;">EN PROCESO</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:10px;border-bottom:1px solid #ccc;">Homologación SIAT</td>
-                            <td style="padding:10px;border-bottom:1px solid #ccc;color:#f39c12;font-weight:bold;">PENDIENTE</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:10px;">Firma digital y XML fiscal</td>
-                            <td style="padding:10px;color:#f39c12;font-weight:bold;">PENDIENTE</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
 
             <!-- DASHBOARD -->
             <div class="section active" id="dashboard">
@@ -1070,6 +1007,36 @@ body{
                 <div class="section-box" id="ticketDetailBox" style="display:none;">
                     <div class="section-box-title">🧾 DETALLE Y RESPUESTA DEL TICKET</div>
                     <div id="ticketDetailContent"></div>
+                </div>
+            </div>
+
+            <!-- IMPUESTOS SIAT -->
+            <div class="section" id="siat">
+                <h1 class="page-title">🏛️ IMPUESTOS SIAT BOLIVIA</h1>
+                <p class="page-subtitle">Control fiscal electrónico, facturación masiva y respaldo tributario oficial.</p>
+
+                <div class="cards-grid">
+                    <div class="card" onclick="renderSIATPanel('config')" style="cursor:pointer;"><div class="card-icon">⚙️</div><div class="card-label">Configuración SIAT</div><div class="card-change">CUIS, CUFD, certificado digital y homologación.</div></div>
+                    <div class="card" onclick="renderSIATPanel('masiva')" style="cursor:pointer;"><div class="card-icon">🧾</div><div class="card-label">Facturación masiva</div><div class="card-change">Generación masiva conforme normativa Bolivia.</div></div>
+                    <div class="card" onclick="renderSIATPanel('facturas')" style="cursor:pointer;"><div class="card-icon">📄</div><div class="card-label">Facturas emitidas</div><div class="card-change">CUF, XML, PDF, QR y estado SIAT.</div></div>
+                    <div class="card" onclick="renderSIATPanel('iva')" style="cursor:pointer;"><div class="card-icon">📚</div><div class="card-label">Registro IVA</div><div class="card-change">Libro de ventas y conciliación tributaria.</div></div>
+                    <div class="card" onclick="renderSIATPanel('eventos')" style="cursor:pointer;"><div class="card-icon">🚨</div><div class="card-label">Eventos significativos</div><div class="card-change">Internet, contingencias y reenvíos.</div></div>
+                    <div class="card" onclick="renderSIATPanel('auditoria')" style="cursor:pointer;"><div class="card-icon">🔎</div><div class="card-label">Auditoría fiscal</div><div class="card-change">Trazabilidad de pedidos, pagos y facturas.</div></div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-box-title">Estado actual de cumplimiento</div>
+                    <table class="table"><tbody>
+                        <tr><td>Estructura fiscal Supabase</td><td style="color:green;font-weight:800;">IMPLEMENTADA</td></tr>
+                        <tr><td>Modalidad Facturación Electrónica en Línea</td><td style="color:#f59e0b;font-weight:800;">EN PROCESO</td></tr>
+                        <tr><td>Homologación SIAT</td><td style="color:#f59e0b;font-weight:800;">PENDIENTE</td></tr>
+                        <tr><td>Firma digital y XML fiscal</td><td style="color:#f59e0b;font-weight:800;">PENDIENTE</td></tr>
+                    </tbody></table>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-box-title">Panel SIAT</div>
+                    <div id="siatPanel">Seleccione una opción del módulo SIAT.</div>
                 </div>
             </div>
 
@@ -1678,6 +1645,72 @@ body{
       '</tr>';
     }).join('');
   };
+})();
+</script>
+
+
+<script id="nexo-siat-users-fixes-v4">
+(function(){
+  'use strict';
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function money(v){var n=Number(v||0); return 'Bs '+n.toFixed(2);}
+  function table(rows, heads){
+    var h='<thead><tr>'+heads.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr></thead>';
+    var b='<tbody>'+(rows.length?rows.join(''):'<tr><td colspan="'+heads.length+'" style="text-align:center;color:#64748b;">Sin registros todavía.</td></tr>')+'</tbody>';
+    return '<div style="overflow:auto;"><table class="table">'+h+b+'</table></div>';
+  }
+  window.logout=function(){
+    try{ localStorage.removeItem('nexoAdminAuth'); sessionStorage.removeItem('nexoAdminAuth'); }catch(e){}
+    window.location.href='nexo-admin-login.html';
+  };
+  window.renderUsers=function(){
+    var box=document.getElementById('usersPanel'); if(!box)return;
+    var adminEmail=localStorage.getItem('nexoAdminEmail')||'ermcba@hotmail.com';
+    box.innerHTML='<div class="section-box-title">Usuarios administrativos</div>'+table([
+      '<tr><td>Superadministrador</td><td>'+esc(adminEmail)+'</td><td>Control total</td><td><button class="action-btn" onclick="changeAdminPassword()">Asignar clave</button></td></tr>',
+      '<tr><td>Admin</td><td>admin@nexo</td><td>Panel general</td><td><button class="action-btn" onclick="alert('Usuario Admin listo para Supabase Auth')">Configurar</button></td></tr>',
+      '<tr><td>Operador</td><td>operador@nexo</td><td>Pedidos y soporte</td><td><button class="action-btn" onclick="alert('Usuario Operador listo para Supabase Auth')">Configurar</button></td></tr>',
+      '<tr><td>Finanzas</td><td>finanzas@nexo</td><td>Pagos, caja, SIAT y reportes</td><td><button class="action-btn" onclick="alert('Usuario Finanzas listo para Supabase Auth')">Configurar</button></td></tr>'
+    ],['Rol','Correo','Permisos','Acciones']);
+  };
+  window.renderSIATPanel=function(kind){
+    var box=document.getElementById('siatPanel'); if(!box)return;
+    if(kind==='config'){
+      box.innerHTML='<b>Configuración SIAT</b><p>Datos registrados en Supabase: NIT 774651015, software nexo, versión 1.0.1, modalidad Electrónica en Línea, sistema propio, proceso masivo activo.</p>'+table([
+        '<tr><td>Ambiente</td><td>PILOTO hasta aprobación SIAT</td></tr>',
+        '<tr><td>Tipo sistema</td><td>PROPIO</td></tr>',
+        '<tr><td>Proceso masivo</td><td>SÍ</td></tr>',
+        '<tr><td>Registro de compras</td><td>NO</td></tr>'
+      ],['Campo','Valor']);
+    } else if(kind==='masiva'){
+      box.innerHTML='<b>Facturación masiva</b><p>El módulo tomará pedidos pagados, validará NIT/CI, generará XML, firmará, enviará paquete SIAT y guardará respuesta.</p>'+table([
+        '<tr><td>PENDIENTE</td><td>Conectar API CUIS/CUFD</td></tr>',
+        '<tr><td>PENDIENTE</td><td>Generador XML oficial</td></tr>',
+        '<tr><td>PENDIENTE</td><td>Firma digital</td></tr>'
+      ],['Estado','Tarea']);
+    } else if(kind==='facturas'){
+      box.innerHTML='<b>Facturas emitidas</b><p>Respaldo oficial en Supabase: tabla siat_facturas, items, XML firmado, QR, PDF URL, estado SIAT y auditoría.</p>'+table([],['N°','Fecha','Cliente','NIT/CI','CUF','Total','Estado SIAT','PDF/XML']);
+    } else if(kind==='iva'){
+      box.innerHTML='<b>Registro IVA</b><p>Se consolida en siat_registro_ventas_iva y vistas de control para cierre mensual.</p>'+table([],['Periodo','Facturas válidas','Anuladas','Total Bs','IVA base','Estado']);
+    } else if(kind==='eventos'){
+      box.innerHTML='<b>Eventos significativos y contingencias</b><p>Respaldo en siat_eventos_significativos y siat_contingencias para cortes de internet, inaccesibilidad SIAT, fallas de software/hardware y energía.</p>'+table([],['Inicio','Fin','Tipo evento','CUFD','Estado','Acción']);
+    } else {
+      box.innerHTML='<b>Auditoría fiscal</b><p>Trazabilidad completa en siat_auditoria_fiscal: pedido, pago, factura, usuario, acción, fecha y datos técnicos.</p>'+table([],['Fecha','Usuario','Acción','Tabla','Registro','Resultado']);
+    }
+  };
+  var oldSwitch=window.switchSection;
+  window.switchSection=function(sectionId, element){
+    document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+    var t=document.getElementById(sectionId); if(t)t.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(function(i){i.classList.remove('active');}); if(element)element.classList.add('active');
+    if(sectionId==='siat'){renderSIATPanel('config');return;}
+    if(sectionId==='users'){renderUsers();return;}
+    if(typeof oldSwitch==='function'){try{return oldSwitch(sectionId, element);}catch(e){console.warn(e);}}
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.querySelector('.logout-btn'); if(btn) btn.onclick=window.logout;
+    if(document.getElementById('users') && document.getElementById('users').classList.contains('active')) renderUsers();
+  });
 })();
 </script>
 
@@ -2694,6 +2727,72 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
       '</tr>';
     }).join('');
   };
+})();
+</script>
+
+
+<script id="nexo-siat-users-fixes-v4">
+(function(){
+  'use strict';
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function money(v){var n=Number(v||0); return 'Bs '+n.toFixed(2);}
+  function table(rows, heads){
+    var h='<thead><tr>'+heads.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr></thead>';
+    var b='<tbody>'+(rows.length?rows.join(''):'<tr><td colspan="'+heads.length+'" style="text-align:center;color:#64748b;">Sin registros todavía.</td></tr>')+'</tbody>';
+    return '<div style="overflow:auto;"><table class="table">'+h+b+'</table></div>';
+  }
+  window.logout=function(){
+    try{ localStorage.removeItem('nexoAdminAuth'); sessionStorage.removeItem('nexoAdminAuth'); }catch(e){}
+    window.location.href='nexo-admin-login.html';
+  };
+  window.renderUsers=function(){
+    var box=document.getElementById('usersPanel'); if(!box)return;
+    var adminEmail=localStorage.getItem('nexoAdminEmail')||'ermcba@hotmail.com';
+    box.innerHTML='<div class="section-box-title">Usuarios administrativos</div>'+table([
+      '<tr><td>Superadministrador</td><td>'+esc(adminEmail)+'</td><td>Control total</td><td><button class="action-btn" onclick="changeAdminPassword()">Asignar clave</button></td></tr>',
+      '<tr><td>Admin</td><td>admin@nexo</td><td>Panel general</td><td><button class="action-btn" onclick="alert('Usuario Admin listo para Supabase Auth')">Configurar</button></td></tr>',
+      '<tr><td>Operador</td><td>operador@nexo</td><td>Pedidos y soporte</td><td><button class="action-btn" onclick="alert('Usuario Operador listo para Supabase Auth')">Configurar</button></td></tr>',
+      '<tr><td>Finanzas</td><td>finanzas@nexo</td><td>Pagos, caja, SIAT y reportes</td><td><button class="action-btn" onclick="alert('Usuario Finanzas listo para Supabase Auth')">Configurar</button></td></tr>'
+    ],['Rol','Correo','Permisos','Acciones']);
+  };
+  window.renderSIATPanel=function(kind){
+    var box=document.getElementById('siatPanel'); if(!box)return;
+    if(kind==='config'){
+      box.innerHTML='<b>Configuración SIAT</b><p>Datos registrados en Supabase: NIT 774651015, software nexo, versión 1.0.1, modalidad Electrónica en Línea, sistema propio, proceso masivo activo.</p>'+table([
+        '<tr><td>Ambiente</td><td>PILOTO hasta aprobación SIAT</td></tr>',
+        '<tr><td>Tipo sistema</td><td>PROPIO</td></tr>',
+        '<tr><td>Proceso masivo</td><td>SÍ</td></tr>',
+        '<tr><td>Registro de compras</td><td>NO</td></tr>'
+      ],['Campo','Valor']);
+    } else if(kind==='masiva'){
+      box.innerHTML='<b>Facturación masiva</b><p>El módulo tomará pedidos pagados, validará NIT/CI, generará XML, firmará, enviará paquete SIAT y guardará respuesta.</p>'+table([
+        '<tr><td>PENDIENTE</td><td>Conectar API CUIS/CUFD</td></tr>',
+        '<tr><td>PENDIENTE</td><td>Generador XML oficial</td></tr>',
+        '<tr><td>PENDIENTE</td><td>Firma digital</td></tr>'
+      ],['Estado','Tarea']);
+    } else if(kind==='facturas'){
+      box.innerHTML='<b>Facturas emitidas</b><p>Respaldo oficial en Supabase: tabla siat_facturas, items, XML firmado, QR, PDF URL, estado SIAT y auditoría.</p>'+table([],['N°','Fecha','Cliente','NIT/CI','CUF','Total','Estado SIAT','PDF/XML']);
+    } else if(kind==='iva'){
+      box.innerHTML='<b>Registro IVA</b><p>Se consolida en siat_registro_ventas_iva y vistas de control para cierre mensual.</p>'+table([],['Periodo','Facturas válidas','Anuladas','Total Bs','IVA base','Estado']);
+    } else if(kind==='eventos'){
+      box.innerHTML='<b>Eventos significativos y contingencias</b><p>Respaldo en siat_eventos_significativos y siat_contingencias para cortes de internet, inaccesibilidad SIAT, fallas de software/hardware y energía.</p>'+table([],['Inicio','Fin','Tipo evento','CUFD','Estado','Acción']);
+    } else {
+      box.innerHTML='<b>Auditoría fiscal</b><p>Trazabilidad completa en siat_auditoria_fiscal: pedido, pago, factura, usuario, acción, fecha y datos técnicos.</p>'+table([],['Fecha','Usuario','Acción','Tabla','Registro','Resultado']);
+    }
+  };
+  var oldSwitch=window.switchSection;
+  window.switchSection=function(sectionId, element){
+    document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+    var t=document.getElementById(sectionId); if(t)t.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(function(i){i.classList.remove('active');}); if(element)element.classList.add('active');
+    if(sectionId==='siat'){renderSIATPanel('config');return;}
+    if(sectionId==='users'){renderUsers();return;}
+    if(typeof oldSwitch==='function'){try{return oldSwitch(sectionId, element);}catch(e){console.warn(e);}}
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.querySelector('.logout-btn'); if(btn) btn.onclick=window.logout;
+    if(document.getElementById('users') && document.getElementById('users').classList.contains('active')) renderUsers();
+  });
 })();
 </script>
 
