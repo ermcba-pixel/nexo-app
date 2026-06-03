@@ -1528,7 +1528,10 @@ function getClientProfile() {
                     <tbody>${rowsHtml}</tbody>
                 </table>
                 ${summaryHtml}
-            </body></html>`;
+            
+
+
+</body></html>`;
             const w = window.open('', '_blank');
             if (!w) return;
             w.document.write(html);
@@ -2715,6 +2718,220 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
   window.nexoSIATCrearEventoInternet=async function(){
     if(!confirm('Registrar evento significativo por corte de internet. ¿Continuar?')) return;
     try{ await siatAction('crear_evento',{codigo_evento:'1',descripcion:'Corte del servicio de Internet'}); alert('Evento significativo registrado.'); renderSIATPanel('eventos'); }catch(e){ alert('Error: '+e.message); }
+  };
+})();
+</script>
+
+
+
+<script id="nexo-siat-direct-rest-fix-v2">
+(function(){
+  'use strict';
+  const SIAT_URL = 'https://ujqbbniptflzytdankwp.supabase.co';
+  const SIAT_KEY = 'sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+  const HEADERS = { apikey: SIAT_KEY, Authorization: 'Bearer ' + SIAT_KEY, 'Content-Type': 'application/json' };
+  const siatCache = { config:null, catalogos:[], facturas:[], items:[], iva:[], eventos:[], contingencias:[], auditoria:[], lotes:[], cierres:[] };
+
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>\"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]; }); }
+  function money(v){ return 'Bs ' + Number(v || 0).toFixed(2); }
+  function fmtDate(v){ try { return v ? new Date(v).toLocaleString('es-BO') : '-'; } catch(e){ return '-'; } }
+  function notice(txt,type){ return '<div style="padding:12px 14px;margin:10px 0;border-radius:12px;background:'+(type==='bad'?'#fee2e2':type==='warn'?'#fef3c7':'#ecfdf5')+';color:'+(type==='bad'?'#991b1b':type==='warn'?'#92400e':'#065f46')+';font-weight:800;">'+esc(txt)+'</div>'; }
+  function btn(label, fn, color){ return '<button class="action-btn" style="margin:4px;background:'+(color||'#0f766e')+';color:white;border:0;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer;" onclick="'+fn+'">'+label+'</button>'; }
+  function table(heads, rows){
+    return '<div style="overflow:auto;max-height:430px;border:1px solid #e5e7eb;border-radius:10px;margin-top:10px;"><table class="table"><thead><tr>'+heads.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+(rows && rows.length ? rows.join('') : '<tr><td colspan="'+heads.length+'" style="text-align:center;color:#64748b;padding:18px;">Sin registros todavía.</td></tr>')+'</tbody></table></div>';
+  }
+  async function restSelect(tableName, query){
+    const url = SIAT_URL + '/rest/v1/' + tableName + '?' + (query || 'select=*');
+    const r = await fetch(url, { cache:'no-store', headers: HEADERS });
+    const txt = await r.text();
+    if(!r.ok) throw new Error(tableName + ': ' + (txt || r.status));
+    return txt ? JSON.parse(txt) : [];
+  }
+  async function restInsert(tableName, rows){
+    const r = await fetch(SIAT_URL + '/rest/v1/' + tableName, { method:'POST', headers:Object.assign({}, HEADERS, {Prefer:'return=representation'}), body:JSON.stringify(rows) });
+    const txt = await r.text();
+    if(!r.ok) throw new Error(tableName + ': ' + (txt || r.status));
+    return txt ? JSON.parse(txt) : [];
+  }
+  async function restPatch(tableName, filter, patch){
+    const r = await fetch(SIAT_URL + '/rest/v1/' + tableName + '?' + filter, { method:'PATCH', headers:Object.assign({}, HEADERS, {Prefer:'return=representation'}), body:JSON.stringify(patch) });
+    const txt = await r.text();
+    if(!r.ok) throw new Error(tableName + ': ' + (txt || r.status));
+    return txt ? JSON.parse(txt) : [];
+  }
+  function pagoAprobado(o){
+    const s = String(o.estado_pago || o.estado || '').toLowerCase();
+    return s.includes('pag') || s.includes('aprob') || s.includes('confirm') || s.includes('complet');
+  }
+  function totalPedido(o){ return Number(o.total_cliente_usd || o.total_usd || o.precio_usd || o.total || o.monto_usd || 0); }
+  function clienteNombre(o){ return String(((o.cliente_nombre||o.nombre||'')+' '+(o.cliente_apellido||o.apellido||'')).trim() || o.nombre_cliente || o.cliente || 'CLIENTE NEXO'); }
+  function clienteNit(o){
+    const pais = String(o.cliente_pais || o.pais || o.country || '').toLowerCase();
+    const nit = String(o.cliente_nit || o.nit || o.documento || o.documento_cliente || o.nit_ci || '').trim();
+    if(pais && !pais.includes('bolivia')) return '99001';
+    return nit || '99001';
+  }
+  async function loadSIAT(){
+    const results = await Promise.allSettled([
+      restSelect('siat_configuracion','select=*&limit=1'),
+      restSelect('siat_catalogos','select=*&order=catalogo.asc,codigo.asc&limit=500'),
+      restSelect('siat_facturas','select=*&order=created_at.desc&limit=500'),
+      restSelect('siat_factura_items','select=*&limit=500'),
+      restSelect('siat_registro_ventas_iva','select=*&order=fecha_factura.desc&limit=500'),
+      restSelect('siat_eventos_significativos','select=*&order=created_at.desc&limit=200'),
+      restSelect('siat_contingencias','select=*&order=created_at.desc&limit=200'),
+      restSelect('siat_auditoria_fiscal','select=*&order=created_at.desc&limit=500'),
+      restSelect('siat_facturacion_masiva_lotes','select=*&order=created_at.desc&limit=100'),
+      restSelect('siat_cierres_fiscales','select=*&order=periodo.desc&limit=100')
+    ]);
+    const get = i => results[i].status === 'fulfilled' ? results[i].value : [];
+    siatCache.config = (get(0)||[])[0] || null;
+    siatCache.catalogos = get(1); if(!siatCache.catalogos.length){ siatCache.catalogos=[{catalogo:'forma_pago',codigo:'1',descripcion:'Efectivo',estado:'ACTIVO'},{catalogo:'forma_pago',codigo:'2',descripcion:'Tarjeta',estado:'ACTIVO'},{catalogo:'forma_pago',codigo:'31',descripcion:'Transferencia bancaria',estado:'ACTIVO'},{catalogo:'forma_pago',codigo:'42',descripcion:'PayPal / billetera digital',estado:'ACTIVO'},{catalogo:'modalidad_facturacion',codigo:'1',descripcion:'Electrónica en Línea',estado:'ACTIVO'},{catalogo:'tipo_documento_sector',codigo:'1',descripcion:'Factura Compra-Venta',estado:'ACTIVO'},{catalogo:'tipo_factura',codigo:'1',descripcion:'Con Derecho a Crédito Fiscal',estado:'ACTIVO'},{catalogo:'tipo_emision',codigo:'1',descripcion:'Online',estado:'ACTIVO'},{catalogo:'unidad_medida',codigo:'58',descripcion:'Unidad (Servicios)',estado:'ACTIVO'},{catalogo:'documento_identidad',codigo:'1',descripcion:'CI - Cédula de Identidad',estado:'ACTIVO'},{catalogo:'documento_identidad',codigo:'5',descripcion:'NIT',estado:'ACTIVO'},{catalogo:'documento_identidad',codigo:'6',descripcion:'Pasaporte / extranjero',estado:'ACTIVO'}]; } siatCache.facturas = get(2); siatCache.items = get(3); siatCache.iva = get(4); siatCache.eventos = get(5); siatCache.contingencias = get(6); siatCache.auditoria = get(7); siatCache.lotes = get(8); siatCache.cierres = get(9);
+    window.nexoSIATCache = siatCache;
+    return siatCache;
+  }
+  function configHTML(data){
+    const c = data.config || {};
+    const rows = [
+      '<tr><td>NIT emisor</td><td>'+esc(c.nit_emisor || '774651015')+'</td></tr>',
+      '<tr><td>Razón social</td><td>'+esc(c.razon_social_emisor || 'EDUARDO RODRIGUEZ MARTINEZ')+'</td></tr>',
+      '<tr><td>Software</td><td>'+esc(c.nombre_software || 'nexo')+' v'+esc(c.version_software || '1.0.1')+'</td></tr>',
+      '<tr><td>Modalidad</td><td>'+esc(c.modalidad_facturacion || 'ELECTRONICA_EN_LINEA')+'</td></tr>',
+      '<tr><td>Tipo sistema</td><td>'+esc(c.tipo_sistema || 'PROPIO')+'</td></tr>',
+      '<tr><td>Proceso masivo</td><td>'+((c.proceso_masivo===true || String(c.proceso_masivo).toLowerCase()==='true' || String(c.proceso_masivo).toUpperCase()==='SI' || String(c.proceso_masivo).toUpperCase()==='SÍ') ? 'SÍ' : 'NO')+'</td></tr>',
+      '<tr><td>Ambiente</td><td>'+esc(c.ambiente || 'PILOTO')+'</td></tr>',
+      '<tr><td>CUIS</td><td>'+esc(c.cuis || 'Pendiente de Impuestos/SIAT')+'</td></tr>',
+      '<tr><td>CUFD</td><td>'+esc(c.cufd || 'Pendiente de Impuestos/SIAT')+'</td></tr>',
+      '<tr><td>Certificado digital</td><td>'+(c.certificado_digital_activo ? 'ACTIVO' : 'PENDIENTE')+'</td></tr>'
+    ];
+    const catRows = (data.catalogos||[]).map(ca=>'<tr><td>'+esc(ca.catalogo)+'</td><td>'+esc(ca.codigo)+'</td><td>'+esc(ca.descripcion)+'</td><td>'+esc(ca.estado)+'</td></tr>');
+    return '<b>Configuración SIAT</b>'+notice('Lectura directa desde Supabase. Antes de producción deben estar CUIS, CUFD, certificado/firma digital y autorización SIAT.', 'warn')+table(['Campo','Valor'], rows)+'<br><b>Catálogos SIAT cargados</b>'+table(['Catálogo','Código','Descripción','Estado'], catRows);
+  }
+  function invoiceRows(rows, selectable){
+    return (rows||[]).map(f=>{
+      const st = String(f.estado || 'BORRADOR');
+      const color = st==='VALIDADA' ? 'green' : st==='RECHAZADA' ? '#dc2626' : st==='PENDIENTE_ENVIO' ? '#f59e0b' : '#475569';
+      const sel = selectable ? '<input type="checkbox" class="siatCheck" value="'+esc(f.id)+'"> ' : '';
+      return '<tr><td>'+sel+esc(f.numero_factura || '-')+'</td><td>'+esc(String(f.fecha_emision || f.created_at || '').slice(0,10))+'</td><td>'+esc(f.razon_social_cliente || '')+'</td><td>'+esc(f.nit_ci_cliente || '')+'</td><td>'+money(f.total_bs)+'</td><td style="font-weight:800;color:'+color+'">'+esc(st)+'</td><td>'+esc(f.cuf || 'Pendiente')+'</td><td>'+esc(f.observaciones || '')+'</td></tr>';
+    });
+  }
+  function masivaHTML(data){
+    const borr = (data.facturas||[]).filter(f=>['BORRADOR','OBSERVADA'].includes(String(f.estado || 'BORRADOR')));
+    return '<b>Facturación masiva - revisión antes de SIAT</b>'+notice('Trabaja en modo BORRADOR/PILOTO. No envía a Impuestos todavía. Primero crea, revisa y aprueba.', 'warn')+
+      btn('🔄 Actualizar', 'nexoSIATReload(\'masiva\')')+btn('🧾 Crear pre-facturas desde pedidos pagados','nexoSIATCrearPrefacturas()','#2563eb')+btn('✅ Aprobar seleccionadas','nexoSIATAprobarSeleccionadas()','#16a34a')+
+      table(['N°','Fecha','Cliente','NIT/CI','Total','Estado','CUF','Observación'], invoiceRows(borr,true));
+  }
+  function facturasHTML(data){
+    return '<b>Facturas emitidas y respaldo</b>'+notice('Control de CUF, XML, PDF/QR y estado SIAT. En piloto quedarán como BORRADOR o PENDIENTE_ENVIO.', 'ok')+btn('🔄 Actualizar','nexoSIATReload(\'facturas\')')+
+      table(['N°','Fecha','Cliente','NIT/CI','Total','Estado','CUF','Observación'], invoiceRows(data.facturas,false));
+  }
+  function ivaHTML(data){
+    const rows = (data.iva||[]).map(r=>'<tr><td>'+esc(r.periodo)+'</td><td>'+esc(r.fecha_factura)+'</td><td>'+esc(r.numero_factura || '-')+'</td><td>'+esc(r.nit_ci_cliente || '')+'</td><td>'+money(r.total_venta_bs)+'</td><td>'+money(r.importe_base_credito_fiscal_bs)+'</td><td>'+money(r.debito_fiscal_bs)+'</td><td>'+esc(r.estado || '')+'</td></tr>');
+    return '<b>Registro de Ventas IVA</b>'+notice('Se alimenta cuando las facturas pasan a estado PENDIENTE_ENVIO/VALIDADA.', 'warn')+btn('🔄 Actualizar','nexoSIATReload(\'iva\')')+table(['Periodo','Fecha','Factura','NIT/CI','Total','Base CF','Débito fiscal','Estado'], rows);
+  }
+  function eventosHTML(data){
+    const rows = (data.eventos||[]).map(e=>'<tr><td>'+fmtDate(e.fecha_inicio || e.created_at)+'</td><td>'+fmtDate(e.fecha_fin)+'</td><td>'+esc(e.codigo_evento)+'</td><td>'+esc(e.descripcion)+'</td><td>'+esc(e.estado)+'</td><td>'+esc(e.codigo_recepcion_evento || '')+'</td></tr>');
+    return '<b>Eventos significativos / contingencias</b>'+notice('Use este módulo para cortes de internet, inaccesibilidad SIAT, fallas de software/hardware o energía.', 'warn')+btn('🚨 Registrar corte de internet','nexoSIATCrearEventoInternet()','#dc2626')+btn('🔄 Actualizar','nexoSIATReload(\'eventos\')')+table(['Inicio','Fin','Código','Descripción','Estado','Recepción SIAT'], rows);
+  }
+  function auditoriaHTML(data){
+    const rows = (data.auditoria||[]).map(a=>'<tr><td>'+fmtDate(a.created_at)+'</td><td>'+esc(a.usuario || '')+'</td><td>'+esc(a.accion || '')+'</td><td>'+esc(a.tabla || '')+'</td><td>'+esc(a.registro_id || '')+'</td></tr>');
+    return '<b>Auditoría fiscal</b>'+notice('Trazabilidad tributaria. No debe borrarse.', 'ok')+btn('🔄 Actualizar','nexoSIATReload(\'auditoria\')')+table(['Fecha','Usuario','Acción','Tabla','Registro'], rows);
+  }
+  window.renderSIATPanel = async function(kind){
+    const box = document.getElementById('siatPanel'); if(!box) return;
+    kind = kind || 'config';
+    box.innerHTML = notice('Cargando SIAT desde Supabase...', 'warn');
+    try{
+      const data = await loadSIAT();
+      if(kind === 'config') box.innerHTML = configHTML(data);
+      else if(kind === 'masiva') box.innerHTML = masivaHTML(data);
+      else if(kind === 'facturas') box.innerHTML = facturasHTML(data);
+      else if(kind === 'iva') box.innerHTML = ivaHTML(data);
+      else if(kind === 'eventos') box.innerHTML = eventosHTML(data);
+      else box.innerHTML = auditoriaHTML(data);
+      box.scrollIntoView({behavior:'smooth', block:'start'});
+    }catch(e){
+      box.innerHTML = notice('Error SIAT: ' + (e.message || e), 'bad') + notice('Revisa conexión, RLS/permisos de Supabase o que las tablas SIAT existan.', 'warn');
+    }
+  };
+  window.nexoSIATReload = function(kind){ window.renderSIATPanel(kind || 'config'); };
+  window.nexoSIATCrearPrefacturas = async function(){
+    if(!confirm('Crear pre-facturas BORRADOR desde pedidos pagados. No se enviarán a Impuestos. ¿Continuar?')) return;
+    const box = document.getElementById('siatPanel'); if(box) box.insertAdjacentHTML('afterbegin', notice('Creando pre-facturas...', 'warn'));
+    try{
+      const pedidos = await restSelect('pedidos','select=*&limit=500');
+      const facturas = await restSelect('siat_facturas','select=pedido_id');
+      const existentes = new Set((facturas||[]).map(f=>String(f.pedido_id||'')));
+      const pendientes = (pedidos||[]).filter(o=>pagoAprobado(o) && !existentes.has(String(o.id||'')));
+      if(!pendientes.length){ alert('No hay pedidos pagados nuevos para prefacturar.'); return window.renderSIATPanel('masiva'); }
+      const rows = pendientes.map((o,idx)=>{
+        const totalUsd = totalPedido(o);
+        const tc = Number((siatCache.config||{}).tipo_cambio || 6.96);
+        const totalBs = Number((totalUsd * tc).toFixed(2));
+        return {
+          pedido_id: o.id || null,
+          pago_id: o.pago_id || null,
+          estado: 'BORRADOR',
+          ambiente: 'PILOTO',
+          modalidad_facturacion: 'ELECTRONICA_EN_LINEA',
+          tipo_documento_sector: 'FACTURA_COMPRA_VENTA',
+          numero_factura: null,
+          fecha_emision: new Date().toISOString(),
+          nit_ci_cliente: clienteNit(o),
+          razon_social_cliente: clienteNombre(o),
+          codigo_cliente: String(o.cliente_id || o.cliente_email || o.email || clienteNit(o)),
+          total_bs: totalBs,
+          monto_total_sujeto_iva_bs: totalBs,
+          importe_base_credito_fiscal_bs: totalBs,
+          observaciones: 'BORRADOR generado desde pedido nexo. Revisar antes de SIAT.'
+        };
+      });
+      const inserted = await restInsert('siat_facturas', rows);
+      try{ await restInsert('siat_auditoria_fiscal', [{tabla:'siat_facturas', accion:'CREAR_PREFACTURAS_BORRADOR', usuario:'Superadministrador', despues:{cantidad:inserted.length}}]); }catch(e){}
+      alert('Pre-facturas BORRADOR creadas: ' + inserted.length);
+      window.renderSIATPanel('masiva');
+    }catch(e){
+      alert('Error creando pre-facturas: ' + (e.message || e));
+      window.renderSIATPanel('masiva');
+    }
+  };
+  window.nexoSIATAprobarSeleccionadas = async function(){
+    const ids = Array.prototype.slice.call(document.querySelectorAll('.siatCheck:checked')).map(x=>x.value);
+    if(!ids.length){ alert('Selecciona al menos una factura BORRADOR.'); return; }
+    if(!confirm('Marcar como PENDIENTE_ENVIO. Todavía NO envía a Impuestos hasta CUIS/CUFD/XML/firma. ¿Continuar?')) return;
+    let ok = 0;
+    try{
+      for(const id of ids){
+        const upd = await restPatch('siat_facturas','id=eq.'+encodeURIComponent(id), {estado:'PENDIENTE_ENVIO', observaciones:'Aprobada para envío SIAT en modo piloto. Pendiente CUIS/CUFD/XML/firma.'});
+        ok += upd.length;
+        const f = upd[0];
+        if(f){
+          try{
+            const periodo = String((f.fecha_emision || new Date().toISOString()).slice(0,7)).replace('-','');
+            await restInsert('siat_registro_ventas_iva', [{periodo:periodo, siat_factura_id:f.id, fecha_factura:(f.fecha_emision||new Date().toISOString()).slice(0,10), numero_factura:f.numero_factura, cuf:f.cuf, nit_ci_cliente:f.nit_ci_cliente, razon_social_cliente:f.razon_social_cliente, total_venta_bs:f.total_bs, importe_base_credito_fiscal_bs:f.importe_base_credito_fiscal_bs || f.total_bs, debito_fiscal_bs:Number((Number(f.total_bs||0)*0.13).toFixed(2)), estado:'PENDIENTE_ENVIO'}]);
+          }catch(e){}
+        }
+      }
+      try{ await restInsert('siat_auditoria_fiscal', [{tabla:'siat_facturas', accion:'APROBAR_PARA_ENVIO_SIAT', usuario:'Superadministrador', despues:{ids:ids, actualizadas:ok}}]); }catch(e){}
+      alert('Facturas aprobadas: ' + ok);
+      window.renderSIATPanel('facturas');
+    }catch(e){ alert('Error aprobando facturas: ' + (e.message || e)); }
+  };
+  window.nexoSIATCrearEventoInternet = async function(){
+    if(!confirm('Registrar evento significativo por corte de internet. ¿Continuar?')) return;
+    try{
+      await restInsert('siat_eventos_significativos', [{codigo_evento:'1', descripcion:'Corte del servicio de Internet', fecha_inicio:new Date().toISOString(), estado:'ABIERTO'}]);
+      try{ await restInsert('siat_auditoria_fiscal', [{tabla:'siat_eventos_significativos', accion:'CREAR_EVENTO_INTERNET', usuario:'Superadministrador'}]); }catch(e){}
+      alert('Evento significativo registrado.'); window.renderSIATPanel('eventos');
+    }catch(e){ alert('Error registrando evento: ' + (e.message || e)); }
+  };
+  const oldSwitch = window.switchSection;
+  window.switchSection = function(sectionId, element){
+    document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+    const t = document.getElementById(sectionId); if(t) t.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(function(i){i.classList.remove('active');}); if(element) element.classList.add('active');
+    if(sectionId === 'siat'){ window.renderSIATPanel('config'); return; }
+    if(typeof oldSwitch === 'function'){ try{return oldSwitch(sectionId, element);}catch(e){console.warn(e);} }
   };
 })();
 </script>
