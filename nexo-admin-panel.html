@@ -2295,5 +2295,124 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
 })();
 </script>
 
+
+<script id="nexo-admin-joins-clientes-envios-tickets-v2">
+(function(){
+  'use strict';
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function cell(v){return '<td>'+esc(v)+'</td>';}
+  function money(v){return 'US$ '+Number(v||0).toFixed(2);}
+  function norm(v){return String(v==null?'':v).toLowerCase().trim();}
+  function getCache(){return window.nexoAdminRealCache || {clientes:[],pedidos:[],pagos:[],tracking_envios:[],tickets:[]};}
+  function fullName(o){return String(((o&& (o.cliente_nombre||o.nombre||''))+' '+(o&&(o.cliente_apellido||o.apellido||''))).trim() || (o&&(o.nombre_cliente||o.cliente||o.fullName||o.nombre_completo)) || '');}
+  function pedidoId(o){return String(o&&(o.pedido_id||o.id_pedido||o.order_id||o.factura_numero||o.factura||o.id)||'');}
+  function paymentPedidoId(p){return String(p&&(p.pedido_id||p.id_pedido||p.order_id||p.factura||p.factura_numero||p.referencia||p.id_pedido_supabase)||'');}
+  function findPedidoByRef(ref){
+    var c=getCache(), r=norm(ref); if(!r) return null;
+    return (c.pedidos||[]).find(function(o){
+      return [o.id,o.factura_numero,o.factura,o.pedido_id,o.order_id].some(function(v){return norm(v)===r;});
+    }) || null;
+  }
+  function findClienteByPedido(o){
+    var c=getCache(); if(!o) return null;
+    var cid=norm(o.cliente_id), em=norm(o.cliente_email||o.email);
+    return (c.clientes||[]).find(function(cl){return (cid && norm(cl.id)===cid) || (em && norm(cl.email)===em);}) || null;
+  }
+  function clienteDePago(p){
+    if(!p) return '';
+    if(fullName(p)) return fullName(p);
+    var ped=findPedidoByRef(paymentPedidoId(p));
+    if(ped && fullName(ped)) return fullName(ped);
+    var cl=ped?findClienteByPedido(ped):null;
+    return cl?fullName(cl):'';
+  }
+  function destinoDePedido(o){
+    if(!o) return '';
+    var cl=findClienteByPedido(o) || {};
+    return o.destino || o.cliente_destino || o.cliente_ciudad || o.ciudad || o.city || cl.ciudad || cl.city || cl.pais || cl.country || o.pais || '';
+  }
+  function clienteDeEnvio(r){
+    if(!r) return '';
+    if(fullName(r)) return fullName(r);
+    var ped=findPedidoByRef(r.pedido_id||r.id_pedido||r.order_id||r.factura||r.factura_numero);
+    if(ped && fullName(ped)) return fullName(ped);
+    var cl=ped?findClienteByPedido(ped):null;
+    return cl?fullName(cl):'';
+  }
+  function destinoDeEnvio(r){
+    if(!r) return '';
+    if(r.destino||r.cliente_destino||r.ciudad||r.cliente_ciudad||r.pais) return r.destino||r.cliente_destino||r.ciudad||r.cliente_ciudad||r.pais;
+    var ped=findPedidoByRef(r.pedido_id||r.id_pedido||r.order_id||r.factura||r.factura_numero);
+    return destinoDePedido(ped);
+  }
+  function canalTicket(t){
+    if(!t) return 'Email';
+    var raw=t.canal||t.ticket_canal||t.channel||t.canal_solicitado||t.medio_respuesta||t.responder_por||t.contacto_preferido||t.preferencia_contacto||'';
+    if(raw) return raw;
+    var text=[t.mensaje,t.asunto,t.tipo_reclamo,t.telefono,t.whatsapp,t.email].join(' ').toLowerCase();
+    if(text.indexOf('whatsapp')>=0 || t.whatsapp) return 'WhatsApp';
+    if(text.indexOf('celular')>=0 || text.indexOf('telefono')>=0 || text.indexOf('teléfono')>=0 || text.indexOf('llamada')>=0 || t.telefono) return 'Celular';
+    if(text.indexOf('mail')>=0 || text.indexOf('correo')>=0 || t.email) return 'Email';
+    return 'Email';
+  }
+  function opcionesContacto(t){
+    var opts=[];
+    var canal=String(canalTicket(t));
+    function add(label,value,href){opts.push({label:label,value:value||'',href:href||''});}
+    if(t&&t.whatsapp) add('WhatsApp',t.whatsapp,'https://wa.me/'+String(t.whatsapp).replace(/[^0-9]/g,''));
+    if(t&&(t.telefono||t.celular)) add('Celular',t.telefono||t.celular,'tel:'+String(t.telefono||t.celular).replace(/\s/g,''));
+    if(t&&t.email) add('Email',t.email,'mailto:'+t.email+'?subject='+encodeURIComponent('Respuesta ticket nexo - '+(t.asunto||'Soporte')));
+    if(!opts.length){
+      if(/whatsapp/i.test(canal)) add('WhatsApp','Solicitado por el cliente','');
+      else if(/celular|tel|llamada/i.test(canal)) add('Celular','Solicitado por el cliente','');
+      else add('Email',t&&t.email?t.email:'Solicitado por el cliente',t&&t.email?'mailto:'+t.email:'');
+    }
+    return opts;
+  }
+  function ensureAdminData(){
+    if(typeof window.fetchNexoAdminData==='function') return window.fetchNexoAdminData().catch(function(){return getCache();});
+    return Promise.resolve(getCache());
+  }
+  window.renderPayments = async function(){
+    await ensureAdminData(); var sec=document.getElementById('payments'); if(!sec)return; var c=getCache();
+    var rows=(c.pagos&&c.pagos.length)?c.pagos:(c.pedidos||[]).map(function(o){return {factura:o.factura_numero||o.id,cliente_nombre:fullName(o),metodo:o.metodo_pago||o.paymentMethod,monto_usd:o.monto_usd||o.total_cliente_usd||o.total_usd||o.total,estado:o.estado_pago||o.estado,pedido_id:o.id};});
+    var by={card:0,bank:0,paypal:0,payoneer:0};
+    rows.forEach(function(p){var k=norm(p.metodo||p.metodo_pago||p.payment_method); if(k.indexOf('payoneer')>=0)by.payoneer++; else if(k.indexOf('paypal')>=0)by.paypal++; else if(k.indexOf('bank')>=0||k.indexOf('wire')>=0||k.indexOf('transfer')>=0||k.indexOf('ach')>=0)by.bank++; else by.card++;});
+    var cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card;cards[1].textContent=by.bank;cards[2].textContent=by.paypal;cards[3].textContent=by.payoneer;}
+    var box=document.getElementById('paymentsTableWrap'); if(!box){box=document.createElement('div');box.id='paymentsTableWrap';box.className='section-box';sec.appendChild(box);}
+    box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>'+(rows.length?rows.map(function(p){var ref=p.factura||p.factura_numero||p.pedido_id||p.id_pedido||p.order_id||''; return '<tr>'+cell(ref)+cell(clienteDePago(p))+cell(String(p.metodo||p.metodo_pago||p.payment_method||'').toUpperCase())+cell(money(p.monto_usd||p.total_usd||p.monto||p.total_cliente_usd||0))+cell(p.estado||p.estado_pago||'')+'</tr>';}).join(''):'<tr><td colspan="5">Sin pagos registrados</td></tr>')+'</tbody></table></div>';
+  };
+  window.renderShipments = async function(){
+    await ensureAdminData(); var box=document.getElementById('shipmentsPanel'); if(!box)return; var c=getCache();
+    var rows=(c.tracking_envios&&c.tracking_envios.length)?c.tracking_envios:(c.pedidos||[]).map(function(o){return {pedido_id:o.factura_numero||o.id,cliente:fullName(o),destino:destinoDePedido(o),fecha_estimada_entrega:o.fecha_estimada_entrega||o.deliveryEstimate,estado_envio:o.estado_envio||o.estado||'En preparación'};});
+    box.innerHTML='<table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Destino</th><th>Entrega estimada</th><th>Estado</th><th>Acción</th></tr></thead><tbody>'+(rows.length?rows.map(function(r){var estado=String(r.estado_envio||r.estado||'En preparación');var accion=estado.toLowerCase().indexOf('reclamo')>=0?'<button class="ticket-response-btn">Enviar</button>':'';return '<tr>'+cell(r.pedido_id||r.factura||r.factura_numero)+cell(clienteDeEnvio(r))+cell(destinoDeEnvio(r))+cell(r.fecha_estimada_entrega||r.deliveryEstimate||'')+cell(estado)+'<td>'+accion+'</td></tr>';}).join(''):'<tr><td colspan="6">Sin envíos registrados</td></tr>')+'</tbody></table>';
+  };
+  window.loadTickets = async function(){
+    await ensureAdminData(); var c=getCache(); window.nexoTicketsCache=c.tickets||[]; var tb=document.getElementById('ticketsTable'); if(!tb)return;
+    var head=tb.parentElement&&tb.parentElement.querySelector('thead tr'); if(head) head.innerHTML='<th>FECHA</th><th>CLIENTE</th><th>ASUNTO</th><th>TIPO</th><th>ESTADO</th><th>PRIORIDAD</th><th>CANAL</th><th>RESPONDER</th>';
+    var q=norm((document.getElementById('ticketSearch')||{}).value||''); var st=String((document.getElementById('ticketStatusFilter')||{}).value||'');
+    var rows=(c.tickets||[]).filter(function(t){var s=[t.nombre_cliente,t.email,t.asunto,t.tipo_reclamo,t.mensaje,canalTicket(t),t.telefono,t.whatsapp].join(' ').toLowerCase();return (!q||s.indexOf(q)>=0)&&(!st||String(t.estado||'Nuevo')===st);});
+    if(!rows.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6f8284;font-weight:800;">No hay tickets para mostrar.</td></tr>';return;}
+    window.nexoTicketsCache=rows;
+    tb.innerHTML=rows.map(function(t,i){var fecha=t.fecha_creacion||t.creado_en||t.created_at||'';return '<tr>'+cell(fecha?new Date(fecha).toLocaleString('es-BO'):'')+cell(t.nombre_cliente||t.cliente||fullName(t))+cell(t.asunto)+cell(t.tipo_reclamo)+cell(t.estado||'Nuevo')+cell(t.prioridad||'Media')+cell(canalTicket(t))+'<td><button class="ticket-response-btn" onclick="openTicketDetail('+i+')">Responder</button></td></tr>';}).join('');
+  };
+  window.openTicketDetail = function(index){
+    var t=(window.nexoTicketsCache||[])[index]; if(!t){alert('No se encontró el ticket seleccionado.');return;}
+    var box=document.getElementById('ticketDetailBox'), content=document.getElementById('ticketDetailContent'); if(box) box.style.display='block'; if(!content)return;
+    var opts=opcionesContacto(t);
+    var buttons=opts.map(function(o){var href=o.href; if(href){return '<a class="btn btn-primary" style="text-decoration:none;display:inline-block;" target="_blank" href="'+esc(href)+'">Responder por '+esc(o.label)+'</a>';} return '<button class="btn btn-secondary" onclick="alert(\'Canal solicitado: '+esc(o.label+' - '+o.value).replace(/'/g,'&#39;')+'\')">'+esc(o.label)+'</button>';}).join('');
+    content.innerHTML='<div class="ticket-detail-grid">'+
+      '<div><span class="info-label">Cliente</span><div class="info-value highlight">'+esc(t.nombre_cliente||t.cliente||fullName(t))+'</div></div>'+
+      '<div><span class="info-label">Canal solicitado</span><div class="info-value highlight">'+esc(canalTicket(t))+'</div></div>'+
+      '<div><span class="info-label">Email</span><div class="info-value">'+esc(t.email||'')+'</div></div>'+
+      '<div><span class="info-label">Celular / WhatsApp</span><div class="info-value">'+esc(t.telefono||t.celular||t.whatsapp||'')+'</div></div>'+
+      '<div><span class="info-label">Estado</span><div class="info-value">'+esc(t.estado||'Nuevo')+'</div></div>'+
+      '<div><span class="info-label">Prioridad</span><div class="info-value">'+esc(t.prioridad||'Media')+'</div></div>'+
+      '</div><div class="ticket-message">'+esc(t.mensaje||'')+'</div><div class="button-group">'+buttons+'</div>';
+    if(box) box.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+})();
+</script>
+
 </body>
 </html>
