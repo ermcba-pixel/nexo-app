@@ -137,6 +137,12 @@ function searchProfile(q){
   const clean = String(q || '').trim();
   const key = norm(clean);
   const profiles = {
+    'calcetin':{query:'socks', any:['sock','socks','hosiery'], es:'calcetín'},
+    'calcetines':{query:'socks', any:['sock','socks','hosiery'], es:'calcetines'},
+    'medias':{query:'socks', any:['sock','socks','hosiery'], es:'medias'},
+    'media':{query:'socks', any:['sock','socks','hosiery'], es:'media'},
+    'sock':{query:'socks', any:['sock','socks','hosiery'], es:'calcetines'},
+    'socks':{query:'socks', any:['sock','socks','hosiery'], es:'calcetines'},
     'cordon':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
     'cordones':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
     'cordones zapatos':{query:'shoelaces', any:['shoelace','shoe lace','laces','lace'], es:'cordones'},
@@ -192,10 +198,10 @@ function relevanceScore(raw, profile){
 function localizeName(name, lang){
   let out = String(name||'');
   const packs = {
-    es:[['Shoelaces','Cordones'],['Shoe Laces','Cordones'],['Laces','Cordones'],['Shoes','Zapatos'],['Sneakers','Zapatillas'],['Women','Mujer'],['Men','Hombre'],['Kids','Niños'],['Bag','Bolsa'],['Bags','Bolsas'],['Black','Negro'],['White','Blanco'],['Red','Rojo'],['Blue','Azul'],['Green','Verde'],['Leather','Cuero'],['Fashion','Moda'],['Casual','Casual'],['Sports','Deportivo'],['Laptop','Laptop'],['Case','Funda'],['Watch','Reloj'],['Smartwatch','Reloj inteligente'],['Phone','Teléfono'],['Charger','Cargador'],['Cable','Cable']],
-    pt:[['Shoelaces','Cadarços'],['Shoe Laces','Cadarços'],['Laces','Cadarços'],['Shoes','Sapatos'],['Sneakers','Tênis'],['Women','Mulher'],['Men','Homem'],['Kids','Crianças'],['Bag','Bolsa'],['Bags','Bolsas'],['Black','Preto'],['White','Branco'],['Red','Vermelho'],['Blue','Azul'],['Green','Verde'],['Leather','Couro'],['Fashion','Moda'],['Sports','Esportivo'],['Case','Capa'],['Watch','Relógio'],['Smartwatch','Relógio inteligente'],['Phone','Telefone'],['Charger','Carregador']],
-    it:[['Shoelaces','Lacci'],['Shoe Laces','Lacci'],['Laces','Lacci'],['Shoes','Scarpe'],['Sneakers','Sneakers'],['Women','Donna'],['Men','Uomo'],['Kids','Bambini'],['Bag','Borsa'],['Bags','Borse'],['Black','Nero'],['White','Bianco'],['Red','Rosso'],['Blue','Blu'],['Green','Verde'],['Leather','Pelle'],['Fashion','Moda'],['Sports','Sportivo'],['Case','Custodia'],['Watch','Orologio'],['Smartwatch','Smartwatch'],['Phone','Telefono'],['Charger','Caricatore']],
-    fr:[['Shoelaces','Lacets'],['Shoe Laces','Lacets'],['Laces','Lacets'],['Shoes','Chaussures'],['Sneakers','Baskets'],['Women','Femme'],['Men','Homme'],['Kids','Enfants'],['Bag','Sac'],['Bags','Sacs'],['Black','Noir'],['White','Blanc'],['Red','Rouge'],['Blue','Bleu'],['Green','Vert'],['Leather','Cuir'],['Fashion','Mode'],['Sports','Sport'],['Case','Étui'],['Watch','Montre'],['Smartwatch','Montre intelligente'],['Phone','Téléphone'],['Charger','Chargeur']]
+    es:[['Socks','Calcetines'],['Sock','Calcetín'],['Hosiery','Calcetería'],['Shoelaces','Cordones'],['Shoe Laces','Cordones'],['Laces','Cordones'],['Shoes','Zapatos'],['Sneakers','Zapatillas'],['Women','Mujer'],['Men','Hombre'],['Kids','Niños'],['Bag','Bolsa'],['Bags','Bolsas'],['Black','Negro'],['White','Blanco'],['Red','Rojo'],['Blue','Azul'],['Green','Verde'],['Leather','Cuero'],['Fashion','Moda'],['Casual','Casual'],['Sports','Deportivo'],['Laptop','Laptop'],['Case','Funda'],['Watch','Reloj'],['Smartwatch','Reloj inteligente'],['Phone','Teléfono'],['Charger','Cargador'],['Cable','Cable']],
+    pt:[['Socks','Meias'],['Sock','Meia'],['Hosiery','Meias'],['Shoelaces','Cadarços'],['Shoe Laces','Cadarços'],['Laces','Cadarços'],['Shoes','Sapatos'],['Sneakers','Tênis'],['Women','Mulher'],['Men','Homem'],['Kids','Crianças'],['Bag','Bolsa'],['Bags','Bolsas'],['Black','Preto'],['White','Branco'],['Red','Vermelho'],['Blue','Azul'],['Green','Verde'],['Leather','Couro'],['Fashion','Moda'],['Sports','Esportivo'],['Case','Capa'],['Watch','Relógio'],['Smartwatch','Relógio inteligente'],['Phone','Telefone'],['Charger','Carregador']],
+    it:[['Socks','Calzini'],['Sock','Calzino'],['Hosiery','Calzetteria'],['Shoelaces','Lacci'],['Shoe Laces','Lacci'],['Laces','Lacci'],['Shoes','Scarpe'],['Sneakers','Sneakers'],['Women','Donna'],['Men','Uomo'],['Kids','Bambini'],['Bag','Borsa'],['Bags','Borse'],['Black','Nero'],['White','Bianco'],['Red','Rosso'],['Blue','Blu'],['Green','Verde'],['Leather','Pelle'],['Fashion','Moda'],['Sports','Sportivo'],['Case','Custodia'],['Watch','Orologio'],['Smartwatch','Smartwatch'],['Phone','Telefono'],['Charger','Caricatore']],
+    fr:[['Socks','Chaussettes'],['Sock','Chaussette'],['Hosiery','Bonneterie'],['Shoelaces','Lacets'],['Shoe Laces','Lacets'],['Laces','Lacets'],['Shoes','Chaussures'],['Sneakers','Baskets'],['Women','Femme'],['Men','Homme'],['Kids','Enfants'],['Bag','Sac'],['Bags','Sacs'],['Black','Noir'],['White','Blanc'],['Red','Rouge'],['Blue','Bleu'],['Green','Vert'],['Leather','Cuir'],['Fashion','Mode'],['Sports','Sport'],['Case','Étui'],['Watch','Montre'],['Smartwatch','Montre intelligente'],['Phone','Téléphone'],['Charger','Chargeur']]
   };
   for(const [a,b] of (packs[lang]||[])) out = out.replace(new RegExp('\\b'+a+'\\b','gi'), b);
   return out;
@@ -231,8 +237,20 @@ export default async function handler(req,res){
 
   const q = String(req.query.q || req.query.keyWord || req.query.keyword || '').trim();
   const lang = String(req.query.lang || req.query.language || 'es').toLowerCase().slice(0,2);
-  const maxPrice = Number(req.query.maxPrice || req.query.max || 0);
-  const minPrice = Number(req.query.minPrice || req.query.min || 0);
+  function parseMoneyParam(v, mode='max'){
+    const raw = String(v ?? '').trim();
+    if(!raw) return 0;
+    const nums = raw.match(/[0-9]+(?:\.[0-9]+)?/g);
+    if(nums && nums.length){
+      const arr = nums.map(Number).filter(Number.isFinite);
+      if(!arr.length) return 0;
+      return mode === 'min' ? Math.min(...arr) : Math.max(...arr);
+    }
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : 0;
+  }
+  const maxPrice = parseMoneyParam(req.query.maxPrice || req.query.max || 0, 'max');
+  const minPrice = parseMoneyParam(req.query.minPrice || req.query.min || 0, 'min');
   const size = Math.min(Math.max(Number(req.query.size || 20), 1), 100);
   const page = Math.max(Number(req.query.page || 1), 1);
 
