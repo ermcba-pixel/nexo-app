@@ -7,6 +7,14 @@ import crypto from 'crypto';
 const REGION = process.env.AMAZON_REGION || 'us-east-1';
 const HOST = process.env.AMAZON_HOST || 'webservices.amazon.com';
 const MARKETPLACE = process.env.AMAZON_MARKETPLACE || 'www.amazon.com';
+const NEXO_AMAZON_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
+function withNexoAmazonTag(url){
+  try{
+    const u = new URL(String(url || '').startsWith('http') ? String(url) : `https://${MARKETPLACE}/s?k=producto`);
+    u.searchParams.set('tag', NEXO_AMAZON_TAG);
+    return u.toString();
+  }catch(e){ return `https://${MARKETPLACE}/s?k=producto&tag=${encodeURIComponent(NEXO_AMAZON_TAG)}`; }
+}
 const SERVICE = 'ProductAdvertisingAPI';
 const PATH = '/paapi5/searchitems';
 const TARGET = 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems';
@@ -49,7 +57,7 @@ function normalizePaapiItem(item, idx){
   const image=item?.Images?.Primary?.Large?.URL || item?.Images?.Primary?.Medium?.URL || item?.Images?.Primary?.Small?.URL || '';
   const title=item?.ItemInfo?.Title?.DisplayValue || 'Producto Amazon';
   const asin=item?.ASIN || `AMZ-${idx+1}`;
-  const url=item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`;
+  const url=withNexoAmazonTag(item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`);
   const availability=listing?.Availability?.Message || '';
   return {
     id:`amazon-${asin}`, asin, name:title, title, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🟠',
@@ -99,7 +107,7 @@ function temporaryCatalog(q, maxPrice){
     return {
       id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🟠',
       price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:'electronica',
-      image:'', imageType, url:`https://${MARKETPLACE}/s?k=${query}`, sourceUrl:`https://${MARKETPLACE}/s?k=${query}`,
+      image:'', imageType, url:withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${query}`), sourceUrl:withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${query}`),
       stock:'Verificar en Amazon', source:'amazon-temporal-catalog', rating:4.6, reviews:0,
       sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true
     };
@@ -127,7 +135,7 @@ export default async function handler(req,res){
       mode:'temporary_catalog_until_creators_api',
       originalImages:false,
       sort:'price_desc',
-      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. El checkout PayPal funciona y los enlaces abren Amazon.',
+      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. Los enlaces abren Amazon con el tag afiliado nexo08-20.',
       paapiStatus:real,
       products:temporaryCatalog(q, maxPrice)
     });

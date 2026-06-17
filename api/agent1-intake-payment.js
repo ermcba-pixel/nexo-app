@@ -45,11 +45,11 @@ export default async function handler(req,res){
       ok:true,
       id,
       status: methodStatus,
-      agentStatus:'agente_1_listo_para_captura_y_compra_cj',
+      agentStatus:'agente_1_listo_para_cobro_y_compra_proveedor',
       paymentMethod,
       totals:{subtotal, shipping, vendorFees, commission, total},
       paypalBusiness:'nexo PayPal Business',
-      provider:'CJ Dropshipping',
+      provider:(order.items||[]).some(i=>String(i.provider||i.proveedor||'').toLowerCase().includes('amazon')) ? 'Amazon' : ((order.items||[]).some(i=>String(i.provider||i.proveedor||'').toLowerCase().includes('alibaba')) ? 'Alibaba' : 'CJ Dropshipping'),
       cjReady:Boolean(process.env.CJ_API_KEY),
       paypalAdvancedReady:Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
       payoneerUrl: paymentMethod === 'payoneer' ? payoneerUrl : '',
@@ -57,7 +57,7 @@ export default async function handler(req,res){
         'capturar pago del cliente solo cuando exista pasarela directa habilitada',
         'para ACH/Wire: esperar pasarela bancaria autorizada o confirmación real de abono',
         'confirmar webhook de pago aprobado',
-        'crear orden CJ con datos de cliente y envío',
+        'crear orden o redirección según proveedor: CJ API, Alibaba sourcing o Amazon afiliado nexo08-20',
         'registrar tracking y comisión neta'
       ],
       createdAt:new Date().toISOString()
@@ -94,7 +94,7 @@ export default async function handler(req,res){
         await fetch(`${url}/rest/v1/agent1_orders`, {
           method:'POST',
           headers:{apikey:key, Authorization:`Bearer ${key}`, 'Content-Type':'application/json', Prefer:'return=minimal'},
-          body: JSON.stringify({pedido_id:id, proveedor:'CJ Dropshipping', estado:intake.status, costo_producto:subtotal, costo_envio:shipping, comision_nexo:commission, payload:intake})
+          body: JSON.stringify({pedido_id:id, proveedor:intake.provider, estado:intake.status, costo_producto:subtotal, costo_envio:shipping, comision_nexo:commission, payload:intake})
         }).catch(()=>null);
       }
     }catch(e){}

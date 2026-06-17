@@ -36,7 +36,7 @@ export async function sb(path, options={}){
 
 export async function logAgent(pedido_id, accion, estado='ok', detalle=''){
   try{
-    await sb('logs_agent1', {method:'POST', body:JSON.stringify([{pedido_id, accion, estado, detalle}])});
+    await sb('logs_agente1', {method:'POST', body:JSON.stringify([{pedido_id, accion, estado, detalle}])});
   }catch(e){ /* no rompe el flujo */ }
 }
 
