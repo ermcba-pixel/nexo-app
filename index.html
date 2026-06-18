@@ -1,534 +1,902 @@
--- ============================================================
--- nexo - SUPABASE: MÓDULO DE FACTURACIÓN MASIVA BOLIVIA / SIAT
--- Versión: 1.0.1
--- Ejecutar en Supabase SQL Editor.
--- Objetivo: preparar la base de datos para autorización SIAT,
--- emisión masiva, control tributario, auditoría, XML, QR, CUIS,
--- CUFD, CUF, contingencias y trazabilidad.
--- ============================================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexo™ - Portal Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-create extension if not exists pgcrypto;
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --success: #27AE60;
+        }
 
--- =========================
--- 1) FUNCIONES BASE
--- =========================
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            gap: 30px;
+        }
 
-create or replace function public.nexo_touch_updated_at()
-returns trigger
-language plpgsql
-as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$;
+        .portal-container {
+            width: 100%;
+            max-width: 1300px;
+            background-color: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: row;
+            min-height: 650px;
+        }
 
-create or replace function public.nexo_factura_nit_ci_por_pais(p_pais text, p_nit_ci text)
-returns text
-language plpgsql
-as $$
-begin
-  -- Regla operativa nexo:
-  -- Cliente fuera de Bolivia => NIT/CI 99001.
-  -- Cliente Bolivia => NIT/CI real del cliente.
-  if lower(coalesce(p_pais,'')) not in ('bolivia','bo','bol','estado plurinacional de bolivia') then
-    return '99001';
-  end if;
+        /* ============ HEADER IZQUIERDO ============ */
+        .portal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 60px 50px;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
 
-  if nullif(trim(coalesce(p_nit_ci,'')), '') is null then
-    raise exception 'Cliente Bolivia requiere NIT/CI real para facturación';
-  end if;
+        .portal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
 
-  return trim(p_nit_ci);
-end;
-$$;
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
 
-create or replace function public.nexo_periodo_yyyymm(p_fecha timestamptz)
-returns text
-language sql
-immutable
-as $$
-  select to_char(p_fecha at time zone 'America/La_Paz','YYYY-MM');
-$$;
+        /* ========== LOGO COMPLETO BLANCO ========== */
+        .logo-container {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
--- =========================
--- 2) TABLAS EXISTENTES: CAMPOS MÍNIMOS PARA ENLACE
--- =========================
+        .logo-box {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 14px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            gap: 6px;
+            width: 130px;
+        }
 
-create table if not exists public.clientes (
-  id uuid primary key default gen_random_uuid(),
-  nombre text,
-  apellido text,
-  email text,
-  telefono text,
-  pais text,
-  region text,
-  ciudad text,
-  direccion text,
-  codigo_postal text,
-  documento text,
-  nit_ci text,
-  razon_social text,
-  tipo_documento text,
-  fecha_registro timestamptz default now(),
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+        .logo-text-nexo {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
 
-alter table public.clientes add column if not exists nit_ci text;
-alter table public.clientes add column if not exists razon_social text;
-alter table public.clientes add column if not exists tipo_documento text;
-alter table public.clientes add column if not exists updated_at timestamptz default now();
+        .logo-ne {
+            color: var(--primary);
+        }
 
-create index if not exists idx_clientes_email on public.clientes(email);
-create index if not exists idx_clientes_nit_ci on public.clientes(nit_ci);
+        .logo-x {
+            color: var(--accent);
+            font-weight: 900;
+        }
 
-create table if not exists public.pedidos (
-  id uuid primary key default gen_random_uuid(),
-  cliente_id uuid,
-  estado text default 'pendiente',
-  estado_pago text default 'pendiente',
-  total numeric(14,2) default 0,
-  moneda text default 'USD',
-  proveedor text,
-  items jsonb default '[]'::jsonb,
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+        .logo-o {
+            color: var(--primary);
+        }
 
-alter table public.pedidos add column if not exists factura_id uuid;
-alter table public.pedidos add column if not exists requiere_factura boolean default true;
-alter table public.pedidos add column if not exists pais_facturacion text;
-alter table public.pedidos add column if not exists nit_ci_facturacion text;
-alter table public.pedidos add column if not exists razon_social_facturacion text;
-alter table public.pedidos add column if not exists total_bs numeric(14,2);
-alter table public.pedidos add column if not exists tipo_cambio numeric(12,6);
-alter table public.pedidos add column if not exists updated_at timestamptz default now();
+        .logo-subtitle {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
 
-create table if not exists public.pagos (
-  id uuid primary key default gen_random_uuid(),
-  pedido_id uuid,
-  cliente_id uuid,
-  metodo text,
-  estado text default 'pendiente',
-  monto numeric(14,2) default 0,
-  moneda text default 'USD',
-  referencia text,
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+        .portal-title {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 15px 0 10px 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
 
-alter table public.pagos add column if not exists factura_id uuid;
-alter table public.pagos add column if not exists monto_bs numeric(14,2);
-alter table public.pagos add column if not exists tipo_cambio numeric(12,6);
-alter table public.pagos add column if not exists conciliado boolean default false;
-alter table public.pagos add column if not exists fecha_conciliacion timestamptz;
-alter table public.pagos add column if not exists updated_at timestamptz default now();
+        .portal-description {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+            max-width: 95%;
+            margin: 0 auto;
+        }
 
--- =========================
--- 3) CONFIGURACIÓN SIAT / CONTRIBUYENTE
--- =========================
+        /* ============ CONTENT DERECHO ============ */
+        .portal-content {
+            padding: 45px 45px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 30px;
+        }
 
-create table if not exists public.siat_configuracion (
-  id uuid primary key default gen_random_uuid(),
-  activo boolean default true,
-  ambiente text not null default 'pruebas' check (ambiente in ('pruebas','produccion')),
-  modalidad text not null default 'ELECTRONICA_EN_LINEA',
-  tipo_sistema text not null default 'PROPIO',
-  proceso_masivo boolean default true,
-  registro_compras boolean default false,
-  nombre_software text not null default 'nexo',
-  version_software text not null default '1.0.1',
-  nit_emisor text not null default '774651015',
-  razon_social_emisor text not null default 'EDUARDO RODRIGUEZ MARTINEZ',
-  nombre_comercial text default 'nexo',
-  sucursal_nro integer default 435,
-  punto_venta_nro integer default 0,
-  domicilio text default 'ZONA: QUERU QUERU, AVENIDA: AMÉRICA, NRO: 435, EDIFICIO: S/N PISO: 4 NRO LOCAL/OFICINA: Oficina No. 9',
-  municipio text default 'COCHABAMBA',
-  telefono text,
-  actividad_economica text,
-  codigo_actividad_sin text,
-  codigo_producto_sin text,
-  unidad_medida_sin text default 'Unidad (Servicios)',
-  sector_documento text default 'FACTURA COMPRA-VENTA',
-  tipo_factura_documento text default 'FACTURA',
-  tipo_emision text default 'ONLINE',
-  tipo_documento_sector text,
-  leyenda_sin text default 'ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY',
-  leyenda_consumidor text default 'Ley N° 453: El proveedor debe brindar atención sin discriminación, con respeto, calidez y cordialidad a los usuarios y consumidores.',
-  leyenda_representacion_grafica text default 'Este documento es la Representación Gráfica de un Documento Fiscal Digital emitido en una modalidad de facturación en línea',
-  certificado_digital_estado text default 'pendiente',
-  certificado_digital_vencimiento timestamptz,
-  token_delegado_estado text default 'pendiente',
-  autorizado_siat boolean default false,
-  fecha_autorizacion_siat timestamptz,
-  observaciones text,
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+        .access-section {
+            margin-bottom: 0;
+        }
 
-create trigger trg_siat_configuracion_updated_at
-before update on public.siat_configuracion
-for each row execute function public.nexo_touch_updated_at();
+        .access-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
 
-insert into public.siat_configuracion (
-  ambiente, modalidad, tipo_sistema, proceso_masivo, registro_compras,
-  nombre_software, version_software, nit_emisor, razon_social_emisor, nombre_comercial
-)
-select 'pruebas','ELECTRONICA_EN_LINEA','PROPIO',true,false,'nexo','1.0.1','774651015','EDUARDO RODRIGUEZ MARTINEZ','nexo'
-where not exists (select 1 from public.siat_configuracion);
+        .access-card {
+            background-color: var(--light);
+            border-radius: 18px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
 
--- =========================
--- 4) CÓDIGOS SIAT: CUIS / CUFD / CUF
--- =========================
+        .access-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(122, 199, 66, 0.08) 0%, rgba(74, 107, 109, 0.05) 100%);
+        }
 
-create table if not exists public.siat_cuis (
-  id uuid primary key default gen_random_uuid(),
-  configuracion_id uuid references public.siat_configuracion(id) on delete cascade,
-  cuis text not null,
-  codigo_sucursal integer default 0,
-  codigo_punto_venta integer default 0,
-  fecha_inicio timestamptz default now(),
-  fecha_vencimiento timestamptz,
-  vigente boolean default true,
-  respuesta_siat jsonb default '{}'::jsonb,
-  creado_en timestamptz default now()
-);
+        .access-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
 
-create index if not exists idx_siat_cuis_vigente on public.siat_cuis(vigente, fecha_vencimiento);
+        .access-content {
+            flex: 1;
+        }
 
-create table if not exists public.siat_cufd (
-  id uuid primary key default gen_random_uuid(),
-  cuis_id uuid references public.siat_cuis(id) on delete set null,
-  cufd text not null,
-  codigo_control text,
-  direccion text,
-  codigo_sucursal integer default 0,
-  codigo_punto_venta integer default 0,
-  fecha_inicio timestamptz default now(),
-  fecha_vencimiento timestamptz,
-  vigente boolean default true,
-  respuesta_siat jsonb default '{}'::jsonb,
-  creado_en timestamptz default now()
-);
+        .access-card h3 {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
 
-create index if not exists idx_siat_cufd_vigente on public.siat_cufd(vigente, fecha_vencimiento);
+        .access-card p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
 
--- =========================
--- 5) CATÁLOGOS SIAT SINCRONIZADOS
--- =========================
+        .access-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 107, 109, 0.2);
+        }
 
-create table if not exists public.siat_catalogos (
-  id uuid primary key default gen_random_uuid(),
-  tipo text not null,
-  codigo text not null,
-  descripcion text not null,
-  estado text default 'activo',
-  raw jsonb default '{}'::jsonb,
-  sincronizado_en timestamptz default now(),
-  unique(tipo, codigo)
-);
+        .access-btn:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.3);
+        }
 
-create index if not exists idx_siat_catalogos_tipo on public.siat_catalogos(tipo);
+        /* ============ LANGUAGE SELECTOR ============ */
+        .language-footer {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(232, 240, 240, 0.8) 100%);
+            padding: 24px 32px;
+            border-radius: 16px;
+            border: 2px solid rgba(74, 107, 109, 0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 500px;
+        }
 
--- =========================
--- 6) FACTURAS: CABECERA / DETALLE / XML / PDF
--- =========================
+        .language-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: center;
+        }
 
-create table if not exists public.facturas (
-  id uuid primary key default gen_random_uuid(),
-  pedido_id uuid,
-  pago_id uuid,
-  cliente_id uuid,
-  configuracion_id uuid references public.siat_configuracion(id),
-  numero_factura bigint,
-  cuf text,
-  cufd text,
-  cuis text,
-  codigo_autorizacion text,
-  estado text not null default 'borrador'
-    check (estado in ('borrador','pendiente_envio','emitida','validada','rechazada','anulada','contingencia','observada')),
-  modalidad text default 'ELECTRONICA_EN_LINEA',
-  proceso_masivo boolean default true,
-  nit_emisor text default '774651015',
-  razon_social_emisor text default 'EDUARDO RODRIGUEZ MARTINEZ',
-  nombre_comercial text default 'nexo',
-  sucursal_nro integer default 435,
-  punto_venta_nro integer default 0,
-  municipio text default 'COCHABAMBA',
-  direccion_emisor text,
-  fecha_emision timestamptz default now(),
-  periodo text generated always as (to_char(fecha_emision at time zone 'America/La_Paz','YYYY-MM')) stored,
-  nit_ci_cliente text not null,
-  razon_social_cliente text not null,
-  codigo_cliente text,
-  pais_cliente text,
-  email_cliente text,
-  tipo_documento_cliente text,
-  moneda text default 'BOB',
-  tipo_cambio numeric(12,6) default 1,
-  subtotal numeric(14,2) not null default 0,
-  descuento numeric(14,2) not null default 0,
-  total numeric(14,2) not null default 0,
-  monto_gift_card numeric(14,2) not null default 0,
-  monto_a_pagar numeric(14,2) not null default 0,
-  importe_base_credito_fiscal numeric(14,2) not null default 0,
-  total_literal text,
-  codigo_qr text,
-  qr_url text,
-  xml_path text,
-  pdf_path text,
-  xml_hash text,
-  firma_hash text,
-  respuesta_siat jsonb default '{}'::jsonb,
-  errores jsonb default '[]'::jsonb,
-  motivo_anulacion text,
-  anulada_en timestamptz,
-  enviada_email_en timestamptz,
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+        .language-title {
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
 
-alter table public.facturas add column if not exists proceso_masivo boolean default true;
-alter table public.facturas add column if not exists periodo text generated always as (to_char(fecha_emision at time zone 'America/La_Paz','YYYY-MM')) stored;
+        .language-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-create unique index if not exists ux_facturas_cuf on public.facturas(cuf) where cuf is not null;
-create index if not exists idx_facturas_estado_periodo on public.facturas(estado, periodo);
-create index if not exists idx_facturas_cliente on public.facturas(cliente_id);
-create index if not exists idx_facturas_pedido on public.facturas(pedido_id);
+        .lang-btn {
+            background-color: var(--white);
+            color: var(--dark);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+        }
 
-create trigger trg_facturas_updated_at
-before update on public.facturas
-for each row execute function public.nexo_touch_updated_at();
+        .lang-btn:hover,
+        .lang-btn.active {
+            background-color: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
 
-create table if not exists public.factura_items (
-  id uuid primary key default gen_random_uuid(),
-  factura_id uuid not null references public.facturas(id) on delete cascade,
-  codigo_producto_servicio text,
-  codigo_producto_sin text,
-  cantidad numeric(14,2) not null default 1,
-  unidad_medida text default 'Unidad (Servicios)',
-  codigo_unidad_medida_sin text,
-  descripcion text not null,
-  precio_unitario numeric(14,2) not null default 0,
-  descuento numeric(14,2) not null default 0,
-  subtotal numeric(14,2) not null default 0,
-  numero_serie text,
-  imei text,
-  raw jsonb default '{}'::jsonb,
-  creado_en timestamptz default now()
-);
+        @media (max-width: 1024px) {
+            .portal-container {
+                flex-direction: column;
+                min-height: auto;
+            }
 
-create index if not exists idx_factura_items_factura on public.factura_items(factura_id);
+            .portal-header {
+                width: 100%;
+                padding: 45px 40px;
+                min-height: 280px;
+            }
 
--- =========================
--- 7) LOTES DE EMISIÓN MASIVA
--- =========================
+            .portal-content {
+                padding: 40px;
+            }
 
-create table if not exists public.facturacion_masiva_lotes (
-  id uuid primary key default gen_random_uuid(),
-  periodo text not null,
-  estado text default 'preparado'
-    check (estado in ('preparado','procesando','enviado','validado','parcial','rechazado','cerrado')),
-  total_facturas integer default 0,
-  total_monto numeric(14,2) default 0,
-  archivo_paquete_path text,
-  hash_paquete text,
-  respuesta_siat jsonb default '{}'::jsonb,
-  errores jsonb default '[]'::jsonb,
-  creado_por text,
-  creado_en timestamptz default now(),
-  enviado_en timestamptz,
-  validado_en timestamptz,
-  updated_at timestamptz default now()
-);
+            .language-footer {
+                margin-top: 20px;
+            }
+        }
 
-create trigger trg_facturacion_masiva_lotes_updated_at
-before update on public.facturacion_masiva_lotes
-for each row execute function public.nexo_touch_updated_at();
+        @media (max-width: 768px) {
+            .portal-header {
+                padding: 35px 30px;
+                gap: 20px;
+            }
 
-create table if not exists public.facturacion_masiva_lote_items (
-  id uuid primary key default gen_random_uuid(),
-  lote_id uuid references public.facturacion_masiva_lotes(id) on delete cascade,
-  factura_id uuid references public.facturas(id) on delete cascade,
-  estado text default 'incluida',
-  respuesta_siat jsonb default '{}'::jsonb,
-  creado_en timestamptz default now(),
-  unique(lote_id, factura_id)
-);
+            .logo-box {
+                padding: 12px 18px;
+            }
 
--- =========================
--- 8) EVENTOS SIGNIFICATIVOS / CONTINGENCIAS
--- =========================
+            .logo-text-nexo {
+                font-size: 42px;
+            }
 
-create table if not exists public.siat_eventos_significativos (
-  id uuid primary key default gen_random_uuid(),
-  codigo_evento text not null,
-  descripcion text not null,
-  fecha_inicio timestamptz not null default now(),
-  fecha_fin timestamptz,
-  estado text default 'abierto' check (estado in ('abierto','cerrado','enviado','validado','rechazado')),
-  cufd_evento text,
-  cafc text,
-  respuesta_siat jsonb default '{}'::jsonb,
-  observaciones text,
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+            .portal-title {
+                font-size: 26px;
+            }
 
-create trigger trg_siat_eventos_updated_at
-before update on public.siat_eventos_significativos
-for each row execute function public.nexo_touch_updated_at();
+            .portal-content {
+                padding: 35px;
+            }
 
--- =========================
--- 9) REGISTRO DE VENTAS / CONTROL TRIBUTARIO
--- =========================
+            .access-card {
+                padding: 20px;
+            }
 
-create table if not exists public.registro_ventas_iva (
-  id uuid primary key default gen_random_uuid(),
-  factura_id uuid references public.facturas(id) on delete set null,
-  periodo text not null,
-  fecha_factura date not null,
-  numero_factura bigint,
-  cuf text,
-  nit_ci_cliente text,
-  razon_social_cliente text,
-  importe_total numeric(14,2) default 0,
-  importe_ice numeric(14,2) default 0,
-  importe_iehd numeric(14,2) default 0,
-  importe_ipj numeric(14,2) default 0,
-  tasas numeric(14,2) default 0,
-  importe_no_sujeto_cf numeric(14,2) default 0,
-  descuentos numeric(14,2) default 0,
-  importe_base_cf numeric(14,2) default 0,
-  debito_fiscal numeric(14,2) generated always as (round((coalesce(importe_base_cf,0) * 0.13)::numeric, 2)) stored,
-  estado text default 'registrado',
-  consolidado boolean default false,
-  consolidado_en timestamptz,
-  raw jsonb default '{}'::jsonb,
-  creado_en timestamptz default now()
-);
+            .access-card h3 {
+                font-size: 18px;
+            }
 
-create index if not exists idx_registro_ventas_periodo on public.registro_ventas_iva(periodo);
-create unique index if not exists ux_registro_ventas_factura on public.registro_ventas_iva(factura_id) where factura_id is not null;
+            .language-footer {
+                padding: 20px 25px;
+                gap: 16px;
+            }
 
-create table if not exists public.cierres_fiscales (
-  id uuid primary key default gen_random_uuid(),
-  periodo text not null unique,
-  ventas_total numeric(14,2) default 0,
-  ventas_base_cf numeric(14,2) default 0,
-  debito_fiscal numeric(14,2) default 0,
-  facturas_emitidas integer default 0,
-  facturas_anuladas integer default 0,
-  estado text default 'abierto' check (estado in ('abierto','revisado','consolidado','declarado','bloqueado')),
-  revisado_por text,
-  revisado_en timestamptz,
-  notas text,
-  creado_en timestamptz default now(),
-  updated_at timestamptz default now()
-);
+            .language-title {
+                font-size: 14px;
+            }
+        }
+    
+.nexo-left-legal-card{margin:22px auto 0;max-width:390px;background:rgba(45,62,63,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;color:#fff;text-align:center;font-size:11px;line-height:1.55;padding:12px 14px;box-shadow:0 10px 25px rgba(0,0,0,.12)}.nexo-left-legal-card a{color:#fff;font-weight:800;text-decoration:underline}
+body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
+</style>
 
-create trigger trg_cierres_fiscales_updated_at
-before update on public.cierres_fiscales
-for each row execute function public.nexo_touch_updated_at();
+<script>
+(function(){
+  function syncNexoLanguage(){
+    var lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang); localStorage.setItem('nexoLang', lang);
+    document.documentElement.lang = lang;
+    window.nexoLangCurrent = lang;
+  }
+  syncNexoLanguage();
+})();
+</script>
 
--- =========================
--- 10) AUDITORÍA INALTERABLE
--- =========================
 
-create table if not exists public.auditoria_fiscal (
-  id uuid primary key default gen_random_uuid(),
-  entidad text not null,
-  entidad_id uuid,
-  accion text not null,
-  antes jsonb,
-  despues jsonb,
-  usuario text,
-  ip text,
-  user_agent text,
-  hash_evento text,
-  creado_en timestamptz default now()
-);
+<style>
+#nexo-legal-footer{max-width:1300px;width:100%;text-align:center;color:rgba(255,255,255,.88);font-size:12px;padding:8px 0 18px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+#nexo-legal-footer a{color:inherit;text-decoration:none;font-weight:700}
+#nexo-legal-footer a:hover{text-decoration:underline}
+.nexo-policy-modal{position:fixed;inset:0;background:rgba(24,35,36,.62);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.nexo-policy-modal.open{display:flex}
+.nexo-policy-card{width:min(980px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:24px;box-shadow:0 20px 50px rgba(0,0,0,.24);padding:28px}
+.nexo-policy-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.nexo-policy-top h2{margin:0;color:#4A6B6D;font-size:28px}
+.nexo-close-btn{border:none;background:#eef4f4;color:#2D3E3F;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800}
+.nexo-policy-body h3{color:#4A6B6D;margin:20px 0 8px;font-size:19px}
+.nexo-policy-body p,.nexo-policy-body li{color:#44595c;line-height:1.65;font-size:15px}
+.nexo-policy-body ul{padding-left:20px}
 
-create index if not exists idx_auditoria_fiscal_entidad on public.auditoria_fiscal(entidad, entidad_id);
-create index if not exists idx_auditoria_fiscal_fecha on public.auditoria_fiscal(creado_en);
+.nexo-left-legal-card{margin:22px auto 0;max-width:390px;background:rgba(45,62,63,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;color:#fff;text-align:center;font-size:11px;line-height:1.55;padding:12px 14px;box-shadow:0 10px 25px rgba(0,0,0,.12)}.nexo-left-legal-card a{color:#fff;font-weight:800;text-decoration:underline}
+body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
+</style>
 
-create or replace function public.nexo_auditar_factura()
-returns trigger
-language plpgsql
-as $$
-begin
-  insert into public.auditoria_fiscal(entidad, entidad_id, accion, antes, despues, hash_evento)
-  values(
-    'facturas',
-    coalesce(new.id, old.id),
-    tg_op,
-    case when tg_op in ('UPDATE','DELETE') then to_jsonb(old) else null end,
-    case when tg_op in ('INSERT','UPDATE') then to_jsonb(new) else null end,
-    encode(digest(coalesce(to_jsonb(new)::text, '') || coalesce(to_jsonb(old)::text, '') || now()::text, 'sha256'),'hex')
-  );
-  return coalesce(new, old);
-end;
-$$;
+</head>
+<body>
+    <div class="portal-container">
+        <!-- HEADER IZQUIERDO -->
+        <div class="portal-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-box">
+                        <div class="logo-text-nexo">
+                            <span class="logo-ne">ne</span><span class="logo-x">x</span><span class="logo-o">o</span>
+                        </div>
+                        <div class="logo-subtitle">Servicios Generales y Empresariales</div>
+                    </div>
+                </div>
 
-drop trigger if exists trg_auditar_factura on public.facturas;
-create trigger trg_auditar_factura
-after insert or update or delete on public.facturas
-for each row execute function public.nexo_auditar_factura();
+                <h2 class="portal-title">nexo<br>Plataforma de Intermediación<br>Comercial Internacional</h2>
 
--- =========================
--- 11) VISTAS ADMINISTRATIVAS
--- =========================
+                <p class="portal-description">
+                    Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
+                </p>
+                <div class="nexo-left-legal-card" data-nexo-left-legal="1">
+                    <strong id="leftLegalTitle">nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
+                    <span id="leftLegalCompany">nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia</span><br>
+                    <span id="leftLegalDesc">nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</span><br>
+                    <span id="leftLegalCopy">© 2026 nexo™ – Todos los derechos reservados</span><br>
+                    <a id="leftLegalNotice" href="aviso-legal.html">Aviso Legal</a> |
+                    <a id="leftLegalTerms" href="terminos-condiciones.html">Términos y Condiciones</a> |
+                    <a id="leftLegalPrivacy" href="politica-privacidad.html">Privacidad</a> |
+                    <a id="leftLegalCookies" href="politica-cookies.html">Cookies</a> |
+                    <a id="leftLegalRefunds" href="reembolsos.html">Reembolsos</a>
+                </div>
 
-create or replace view public.vw_facturacion_pendiente as
-select
-  p.id as pedido_id,
-  p.cliente_id,
-  c.email,
-  c.pais,
-  coalesce(p.razon_social_facturacion, c.razon_social, trim(coalesce(c.nombre,'') || ' ' || coalesce(c.apellido,''))) as razon_social_facturacion,
-  public.nexo_factura_nit_ci_por_pais(coalesce(p.pais_facturacion,c.pais), coalesce(p.nit_ci_facturacion,c.nit_ci,c.documento)) as nit_ci_facturacion,
-  coalesce(p.total_bs, p.total) as total_bs,
-  p.estado,
-  p.estado_pago,
-  p.creado_en
-from public.pedidos p
-left join public.clientes c on c.id = p.cliente_id
-where coalesce(p.requiere_factura,true) = true
-  and p.factura_id is null
-  and lower(coalesce(p.estado_pago,'')) in ('pagado','capturado','completed','aprobado');
+</div>
+        </div>
 
-create or replace view public.vw_resumen_fiscal_periodo as
-select
-  periodo,
-  count(*) filter (where estado in ('emitida','validada')) as facturas_validas,
-  count(*) filter (where estado = 'anulada') as facturas_anuladas,
-  sum(total) filter (where estado in ('emitida','validada')) as total_facturado,
-  sum(importe_base_credito_fiscal) filter (where estado in ('emitida','validada')) as base_credito_fiscal,
-  round((sum(importe_base_credito_fiscal) filter (where estado in ('emitida','validada')) * 0.13)::numeric,2) as debito_fiscal_estimado
-from public.facturas
-group by periodo;
+        <!-- CONTENT DERECHO -->
+        <div class="portal-content">
+            <!-- ACCESO CLIENTE -->
+            <div class="access-section">
+                <div class="access-title">👥 Acceso Cliente</div>
+                <div class="access-card" onclick="goToPublicStore()">
+                    <div class="access-icon">🛒</div>
+                    <div class="access-content">
+                        <h3>Tienda Pública</h3>
+                        <p>Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.</p>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                            <button class="access-btn" onclick="event.stopPropagation(); goToPublicStore()">Ir a la Tienda</button>
+                            <button class="access-btn" onclick="event.stopPropagation(); goToCustomerSupport()">Ir a Atención al Cliente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
--- =========================
--- 12) RLS: bloquear escritura pública directa
--- =========================
+            <!-- LANGUAGE SELECTOR -->
+            <div style="display: flex; justify-content: center; width: 100%;">
+                <div class="language-footer">
+                    <div class="language-section">
+                        <div class="language-title">🌍 Idioma</div>
+                        <div class="language-buttons">
+                            <button class="lang-btn active" data-lang="es" onclick="setLanguage('es', event)">Español</button>
+                            <button class="lang-btn" data-lang="en" onclick="setLanguage('en', event)">English</button>
+                            <button class="lang-btn" data-lang="pt" onclick="setLanguage('pt', event)">Português</button>
+                            <button class="lang-btn" data-lang="it" onclick="setLanguage('it', event)">Italiano</button>
+                            <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr', event)">Français</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-alter table public.siat_configuracion enable row level security;
-alter table public.siat_cuis enable row level security;
-alter table public.siat_cufd enable row level security;
-alter table public.siat_catalogos enable row level security;
-alter table public.facturas enable row level security;
-alter table public.factura_items enable row level security;
-alter table public.facturacion_masiva_lotes enable row level security;
-alter table public.facturacion_masiva_lote_items enable row level security;
-alter table public.siat_eventos_significativos enable row level security;
-alter table public.registro_ventas_iva enable row level security;
-alter table public.cierres_fiscales enable row level security;
-alter table public.auditoria_fiscal enable row level security;
+            <!-- ACCESO ADMINISTRATIVO -->
+            <div class="access-section">
+                <div class="access-title">🔐 Acceso Administrativo</div>
+                <div class="access-card" onclick="goToAdminLogin()">
+                    <div class="access-icon">⚙️</div>
+                    <div class="access-content">
+                        <h3 >Panel Administrativo</h3>
+                        <p>Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.</p>
+                        <button class="access-btn">Ingresar Panel Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
--- Lectura pública deshabilitada por defecto. El backend con SERVICE_ROLE puede operar.
--- Cuando creemos usuarios administrativos con auth.uid(), añadiremos políticas específicas.
--- ============================================================
--- FIN SCRIPT SUPABASE SIAT
--- ============================================================
+    <!-- FOOTER COPYRIGHT -->
+    <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600;">
+        nexo – Plataforma de Intermediación Comercial Internacional | © 2026 | NIT: 774651015 | 3 Agentes IA Integrados
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('nexo_language', lang); localStorage.setItem('nexoLang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function goToPublicStore() {
+            window.location.href = 'nexo-cliente-login.html';
+        }
+
+        function goToAdminLogin() {
+            window.location.href = 'nexo-admin-login.html';
+        }
+
+        function goToCustomerSupport() {
+            window.location.href = 'nexo-agent2-soporte.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('nexo_language') || 'es';
+            const langs = ['es', 'en', 'pt', 'it', 'fr'];
+            document.querySelectorAll('.lang-btn').forEach((btn, idx) => {
+                if (langs[idx] === savedLang) btn.classList.add('active');
+            });
+        });
+    </script>
+
+<script>
+(function(){
+  const portalTexts = {
+    es:{client:'👥 Acceso Cliente', storeTitle:'Tienda Pública', storeDesc:'Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.', storeBtn:'Ir a la Tienda', admin:'🔐 Acceso Administrativo', adminTitle:'Panel Administrativo', adminDesc:'Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.', adminBtn:'Ir a Atencion al Cliente', lang:'🌍 Idioma', header:'nexo<br>Plataforma de Intermediación<br>Comercial Internacional', desc:'Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics'},
+    en:{client:'👥 Client Access', storeTitle:'Public Store', storeDesc:'Explore our product catalog, add items to cart and complete your purchase securely.', storeBtn:'Go to Store', admin:'🔐 Administrative Access', adminTitle:'Admin Panel', adminDesc:'Exclusive access with 3 AI Agents, metrics, user control and ROI analysis.', adminBtn:'Enter Customer Service', lang:'🌍 Language', header:'nexo<br>International Commercial<br>Intermediation System', desc:'Public Store • International Payments • Automatic Purchasing • AI Support • Marketing Analytics'},
+    pt:{client:'👥 Acesso do Cliente', storeTitle:'Loja Pública', storeDesc:'Explore nosso catálogo de produtos, adicione ao carrinho e conclua sua compra com segurança.', storeBtn:'Ir para a Loja', admin:'🔐 Acesso Administrativo', adminTitle:'Painel Administrativo', adminDesc:'Acesso exclusivo com 3 agentes IA, métricas, controle de usuários e análise ROI.', adminBtn:'Entrar no Painel Admin', lang:'🌍 Idioma', header:'nexo<br>Sistema de Intermediação<br>Comercial Internacional', desc:'Loja Pública • Pagamentos Internacionais • Compra Automática • Suporte IA • Marketing Analytics'},
+    it:{client:'👥 Accesso Cliente', storeTitle:'Negozio Pubblico', storeDesc:'Esplora il nostro catalogo prodotti, aggiungi al carrello e completa il tuo acquisto in sicurezza.', storeBtn:'Vai al Negozio', admin:'🔐 Accesso Amministrativo', adminTitle:'Pannello Amministrativo', adminDesc:'Accesso esclusivo con 3 Agenti IA, metriche, controllo utenti e analisi ROI.', adminBtn:'Entra nel Pannello Admin', lang:'🌍 Lingua', header:'nexo<br>Sistema di Intermediazione<br>Commerciale Internazionale', desc:'Negozio Pubblico • Pagamenti Internazionali • Acquisto Automatico • Supporto IA • Marketing Analytics'},
+    fr:{client:'👥 Accès Client', storeTitle:'Boutique Publique', storeDesc:'Explorez notre catalogue, ajoutez au panier et finalisez votre achat en toute sécurité.', storeBtn:'Aller à la Boutique', admin:'🔐 Accès Administratif', adminTitle:'Panneau Administratif', adminDesc:'Accès exclusif avec 3 agents IA, métriques, contrôle des utilisateurs et analyse ROI.', adminBtn:'Entrer dans le Panneau Admin', lang:'🌍 Langue', header:'nexo<br>Système d’Intermédiation<br>Commerciale Internationale', desc:'Boutique Publique • Paiements Internationaux • Achat Automatique • Support IA • Marketing Analytics'}
+  };
+  window.setLanguage = function(lang, ev){
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang);
+    if(ev && ev.target){
+      document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+      ev.target.classList.add('active');
+    }
+    applyPortalLanguage();
+  }
+  window.goToPublicStore = function(){ window.location.href='nexo-cliente-login.html'; }
+  window.goToAdminLogin = function(){ window.location.href='nexo-admin-login.html'; }
+  function applyPortalLanguage(){
+    var lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    var t = portalTexts[lang] || portalTexts.es;
+    document.documentElement.lang = lang;
+    var access = document.querySelectorAll('.access-title');
+    if(access[0]) access[0].textContent = t.client;
+    if(access[1]) access[1].textContent = t.admin;
+    var titles = document.querySelectorAll('.access-card h3');
+    if(titles[0]) titles[0].textContent = t.storeTitle;
+    if(titles[1]) titles[1].textContent = t.adminTitle;
+    var ps = document.querySelectorAll('.access-card p');
+    if(ps[0]) ps[0].textContent = t.storeDesc;
+    if(ps[1]) ps[1].textContent = t.adminDesc;
+    var btns = document.querySelectorAll('.access-btn');
+    if(btns[0]) btns[0].textContent = t.storeBtn;
+    if(btns[1]) btns[1].textContent = t.adminBtn;
+    var lt = document.querySelector('.language-title'); if(lt) lt.textContent = t.lang;
+    var ht = document.querySelector('.portal-title'); if(ht) ht.innerHTML = t.header;
+    var hd = document.querySelector('.portal-description'); if(hd) hd.textContent = t.desc;
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang===lang));
+  }
+  document.addEventListener('DOMContentLoaded', applyPortalLanguage);
+})();
+</script>
+
+
+
+
+
+<footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
+  nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
+  nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
+  © 2026 nexo™ – Todos los derechos reservados<br>
+  <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+    <a href="aviso-legal.html">Aviso Legal</a><span>&nbsp;|&nbsp;</span>
+    <a href="terminos-condiciones.html">Términos y Condiciones</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-privacidad.html">Privacidad</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-cookies.html">Cookies</a><span>&nbsp;|&nbsp;</span>
+    <a href="reembolsos.html">Reembolsos</a>
+  </div>
+</footer>
+<div class="nexo-policy-modal" id="nexoPolicyModal">
+  <div class="nexo-policy-card">
+    <div class="nexo-policy-top">
+      <h2 id="nexoPolicyTitle">Aviso legal</h2>
+      <button class="nexo-close-btn" type="button" onclick="closePolicyModal()">Cerrar</button>
+    </div>
+    <div class="nexo-policy-body" id="nexoPolicyBody"></div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const portalTextsExtra = {
+    es:{
+      legalFooter:{legal:'Aviso legal',privacy:'Privacidad',terms:'Términos',cookies:'Cookies',security:'Seguridad',refunds:'Reembolsos',close:'Cerrar'},
+      policies:{
+        legal:{title:'Aviso legal',body:`<p>Este portal es operado por Nexo Servicios Generales y Empresariales como plataforma digital de acceso a tienda, soporte y panel administrativo. El contenido tiene finalidad informativa y operativa.</p><h3>Uso del sitio</h3><p>El usuario debe utilizar el portal de forma lícita, sin intentar alterar su funcionamiento, vulnerar accesos o introducir software malicioso.</p><h3>Propiedad intelectual</h3><p>Los textos, diseños, logotipos, estructura visual y componentes del portal pertenecen a NEXO o se usan con autorización.</p>`},
+        privacy:{title:'Política de privacidad',body:`<p>NEXO tratará los datos que el usuario envíe en formularios de acceso, soporte o compra únicamente para la gestión del servicio, autenticación, soporte y mejora operativa.</p><h3>Datos tratados</h3><ul><li>Datos de contacto</li><li>Datos operativos de pedidos o solicitudes</li><li>Información técnica básica del navegador cuando sea necesaria para el funcionamiento</li></ul><h3>Derechos</h3><p>El usuario podrá solicitar corrección, actualización o eliminación de sus datos por los canales habilitados por NEXO.</p>`},
+        terms:{title:'Términos y condiciones',body:`<p>Al usar este portal, el usuario acepta las condiciones de uso de la plataforma. Si no está de acuerdo, debe abstenerse de utilizarla.</p><h3>Responsabilidades del usuario</h3><ul><li>Proporcionar información veraz</li><li>Proteger sus credenciales</li><li>No usar el sistema con fines ilícitos o fraudulentos</li></ul><h3>Disponibilidad</h3><p>NEXO podrá actualizar, suspender o modificar funcionalidades por motivos operativos, de mantenimiento o seguridad.</p>`},
+        cookies:{title:'Política de cookies',body:`<p>Este portal puede utilizar almacenamiento local del navegador y tecnologías equivalentes para recordar idioma, mantener sesión y soportar funciones necesarias del sistema.</p><h3>Control</h3><p>El usuario puede borrar cookies o almacenamiento local desde su navegador. Esto podría afectar ciertas funciones del portal.</p>`},
+        security:{title:'Seguridad de la plataforma',body:`<p>NEXO aplica medidas técnicas y operativas razonables para proteger la integridad del portal y la información gestionada.</p><h3>Medidas generales</h3><ul><li>Separación de accesos de cliente y administración</li><li>Controles de autenticación</li><li>Buenas prácticas para sesiones y almacenamiento local</li><li>Revisión operativa y mantenimiento del sistema</li></ul><h3>Recomendaciones al usuario</h3><ul><li>No compartir claves</li><li>Usar contraseñas seguras</li><li>Cerrar sesión en equipos compartidos</li><li>Verificar que el dominio publicado sea el oficial</li></ul>`},
+        refunds:{title:'Política de reembolsos',body:`<p>Las solicitudes de reembolso estarán sujetas a validación del caso, estado del pedido, proveedor involucrado y condiciones de operación aplicables.</p><h3>Criterios generales</h3><ul><li>Error confirmado en el cobro o duplicidad</li><li>Pedido no procesado cuando corresponda</li><li>Incidencias verificadas de entrega o producto conforme a la revisión del caso</li></ul><h3>Proceso</h3><p>El cliente deberá presentar su solicitud por los canales de atención habilitados, indicando datos del pedido y descripción clara del incidente. NEXO revisará el caso y comunicará la resolución correspondiente.</p>`}
+      }
+    },
+    en:{
+      legalFooter:{legal:'Legal notice',privacy:'Privacy',terms:'Terms',cookies:'Cookies',security:'Security',refunds:'Refunds',close:'Close'},
+      policies:{
+        legal:{title:'Legal notice',body:`<p>This portal is operated by Nexo Servicios Generales y Empresariales as a digital platform for store access, support and administrative access. The content is provided for operational and informational purposes.</p><h3>Use of the site</h3><p>Users must use the portal lawfully and must not attempt to alter its operation, bypass access controls or introduce malicious software.</p><h3>Intellectual property</h3><p>The texts, design, logos, visual structure and portal components belong to NEXO or are used with authorization.</p>`},
+        privacy:{title:'Privacy policy',body:`<p>NEXO will process the data submitted by users through access, support or purchase forms only for service management, authentication, support and operational improvement.</p><h3>Data processed</h3><ul><li>Contact data</li><li>Operational order or request data</li><li>Basic browser technical information when required for operation</li></ul><h3>Rights</h3><p>Users may request correction, update or deletion of their data through NEXO’s enabled channels.</p>`},
+        terms:{title:'Terms and conditions',body:`<p>By using this portal, the user accepts the platform terms of use. If the user disagrees, they should refrain from using it.</p><h3>User responsibilities</h3><ul><li>Provide truthful information</li><li>Protect their credentials</li><li>Not use the system for unlawful or fraudulent purposes</li></ul><h3>Availability</h3><p>NEXO may update, suspend or modify functionalities for operational, maintenance or security reasons.</p>`},
+        cookies:{title:'Cookie policy',body:`<p>This portal may use local browser storage and equivalent technologies to remember language, keep sessions and support necessary system functions.</p><h3>Control</h3><p>Users may clear cookies or local storage from their browser. This may affect certain portal functions.</p>`},
+        security:{title:'Platform security',body:`<p>NEXO applies reasonable technical and operational measures to protect portal integrity and managed information.</p><h3>General measures</h3><ul><li>Separated client and administrative access</li><li>Authentication controls</li><li>Good practices for sessions and local storage</li><li>Operational review and maintenance</li></ul><h3>User recommendations</h3><ul><li>Do not share passwords</li><li>Use strong credentials</li><li>Sign out on shared devices</li><li>Verify the published domain is the official one</li></ul>`},
+        refunds:{title:'Refund policy',body:`<p>Refund requests are subject to validation according to the case, order status, involved provider and applicable operating conditions.</p><h3>General criteria</h3><ul><li>Confirmed billing error or duplicate charge</li><li>Order not processed when applicable</li><li>Verified delivery or product incident subject to case review</li></ul><h3>Process</h3><p>The customer must submit the request through the enabled support channels, including order details and a clear description of the incident. NEXO will review the case and communicate the corresponding resolution.</p>`}
+      }
+    },
+    pt:{
+      legalFooter:{legal:'Aviso legal',privacy:'Privacidade',terms:'Termos',cookies:'Cookies',security:'Segurança',refunds:'Reembolsos',close:'Fechar'},
+      policies:{
+        legal:{title:'Aviso legal',body:`<p>Este portal é operado pela Nexo Servicios Generales y Empresariales como plataforma digital de acesso à loja, suporte e área administrativa. O conteúdo tem finalidade informativa e operacional.</p>`},
+        privacy:{title:'Política de privacidade',body:`<p>A NEXO tratará os dados enviados pelo usuário apenas para gestão do serviço, autenticação, suporte e melhoria operacional.</p>`},
+        terms:{title:'Termos e condições',body:`<p>Ao usar este portal, o usuário aceita os termos de uso da plataforma.</p>`},
+        cookies:{title:'Política de cookies',body:`<p>Este portal pode usar armazenamento local do navegador e tecnologias equivalentes para lembrar idioma, sessão e funções necessárias.</p>`},
+        security:{title:'Segurança da plataforma',body:`<p>A NEXO aplica medidas técnicas e operacionais razoáveis para proteger a integridade do portal.</p>`},
+        refunds:{title:'Política de reembolsos',body:`<p>Pedidos de reembolso estarão sujeitos à validação do caso, status do pedido, fornecedor envolvido e condições aplicáveis.</p>`}
+      }
+    },
+    it:{
+      legalFooter:{legal:'Avviso legale',privacy:'Privacy',terms:'Termini',cookies:'Cookie',security:'Sicurezza',refunds:'Rimborsi',close:'Chiudi'},
+      policies:{
+        legal:{title:'Avviso legale',body:`<p>Questo portale è gestito da Nexo Servicios Generales y Empresariales come piattaforma digitale per negozio, supporto e accesso amministrativo.</p>`},
+        privacy:{title:'Informativa sulla privacy',body:`<p>NEXO tratterà i dati inviati dall’utente solo per gestione del servizio, autenticazione, supporto e miglioramento operativo.</p>`},
+        terms:{title:'Termini e condizioni',body:`<p>Usando questo portale, l’utente accetta i termini di utilizzo della piattaforma.</p>`},
+        cookies:{title:'Politica sui cookie',body:`<p>Questo portale può usare archiviazione locale del browser e tecnologie equivalenti per lingua, sessione e funzioni necessarie.</p>`},
+        security:{title:'Sicurezza della piattaforma',body:`<p>NEXO applica misure tecniche e operative ragionevoli per proteggere l’integrità del portale.</p>`},
+        refunds:{title:'Politica di rimborso',body:`<p>Le richieste di rimborso sono soggette a verifica del caso, stato dell’ordine, fornitore coinvolto e condizioni applicabili.</p>`}
+      }
+    },
+    fr:{
+      legalFooter:{legal:'Mentions légales',privacy:'Confidentialité',terms:'Conditions',cookies:'Cookies',security:'Sécurité',refunds:'Remboursements',close:'Fermer'},
+      policies:{
+        legal:{title:'Mentions légales',body:`<p>Ce portail est exploité par Nexo Servicios Generales y Empresariales comme plateforme numérique d’accès boutique, support et zone administrative.</p>`},
+        privacy:{title:'Politique de confidentialité',body:`<p>NEXO traitera les données envoyées par l’utilisateur uniquement pour la gestion du service, l’authentification, le support et l’amélioration opérationnelle.</p>`},
+        terms:{title:'Conditions générales',body:`<p>En utilisant ce portail, l’utilisateur accepte les conditions d’utilisation de la plateforme.</p>`},
+        cookies:{title:'Politique de cookies',body:`<p>Ce portail peut utiliser le stockage local du navigateur et des technologies équivalentes pour la langue, la session et les fonctions nécessaires.</p>`},
+        security:{title:'Sécurité de la plateforme',body:`<p>NEXO applique des mesures techniques et opérationnelles raisonnables pour protéger l’intégrité du portail.</p>`},
+        refunds:{title:'Politique de remboursement',body:`<p>Les demandes de remboursement sont soumises à la validation du cas, du statut de la commande, du fournisseur concerné et des conditions applicables.</p>`}
+      }
+    }
+  };
+
+  window.openPolicyModal = function(key){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const dict = portalTextsExtra[lang] || portalTextsExtra.es;
+    const entry = dict.policies[key];
+    if(!entry) return;
+    document.getElementById('nexoPolicyTitle').textContent = entry.title;
+    document.getElementById('nexoPolicyBody').innerHTML = entry.body;
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal) modal.classList.add('open');
+  };
+  window.closePolicyModal = function(){
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal) modal.classList.remove('open');
+  };
+
+  const oldApply = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof oldApply === 'function') oldApply();
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const dict = portalTextsExtra[lang] || portalTextsExtra.es;
+    document.querySelectorAll('[data-policy-link]').forEach(a=>{
+      const key = a.getAttribute('data-policy-link');
+      if(dict.legalFooter[key]) a.textContent = dict.legalFooter[key];
+      a.onclick = function(e){ e.preventDefault(); openPolicyModal(key); };
+    });
+    const btn = document.querySelector('.nexo-close-btn');
+    if(btn) btn.textContent = dict.legalFooter.close;
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof window.applyPortalLanguage === 'function') window.applyPortalLanguage();
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal){
+      modal.addEventListener('click', function(e){
+        if(e.target === modal) closePolicyModal();
+      });
+    }
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const nexoFooterLabels = {
+    es:{legal:'Aviso legal',privacy:'Privacidad',terms:'Términos',cookies:'Cookies',security:'Seguridad',refunds:'Reembolsos'},
+    en:{legal:'Legal Notice',privacy:'Privacy',terms:'Terms',cookies:'Cookies',security:'Security',refunds:'Refunds'},
+    pt:{legal:'Aviso legal',privacy:'Privacidade',terms:'Termos',cookies:'Cookies',security:'Segurança',refunds:'Reembolsos'},
+    it:{legal:'Avviso legale',privacy:'Privacy',terms:'Termini',cookies:'Cookie',security:'Sicurezza',refunds:'Rimborsi'},
+    fr:{legal:'Mentions légales',privacy:'Confidentialité',terms:'Conditions',cookies:'Cookies',security:'Sécurité',refunds:'Remboursements'}
+  };
+  function applyFooterLegalTitles(){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const t = nexoFooterLabels[lang] || nexoFooterLabels.es;
+    document.querySelectorAll('[data-policy-link]').forEach(a=>{
+      const key = a.getAttribute('data-policy-link');
+      if(t[key]) a.textContent = t[key];
+    });
+  }
+  const oldApplyPortalLanguage = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof oldApplyPortalLanguage === 'function') oldApplyPortalLanguage();
+    applyFooterLegalTitles();
+  };
+  document.addEventListener('DOMContentLoaded', applyFooterLegalTitles);
+})();
+</script>
+
+<script src="nexo-legal-i18n.js"></script>
+
+<script id="nexo-legal-footer-i18n-final">
+(function(){
+  const LEGAL={
+    es:{title:'Plataforma de Intermediación Comercial Internacional',company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal',terms:'Términos y Condiciones',privacy:'Privacidad',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condiciones legales de compra nexo™',buyDesc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'International Commercial Intermediation Platform',company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice',terms:'Terms and Conditions',privacy:'Privacy',cookies:'Cookies',refunds:'Refunds',buyTitle:'nexo™ legal purchase conditions',buyDesc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Plataforma de Intermediação Comercial Internacional',company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal',terms:'Termos e Condições',privacy:'Privacidade',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condições legais de compra nexo™',buyDesc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Piattaforma di Intermediazione Commerciale Internazionale',company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale',terms:'Termini e Condizioni',privacy:'Privacy',cookies:'Cookie',refunds:'Rimborsi',buyTitle:'Condizioni legali di acquisto nexo™',buyDesc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Plateforme d’Intermédiation Commerciale Internationale',company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions légales',terms:'Conditions générales',privacy:'Confidentialité',cookies:'Cookies',refunds:'Remboursements',buyTitle:'Conditions légales d’achat nexo™',buyDesc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  function lang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||document.documentElement.lang||'es').slice(0,2).toLowerCase();}
+  function a(href,txt){return `<a href="${href}">${txt}</a>`;}
+  function legalHTML(t){return `<strong>nexo™</strong> – ${t.title}<br>${t.company}<br>${t.desc}<br>© 2026 nexo™ – ${t.rights}<br><span class="nexo-footer-links">${a('aviso-legal.html',t.legal)} | ${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('politica-cookies.html',t.cookies)} | ${a('reembolsos.html',t.refunds)}</span>`;}
+  window.nexoApplyLegalI18n=function(){
+    const t=LEGAL[lang()]||LEGAL.es;
+    document.querySelectorAll('[data-nexo-legal-footer], .nexo-left-legal-card, .nexo-left-legal, footer#nexoFooter, footer.nexo-footer, footer.nexo-legal-footer').forEach(el=>{el.innerHTML=legalHTML(t);});
+    document.querySelectorAll('.page-legal-block').forEach(el=>{
+      const checked = el.querySelector('input')?.checked ? 'checked' : '';
+      el.innerHTML = `<p style="margin:0 0 8px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 12px 0;">${t.buyDesc}</p><p style="margin:0 0 12px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" ${checked} style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label>`;
+    });
+    const modalLegal=document.querySelector('#confirmationModal .nexo-checkout-legal');
+    if(modalLegal){
+      const chk = document.getElementById('nexoLegalAccept')?.checked ? 'checked' : '';
+      modalLegal.innerHTML = `<p style="margin:0 0 10px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 10px 0;">${t.buyDesc}</p><p style="margin:0 0 10px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;"><input type="checkbox" id="nexoLegalAccept" ${chk} required style="margin-top:3px;min-width:18px;min-height:18px;"><span>${t.accept}</span></label><div id="nexoLegalWarning" style="display:none;margin-top:10px;color:#c62828;font-weight:800;">${lang()==='en'?'You must accept the legal conditions to continue.':lang()==='fr'?'Vous devez accepter les conditions légales pour continuer.':lang()==='pt'?'Você deve aceitar as condições legais para continuar.':lang()==='it'?'Devi accettare le condizioni legali per continuare.':'Para continuar debes aceptar las condiciones legales de la compra.'}</div>`;
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>{nexoApplyLegalI18n(); setTimeout(nexoApplyLegalI18n,200); setTimeout(nexoApplyLegalI18n,700);});
+  document.addEventListener('click',e=>{ if(e.target.closest('button,a')) setTimeout(nexoApplyLegalI18n,60);},true);
+  window.addEventListener('storage',nexoApplyLegalI18n);
+})();
+</script>
+
+
+<script id="nexo-index-legal-left-final-fix">
+(function(){
+  const LEGAL_INDEX = {
+    es:{
+      title:'nexo™ – Plataforma de Intermediación Comercial Internacional',
+      company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
+      desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',
+      copy:'© 2026 nexo™ – Todos los derechos reservados',
+      legal:'Aviso Legal', terms:'Términos y Condiciones', privacy:'Privacidad', cookies:'Cookies', refunds:'Reembolsos'
+    },
+    en:{
+      title:'nexo™ – International Commercial Intermediation Platform',
+      company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',
+      desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',
+      copy:'© 2026 nexo™ – All rights reserved',
+      legal:'Legal Notice', terms:'Terms and Conditions', privacy:'Privacy', cookies:'Cookies', refunds:'Refunds'
+    },
+    pt:{
+      title:'nexo™ – Plataforma de Intermediação Comercial Internacional',
+      company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',
+      desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',
+      copy:'© 2026 nexo™ – Todos os direitos reservados',
+      legal:'Aviso Legal', terms:'Termos e Condições', privacy:'Privacidade', cookies:'Cookies', refunds:'Reembolsos'
+    },
+    it:{
+      title:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale',
+      company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',
+      desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',
+      copy:'© 2026 nexo™ – Tutti i diritti riservati',
+      legal:'Avviso Legale', terms:'Termini e Condizioni', privacy:'Privacy', cookies:'Cookie', refunds:'Rimborsi'
+    },
+    fr:{
+      title:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale',
+      company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',
+      desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',
+      copy:'© 2026 nexo™ – Tous droits réservés',
+      legal:'Mentions légales', terms:'Conditions générales', privacy:'Confidentialité', cookies:'Cookies', refunds:'Remboursements'
+    }
+  };
+
+  function currentLang(){
+    return (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es').slice(0,2).toLowerCase();
+  }
+
+  function setText(id, value){
+    const el = document.getElementById(id);
+    if(el) el.textContent = value;
+  }
+
+  function applyIndexLegal(){
+    const t = LEGAL_INDEX[currentLang()] || LEGAL_INDEX.es;
+
+    setText('leftLegalTitle', t.title);
+    setText('leftLegalCompany', t.company);
+    setText('leftLegalDesc', t.desc);
+    setText('leftLegalCopy', t.copy);
+    setText('leftLegalNotice', t.legal);
+    setText('leftLegalTerms', t.terms);
+    setText('leftLegalPrivacy', t.privacy);
+    setText('leftLegalCookies', t.cookies);
+    setText('leftLegalRefunds', t.refunds);
+
+    // Si existe otro footer legal visible en index, también queda sincronizado.
+    document.querySelectorAll('footer.nexo-legal-footer[data-nexo-legal-footer="1"]').forEach(footer=>{
+      footer.innerHTML = `<strong>nexo™</strong> – ${t.title.replace('nexo™ – ','')}<br>
+        ${t.company}<br>
+        ${t.desc}<br>
+        ${t.copy}<br>
+        <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+          <a href="aviso-legal.html">${t.legal}</a><span>&nbsp;|&nbsp;</span>
+          <a href="terminos-condiciones.html">${t.terms}</a><span>&nbsp;|&nbsp;</span>
+          <a href="politica-privacidad.html">${t.privacy}</a><span>&nbsp;|&nbsp;</span>
+          <a href="politica-cookies.html">${t.cookies}</a><span>&nbsp;|&nbsp;</span>
+          <a href="reembolsos.html">${t.refunds}</a>
+        </div>`;
+    });
+  }
+
+  const previousSetLanguage = window.setLanguage;
+  window.setLanguage = function(lang, ev){
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang);
+    if(typeof previousSetLanguage === 'function'){
+      try { previousSetLanguage(lang, ev); } catch(e) {}
+    }
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang === lang));
+    setTimeout(applyIndexLegal, 0);
+    setTimeout(applyIndexLegal, 80);
+    return false;
+  };
+
+  const previousApplyPortalLanguage = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof previousApplyPortalLanguage === 'function'){
+      try { previousApplyPortalLanguage(); } catch(e) {}
+    }
+    applyIndexLegal();
+  };
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    applyIndexLegal();
+    setTimeout(applyIndexLegal, 100);
+    setTimeout(applyIndexLegal, 500);
+  });
+  window.addEventListener('storage', applyIndexLegal);
+})();
+</script>
+
+
+<script id="nexo-legal-links-carry-lang-final">
+(function(){
+  function currentLang(){
+    return (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es').slice(0,2).toLowerCase();
+  }
+  function patchLegalLinks(){
+    const files = ['aviso-legal.html','terminos-condiciones.html','politica-privacidad.html','politica-cookies.html','reembolsos.html'];
+    const lang = currentLang();
+    document.querySelectorAll('a[href]').forEach(a=>{
+      const href = a.getAttribute('href') || '';
+      const clean = href.split('?')[0].split('#')[0];
+      if(files.includes(clean)){
+        a.setAttribute('href', clean + '?lang=' + encodeURIComponent(lang));
+      }
+    });
+  }
+  const oldSetLanguage = window.setLanguage;
+  window.setLanguage = function(lang, ev){
+    if(typeof oldSetLanguage === 'function'){
+      try { oldSetLanguage(lang, ev); } catch(e) {}
+    } else {
+      localStorage.setItem('nexoLang', lang);
+      localStorage.setItem('nexo_language', lang);
+    }
+    setTimeout(patchLegalLinks, 0);
+    setTimeout(patchLegalLinks, 80);
+    return false;
+  };
+  document.addEventListener('DOMContentLoaded', ()=>{
+    patchLegalLinks();
+    setTimeout(patchLegalLinks, 200);
+    setTimeout(patchLegalLinks, 700);
+  });
+})();
+</script>
+
+</body>
+</html>
