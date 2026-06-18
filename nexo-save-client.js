@@ -1,48 +1,103 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ujqbbniptflzytdankwp.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// nexo – Multi-provider Product Search API
+// Combina CJ real + Alibaba preparado + Amazon respaldo para que la tienda no dependa de un solo proveedor.
 
-async function sb(path){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' }
-  });
-  const txt = await r.text();
-  let data = null;
-  try { data = txt ? JSON.parse(txt) : []; } catch { data = txt; }
-  if(!r.ok) throw new Error(typeof data === 'string' ? data : JSON.stringify(data));
-  return data || [];
+function cors(res){
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Methods','GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers','Content-Type');
 }
-async function sbPost(table, rows){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-    method:'POST',
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', Prefer:'return=representation' },
-    body: JSON.stringify(rows)
-  });
-  const txt = await r.text(); let data=null; try{ data=txt?JSON.parse(txt):[]; }catch{ data=txt; }
-  if(!r.ok) throw new Error(typeof data === 'string' ? data : JSON.stringify(data));
-  return data || [];
+function clean(s){ return String(s||'').trim(); }
+function money(n){ const x=Number(n||0); return Number.isFinite(x) ? Number(x.toFixed(2)) : 0; }
+function sortProducts(products){
+  return products
+    .filter(p=>p && money(p.price)>0)
+    .sort((a,b)=>money(b.price)-money(a.price));
+}
+async function callLocal(req, path){
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers.host;
+  const url = `${proto}://${host}${path}`;
+  const r = await fetch(url, {cache:'no-store'});
+  const data = await r.json().catch(()=>({ok:false,error:'invalid_json'}));
+  return {status:r.status, data};
+}
+function normalizeFromTable(row){
+  return {
+    id:`supabase-${row.id}`,
+    sku: row.sku_original || row.sku || '',
+    name: row.nombre_original || row.nombre || 'Producto proveedor',
+    title: row.nombre_original || row.nombre || 'Producto proveedor',
+    provider: row.marketplace || row.proveedor_nombre || row.proveedor || 'Proveedor',
+    proveedor: row.marketplace || row.proveedor_nombre || row.proveedor || 'Proveedor',
+    vendor: row.marketplace || row.proveedor_nombre || row.proveedor || 'Proveedor',
+    providerLogo: row.marketplace === 'Alibaba' ? '🟧' : '🌐',
+    price: money(row.precio_original || row.precio || 0),
+    category: row.categoria || 'general',
+    image: row.imagen_principal || '',
+    sourceUrl: row.url_original || '',
+    url: row.url_original || '',
+    stock: row.stock || 'Verificar stock',
+    source:'supabase-proveedor_productos',
+    features:'Producto registrado en proveedor_productos de Supabase.'
+  };
+}
+async function searchSupabaseProductos(q, maxPrice){
+  try{
+    const { sb } = await import('./_nexo-supabase.js');
+    const term = encodeURIComponent(`%${q}%`);
+    let path = `proveedor_productos?select=*&or=(nombre_original.ilike.${term},descripcion_original.ilike.${term},sku_original.ilike.${term})&limit=20`;
+    const rows = await sb(path, {method:'GET', prefer:'return=representation'});
+    let products = Array.isArray(rows) ? rows.map(normalizeFromTable) : [];
+    if(Number(maxPrice)>0) products = products.filter(p=>p.price<=Number(maxPrice));
+    return products;
+  }catch(e){ return []; }
 }
 
 export default async function handler(req,res){
-  try{
-    if(!SUPABASE_KEY) return res.status(500).json({ok:false,error:'Falta SUPABASE_SERVICE_ROLE_KEY'});
-    const [clientes,pedidos,pagos,productos,facturas,tracking,tickets,afiliados,logs,usuarios_admin] = await Promise.all([
-      sb('clientes?select=*&order=fecha_registro.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('pedidos?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('pagos?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('productos?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('facturas?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('tracking_envios?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('tickets?select=*&order=fecha_creacion.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('afiliados_amazon?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('logs_agente1?select=*&order=creado_en.desc&limit=200').catch(e=>({error:e.message, data:[]})),
-      sb('usuarios_admin?select=*&limit=50').catch(e=>({error:e.message, data:[]}))
-    ]);
-    const norm = x => Array.isArray(x) ? x : (x.data || []);
-    let usuarios = norm(usuarios_admin);
-    if(!usuarios.length && process.env.SUPABASE_SERVICE_ROLE_KEY){
-      try{ usuarios = await sbPost('usuarios_admin', [{usuario:process.env.NEXO_SUPERADMIN_EMAIL || 'ermcba@hotmail.com', contraseña:'CONFIGURAR_EN_PANEL', rol:'superadministrador', activo:true}]); }catch(e){ /* no bloquea panel */ }
-    }
-    const errors = [clientes,pedidos,pagos,productos,facturas,tracking,tickets,afiliados,logs,usuarios_admin].filter(x=>x && x.error).map(x=>x.error);
-    res.status(200).json({ok:true, using_service_role: !!process.env.SUPABASE_SERVICE_ROLE_KEY, errors, clientes:norm(clientes), pedidos:norm(pedidos), pagos:norm(pagos), productos:norm(productos), facturas:norm(facturas), tracking_envios:norm(tracking), tickets:norm(tickets), afiliados_amazon:norm(afiliados), logs_agente1:norm(logs), usuarios_admin:usuarios});
-  }catch(e){ res.status(500).json({ok:false,error:e.message||String(e)}); }
+  cors(res);
+  if(req.method==='OPTIONS') return res.status(200).end();
+  if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
+
+  const q = clean(req.query.q || req.query.search || '');
+  const maxPrice = Number(req.query.maxPrice || req.query.max || 0);
+  const category = clean(req.query.category || '');
+  const size = Math.min(Math.max(Number(req.query.size || 20),1),60);
+  if(!q) return res.status(200).json({ok:true, products:[], providers:[], message:'Ingrese un producto para buscar'});
+
+  const qs = new URLSearchParams({q, size:String(size), lang:clean(req.query.lang||'es')});
+  if(Number(maxPrice)>0) qs.set('maxPrice', String(maxPrice));
+  if(category) qs.set('category', category);
+
+  const results = await Promise.allSettled([
+    searchSupabaseProductos(q,maxPrice),
+    callLocal(req, `/api/cj-products?${qs.toString()}`),
+    callLocal(req, `/api/alibaba-products?${qs.toString()}&size=10`),
+    callLocal(req, `/api/amazon-products?${qs.toString()}`)
+  ]);
+
+  const products=[];
+  const providers=[];
+  const notices=[];
+
+  const supa = results[0];
+  if(supa.status==='fulfilled' && Array.isArray(supa.value) && supa.value.length){ products.push(...supa.value); providers.push('Supabase'); }
+
+  for(const r of results.slice(1)){
+    if(r.status !== 'fulfilled') continue;
+    const data = r.value?.data || {};
+    if(data.provider) providers.push(data.provider);
+    if(data.notice) notices.push(data.notice);
+    if(data.ok !== false && Array.isArray(data.products)) products.push(...data.products);
+  }
+
+  const out = sortProducts(products).slice(0,size);
+  return res.status(200).json({
+    ok:true,
+    provider:'Multi-proveedor',
+    providers:[...new Set(providers)],
+    count:out.length,
+    mode:'cj_alibaba_amazon_supabase',
+    notices,
+    products:out
+  });
 }

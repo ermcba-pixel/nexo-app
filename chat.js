@@ -7,6 +7,14 @@ import crypto from 'crypto';
 const REGION = process.env.AMAZON_REGION || 'us-east-1';
 const HOST = process.env.AMAZON_HOST || 'webservices.amazon.com';
 const MARKETPLACE = process.env.AMAZON_MARKETPLACE || 'www.amazon.com';
+const NEXO_AMAZON_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
+function withNexoAmazonTag(url){
+  try{
+    const u = new URL(String(url || '').startsWith('http') ? String(url) : `https://${MARKETPLACE}/s?k=producto`);
+    u.searchParams.set('tag', NEXO_AMAZON_TAG);
+    return u.toString();
+  }catch(e){ return `https://${MARKETPLACE}/s?k=producto&tag=${encodeURIComponent(NEXO_AMAZON_TAG)}`; }
+}
 const SERVICE = 'ProductAdvertisingAPI';
 const PATH = '/paapi5/searchitems';
 const TARGET = 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems';
@@ -49,7 +57,7 @@ function normalizePaapiItem(item, idx){
   const image=item?.Images?.Primary?.Large?.URL || item?.Images?.Primary?.Medium?.URL || item?.Images?.Primary?.Small?.URL || '';
   const title=item?.ItemInfo?.Title?.DisplayValue || 'Producto Amazon';
   const asin=item?.ASIN || `AMZ-${idx+1}`;
-  const url=item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`;
+  const url=withNexoAmazonTag(item?.DetailPageURL || `https://${MARKETPLACE}/dp/${asin}`);
   const availability=listing?.Availability?.Message || '';
   return {
     id:`amazon-${asin}`, asin, name:title, title, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🟠',
@@ -80,32 +88,48 @@ async function searchAmazonPaapi(q, maxPrice){
 }
 
 const catalog = {
+  socks: [
+    ['Men Athletic Socks 6 Pack',14.99,'socks'],['Cotton Crew Socks 10 Pack',12.99,'socks'],['Compression Socks 3 Pack',18.99,'socks'],['Dress Socks for Men 6 Pairs',16.99,'socks'],['Women Ankle Socks 8 Pack',11.99,'socks'],['Kids Colorful Socks 12 Pack',13.49,'socks'],['Sports Cushioned Socks 6 Pack',15.99,'socks'],['No Show Socks 10 Pack',10.99,'socks'],['Thermal Winter Socks 4 Pack',19.99,'socks'],['Bamboo Socks 6 Pairs',17.50,'socks'],['Running Socks 5 Pack',13.75,'socks'],['Novelty Socks Gift Set',9.99,'socks']
+  ],
+  shoelaces: [
+    ['Flat Shoelaces 6 Pairs',7.99,'shoelaces'],['Elastic No Tie Shoelaces',8.99,'shoelaces'],['Round Boot Laces 3 Pairs',9.99,'shoelaces'],['Reflective Shoelaces 4 Pairs',6.99,'shoelaces'],['Sneaker Replacement Laces',5.99,'shoelaces']
+  ],
   iphone: [
-    ['Apple iPhone 15 Pro Max 256GB',1199,'phone'],['Apple iPhone 15 Pro 128GB',999,'phone'],['Apple iPhone 15 Plus 128GB',899,'phone'],['Apple iPhone 15 128GB',799,'phone'],['Apple iPhone 14 Pro Max 256GB',749,'phone'],['Apple iPhone 14 Pro 128GB',699,'phone'],['Apple iPhone 14 128GB',599,'phone'],['Apple iPhone 13 128GB',449,'phone'],['Apple iPhone SE 3rd Gen',289,'phone'],['Apple MagSafe Charger',39,'phone'],['Apple USB-C Power Adapter',29,'phone'],['iPhone 15 Silicone Case',24,'phone']
+    ['Apple USB-C Power Adapter',19.99,'phone'],['iPhone 15 Silicone Case',24.00,'phone'],['MagSafe Compatible Charger',23.99,'phone'],['USB-C Cable 2 Pack',12.99,'phone'],['Phone Stand Aluminum',15.00,'phone'],['Screen Protector 3 Pack',9.99,'phone']
   ],
   laptop: [
-    ['Apple MacBook Pro 14 M3',1799,'laptop'],['Dell XPS 15 Laptop',1499,'laptop'],['Lenovo ThinkPad X1 Carbon',1399,'laptop'],['HP Spectre x360 14',1199,'laptop'],['Microsoft Surface Laptop 5',999,'laptop'],['Acer Aspire 5 15.6',529,'laptop'],['Lenovo IdeaPad 15',399,'laptop'],['HP 14 Ryzen Laptop',349,'laptop']
+    ['USB-C Hub 6 in 1',22.99,'laptop'],['Laptop Stand Aluminum',24.99,'laptop'],['Wireless Mouse',14.99,'laptop'],['HDMI Cable 2 Pack',11.99,'laptop'],['Keyboard Cover',9.99,'laptop']
   ],
   default: [
-    ['Amazon Echo Show 10',249,'product'],['Kindle Paperwhite Signature',189,'product'],['Fire HD 10 Tablet',139,'product'],['Ring Video Doorbell',99,'product'],['Anker USB-C Hub',59,'product'],['Logitech Wireless Mouse',34,'product'],['USB-C Cable 2 Pack',19,'product'],['Phone Stand Aluminum',15,'product']
+    ['USB-C Cable 2 Pack',12.99,'product'],['Phone Stand Aluminum',15.00,'product'],['Logitech Wireless Mouse',24.99,'product'],['Anker USB-C Hub',23.99,'product'],['Travel Organizer Bag',18.99,'product'],['Desk Accessories Set',19.99,'product']
   ]
 };
+function catalogKey(q){
+  if(/calcetin|calcetines|media|medias|sock/i.test(q)) return 'socks';
+  if(/cordon|cordones|shoelace|lace/i.test(q)) return 'shoelaces';
+  if(/iphone|ios|apple phone|celular|telefono|phone/i.test(q)) return 'iphone';
+  if(/laptop|notebook|macbook|comput/i.test(q)) return 'laptop';
+  return 'default';
+}
 function temporaryCatalog(q, maxPrice){
-  const key = /iphone|ios|apple phone/i.test(q) ? 'iphone' : /laptop|notebook|macbook|comput/i.test(q) ? 'laptop' : 'default';
-  let rows = catalog[key].concat(catalog.default).slice(0,20);
+  const key = catalogKey(q || '');
+  let rows = (catalog[key] || catalog.default).slice();
+  if(key === 'default') rows = rows.concat(catalog.socks.slice(0,4), catalog.shoelaces.slice(0,3));
+  const limit = Number(maxPrice || 0);
   let products = rows.map((r,idx)=>{
     const [name, price, imageType] = r;
     const query = encodeURIComponent(name);
+    const url = withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${query}`);
     return {
-      id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🟠',
-      price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:'electronica',
-      image:'', imageType, url:`https://${MARKETPLACE}/s?k=${query}`, sourceUrl:`https://${MARKETPLACE}/s?k=${query}`,
-      stock:'Verificar en Amazon', source:'amazon-temporal-catalog', rating:4.6, reviews:0,
-      sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true
+      id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🇺🇸',
+      price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:key,
+      image:'', imageType, url, sourceUrl:url, originalProviderUrl:url,
+      stock:'Verificar disponibilidad y precio final en Amazon', source:'amazon-affiliate-temporal', rating:4.6, reviews:0,
+      sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true, amazonAffiliate:true, amazon_tag:NEXO_AMAZON_TAG
     };
   });
-  if(maxPrice) products = products.filter(p=>p.price<=maxPrice);
-  return products.sort((a,b)=>Number(b.price)-Number(a.price));
+  if(limit > 0) products = products.filter(p=>Number(p.price||0) <= limit);
+  return products.sort((a,b)=>Number(b.price)-Number(a.price)).slice(0,50);
 }
 
 export default async function handler(req,res){
@@ -127,7 +151,7 @@ export default async function handler(req,res){
       mode:'temporary_catalog_until_creators_api',
       originalImages:false,
       sort:'price_desc',
-      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. El checkout PayPal funciona y los enlaces abren Amazon.',
+      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. Los enlaces abren Amazon con el tag afiliado nexo08-20.',
       paapiStatus:real,
       products:temporaryCatalog(q, maxPrice)
     });

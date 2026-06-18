@@ -4,445 +4,1395 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>nexo™ - Tienda Cliente</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    :root{--primary:#4A6B6D;--secondary:#5A7C7E;--tertiary:#6A8C8D;--light:#E8F0F0;--white:#fff;--dark:#2D3E3F;--accent:#7AC742;--warning:#F39C12}
-    body{font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,var(--primary),var(--secondary),var(--tertiary));min-height:100vh;padding:20px}
-    .store-container{max-width:1400px;margin:0 auto;background:var(--white);border-radius:30px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.25)}
-    .store-header{background:linear-gradient(135deg,var(--primary),var(--secondary),var(--tertiary));padding:30px 40px;display:grid;grid-template-columns:auto auto;gap:24px;align-items:center;color:#fff}
-    .header-left{display:flex;align-items:center;gap:20px}.logo-store{background:#fff;border-radius:15px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:900;font-size:28px}.ne,.o{color:var(--primary)}.x{color:var(--accent)}.logo-store-subtitle{font-size:7px;color:#888;letter-spacing:1px;font-weight:700;text-transform:uppercase}
-    .header-title h1{font-size:32px;font-weight:900;margin:0}.header-title p{font-size:13px;opacity:.9;margin-top:4px}
-    .nexo-search-instruction{max-width:620px;padding:16px 18px;border:1px solid rgba(255,255,255,.35);border-radius:14px;color:#fff;font-size:13px;line-height:1.45;font-weight:700;background:rgba(255,255,255,.08)}
-    .header-right{display:flex;align-items:center;gap:16px}.cart-badge{background:var(--accent);color:var(--dark);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;cursor:pointer}
-    .back-btn{background:rgba(255,255,255,.2);color:#fff;padding:10px 16px;border-radius:8px;border:2px solid rgba(255,255,255,.3);cursor:pointer;font-weight:700;font-size:13px}
-    .store-content{padding:40px}.filters-section{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:20px;margin-bottom:36px;padding:20px;background:linear-gradient(135deg,var(--light),rgba(122,199,66,.05));border-radius:16px;border:2px solid rgba(74,107,109,.1)}
-    .filter-group{display:flex;flex-direction:column;gap:8px}.filter-label{font-size:13px;font-weight:800;color:var(--dark);text-transform:uppercase;letter-spacing:1px}
-    .filter-input,.filter-select{padding:12px;border:2px solid #ddd;border-radius:8px;font-size:14px}.filter-input:focus,.filter-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 8px rgba(122,199,66,.25)}
-    .hint{grid-column:1/-1;font-size:12px;color:#5e7172;font-weight:700;text-align:right}
-    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px;margin-bottom:40px}
-    .empty-note,.loading-note,.api-note{grid-column:1/-1;text-align:center;color:#4A6B6D;font-weight:900;padding:38px 10px;background:#f5fbf9;border:1px solid #d7e4df;border-radius:16px}.api-note{border-left:6px solid var(--warning);line-height:1.6}.loading-note{opacity:.9}
-    .product-card{background:linear-gradient(135deg,var(--light),rgba(122,199,66,.05));border:2px solid rgba(74,107,109,.1);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-    .product-image{height:150px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:58px;border-bottom:1px solid rgba(74,107,109,.08)}
-    .product-info{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}.provider{font-size:11px;color:#4A6B6D;font-weight:900;background:rgba(122,199,66,.14);padding:4px 7px;border-radius:999px;width:fit-content}
-    .provider-link{font-size:11px;color:#4A6B6D;font-weight:900;text-decoration:underline}.product-name{font-weight:900;color:var(--dark);font-size:14px;line-height:1.3}.product-rating{font-size:12px;color:#F39C12}.product-price{font-size:19px;font-weight:900;color:var(--accent)}
-    .product-stock{font-size:11px;color:#777}.add-to-cart-btn{margin-top:auto;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:10px;border:0;border-radius:8px;font-weight:800;cursor:pointer}
-    .modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5)}.modal-content{background:#fff;margin:5% auto;padding:30px;border-radius:20px;width:90%;max-width:600px;max-height:80vh;overflow:auto}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid rgba(74,107,109,.1);padding-bottom:16px}.close-btn{background:0;border:0;font-size:28px;cursor:pointer}
-    .cart-item{display:grid;grid-template-columns:1fr 90px 90px;gap:12px;padding:12px;background:var(--light);border-radius:10px;margin-bottom:10px;align-items:center}.qty-btn{background:var(--accent);color:#fff;border:0;width:24px;height:24px;border-radius:4px;cursor:pointer;font-weight:900}.cart-summary{background:var(--light);border-radius:12px;padding:16px;margin-top:18px}.summary-row{display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;font-weight:700}.summary-row.total{border-top:1px solid #cad8d8;padding-top:10px;font-size:16px;color:var(--accent);font-weight:900}
-    .checkout-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:0;border-radius:10px;font-weight:900;margin-top:16px;cursor:pointer}
-    footer{margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88)}
-    footer a{color:#fff;font-weight:800;text-decoration:underline}
-    footer a:hover{color:var(--accent)}
-    @media(max-width:900px){.store-header{grid-template-columns:1fr}.filters-section{grid-template-columns:1fr}.nexo-search-instruction{max-width:100%}.store-content{padding:24px}}
-  
-    .product-image{font-size:0!important;overflow:hidden}
-    .product-image img{width:100%;height:100%;object-fit:cover;display:block}
-    .product-features{font-size:11px;color:#4A6B6D;line-height:1.45;background:rgba(255,255,255,.55);border-radius:8px;padding:8px;margin-top:2px}
-    .product-features strong{color:#2D3E3F}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexo™ - Login Cliente</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --danger: #c62828;
+            --success: #2e7d32;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 1280px;
+            background-color: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            overflow: hidden;
+            display: flex;
+            min-height: 680px;
+        }
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 60px 50px;
+            text-align: center;
+            color: var(--white);
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-logo {
+            background-color: var(--white);
+            border-radius: 22px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 12px 18px;
+            margin-bottom: 18px;
+        }
+        .logo-text-nexo {
+            font-size: 65px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .logo-ne { color: var(--primary); }
+        .logo-x { color: var(--accent); }
+        .logo-o { color: var(--primary); }
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .login-header p {
+            font-size: 13px;
+            opacity: 0.85;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+        .login-content {
+            padding: 42px 50px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .back-btn {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+            font-weight: 600;
+            border-left: 4px solid;
+            width: 100%;
+            max-width: 560px;
+        }
+        .alert.show { display: block; }
+        .alert-error {
+            background: #ffebee;
+            color: var(--danger);
+            border-left-color: #E74C3C;
+        }
+        .alert-success {
+            background: #e8f5e9;
+            color: var(--success);
+            border-left-color: #27AE60;
+        }
+        .form-title {
+            text-align: center;
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+        .form-wrapper {
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-row.full { grid-template-columns: 1fr; }
+        .form-label {
+            display: block;
+            margin-bottom: 9px;
+            color: var(--dark);
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 13px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            background-color: var(--white);
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(122,199,66,0.2);
+        }
+        .password-help {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
+        }
+        .password-rules-panel{
+            margin-top:10px;
+            padding:12px 14px;
+            border-radius:14px;
+            background:#f6faf7;
+            border:1px solid #e2ece5;
+        }
+        .password-rules-title{
+            font-size:12px;
+            font-weight:800;
+            color:#a94442;
+            margin-bottom:8px;
+        }
+        .password-rules-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:6px 18px;
+            font-size:12px;
+            color:#5b6c6d;
+        }
+        .password-rule.ok{color:#2f7d32;font-weight:700;}
+        .password-rule.no{color:#a94442;font-weight:700;}
 
-  
-    .nexo-search-instruction{display:none!important}
-  .variant-link-btn{width:100%;border:1px solid rgba(74,107,109,.22);background:#eaf4ea;color:#4A6B6D;border-radius:9px;padding:10px 12px;font-weight:900;cursor:pointer;line-height:1.2;text-align:center;display:block;margin:8px 0}.variant-link-btn:hover{background:#dff0d8}
-</style>
+        .recovery-modal{
+            position:fixed;
+            inset:0;
+            background:rgba(31,45,46,.55);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+            padding:20px;
+        }
+        .recovery-modal.show{display:flex !important;}
+        .recovery-card{
+            width:min(560px,100%);
+            background:#fff;
+            border-radius:24px;
+            box-shadow:0 24px 60px rgba(0,0,0,.25);
+            padding:24px;
+            margin:auto;
+        }
+        .recovery-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+        .recovery-title{font-size:24px;font-weight:900;color:var(--primary);margin:0;}
+        .recovery-close{border:none;background:#eef3f3;color:var(--primary);width:42px;height:42px;border-radius:12px;cursor:pointer;font-size:20px;font-weight:900;}
+        .recovery-note{background:#f4f9ef;border-left:4px solid var(--accent);border-radius:12px;padding:12px 14px;font-size:13px;color:#4a6264;margin-bottom:14px;line-height:1.5;}
+        .recovery-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+        .recovery-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:16px;}
+        .recovery-status{margin-top:12px;padding:12px 14px;border-radius:12px;display:none;font-size:13px;line-height:1.5;}
+        .recovery-status.ok{display:block;background:#eef9ef;color:#2d5a2d;border-left:4px solid #79c54a;}
+        .recovery-status.err{display:block;background:#fff3f3;color:#7a2d2d;border-left:4px solid #d9534f;}
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            box-shadow: 0 6px 20px rgba(74,107,109,0.2);
+        }
+        .btn-login:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .toggle-form a {
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .hide { display: none; }
+
+        .nexo-left-legal{
+            margin-top:18px;
+            max-width:360px;
+            font-size:11px;
+            line-height:1.55;
+            color:rgba(255,255,255,.95);
+            font-weight:600;
+            text-align:center;
+            padding:12px 14px;
+            border-radius:14px;
+            background:rgba(45,62,63,.28);
+            border:1px solid rgba(255,255,255,.18);
+        }
+
+        .nexo-left-legal a,
+        .nexo-left-legal a:visited{
+            color: #DDE7E8 !important;
+            text-decoration: underline;
+            font-weight: 700;
+        }
+        .nexo-left-legal a:hover{
+            color: #FFFFFF !important;
+        }
+
+        @media (max-width: 1024px) {
+            .login-container { flex-direction: column; }
+            .login-header { width: 100%; padding: 45px 40px; }
+            .login-content { padding: 45px 40px; }
+        }
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-  <div class="store-container">
-    <div class="store-header">
-      <div class="header-left">
-        <div class="logo-store"><span><span class="ne">ne</span><span class="x">X</span><span class="o">o</span></span><div class="logo-store-subtitle" data-i18n-store="logoSubtitle">Tienda</div></div>
-        <div class="header-title"><h1 data-i18n-store="title">Tienda nexo™</h1><p data-i18n-store="subtitle">30 Productos multi-proveedor • Envíos Internacionales</p></div>
-      </div>
-      <div class="header-right">
-        <div class="cart-badge" onclick="openCart()" title="Ver Carrito" data-i18n-title-store="cartTitle">🛒 <span id="cartCount">0</span></div>
-        <button class="back-btn" onclick="location.href='index.html'" data-i18n-store="backBtn">← Volver</button>
-      </div>
-    </div>
-    <div class="store-content">
-      <div class="filters-section">
-        <div class="filter-group"><label class="filter-label" data-i18n-store="searchLabel">🔍 Buscar</label><input type="text" class="filter-input" id="searchInput" placeholder="Nombre del producto..." data-i18n-placeholder-store="searchPlaceholder" oninput="filterProducts()"></div>
-        <div class="filter-group"><label class="filter-label" data-i18n-store="categoryLabel">📁 Categoría</label><select class="filter-select" id="categoryFilter" onchange="filterProducts()"><option value="" data-i18n-store="allCategories">Todas las categorías</option><option value="electronica">Electrónica y tecnología</option><option value="componentes">Componentes electrónicos</option><option value="computacion">Computación y oficina</option><option value="celulares">Celulares y accesorios</option><option value="moda">Ropa, moda y textiles</option><option value="calzado">Calzado y sombreros</option><option value="joyeria">Joyería, relojes y accesorios</option><option value="belleza">Belleza y cuidado personal</option><option value="salud">Salud y cuidado personal</option><option value="hogar">Hogar, muebles y decoración</option><option value="cocina">Cocina y electrodomésticos</option><option value="deporte">Deporte y entretenimiento</option><option value="juguetes">Niños, juguetes y crianza</option><option value="mascotas">Cuidado de mascotas</option><option value="auto">Auto, motos y suministros</option><option value="herramientas">Ferretería, herramientas y construcción</option><option value="maquinaria">Maquinaria y equipo industrial</option><option value="materias_primas">Materias primas</option><option value="empaque">Empaque, etiquetas y embalaje</option><option value="agricultura">Agricultura y alimentos</option><option value="regalos">Regalos y artesanías</option><option value="abarrotes">Abarrotes y consumo masivo</option></select></div>
-        <div class="filter-group"><label class="filter-label">🏪 Proveedor</label><select class="filter-select" id="providerFilter" onchange="filterProducts()"><option value="">Todos los proveedores</option><option value="cj">CJ Dropshipping</option><option value="alibaba">Alibaba</option><option value="amazon">Amazon</option><option value="aliexpress">AliExpress</option><option value="temu">Temu</option><option value="ebay">eBay</option><option value="mercadolibre">Mercado Libre</option><option value="walmart">Walmart</option><option value="etsy">Etsy</option><option value="shopify">Shopify</option><option value="lazada">Lazada</option></select></div>
-        <div class="filter-group"><label class="filter-label" data-i18n-store="maxPriceLabel">💲 Precio Máximo</label><input type="number" class="filter-input" id="priceFilter" placeholder="Sin límite si queda vacío" data-i18n-placeholder-store="maxPricePlaceholder" min="0" oninput="filterProducts()"></div>
-        <div class="hint" data-i18n-store="hint">Si no coloca precio máximo, se muestran productos sugeridos para la búsqueda.</div>
-      </div>
-      <div class="products-grid" id="productsGrid"></div>
-    </div>
+    <div class="login-container">
+        <div class="login-header">
+            <div>
+                <div class="login-logo">
+                    <div class="logo-text-nexo">
+                        <span class="logo-ne">ne</span><span class="logo-x">x</span><span class="logo-o">o</span>
+                    </div>
+                </div>
+                <h1>nexo™</h1>
+                <p>Tienda Digital - Acceso Cliente Directo</p>
+<div class="nexo-left-legal" data-nexo-legal-footer="1">
+  <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
+  nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
+  nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
+  © 2026 nexo™ – Todos los derechos reservados<br>
+  <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+    <a href="aviso-legal.html">Aviso Legal</a><span>&nbsp;|&nbsp;</span>
+    <a href="terminos-condiciones.html">Términos y Condiciones</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-privacidad.html">Privacidad</a><span>&nbsp;|&nbsp;</span>
+    <a href="politica-cookies.html">Cookies</a><span>&nbsp;|&nbsp;</span>
+    <a href="reembolsos.html">Reembolsos</a>
   </div>
+</div>
 
-  <div id="cartModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header"><h2 data-i18n-store="cartHeader">🛒 Tu Carrito</h2><button class="close-btn" onclick="closeCart()">×</button></div>
-      <div id="cartItems"></div>
-      <div class="cart-summary">
-        <div class="summary-row"><span data-i18n-store="subtotalLbl">Subtotal producto:</span><span>$<span id="subtotal">0.00</span></span></div>
-        <div class="summary-row"><span data-i18n-store="shippingLbl">Gastos de envío CJ/Marketplace:</span><span>$<span id="amazonShipping">0.00</span></span></div>
-        <div class="summary-row"><span data-i18n-store="vendorLbl">Gastos proveedor/marketplace CJ:</span><span>$<span id="vendorFees">0.00</span></span></div>
-        <div class="summary-row"><span data-i18n-store="commissionLbl">Comisión nexo™:</span><span>$<span id="commission">0.00</span></span></div>
-        <div class="summary-row total"><span data-i18n-store="totalLbl">Total a Pagar:</span><span>$<span id="totalPrice">0.00</span></span></div>
-      </div>
-      <button class="checkout-btn" onclick="goToCheckout()" data-i18n-store="checkoutBtn">Proceder al Pago</button>
+            </div>
+        </div>
+
+        <div class="login-content">
+            <a class="back-btn" href="index.html" onclick="goBack(event)">← Volver al Portal</a>
+            <div id="alertBox" class="alert"></div>
+
+            <div id="loginForm">
+                <div class="form-title">Ingreso a Tienda</div>
+                <div class="form-wrapper">
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">📧 Correo Electrónico</label>
+                            <input type="email" class="form-input" id="loginEmail" placeholder="tu@email.com">
+                            <div class="password-help" id="emailUserHelp">Tu E-Mail es tu correo electrónico registrado.</div>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">🔐 Contraseña</label>
+                            <div style="position:relative;"><input type="password" class="form-input" id="loginPassword" placeholder="Mínimo 8 caracteres" style="padding-right:44px;"><button type="button" id="toggleLoginPass" onclick="toggleLoginPassword()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:18px;">👁️</button></div>
+                            <div id="passwordRulesLive" class="password-rules-panel"><div class="password-rules-title">Muy débil</div><div class="password-rules-grid"></div></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-login" id="loginBtn" onclick="loginClient(event)">Ingresar a Tienda</button>
+                    <div class="toggle-form" id="loginLinks">¿Aún no tienes cuenta? <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">Regístrate aquí</a><br><a href="#" id="forgotUserLink" onclick="return showEmailIsUser();">¿Cuál es mi E-Mail?</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">¿Olvidaste tu contraseña?</a></div>
+                </div>
+            </div>
+
+            <div id="registerForm" class="hide">
+                <div class="form-title">Crear Mi Cuenta</div>
+                <div class="form-wrapper">
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">👤 Nombre</label>
+                            <input type="text" class="form-input" id="regName" placeholder="Juan">
+                        </div>
+                        <div>
+                            <label class="form-label">Apellido</label>
+                            <input type="text" class="form-input" id="regLastName" placeholder="Pérez">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">🪪 Número Documento de Identidad / NIT</label>
+                            <input type="text" class="form-input" id="regDocument" placeholder="CI, pasaporte o NIT">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">📧 Correo Electrónico</label>
+                            <input type="email" class="form-input" id="regEmail" placeholder="tu@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">🌍 País</label>
+                            <select class="form-select" id="regCountry" onchange="syncAreaCode(); validateRegisterForm();">
+                                <option value="">Seleccione país</option>
+                                <option value="Afganistán" data-code="+93">Afganistán (+93)</option>
+                                <option value="Albania" data-code="+355">Albania (+355)</option>
+                                <option value="Alemania" data-code="+49">Alemania (+49)</option>
+                                <option value="Andorra" data-code="+376">Andorra (+376)</option>
+                                <option value="Angola" data-code="+244">Angola (+244)</option>
+                                <option value="Anguila" data-code="+1">Anguila (+1)</option>
+                                <option value="Antigua y Barbuda" data-code="+1">Antigua y Barbuda (+1)</option>
+                                <option value="Antártida" data-code="+672">Antártida (+672)</option>
+                                <option value="Arabia Saudí" data-code="+966">Arabia Saudí (+966)</option>
+                                <option value="Argelia" data-code="+213">Argelia (+213)</option>
+                                <option value="Argentina" data-code="+54">Argentina (+54)</option>
+                                <option value="Armenia" data-code="+374">Armenia (+374)</option>
+                                <option value="Aruba" data-code="+297">Aruba (+297)</option>
+                                <option value="Australia" data-code="+61">Australia (+61)</option>
+                                <option value="Austria" data-code="+43">Austria (+43)</option>
+                                <option value="Azerbaiyán" data-code="+994">Azerbaiyán (+994)</option>
+                                <option value="Bahamas" data-code="+1">Bahamas (+1)</option>
+                                <option value="Bangladés" data-code="+880">Bangladés (+880)</option>
+                                <option value="Barbados" data-code="+1">Barbados (+1)</option>
+                                <option value="Baréin" data-code="+973">Baréin (+973)</option>
+                                <option value="Belice" data-code="+501">Belice (+501)</option>
+                                <option value="Benín" data-code="+229">Benín (+229)</option>
+                                <option value="Bermudas" data-code="+1">Bermudas (+1)</option>
+                                <option value="Bielorrusia" data-code="+375">Bielorrusia (+375)</option>
+                                <option value="Bolivia" data-code="+591">Bolivia (+591)</option>
+                                <option value="Bosnia y Herzegovina" data-code="+387">Bosnia y Herzegovina (+387)</option>
+                                <option value="Botsuana" data-code="+267">Botsuana (+267)</option>
+                                <option value="Brasil" data-code="+55">Brasil (+55)</option>
+                                <option value="Brunéi" data-code="+673">Brunéi (+673)</option>
+                                <option value="Bulgaria" data-code="+359">Bulgaria (+359)</option>
+                                <option value="Burkina Faso" data-code="+226">Burkina Faso (+226)</option>
+                                <option value="Burundi" data-code="+257">Burundi (+257)</option>
+                                <option value="Bután" data-code="+975">Bután (+975)</option>
+                                <option value="Bélgica" data-code="+32">Bélgica (+32)</option>
+                                <option value="Cabo Verde" data-code="+238">Cabo Verde (+238)</option>
+                                <option value="Camboya" data-code="+855">Camboya (+855)</option>
+                                <option value="Camerún" data-code="+237">Camerún (+237)</option>
+                                <option value="Canadá" data-code="+1">Canadá (+1)</option>
+                                <option value="Caribe neerlandés" data-code="+599">Caribe neerlandés (+599)</option>
+                                <option value="Catar" data-code="+974">Catar (+974)</option>
+                                <option value="Chad" data-code="+235">Chad (+235)</option>
+                                <option value="Chequia" data-code="+420">Chequia (+420)</option>
+                                <option value="Chile" data-code="+56">Chile (+56)</option>
+                                <option value="China" data-code="+86">China (+86)</option>
+                                <option value="Chipre" data-code="+357">Chipre (+357)</option>
+                                <option value="Ciudad del Vaticano" data-code="+379">Ciudad del Vaticano (+379)</option>
+                                <option value="Colombia" data-code="+57">Colombia (+57)</option>
+                                <option value="Comoras" data-code="+269">Comoras (+269)</option>
+                                <option value="Congo" data-code="+242">Congo (+242)</option>
+                                <option value="Corea del Norte" data-code="+850">Corea del Norte (+850)</option>
+                                <option value="Corea del Sur" data-code="+82">Corea del Sur (+82)</option>
+                                <option value="Costa Rica" data-code="+506">Costa Rica (+506)</option>
+                                <option value="Croacia" data-code="+385">Croacia (+385)</option>
+                                <option value="Cuba" data-code="+53">Cuba (+53)</option>
+                                <option value="Curazao" data-code="+599">Curazao (+599)</option>
+                                <option value="Côte d’Ivoire" data-code="+225">Côte d’Ivoire (+225)</option>
+                                <option value="Dinamarca" data-code="+45">Dinamarca (+45)</option>
+                                <option value="Dominica" data-code="+1">Dominica (+1)</option>
+                                <option value="Ecuador" data-code="+593">Ecuador (+593)</option>
+                                <option value="Egipto" data-code="+20">Egipto (+20)</option>
+                                <option value="El Salvador" data-code="+503">El Salvador (+503)</option>
+                                <option value="Emiratos Árabes Unidos" data-code="+971">Emiratos Árabes Unidos (+971)</option>
+                                <option value="Eritrea" data-code="+291">Eritrea (+291)</option>
+                                <option value="Eslovaquia" data-code="+421">Eslovaquia (+421)</option>
+                                <option value="Eslovenia" data-code="+386">Eslovenia (+386)</option>
+                                <option value="España" data-code="+34">España (+34)</option>
+                                <option value="Estados Unidos" data-code="+1">Estados Unidos (+1)</option>
+                                <option value="Estonia" data-code="+372">Estonia (+372)</option>
+                                <option value="Esuatini" data-code="+268">Esuatini (+268)</option>
+                                <option value="Etiopía" data-code="+251">Etiopía (+251)</option>
+                                <option value="Filipinas" data-code="+63">Filipinas (+63)</option>
+                                <option value="Finlandia" data-code="+358">Finlandia (+358)</option>
+                                <option value="Fiyi" data-code="+679">Fiyi (+679)</option>
+                                <option value="Francia" data-code="+33">Francia (+33)</option>
+                                <option value="Gabón" data-code="+241">Gabón (+241)</option>
+                                <option value="Gambia" data-code="+220">Gambia (+220)</option>
+                                <option value="Georgia" data-code="+995">Georgia (+995)</option>
+                                <option value="Ghana" data-code="+233">Ghana (+233)</option>
+                                <option value="Gibraltar" data-code="+350">Gibraltar (+350)</option>
+                                <option value="Granada" data-code="+1">Granada (+1)</option>
+                                <option value="Grecia" data-code="+30">Grecia (+30)</option>
+                                <option value="Groenlandia" data-code="+299">Groenlandia (+299)</option>
+                                <option value="Guadalupe" data-code="+590">Guadalupe (+590)</option>
+                                <option value="Guam" data-code="+1">Guam (+1)</option>
+                                <option value="Guatemala" data-code="+502">Guatemala (+502)</option>
+                                <option value="Guayana Francesa" data-code="+594">Guayana Francesa (+594)</option>
+                                <option value="Guernesey" data-code="+44">Guernesey (+44)</option>
+                                <option value="Guinea" data-code="+224">Guinea (+224)</option>
+                                <option value="Guinea Ecuatorial" data-code="+240">Guinea Ecuatorial (+240)</option>
+                                <option value="Guinea-Bisáu" data-code="+245">Guinea-Bisáu (+245)</option>
+                                <option value="Guyana" data-code="+592">Guyana (+592)</option>
+                                <option value="Haití" data-code="+509">Haití (+509)</option>
+                                <option value="Honduras" data-code="+504">Honduras (+504)</option>
+                                <option value="Hungría" data-code="+36">Hungría (+36)</option>
+                                <option value="India" data-code="+91">India (+91)</option>
+                                <option value="Indonesia" data-code="+62">Indonesia (+62)</option>
+                                <option value="Irak" data-code="+964">Irak (+964)</option>
+                                <option value="Irlanda" data-code="+353">Irlanda (+353)</option>
+                                <option value="Irán" data-code="+98">Irán (+98)</option>
+                                <option value="Isla Bouvet" data-code="">Isla Bouvet</option>
+                                <option value="Isla Norfolk" data-code="">Isla Norfolk</option>
+                                <option value="Isla de Man" data-code="+44">Isla de Man (+44)</option>
+                                <option value="Isla de Navidad" data-code="+61">Isla de Navidad (+61)</option>
+                                <option value="Islandia" data-code="+354">Islandia (+354)</option>
+                                <option value="Islas Aland" data-code="">Islas Aland</option>
+                                <option value="Islas Caimán" data-code="+1">Islas Caimán (+1)</option>
+                                <option value="Islas Cocos" data-code="">Islas Cocos</option>
+                                <option value="Islas Cook" data-code="+682">Islas Cook (+682)</option>
+                                <option value="Islas Feroe" data-code="+298">Islas Feroe (+298)</option>
+                                <option value="Islas Georgia del Sur y Sandwich del Sur" data-code="">Islas Georgia del Sur y Sandwich del Sur</option>
+                                <option value="Islas Heard y McDonald" data-code="">Islas Heard y McDonald</option>
+                                <option value="Islas Malvinas" data-code="+500">Islas Malvinas (+500)</option>
+                                <option value="Islas Marianas del Norte" data-code="+1">Islas Marianas del Norte (+1)</option>
+                                <option value="Islas Marshall" data-code="+692">Islas Marshall (+692)</option>
+                                <option value="Islas Pitcairn" data-code="">Islas Pitcairn</option>
+                                <option value="Islas Salomón" data-code="+677">Islas Salomón (+677)</option>
+                                <option value="Islas Turcas y Caicos" data-code="+1">Islas Turcas y Caicos (+1)</option>
+                                <option value="Islas Vírgenes Británicas" data-code="+1">Islas Vírgenes Británicas (+1)</option>
+                                <option value="Islas Vírgenes de EE. UU." data-code="+1">Islas Vírgenes de EE. UU. (+1)</option>
+                                <option value="Islas menores alejadas de EE. UU." data-code="">Islas menores alejadas de EE. UU.</option>
+                                <option value="Israel" data-code="+972">Israel (+972)</option>
+                                <option value="Italia" data-code="+39">Italia (+39)</option>
+                                <option value="Jamaica" data-code="+1">Jamaica (+1)</option>
+                                <option value="Japón" data-code="+81">Japón (+81)</option>
+                                <option value="Jersey" data-code="+44">Jersey (+44)</option>
+                                <option value="Jordania" data-code="+962">Jordania (+962)</option>
+                                <option value="Kazajistán" data-code="+7">Kazajistán (+7)</option>
+                                <option value="Kenia" data-code="+254">Kenia (+254)</option>
+                                <option value="Kirguistán" data-code="+996">Kirguistán (+996)</option>
+                                <option value="Kiribati" data-code="+686">Kiribati (+686)</option>
+                                <option value="Kuwait" data-code="+965">Kuwait (+965)</option>
+                                <option value="Laos" data-code="+856">Laos (+856)</option>
+                                <option value="Lesoto" data-code="+266">Lesoto (+266)</option>
+                                <option value="Letonia" data-code="+371">Letonia (+371)</option>
+                                <option value="Liberia" data-code="+231">Liberia (+231)</option>
+                                <option value="Libia" data-code="+218">Libia (+218)</option>
+                                <option value="Liechtenstein" data-code="+423">Liechtenstein (+423)</option>
+                                <option value="Lituania" data-code="+370">Lituania (+370)</option>
+                                <option value="Luxemburgo" data-code="+352">Luxemburgo (+352)</option>
+                                <option value="Líbano" data-code="+961">Líbano (+961)</option>
+                                <option value="Macedonia del Norte" data-code="+389">Macedonia del Norte (+389)</option>
+                                <option value="Madagascar" data-code="+261">Madagascar (+261)</option>
+                                <option value="Malasia" data-code="+60">Malasia (+60)</option>
+                                <option value="Malaui" data-code="+265">Malaui (+265)</option>
+                                <option value="Maldivas" data-code="+960">Maldivas (+960)</option>
+                                <option value="Mali" data-code="+223">Mali (+223)</option>
+                                <option value="Malta" data-code="+356">Malta (+356)</option>
+                                <option value="Marruecos" data-code="+212">Marruecos (+212)</option>
+                                <option value="Martinica" data-code="+596">Martinica (+596)</option>
+                                <option value="Mauricio" data-code="+230">Mauricio (+230)</option>
+                                <option value="Mauritania" data-code="+222">Mauritania (+222)</option>
+                                <option value="Mayotte" data-code="+262">Mayotte (+262)</option>
+                                <option value="Micronesia" data-code="+691">Micronesia (+691)</option>
+                                <option value="Moldavia" data-code="+373">Moldavia (+373)</option>
+                                <option value="Mongolia" data-code="+976">Mongolia (+976)</option>
+                                <option value="Montenegro" data-code="+382">Montenegro (+382)</option>
+                                <option value="Montserrat" data-code="+1">Montserrat (+1)</option>
+                                <option value="Mozambique" data-code="+258">Mozambique (+258)</option>
+                                <option value="Myanmar (Birmania)" data-code="+95">Myanmar (Birmania) (+95)</option>
+                                <option value="México" data-code="+52">México (+52)</option>
+                                <option value="Mónaco" data-code="+377">Mónaco (+377)</option>
+                                <option value="Namibia" data-code="+264">Namibia (+264)</option>
+                                <option value="Nauru" data-code="+674">Nauru (+674)</option>
+                                <option value="Nepal" data-code="+977">Nepal (+977)</option>
+                                <option value="Nicaragua" data-code="+505">Nicaragua (+505)</option>
+                                <option value="Nigeria" data-code="+234">Nigeria (+234)</option>
+                                <option value="Niue" data-code="+683">Niue (+683)</option>
+                                <option value="Noruega" data-code="+47">Noruega (+47)</option>
+                                <option value="Nueva Caledonia" data-code="+687">Nueva Caledonia (+687)</option>
+                                <option value="Nueva Zelanda" data-code="+64">Nueva Zelanda (+64)</option>
+                                <option value="Níger" data-code="+227">Níger (+227)</option>
+                                <option value="Omán" data-code="+968">Omán (+968)</option>
+                                <option value="Pakistán" data-code="+92">Pakistán (+92)</option>
+                                <option value="Palaos" data-code="+680">Palaos (+680)</option>
+                                <option value="Panamá" data-code="+507">Panamá (+507)</option>
+                                <option value="Papúa Nueva Guinea" data-code="+675">Papúa Nueva Guinea (+675)</option>
+                                <option value="Paraguay" data-code="+595">Paraguay (+595)</option>
+                                <option value="Países Bajos" data-code="+31">Países Bajos (+31)</option>
+                                <option value="Perú" data-code="+51">Perú (+51)</option>
+                                <option value="Polinesia Francesa" data-code="+689">Polinesia Francesa (+689)</option>
+                                <option value="Polonia" data-code="+48">Polonia (+48)</option>
+                                <option value="Portugal" data-code="+351">Portugal (+351)</option>
+                                <option value="Puerto Rico" data-code="+1">Puerto Rico (+1)</option>
+                                <option value="RAE de Hong Kong (China)" data-code="+852">RAE de Hong Kong (China) (+852)</option>
+                                <option value="RAE de Macao (China)" data-code="+853">RAE de Macao (China) (+853)</option>
+                                <option value="Reino Unido" data-code="+44">Reino Unido (+44)</option>
+                                <option value="República Centroafricana" data-code="+236">República Centroafricana (+236)</option>
+                                <option value="República Democrática del Congo" data-code="+243">República Democrática del Congo (+243)</option>
+                                <option value="República Dominicana" data-code="+1">República Dominicana (+1)</option>
+                                <option value="Reunión" data-code="+262">Reunión (+262)</option>
+                                <option value="Ruanda" data-code="+250">Ruanda (+250)</option>
+                                <option value="Rumanía" data-code="+40">Rumanía (+40)</option>
+                                <option value="Rusia" data-code="+7">Rusia (+7)</option>
+                                <option value="Samoa" data-code="+685">Samoa (+685)</option>
+                                <option value="Samoa Americana" data-code="+1">Samoa Americana (+1)</option>
+                                <option value="San Bartolomé" data-code="+590">San Bartolomé (+590)</option>
+                                <option value="San Cristóbal y Nieves" data-code="+1">San Cristóbal y Nieves (+1)</option>
+                                <option value="San Marino" data-code="+378">San Marino (+378)</option>
+                                <option value="San Martín" data-code="+590">San Martín (+590)</option>
+                                <option value="San Pedro y Miquelón" data-code="+508">San Pedro y Miquelón (+508)</option>
+                                <option value="San Vicente y las Granadinas" data-code="+1">San Vicente y las Granadinas (+1)</option>
+                                <option value="Santa Elena" data-code="+290">Santa Elena (+290)</option>
+                                <option value="Santa Lucía" data-code="+1">Santa Lucía (+1)</option>
+                                <option value="Santo Tomé y Príncipe" data-code="+239">Santo Tomé y Príncipe (+239)</option>
+                                <option value="Senegal" data-code="+221">Senegal (+221)</option>
+                                <option value="Serbia" data-code="+381">Serbia (+381)</option>
+                                <option value="Seychelles" data-code="+248">Seychelles (+248)</option>
+                                <option value="Sierra Leona" data-code="+232">Sierra Leona (+232)</option>
+                                <option value="Singapur" data-code="+65">Singapur (+65)</option>
+                                <option value="Sint Maarten" data-code="+1">Sint Maarten (+1)</option>
+                                <option value="Siria" data-code="+963">Siria (+963)</option>
+                                <option value="Somalia" data-code="+252">Somalia (+252)</option>
+                                <option value="Sri Lanka" data-code="+94">Sri Lanka (+94)</option>
+                                <option value="Sudáfrica" data-code="+27">Sudáfrica (+27)</option>
+                                <option value="Sudán" data-code="+249">Sudán (+249)</option>
+                                <option value="Sudán del Sur" data-code="+211">Sudán del Sur (+211)</option>
+                                <option value="Suecia" data-code="+46">Suecia (+46)</option>
+                                <option value="Suiza" data-code="+41">Suiza (+41)</option>
+                                <option value="Surinam" data-code="+597">Surinam (+597)</option>
+                                <option value="Svalbard y Jan Mayen" data-code="+47">Svalbard y Jan Mayen (+47)</option>
+                                <option value="Sáhara Occidental" data-code="+212">Sáhara Occidental (+212)</option>
+                                <option value="Tailandia" data-code="+66">Tailandia (+66)</option>
+                                <option value="Taiwán" data-code="+886">Taiwán (+886)</option>
+                                <option value="Tanzania" data-code="+255">Tanzania (+255)</option>
+                                <option value="Tayikistán" data-code="+992">Tayikistán (+992)</option>
+                                <option value="Territorio Británico del Océano Índico" data-code="+246">Territorio Británico del Océano Índico (+246)</option>
+                                <option value="Territorios Australes Franceses" data-code="+262">Territorios Australes Franceses (+262)</option>
+                                <option value="Territorios Palestinos" data-code="+970">Territorios Palestinos (+970)</option>
+                                <option value="Timor-Leste" data-code="+670">Timor-Leste (+670)</option>
+                                <option value="Togo" data-code="+228">Togo (+228)</option>
+                                <option value="Tokelau" data-code="+690">Tokelau (+690)</option>
+                                <option value="Tonga" data-code="+676">Tonga (+676)</option>
+                                <option value="Trinidad y Tobago" data-code="+1">Trinidad y Tobago (+1)</option>
+                                <option value="Turkmenistán" data-code="+993">Turkmenistán (+993)</option>
+                                <option value="Turquía" data-code="+90">Turquía (+90)</option>
+                                <option value="Tuvalu" data-code="+688">Tuvalu (+688)</option>
+                                <option value="Túnez" data-code="+216">Túnez (+216)</option>
+                                <option value="Ucrania" data-code="+380">Ucrania (+380)</option>
+                                <option value="Uganda" data-code="+256">Uganda (+256)</option>
+                                <option value="Uruguay" data-code="+598">Uruguay (+598)</option>
+                                <option value="Uzbekistán" data-code="+998">Uzbekistán (+998)</option>
+                                <option value="Vanuatu" data-code="+678">Vanuatu (+678)</option>
+                                <option value="Venezuela" data-code="+58">Venezuela (+58)</option>
+                                <option value="Vietnam" data-code="+84">Vietnam (+84)</option>
+                                <option value="Wallis y Futuna" data-code="+681">Wallis y Futuna (+681)</option>
+                                <option value="Yemen" data-code="+967">Yemen (+967)</option>
+                                <option value="Yibuti" data-code="+253">Yibuti (+253)</option>
+                                <option value="Zambia" data-code="+260">Zambia (+260)</option>
+                                <option value="Zimbabue" data-code="+263">Zimbabue (+263)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">☎️ Código de área</label>
+                            <input type="text" class="form-input" id="regAreaCode" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">📱 Teléfono</label>
+                            <input type="tel" class="form-input" id="regPhone" placeholder="77777777">
+                        </div>
+                        <div>
+                            <label class="form-label">📮 Código Postal</label>
+                            <input type="text" class="form-input" id="regPostalCode" placeholder="0000">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label class="form-label">🗺️ Región / Estado</label>
+                            <input type="text" class="form-input" id="regRegion" placeholder="">
+                        </div>
+                        <div>
+                            <label class="form-label">🏠 Ciudad</label>
+                            <input type="text" class="form-input" id="regCity" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">📍 Dirección exacta de envío</label>
+                            <input type="text" class="form-input" id="regAddress" placeholder="Calle, número, zona, referencia">
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div>
+                            <label class="form-label">🔐 Contraseña</label>
+                            <input type="password" class="form-input" id="regPassword" placeholder="Mínimo 8 caracteres" oninput="validateRegisterForm()">
+                            <div id="registerPasswordRules" class="password-rules-panel"><div class="password-rules-title">Muy débil</div><div class="password-rules-grid"></div></div>
+                            <div class="password-help">Mínimo 8 caracteres para crear la cuenta.</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-login" id="registerBtn" onclick="registerClient(event)">Crear Cuenta</button>
+                    <div class="toggle-form">¿Ya tienes cuenta? <a href="#" onclick="toggleForms(); return false;">Inicia sesión aquí</a></div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <footer id="nexoFooter" class="nexo-footer">
-    <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
-    nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>
-    nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.<br>
-    © 2026 nexo™ – Todos los derechos reservados<br>
-    <span class="nexo-footer-links"><a href="aviso-legal.html">Aviso Legal</a> | <a href="terminos-condiciones.html">Términos y Condiciones</a> | <a href="politica-privacidad.html">Privacidad</a> | <a href="politica-cookies.html">Cookies</a> | <a href="reembolsos.html">Reembolsos</a></span>
-  </footer>
+    <script>
+        function toggleForms() {
+            document.getElementById('loginForm').classList.toggle('hide');
+            document.getElementById('registerForm').classList.toggle('hide');
+            document.getElementById('alertBox').classList.remove('show');
+            setTimeout(() => { applyLoginLanguage(); applyRegisterLanguage(); }, 20);
+        }
+
+        function syncAreaCode() {
+            const sel = document.getElementById('regCountry');
+            const opt = sel.options[sel.selectedIndex];
+            document.getElementById('regAreaCode').value = (opt && opt.getAttribute('data-code')) || '';
+        }
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert show alert-${type}`;
+        }
+
+        function validateRegisterForm() {
+            const requiredIds = [
+                'regName','regLastName','regDocument','regEmail','regCountry',
+                'regAreaCode','regPhone','regPostalCode','regRegion','regCity',
+                'regAddress','regPassword'
+            ];
+            const allFilled = requiredIds.every(id => {
+                const el = document.getElementById(id);
+                return el && String(el.value || '').trim() !== '';
+            });
+            const password = document.getElementById('regPassword').value || '';
+            const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(password);
+            const hasLower = /[a-záéíóúñ]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(password);
+            const hasLength = password.length >= 8;
+            if (typeof renderLivePasswordRules === 'function') renderLivePasswordRules('regPassword', 'registerPasswordRules');
+            const ok = allFilled && hasUpper && hasLower && hasNumber && hasSymbol && hasLength;
+            document.getElementById('registerBtn').disabled = !ok;
+            return ok;
+        }
+
+        function getProfileFromForm() {
+            return {
+                fullName: (document.getElementById('regName').value + ' ' + document.getElementById('regLastName').value).trim(),
+                name: document.getElementById('regName').value.trim(),
+                lastName: document.getElementById('regLastName').value.trim(),
+                documentId: document.getElementById('regDocument').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                country: document.getElementById('regCountry').value.trim(),
+                areaCode: document.getElementById('regAreaCode').value.trim(),
+                phone: document.getElementById('regPhone').value.trim(),
+                postalCode: document.getElementById('regPostalCode').value.trim(),
+                region: document.getElementById('regRegion').value.trim(),
+                city: document.getElementById('regCity').value.trim(),
+                address: document.getElementById('regAddress').value.trim(),
+                password: document.getElementById('regPassword').value
+            };
+        }
+
+        async function registerClient(e) {
+            if (e) e.preventDefault();
+            if (!validateRegisterForm()) {
+                showAlert('Completa todos los campos y usa una contraseña de mínimo 8 caracteres.', 'error');
+                return;
+            }
+            const profile = getProfileFromForm();
+            localStorage.setItem('nexoClientProfile', JSON.stringify(profile));
+            sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile));
+            sessionStorage.setItem('clientEmail', profile.email);
+            sessionStorage.setItem('clientName', profile.fullName);
+            try {
+                const resp = await fetch('/api/nexo-save-client', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(profile)
+                });
+                const js = await resp.json().catch(()=>null);
+                if(!js || js.ok === false){ await nexoDirectSaveClientToSupabase(profile); }
+            } catch(e) { console.warn('Cliente guardado local; sincronización Supabase pendiente', e); }
+            showAlert('✅ Cuenta creada correctamente. Abriendo tienda...', 'success');
+            setTimeout(() => {
+                window.location.href = 'nexo-tienda-cliente.html';
+            }, 450);
+        }
+
+        async function loginClient(e) {
+            if (e) e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const saved = JSON.parse(localStorage.getItem('nexoClientProfile') || 'null');
+
+            if (!email || !password) {
+                showAlert('Ingresa correo electrónico y contraseña.', 'error');
+                return;
+            }
+
+            try {
+                const remote = await nexoFindClientByEmailPassword(email, password);
+                if (remote && remote.email) {
+                    setSavedClientProfile(remote);
+                    sessionStorage.setItem('clientEmail', remote.email);
+                    sessionStorage.setItem('clientName', remote.fullName || '');
+                    sessionStorage.setItem('nexoActiveClient', JSON.stringify(remote));
+                    showAlert('✅ Ingreso habilitado. Abriendo tienda...', 'success');
+                    setTimeout(() => { window.location.href = 'nexo-tienda-cliente.html'; }, 450);
+                    return;
+                }
+            } catch(err) {
+                console.warn('No se pudo validar en Supabase, usando respaldo local:', err);
+            }
+
+            if (saved && saved.email) {
+                if (saved.email.toLowerCase() !== email.toLowerCase() || saved.password !== password) {
+                    showAlert('Correo electrónico o contraseña incorrectos.', 'error');
+                    return;
+                }
+                sessionStorage.setItem('clientEmail', saved.email);
+                sessionStorage.setItem('clientName', saved.fullName || '');
+                sessionStorage.setItem('nexoActiveClient', JSON.stringify(saved));
+                showAlert('✅ Ingreso habilitado. Abriendo tienda...', 'success');
+                setTimeout(() => { window.location.href = 'nexo-tienda-cliente.html'; }, 450);
+                return;
+            }
+
+            showAlert('Correo electrónico o contraseña incorrectos.', 'error');
+        }
+
+        function goBack(e) {
+            if (e) e.preventDefault();
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#registerForm input, #registerForm select').forEach(el => {
+                el.addEventListener('input', validateRegisterForm);
+                el.addEventListener('change', validateRegisterForm);
+            });
+            validateRegisterForm();
+        });
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!document.getElementById('registerForm').classList.contains('hide')) {
+                    registerClient();
+                } else {
+                    loginClient();
+                }
+            }
+        });
+    
+function hardTranslateClientLogin(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  const M = {
+    es:{title:'INGRESO A TIENDA', email:'Correo Electrónico', pass:'Contraseña', btn:'INGRESAR A TIENDA', back:'← Volver al Portal', noacc:'¿Aún no tienes cuenta?', reg:'Regístrate aquí', forgotu:'¿Cuál es mi E-Mail?', forgotp:'¿Olvidaste tu contraseña?'},
+    en:{title:'STORE LOGIN', email:'Email Address', pass:'Password', btn:'ENTER STORE', back:'← Back to Portal', noacc:"Don't have an account?", reg:'Register here', forgotu:'What is my E-Mail?', forgotp:'Forgot your password?'},
+    pt:{title:'ENTRADA NA LOJA', email:'Correio Eletrônico', pass:'Senha', btn:'ENTRAR NA LOJA', back:'← Voltar ao Portal', noacc:'Ainda não tem conta?', reg:'Registre-se aqui', forgotu:'Qual é meu E-Mail?', forgotp:'Esqueceu sua senha?'},
+    it:{title:'ACCESSO AL NEGOZIO', email:'Email', pass:'Password', btn:'ENTRA NEL NEGOZIO', back:'← Torna al Portale', noacc:'Non hai un account?', reg:'Registrati qui', forgotu:'Qual è la mia E-Mail?', forgotp:'Hai dimenticato la password?'},
+    fr:{title:'CONNEXION À LA BOUTIQUE', email:'Adresse e-mail', pass:'Mot de passe', btn:'ENTRER DANS LA BOUTIQUE', back:'← Retour au Portail', noacc:"Vous n'avez pas de compte ?", reg:'Inscrivez-vous ici', forgotu:'Quel est mon e-mail ?', forgotp:'Mot de passe oublié ?'}
+  };
+  const t = M[lang] || M.es;
+  document.querySelectorAll('h1,h2,h3,label,div,span,p,a,button').forEach(el=>{
+    const tx=(el.textContent||'').trim();
+    if(tx==='INGRESO A TIENDA' || tx==='STORE LOGIN') el.textContent=t.title;
+    if(tx==='Correo Electrónico' || tx==='Email Address') el.textContent='📧 ' + t.email;
+    if(tx==='Contraseña' || tx==='Password' || tx==='undefined') el.textContent='🔐 ' + t.pass;
+    if(tx==='INGRESAR A TIENDA' || tx==='ENTER STORE') el.textContent=t.btn;
+    if(tx==='← Volver al Portal' || tx==='← Back to Portal') el.textContent=t.back;
+  });
+  const wrap = document.querySelector('.login-links') || document.getElementById('loginLinksWrap') || document.getElementById('loginLinksText');
+  if (wrap) {
+    wrap.innerHTML = `${t.noacc} <a href="#" onclick="toggleForms();return false;">${t.reg}</a><br><a href="#" onclick="return showEmailIsUser();">${t.forgotu}</a> · <a href="#" onclick="return openRecoveryModal('pass');">${t.forgotp}</a>`;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function(){ setTimeout(hardTranslateClientLogin,50); setTimeout(hardTranslateClientLogin,250); });
+</script>
 
 <script>
-const NEXO_AMAZON_TAG='nexo08-20';
-let products=[];
-let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
-function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
-function nexoAmazonAffiliateUrl(search){return 'https://www.amazon.com/s?k='+encodeURIComponent(search||'producto')+'&tag='+NEXO_AMAZON_TAG;}
-function detectCategory(q, selected){
-  if(selected) return selected;
-  if(/iphone|celular|phone|laptop|usb|cargador|mouse|teclado|auricular|monitor|tablet/.test(q)) return 'electronica';
-  if(/zapato|tenis|camisa|polera|pantalon|cordon|cordones|ropa|moda|shoe|shirt/.test(q)) return 'moda';
-  if(/lapiz|lápiz|boligrafo|bolígrafo|cuaderno|oficina|papel|carpeta|marcador/.test(q)) return 'oficina';
-  if(/belleza|crema|maquillaje|shampoo|perfume|beauty|skin/.test(q)) return 'belleza';
-  if(/hogar|cocina|casa|home|kitchen/.test(q)) return 'hogar';
-  return 'accesorios';
+const loginTexts = {
+  es:{title:'Ingreso a Tienda', email:'📧 Correo Electrónico', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', btn:'Ingresar a Tienda', back:'← Volver al Portal', side:'Tienda Digital - Acceso Cliente Directo', noAccount:'¿Aún no tienes cuenta?', register:'Regístrate aquí', forgotUser:'¿Cuál es mi E-Mail?', forgotPass:'¿Olvidaste tu contraseña?', forgotUserMsg:'Tu E-Mail es el correo electrónico con el que te registraste.', forgotPassMsg:'La recuperación de contraseña está en preparación.'},
+  en:{title:'Store Login', email:'📧 Email Address', pass:'🔐 Password', passPh:'Minimum 8 characters', btn:'Enter Store', back:'← Back to Portal', side:'Digital Store - Direct Client Access', noAccount:"Don't have an account?", register:'Register here', forgotUser:'What is my E-Mail?', forgotPass:'Forgot your password?', forgotUserMsg:'Your E-Mail is the email address you registered with.', forgotPassMsg:'Password recovery is in preparation.'},
+  pt:{title:'Acesso à Loja', email:'📧 E-mail', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', btn:'Entrar na Loja', back:'← Voltar ao Portal', side:'Loja Digital - Acesso Direto do Cliente', noAccount:'Ainda não tem conta?', register:'Cadastre-se aqui', forgotUser:'Qual é meu E-Mail?', forgotPass:'Esqueceu sua senha?', forgotUserMsg:'Seu E-Mail é o endereço usado no cadastro.', forgotPassMsg:'A recuperação de senha está em preparação.'},
+  it:{title:'Accesso al Negozio', email:'📧 Email', pass:'🔐 Password', passPh:'Minimo 8 caratteri', btn:'Entra nel Negozio', back:'← Torna al Portale', side:'Negozio Digitale - Accesso Diretto Cliente', noAccount:'Non hai un account?', register:'Registrati qui', forgotUser:'Qual è la mia E-Mail?', forgotPass:'Hai dimenticato la password?', forgotUserMsg:'La tua E-Mail è l’indirizzo usato per la registrazione.', forgotPassMsg:'Il recupero password è in preparazione.'},
+  fr:{title:'Accès Boutique', email:'📧 E-mail', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', btn:'Entrer dans la Boutique', back:'← Retour au Portail', side:'Boutique Digitale - Accès Client Direct', noAccount:"Vous n'avez pas de compte ?", register:'Inscrivez-vous ici', forgotUser:'Quel est mon e-mail ?', forgotPass:'Vous avez oublié votre mot de passe ?', forgotUserMsg:'Votre E-Mail est l’adresse utilisée lors de l’inscription.', forgotPassMsg:'La récupération du mot de passe est en préparation.'}
+};
+let currentLoginTexts = loginTexts.es;
+function applyLoginLanguage(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  const t = loginTexts[lang] || loginTexts.es;
+  currentLoginTexts = t;
+  const formTitle = document.querySelector('#loginForm .form-title'); if(formTitle) formTitle.textContent = t.title;
+  const labels = document.querySelectorAll('#loginForm .form-label');
+  if(labels[0]) labels[0].textContent = t.email;
+  if(labels[1]) labels[1].textContent = t.pass;
+  const em = document.getElementById('loginEmail'); if(em) em.placeholder = 'tu@email.com';
+  const pw = document.getElementById('loginPassword'); if(pw) pw.placeholder = t.passPh;
+  const btn = document.getElementById('loginBtn'); if(btn) btn.textContent = t.btn;
+  const back = document.querySelector('.back-btn'); if(back) back.textContent = t.back;
+  const sidep = document.querySelector('.login-header p'); if(sidep) sidep.textContent = t.side;
+  const links = document.getElementById('loginLinks'); if(links) links.innerHTML = `${t.noAccount} <a href="#" id="registerHereLink" onclick="toggleForms(); return false;">${t.register}</a><br><a href="#" id="forgotUserLink" onclick="return showEmailIsUser();">${t.forgotUser}</a> · <a href="#" id="forgotPassLink" onclick="return openRecoveryModal('pass');">${t.forgotPass}</a>`;
+  const emailHelp = document.getElementById('emailUserHelp'); if(emailHelp) emailHelp.textContent = (loginI18n[getCurrentLang()]?.forgotUserMsg || 'Tu E-Mail es tu correo electrónico registrado.');
 }
-function emojiFor(cat,q){if(cat==='moda') return /(zapato|tenis|shoe)/.test(q)?'👟':'👕'; if(cat==='electronica') return '🔌'; if(cat==='oficina') return '📎'; if(cat==='belleza') return '🧴'; if(cat==='hogar') return '🏠'; return '🛍️';}
-function normalizeCjProduct(raw, idx){
-  const price = Number(raw.price ?? raw.sellPrice ?? raw.nowPrice ?? raw.discountPrice ?? raw.cjProductCost ?? 0);
-  const ship = Number(raw.cjShippingCost ?? raw.shippingAmazon ?? raw.shippingCost ?? raw.shippingPrice ?? raw.logisticPrice ?? 0);
-  const fee = Number(raw.cjHandlingFee ?? raw.vendorFee ?? raw.handlingFee ?? raw.serviceFee ?? 0);
+function toggleLoginPassword(){
+  const el=document.getElementById('loginPassword'); const eye=document.getElementById('toggleLoginPass');
+  if(!el) return; el.type = el.type==='password' ? 'text' : 'password'; if(eye) eye.textContent = el.type==='password' ? '👁️' : '🙈';
+}
+document.addEventListener('DOMContentLoaded', () => { applyLoginLanguage(); applyRegisterLanguage(); });
+
+const registerTexts = {
+  es:{title:'Crear Mi Cuenta', back:'← Volver al Portal', first:'👤 Nombre', last:'Apellido', doc:'🪪 Número Documento de Identidad / NIT', docPh:'CI, pasaporte o NIT', email:'📧 Correo Electrónico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Teléfono', zip:'📮 Código Postal', region:'🏙️ Región / Estado', city:'🏠 Ciudad', address:'📍 Dirección exacta de envío', pass:'🔐 Contraseña', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres para crear la cuenta.', btn:'Crear Cuenta', have:'¿Ya tienes cuenta?', signin:'Inicia sesión aquí'},
+  en:{title:'Create My Account', back:'← Back to Portal', first:'👤 First Name', last:'Last Name', doc:'🪪 Identity Document Number / Tax ID', docPh:'ID, passport or tax ID', email:'📧 Email Address', country:'🌎 Country', area:'☎️ Area Code', phone:'📱 Phone', zip:'📮 Postal Code', region:'🏙️ Region / State', city:'🏠 City', address:'📍 Exact Shipping Address', pass:'🔐 Password', passPh:'Minimum 8 characters', passHelp:'Minimum 8 characters to create the account.', btn:'Create Account', have:'Already have an account?', signin:'Sign in here'},
+  pt:{title:'Criar Minha Conta', back:'← Voltar ao Portal', first:'👤 Nome', last:'Sobrenome', doc:'🪪 Número do Documento de Identidade / NIF', docPh:'RG, passaporte ou NIF', email:'📧 Correio Eletrônico', country:'🌎 País', area:'☎️ Código de área', phone:'📱 Telefone', zip:'📮 Código Postal', region:'🏙️ Região / Estado', city:'🏠 Cidade', address:'📍 Endereço exato de entrega', pass:'🔐 Senha', passPh:'Mínimo 8 caracteres', passHelp:'Mínimo 8 caracteres<div class="password-rules-panel">✔ Mayús<br>✔ minús<br>✔ Número<br>✔ Símbolo<br>✔ 8 carac</div> para criar a conta.', btn:'Criar Conta', have:'Já tem conta?', signin:'Entre aqui'},
+  it:{title:'Crea Il Mio Account', back:'← Torna al Portale', first:'👤 Nome', last:'Cognome', doc:'🪪 Numero Documento d’Identità / Partita IVA', docPh:'CI, passaporto o P.IVA', email:'📧 Email', country:'🌎 Paese', area:'☎️ Prefisso', phone:'📱 Telefono', zip:'📮 Codice Postale', region:'🏙️ Regione / Stato', city:'🏠 Città', address:'📍 Indirizzo esatto di spedizione', pass:'🔐 Password', passPh:'Minimo 8 caratteri', passHelp:'Minimo 8 caratteri per creare l’account.', btn:'Crea Account', have:'Hai già un account?', signin:'Accedi qui'},
+  fr:{title:'Créer Mon Compte', back:'← Retour au Portail', first:'👤 Prénom', last:'Nom', doc:'🪪 Numéro du document d’identité / NIF', docPh:'CI, passeport ou NIF', email:'📧 Adresse e-mail', country:'🌎 Pays', area:'☎️ Indicatif', phone:'📱 Téléphone', zip:'📮 Code Postal', region:'🏙️ Région / État', city:'🏠 Ville', address:'📍 Adresse exacte de livraison', pass:'🔐 Mot de passe', passPh:'Minimum 8 caractères', passHelp:'Minimum 8 caractères pour créer le compte.', btn:'Créer le Compte', have:'Vous avez déjà un compte ?', signin:'Connectez-vous ici'}
+};
+function applyRegisterLanguage(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  const t = registerTexts[lang] || registerTexts.es;
+  const back = document.querySelector('.back-btn'); if(back) back.textContent = t.back;
+  const title = document.querySelector('#registerForm .form-title'); if(title) title.textContent = t.title;
+  const labels = document.querySelectorAll('#registerForm .form-label');
+  if(labels[0]) labels[0].textContent = t.first;
+  if(labels[1]) labels[1].textContent = t.last;
+  if(labels[2]) labels[2].textContent = t.doc;
+  if(labels[3]) labels[3].textContent = t.email;
+  if(labels[4]) labels[4].textContent = t.country;
+  if(labels[5]) labels[5].textContent = t.area;
+  if(labels[6]) labels[6].textContent = t.phone;
+  if(labels[7]) labels[7].textContent = t.zip;
+  if(labels[8]) labels[8].textContent = t.region;
+  if(labels[9]) labels[9].textContent = t.city;
+  if(labels[10]) labels[10].textContent = t.address;
+  if(labels[11]) labels[11].textContent = t.pass;
+
+  const doc = document.getElementById('regDocument'); if(doc) doc.placeholder = t.docPh;
+  const pass = document.getElementById('regPassword'); if(pass) pass.placeholder = t.passPh;
+  const ph = document.querySelector('#registerForm .password-help'); if(ph) ph.textContent = t.passHelp;
+  const btn = document.getElementById('registerBtn'); if(btn) btn.textContent = t.btn;
+  const toggle = document.querySelector('#registerForm .toggle-form'); if(toggle) toggle.innerHTML = `${t.have} <a href="#" onclick="toggleForms(); return false;">${t.signin}</a>`;
+}
+
+</script>
+
+
+<script>
+function nexoPublicCleanup(){
+  try{
+    const keep = {
+      nexoLang: localStorage.getItem('nexoLang'),
+      nexo_language: localStorage.getItem('nexo_language')
+    };
+    const removeKeys = [
+      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
+      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
+    ];
+    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
+    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
+</script>
+
+
+
+<div id="recoveryModal" class="recovery-modal" style="display:none;">
+  <div class="recovery-card">
+    <div class="recovery-head">
+      <h3 class="recovery-title" id="recoveryTitle">Recuperar acceso</h3>
+      <button type="button" class="recovery-close" onclick="closeRecoveryModal()">×</button>
+    </div>
+    <div class="recovery-note" id="recoveryNote">Actualiza tus datos de acceso para volver a ingresar a la tienda.</div>
+    <div class="recovery-grid">
+      <div>
+        <label class="form-label" id="recoveryLabel1">Dato 1</label>
+        <input type="text" class="form-input" id="recoveryField1">
+      </div>
+      <div>
+        <label class="form-label" id="recoveryLabel2">Dato 2</label>
+        <input type="text" class="form-input" id="recoveryField2">
+      </div>
+      <div>
+        <label class="form-label" id="recoveryLabel3">Dato 3</label>
+        <input type="text" class="form-input" id="recoveryField3">
+      </div>
+    </div>
+    <div id="recoveryStatus" class="recovery-status"></div>
+    <div class="recovery-actions">
+      <button type="button" class="back-btn" id="recoveryCancelBtn" onclick="closeRecoveryModal()">Cancelar</button>
+      <button type="button" class="btn-login" id="recoverySaveBtn" onclick="submitRecovery()">Guardar y volver</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+let currentRecoveryMode = 'mail';
+
+const recoveryTexts = {
+  es: {
+    userInfo: 'Tu E-Mail de cliente es tu correo electrónico registrado. Ingresa siempre con tu email y contraseña.',
+    mailTitle: 'Recuperar E-Mail registrado',
+    mailNote: 'Ingresa tu contraseña registrada. Si coincide con la cuenta guardada, nexo™ mostrará el E-Mail asociado para que puedas ingresar.',
+    f1Mail: 'Contraseña registrada',
+    mailOk: 'Tu E-Mail registrado es: ',
+    wrongMailPass: 'La contraseña no coincide con la cuenta registrada.',
+    passTitle: 'Recuperar / actualizar contraseña',
+    passNote: 'Ingresa tu correo electrónico registrado y escribe tu nueva contraseña. En nexo™ el usuario del cliente es siempre su email.',
+    f1Pass: 'Correo electrónico registrado',
+    f2Pass: 'Nueva contraseña',
+    f3Pass: 'Repite nueva contraseña',
+    save: 'Guardar y volver',
+    cancel: 'Cancelar',
+    noProfile: 'No existe una cuenta registrada en este navegador. Primero crea tu cuenta o usa el correo con el que te registraste.',
+    wrongUser: 'El correo electrónico no coincide con la cuenta registrada.',
+    mismatchPass: 'Los dos campos de la nueva contraseña no coinciden.',
+    shortPass: 'La nueva contraseña debe tener al menos 8 caracteres.',
+    emptyFields: 'Completa los tres campos.',
+    passOk: 'Contraseña actualizada correctamente. Ya puedes ingresar con tu correo electrónico y tu nueva contraseña.'
+  },
+  en: {
+    userInfo: 'Your customer username is your registered email address. Always sign in with your email and password.',
+    mailTitle: 'Recover registered E-Mail',
+    mailNote: 'Enter your registered password. If it matches the saved account, nexo™ will show the associated E-Mail so you can sign in.',
+    f1Mail: 'Registered password',
+    mailOk: 'Your registered E-Mail is: ',
+    wrongMailPass: 'The password does not match the registered account.',
+    passTitle: 'Recover / update password',
+    passNote: 'Enter your registered email address and your new password. In nexo™, the customer username is always the email.',
+    f1Pass: 'Registered email address',
+    f2Pass: 'New password',
+    f3Pass: 'Repeat new password',
+    save: 'Save and return',
+    cancel: 'Cancel',
+    noProfile: 'There is no registered account in this browser. Please create your account first or use the email you registered with.',
+    wrongUser: 'The email address does not match the registered account.',
+    mismatchPass: 'The two new password fields do not match.',
+    shortPass: 'The new password must be at least 8 characters.',
+    emptyFields: 'Complete all three fields.',
+    passOk: 'Password updated successfully. You can now sign in with your email and new password.'
+  },
+  pt: {
+    userInfo: 'Seu usuário de cliente é o e-mail cadastrado. Entre sempre com seu e-mail e senha.',
+    mailTitle: 'Recuperar E-Mail cadastrado',
+    mailNote: 'Informe sua senha cadastrada. Se coincidir com a conta salva, o nexo™ mostrará o E-Mail associado para entrar.',
+    f1Mail: 'Senha cadastrada',
+    mailOk: 'Seu E-Mail cadastrado é: ',
+    wrongMailPass: 'A senha não confere com a conta registrada.',
+    passTitle: 'Recuperar / atualizar senha',
+    passNote: 'Informe seu e-mail cadastrado e sua nova senha. No nexo™, o usuário do cliente é sempre o e-mail.',
+    f1Pass: 'E-mail cadastrado',
+    f2Pass: 'Nova senha',
+    f3Pass: 'Repita a nova senha',
+    save: 'Salvar e voltar',
+    cancel: 'Cancelar',
+    noProfile: 'Não existe conta registrada neste navegador. Primeiro crie sua conta ou use o e-mail cadastrado.',
+    wrongUser: 'O e-mail não confere com a conta registrada.',
+    mismatchPass: 'Os dois campos da nova senha não coincidem.',
+    shortPass: 'A nova senha deve ter pelo menos 8 caracteres.',
+    emptyFields: 'Preencha os três campos.',
+    passOk: 'Senha atualizada com sucesso. Agora você já pode entrar com seu e-mail e a nova senha.'
+  },
+  it: {
+    userInfo: 'Il tuo utente cliente è l’e-mail registrata. Accedi sempre con e-mail e password.',
+    mailTitle: 'Recupera E-Mail registrata',
+    mailNote: 'Inserisci la password registrata. Se coincide con l’account salvato, nexo™ mostrerà l’E-Mail associata.',
+    f1Mail: 'Password registrata',
+    mailOk: 'La tua E-Mail registrata è: ',
+    wrongMailPass: 'La password non corrisponde all’account registrato.',
+    passTitle: 'Recupera / aggiorna password',
+    passNote: 'Inserisci l’e-mail registrata e la nuova password. In nexo™, l’utente cliente è sempre l’e-mail.',
+    f1Pass: 'E-mail registrata',
+    f2Pass: 'Nuova password',
+    f3Pass: 'Ripeti nuova password',
+    save: 'Salva e torna',
+    cancel: 'Annulla',
+    noProfile: 'Non esiste un account registrato in questo browser. Prima crea il tuo account o usa l’e-mail registrata.',
+    wrongUser: 'L’e-mail non corrisponde all’account registrato.',
+    mismatchPass: 'I due campi della nuova password non coincidono.',
+    shortPass: 'La nuova password deve avere almeno 8 caratteri.',
+    emptyFields: 'Completa tutti e tre i campi.',
+    passOk: 'Password aggiornata correttamente. Ora puoi accedere con la tua e-mail e la nuova password.'
+  },
+  fr: {
+    userInfo: 'Votre identifiant client est votre adresse e-mail enregistrée. Connectez-vous toujours avec votre e-mail et votre mot de passe.',
+    mailTitle: 'Récupérer l’E-Mail enregistré',
+    mailNote: 'Saisissez votre mot de passe enregistré. S’il correspond au compte sauvegardé, nexo™ affichera l’E-Mail associé.',
+    f1Mail: 'Mot de passe enregistré',
+    mailOk: 'Votre E-Mail enregistré est : ',
+    wrongMailPass: 'Le mot de passe ne correspond pas au compte enregistré.',
+    passTitle: 'Récupérer / mettre à jour le mot de passe',
+    passNote: 'Saisissez votre e-mail enregistré et votre nouveau mot de passe. Dans nexo™, l’identifiant client est toujours l’e-mail.',
+    f1Pass: 'Adresse e-mail enregistrée',
+    f2Pass: 'Nouveau mot de passe',
+    f3Pass: 'Répétez le nouveau mot de passe',
+    save: 'Enregistrer et revenir',
+    cancel: 'Annuler',
+    noProfile: 'Aucun compte enregistré dans ce navigateur. Créez d’abord votre compte ou utilisez l’e-mail enregistré.',
+    wrongUser: 'L’adresse e-mail ne correspond pas au compte enregistré.',
+    mismatchPass: 'Les deux champs du nouveau mot de passe ne correspondent pas.',
+    shortPass: 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
+    emptyFields: 'Remplissez les trois champs.',
+    passOk: 'Mot de passe mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre e-mail et votre nouveau mot de passe.'
+  }
+}
+
+
+async function nexoFindClientByPassword(password){
+  const URL='https://ujqbbniptflzytdankwp.supabase.co';
+  const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+  const pass = String(password || '').trim();
+  if(!pass) return null;
+  const endpoint = URL + '/rest/v1/clientes?select=*&password=eq.' + encodeURIComponent(pass) + '&limit=1';
+  const r = await fetch(endpoint, {
+    method:'GET',
+    headers:{apikey:KEY, Authorization:'Bearer '+KEY, 'Content-Type':'application/json'}
+  });
+  if(!r.ok) throw new Error(await r.text());
+  const data = await r.json();
+  if(!Array.isArray(data) || !data.length) return null;
+  const row = data[0];
   return {
-    id: String(raw.id || raw.cjProductId || raw.pid || raw.sku || raw.productSku || ('cj-'+idx)).replace(/[^a-zA-Z0-9_-]/g,'_'),
-    cjProductId: raw.cjProductId || raw.pid || raw.productId || raw.id || '',
-    sku: raw.sku || raw.productSku || '',
-    name: raw.name || raw.nameEn || raw.productNameEn || raw.productName || 'CJ Dropshipping product',
-    price: Number((Number.isFinite(price) ? price : 0).toFixed(2)),
-    cjProductCost: Number((Number.isFinite(price) ? price : 0).toFixed(2)),
-    category: raw.category || raw.categoryName || raw.oneCategoryName || 'CJ Dropshipping',
-    emoji: '📦',
-    provider: raw.provider || raw.proveedor || raw.vendor || 'CJ Dropshipping',
-    providerLogo: raw.providerLogo || raw.logo || '🇨🇳',
-    stock: raw.stock || raw.inventory || raw.warehouseInventoryNum || raw.totalVerifiedInventory || 'Verificar disponibilidad',
-    shippingAmazon: Number((Number.isFinite(ship) ? ship : 0).toFixed(2)),
-    cjShippingCost: Number((Number.isFinite(ship) ? ship : 0).toFixed(2)),
-    vendorFee: Number((Number.isFinite(fee) ? fee : 0).toFixed(2)),
-    cjHandlingFee: Number((Number.isFinite(fee) ? fee : 0).toFixed(2)),
-    sourceUrl: raw.sourceUrl || raw.url || raw.productUrl || ('https://www.cjdropshipping.com/search/'+encodeURIComponent(raw.name || raw.productNameEn || '')+'.html'),
-    image: raw.image || raw.bigImage || raw.productImage || raw.imageUrl || raw.productImageSet?.[0] || '',
-    features: ''
+    id: row.id,
+    email: row.email || '',
+    password: row.password || pass,
+    fullName: [row.nombre, row.apellido].filter(Boolean).join(' '),
+    name: row.nombre || '',
+    lastName: row.apellido || '',
+    documentId: row.documento || '',
+    country: row.pais || '',
+    areaCode: row.codigo_area || '',
+    phone: row.telefono || '',
+    postalCode: row.codigo_postal || '',
+    region: row.region || '',
+    city: row.ciudad || '',
+    address: row.direccion || ''
   };
 }
-function parseNexoMoneyRange(v){
-  const raw = String(v ?? '').trim();
-  if(!raw) return Infinity;
-  const nums = raw.match(/[0-9]+(?:\.[0-9]+)?/g);
-  if(nums && nums.length){
-    const arr = nums.map(Number).filter(Number.isFinite);
-    return arr.length ? Math.max(...arr) : Infinity;
-  }
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : Infinity;
-}
-async function fetchCjProducts(search,maxPrice,catSel){
-  const params = new URLSearchParams();
-  params.set('q', search || '');
-  if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
-  if(catSel) params.set('category', catSel);
-  params.set('size','50');
-  params.set('lang', (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es').slice(0,2));
-  const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 15000);
-  const res = await fetch('/api/cj-products?'+params.toString()+'&v=CJREAL20260610', {cache:'no-store', signal: ctrl.signal});
-  clearTimeout(timeout);
-  const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, status:data.status || 'error', message:data.message || data.error || 'CJ API no disponible', setup:data.setup || [], products:[]};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), outOfBudget: !!data.outOfBudget, message:data.message||''};
-}
-async function fetchProviderProducts(search,maxPrice,catSel){
-  const params = new URLSearchParams();
-  params.set('q', search || '');
-  if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
-  if(catSel) params.set('category', catSel);
-  params.set('size','50');
-  const providerSel=document.getElementById('providerFilter')?.value||'';
-  if(providerSel) params.set('provider', providerSel);
-  const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 10000);
-  const res = await fetch('/api/provider-products?'+params.toString()+'&v=PROV20260610', {cache:'no-store', signal: ctrl.signal});
-  clearTimeout(timeout);
-  const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Productos Supabase no disponibles', products:[]};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), message:data.message||''};
-}
-async function fetchAlibabaProducts(search,maxPrice,catSel){
-  const params = new URLSearchParams();
-  params.set('q', search || '');
-  if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
-  if(catSel) params.set('category', catSel);
-  params.set('size','50');
-  const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 10000);
-  const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260610', {cache:'no-store', signal: ctrl.signal});
-  clearTimeout(timeout);
-  const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Alibaba no disponible', products:[]};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), message:data.message||''};
+
+async function nexoFindClientByEmailPassword(email, password){
+  const URL='https://ujqbbniptflzytdankwp.supabase.co';
+  const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const pass = String(password || '').trim();
+  if(!cleanEmail || !pass) return null;
+  const endpoint = URL + '/rest/v1/clientes?select=*&email=eq.' + encodeURIComponent(cleanEmail) + '&password=eq.' + encodeURIComponent(pass) + '&limit=1';
+  const r = await fetch(endpoint, {
+    method:'GET',
+    headers:{apikey:KEY, Authorization:'Bearer '+KEY, 'Content-Type':'application/json'}
+  });
+  if(!r.ok) throw new Error(await r.text());
+  const data = await r.json();
+  if(!Array.isArray(data) || !data.length) return null;
+  const row = data[0];
+  return {
+    id: row.id,
+    email: row.email || cleanEmail,
+    password: row.password || pass,
+    fullName: [row.nombre, row.apellido].filter(Boolean).join(' '),
+    name: row.nombre || '',
+    lastName: row.apellido || '',
+    documentId: row.documento || '',
+    country: row.pais || '',
+    areaCode: row.codigo_area || '',
+    phone: row.telefono || '',
+    postalCode: row.codigo_postal || '',
+    region: row.region || '',
+    city: row.ciudad || '',
+    address: row.direccion || ''
+  };
 }
 
-async function fetchAmazonProducts(search,maxPrice,catSel){
-  const params = new URLSearchParams();
-  params.set('q', search || '');
-  if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
-  if(catSel) params.set('category', catSel);
-  params.set('size','50');
-  const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 10000);
-  const res = await fetch('/api/amazon-products?'+params.toString()+'&v=AMZ20260617', {cache:'no-store', signal: ctrl.signal});
-  clearTimeout(timeout);
-  const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Amazon no disponible', products:[]};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), message:data.notice||data.message||''};
+function getRecoveryLang(){
+  const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+  return recoveryTexts[lang] ? lang : 'es';
 }
-function uniqueNexoProducts(list){
-  const seen = new Set();
-  const out=[];
-  for(const p of list){
-    const key = String(p.sourceUrl || p.url || p.sku || p.id || p.name).toLowerCase();
-    if(seen.has(key)) continue;
-    seen.add(key); out.push(p);
-  }
-  return out;
-}
-
-const nexoStoreImages = {
-  laptop:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
-  notebook:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
-  impresora:'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80',
-  printer:'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=800&q=80',
-  audifonos:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-  auriculares:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-  cable:'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80',
-  cargador:'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
-  celular:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
-  telefono:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
-  reloj:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-  parlante:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80',
-  hdmi:'https://images.unsplash.com/photo-1615526675159-e248c3021d3f?auto=format&fit=crop&w=800&q=80',
-  adaptador:'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80',
-  soporte:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
-  protector:'https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80',
-  zapatos:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
-  zapatillas:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
-  cordones:'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80',
-  calcetin:'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80',
-  calcetines:'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80',
-  medias:'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80',
-  camisa:'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
-  mochila:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
-  default:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
-};
-function nexoStoreImageFor(item){
-  if(item.image || item.imageUrl || item.photo) return item.image || item.imageUrl || item.photo;
-  const hay=normalizeText([item.name,item.aliases,item.category].join(' '));
-  for(const [k,url] of Object.entries(nexoStoreImages)){ if(k!=='default' && hay.includes(k)) return url; }
-  return nexoStoreImages.default;
-}
-function nexoProductFeatures(item){
-  const cat = item.category || 'general';
-  const name = item.name || 'Producto';
-  const source = item.provider || 'Amazon';
-  return `<strong>${nexoStoreT('featuresTitle')}:</strong><br>• ${nexoStoreT('suggested')}: ${name}<br>• ${nexoStoreT('originalProvider')}: ${source}<br>• ${nexoStoreT('priceFilter')}<br>• ${nexoStoreT('verify')}`;
-}
-
-function renderProducts(list){
-  const grid=document.getElementById('productsGrid');
-  const activeSearch=(document.getElementById('searchInput')?.value || '').trim();
-  if(!list.length){grid.innerHTML='<div class="empty-note">'+(activeSearch ? nexoStoreT('noResults') : nexoStoreT('empty'))+'</div>';return;}
-  grid.innerHTML=list.map((p,idx)=>`
-    <div class="product-card">
-      <div class="product-image"><img src="${nexoStoreImageFor(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src=nexoStoreImages.default;"></div>
-      <div class="product-info">
-        <div class="provider">${p.providerLogo} ${p.provider}</div>
-        <button type="button" class="provider-link variant-link-btn" data-variant-index="${idx}" onclick="nexoOpenVariantSafe(${idx}); return false;">${nexoStoreT('provider')}</button>
-        <div class="product-name">${p.name}</div>
-        <div class="product-rating">★★★★★ (128 ${nexoStoreT('reviews')})</div>
-        <div class="product-price">$${p.price.toFixed(2)}</div>
-        <div class="product-stock">${nexoStoreT('stock')}: ${p.stock}</div>
-        <div class="product-features">${p.features || nexoProductFeatures(p)}</div>
-        <button class="add-to-cart-btn" onclick="addToCartByIndex(${idx})">${nexoStoreT('addCart')}</button>
-      </div>
-    </div>`).join('');
-}
-let nexoSearchTimer=null;
-async function filterProducts(){
-  clearTimeout(nexoSearchTimer);
-  nexoSearchTimer = setTimeout(async()=>{
-    const search=document.getElementById('searchInput').value.trim();
-    const maxRaw=document.getElementById('priceFilter').value;
-    const max=parseNexoMoneyRange(maxRaw);
-    const cat=document.getElementById('categoryFilter').value;
-    const grid=document.getElementById('productsGrid');
-    if(!search){ products=[]; renderProducts([]); return; }
-    grid.innerHTML='<div class="loading-note">Consultando CJ, Alibaba, Amazon y proveedores guardados en nexo...</div>';
-    try{
-      const providerSel=(document.getElementById('providerFilter')?.value || '').trim().toLowerCase();
-      const tasks=[];
-      if(!providerSel || providerSel==='cj') tasks.push(['cj', fetchCjProducts(search,max,cat)]);
-      if(!providerSel || providerSel==='alibaba') tasks.push(['alibaba', fetchAlibabaProducts(search,max,cat)]);
-      if(!providerSel || providerSel==='amazon') tasks.push(['amazon', fetchAmazonProducts(search,max,cat)]);
-      tasks.push(['supa', fetchProviderProducts(search,max,cat)]);
-      const settled = await Promise.allSettled(tasks.map(t=>t[1]));
-      const results = {};
-      settled.forEach((r,i)=>{ const key=tasks[i][0]; results[key]=r.status==='fulfilled'?r.value:{ok:false, message:r.reason?.message || String(r.reason), products:[]}; });
-      const cj = results.cj || {ok:true, products:[]};
-      const alibaba = results.alibaba || {ok:true, products:[]};
-      const amazon = results.amazon || {ok:true, products:[]};
-      const supa = results.supa || {ok:true, products:[]};
-      products = uniqueNexoProducts([...(cj.products||[]), ...(alibaba.products||[]), ...(amazon.products||[]), ...(supa.products||[])])
-        .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
-        .filter(p => !Number.isFinite(max) || Number(p.price||0) <= max)
-        .sort((a,b)=>Number(b.price||0)-Number(a.price||0))
-        .slice(0,50);
-      renderProducts(products);
-      if(!products.length && (!cj.ok || !supa.ok)){
-        grid.innerHTML='<div class="api-note">No se encontraron productos. Detalle técnico:<br><small>CJ: '+String(cj.message||'sin respuesta')+'</small><br><small>Alibaba: '+String((typeof alibaba!=='undefined' && alibaba.message)||'sin respuesta')+'</small><br><small>Supabase proveedores: '+String(supa.message||'sin respuesta')+'</small><br><small>Pruebas: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/provider-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>';
-      }
-      if(cj.outOfBudget && products.length){
-        const grid=document.getElementById('productsGrid');
-        grid.insertAdjacentHTML('afterbegin','<div class="api-note" style="grid-column:1/-1">'+(cj.message || 'CJ devolvió productos reales, pero algunos superan el presupuesto máximo colocado.')+'</div>');
-      }
-      if(window.forceNexoFooter) window.forceNexoFooter();
-    }catch(e){
-      products=[];
-      grid.innerHTML='<div class="api-note">No se pudo consultar multi-proveedor.<br><small>Detalle: '+String(e.message||e)+'</small></div>'; if(window.forceNexoFooter) window.forceNexoFooter();
-    }
-  }, 350);
-}
-function addToCartByIndex(idx){ const p=products[idx]; if(!p)return; addProductToCart(p); }
-
-function nexoOpenVariantSafe(idx){
-  const p = Array.isArray(products) ? products[idx] : null;
-  if(!p){ alert('Producto no cargado. Vuelva a buscar el producto.'); return false; }
+function getSavedClientProfile(){
   try{
-    localStorage.setItem('nexoSelectedProviderProduct', JSON.stringify(p));
-    localStorage.setItem('nexoProviderOptions', JSON.stringify(products || []));
-    localStorage.setItem('nexoStoreReturnState', JSON.stringify({search:document.getElementById('searchInput')?.value||'', maxRaw:document.getElementById('priceFilter')?.value||'', cat:document.getElementById('categoryFilter')?.value||'', scrollY:window.scrollY||0}));
-  }catch(e){}
-  window.location.href='nexo-opciones-proveedor.html';
+    return JSON.parse(localStorage.getItem('nexoClientProfile') || sessionStorage.getItem('nexoActiveClient') || 'null');
+  }catch(e){ return null; }
+}
+function setSavedClientProfile(profile){
+  localStorage.setItem('nexoClientProfile', JSON.stringify(profile));
+  sessionStorage.setItem('nexoActiveClient', JSON.stringify(profile));
+  sessionStorage.setItem('clientEmail', profile.email || '');
+  sessionStorage.setItem('clientName', profile.fullName || '');
+}
+function setRecoveryStatus(msg, type){
+  const box = document.getElementById('recoveryStatus');
+  if(!box) return;
+  box.className = 'recovery-status ' + (type === 'ok' ? 'ok' : 'err');
+  box.textContent = msg;
+}
+function showEmailIsUser(){
+  return openRecoveryModal('mail');
+}
+function openRecoveryModal(mode){
+  currentRecoveryMode = mode === 'mail' ? 'mail' : 'pass';
+  const lang = getRecoveryLang();
+  const t = recoveryTexts[lang] || recoveryTexts.es;
+  const modal = document.getElementById('recoveryModal');
+  if(!modal) return false;
+
+  const f1 = document.getElementById('recoveryField1');
+  const f2 = document.getElementById('recoveryField2');
+  const f3 = document.getElementById('recoveryField3');
+  const l1 = document.getElementById('recoveryLabel1');
+  const l2 = document.getElementById('recoveryLabel2');
+  const l3 = document.getElementById('recoveryLabel3');
+
+  if(currentRecoveryMode === 'mail'){
+    document.getElementById('recoveryTitle').textContent = t.mailTitle;
+    document.getElementById('recoveryNote').textContent = t.mailNote;
+    l1.textContent = t.f1Mail;
+    l2.parentElement.style.display = 'none';
+    l3.parentElement.style.display = 'none';
+    f1.value = '';
+    f1.type = 'password';
+    f1.placeholder = 'Mínimo 8 caracteres';
+    f2.value = '';
+    f3.value = '';
+  } else {
+    document.getElementById('recoveryTitle').textContent = t.passTitle;
+    document.getElementById('recoveryNote').textContent = t.passNote;
+    l1.textContent = t.f1Pass;
+    l2.textContent = t.f2Pass;
+    l3.textContent = t.f3Pass;
+    l2.parentElement.style.display = '';
+    l3.parentElement.style.display = '';
+    f1.value = ''; f2.value = ''; f3.value = '';
+    f1.type = 'email';
+    f2.type = 'password';
+    f3.type = 'password';
+    f1.placeholder = 'tu@email.com';
+    f2.placeholder = 'Mínimo 8 caracteres';
+    f3.placeholder = 'Mínimo 8 caracteres';
+  }
+
+  document.getElementById('recoverySaveBtn').textContent = t.save;
+  document.getElementById('recoveryCancelBtn').textContent = t.cancel;
+  document.getElementById('recoveryStatus').className = 'recovery-status';
+  document.getElementById('recoveryStatus').textContent = '';
+
+  modal.style.display = 'flex';
+  modal.classList.add('show');
+  setTimeout(()=>f1.focus(), 50);
   return false;
 }
-document.addEventListener('click', function(ev){
-  const btn = ev.target.closest && ev.target.closest('[data-variant-index]');
-  if(!btn) return;
-  ev.preventDefault(); ev.stopPropagation();
-  nexoOpenVariantSafe(Number(btn.getAttribute('data-variant-index')));
-}, true);
-
-function addToCart(id){
-  const p=products.find(x=>String(x.id)===String(id)); if(!p)return; addProductToCart(p); }
-function addProductToCart(p){
-  const found=cart.find(x=>String(x.id)===String(p.id));
-  if(found) found.quantity++; else cart.push({...p,image:nexoStoreImageFor(p),features:p.features || nexoProductFeatures(p),quantity:1});
-  localStorage.setItem('nexoCart',JSON.stringify(cart)); updateCartCount();
-}
-function updateCartCount(){document.getElementById('cartCount').textContent=cart.reduce((s,i)=>s+i.quantity,0);}
-function openCart(){document.getElementById('cartModal').style.display='block';renderCartItems();}
-function closeCart(){document.getElementById('cartModal').style.display='none';}
-function renderCartItems(){
-  const c=document.getElementById('cartItems');
-  if(!cart.length){c.innerHTML='<p style="text-align:center;color:#777;padding:18px">'+nexoStoreT('cartEmpty')+'</p>';updateCartSummary();return;}
-  c.innerHTML=cart.map((i,idx)=>`<div class="cart-item"><div><strong>${i.emoji} ${i.name}</strong></div><div><button class="qty-btn" onclick="qtyIndex(${idx},-1)">−</button> ${i.quantity} <button class="qty-btn" onclick="qtyIndex(${idx},1)">+</button></div><div><strong>$${(i.price*i.quantity).toFixed(2)}</strong></div></div>`).join('');
-  updateCartSummary();
-}
-function qtyIndex(idx,chg){const i=cart[idx]; if(!i)return; i.quantity+=chg; if(i.quantity<=0)cart.splice(idx,1); localStorage.setItem('nexoCart',JSON.stringify(cart));updateCartCount();renderCartItems();}
-function qty(id,chg){const i=cart.find(x=>String(x.id)===String(id)); if(!i)return; i.quantity+=chg; if(i.quantity<=0)cart=cart.filter(x=>String(x.id)!==String(id)); localStorage.setItem('nexoCart',JSON.stringify(cart));updateCartCount();renderCartItems();}
-function updateCartSummary(){
-  const subtotal=cart.reduce((s,i)=>s+i.price*i.quantity,0);
-  const shipping=cart.reduce((s,i)=>s+(Number(i.cjShippingCost ?? i.shippingAmazon ?? 0)*i.quantity),0);
-  const vendor=cart.reduce((s,i)=>s+(Number(i.cjHandlingFee ?? i.vendorFee ?? 0)*i.quantity),0);
-  const commission=subtotal*.30, total=subtotal+shipping+vendor+commission;
-  document.getElementById('subtotal').textContent=subtotal.toFixed(2);
-  document.getElementById('amazonShipping').textContent=shipping.toFixed(2);
-  document.getElementById('vendorFees').textContent=vendor.toFixed(2);
-  document.getElementById('commission').textContent=commission.toFixed(2);
-  document.getElementById('totalPrice').textContent=total.toFixed(2);
-}
-function goToCheckout(){if(cart.length)location.href='nexo-checkout.html';}
-document.addEventListener('DOMContentLoaded',()=>{products=[];document.getElementById('productsGrid').innerHTML='<div class="empty-note">'+nexoStoreT('empty')+'</div>';updateCartCount(); if(window.applyNexoStoreI18n) window.applyNexoStoreI18n();});
-</script>
-
-<script id="nexo-store-i18n-complete">
-(function(){
-  const dict={
-    es:{logoSubtitle:'Tienda',title:'Tienda nexo™',subtitle:'50 Productos multi-proveedor • Envíos Internacionales',instruction:'',backBtn:'← Volver',cartTitle:'Ver Carrito',searchLabel:'🔍 Buscar',searchPlaceholder:'Nombre del producto...',categoryLabel:'📁 Categoría',allCategories:'Todas las categorías',catElectronics:'Electrónica',catAccessories:'Accesorios',catFashion:'Moda',catOffice:'Oficina',catBeauty:'Belleza',catHome:'Hogar',maxPriceLabel:'💲 Precio Máximo',maxPricePlaceholder:'Sin límite si queda vacío',hint:'Si no coloca precio máximo, se muestran productos sugeridos para la búsqueda.',empty:'Busque el producto que desea comprar y coloque el presupuesto máximo que quiere invertir. nexo™ priorizará opciones reales entre proveedores internacionales como CJ Dropshipping, AliExpress, Amazon Business, Temu, SHEIN y otras plataformas mundiales, seleccionando automáticamente las mejores alternativas disponibles para usted.',noResults:'No se encontraron productos reales disponibles para esa búsqueda y presupuesto. Pruebe con otro nombre de producto o aumente el presupuesto máximo.',provider:'Ver opciones del proveedor',reviews:'reseñas',stock:'Stock',featuresTitle:'Características',suggested:'Producto seleccionado',originalProvider:'Proveedor original',priceFilter:'Precio máximo respetado por filtro nexo™',verify:'Selección gestionada dentro de nexo™ sin enviar al cliente al proveedor',addCart:'+ Carrito',cartHeader:'🛒 Tu Carrito',cartEmpty:'Tu carrito está vacío',subtotalLbl:'Subtotal producto:',shippingLbl:'Gastos de envío CJ/Marketplace:',vendorLbl:'Gastos proveedor/marketplace CJ:',commissionLbl:'Comisión nexo™:',totalLbl:'Total a Pagar:',checkoutBtn:'Proceder al Pago',loadingCj:'Consultando productos reales multi-proveedor...',cjApiNeeded:'Para mostrar productos reales de CJ Dropshipping falta activar la API oficial de CJ en Vercel.',cjApiNeededSub:'En CJ debe obtener: My CJ → Authorization → API → API Key. Luego agregar CJ_API_KEY en Vercel y redeploy.',cjApiError:'No se pudo consultar el endpoint /api/cj-products.',footer1:'Plataforma de Intermediación Comercial Internacional',footer3:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal',terms:'Términos y Condiciones',privacy:'Privacidad',cookies:'Cookies',refunds:'Reembolsos'},
-    en:{logoSubtitle:'Store',title:'nexo™ Store',subtitle:'20 multi-provider products • International shipping',instruction:'Enter the product you want to buy and set the maximum budget you want to invest. nexo™ will first search real CJ Dropshipping products, show provider price, image and costs, and keep Amazon only as the final backup.',backBtn:'← Back',cartTitle:'View Cart',searchLabel:'🔍 Search',searchPlaceholder:'Product name...',categoryLabel:'📁 Category',allCategories:'All categories',catElectronics:'Electronics',catAccessories:'Accessories',catFashion:'Fashion',catOffice:'Office',catBeauty:'Beauty',catHome:'Home',maxPriceLabel:'💲 Maximum Price',maxPricePlaceholder:'No limit if left empty',hint:'If no maximum price is entered, suggested products for the search are shown.',empty:'Search for the product you want to buy and enter your maximum budget. nexo™ will prioritize real options from global providers such as CJ Dropshipping, AliExpress, Amazon Business, Temu, SHEIN and other worldwide platforms, automatically selecting the best available alternatives for you.',noResults:'No real products were found for that search and budget. Try another product name or increase the maximum budget.',provider:'View provider options',reviews:'reviews',stock:'Stock',featuresTitle:'Features',suggested:'Suggested product based on search',originalProvider:'Original provider',priceFilter:'Maximum price respected by nexo™ filter',verify:'Verify availability, size/color and shipping with the original provider',addCart:'+ Cart',cartHeader:'🛒 Your Cart',cartEmpty:'Your cart is empty',subtotalLbl:'Product subtotal:',shippingLbl:'CJ/Marketplace shipping costs:',vendorLbl:'CJ provider/marketplace charges:',commissionLbl:'nexo™ commission:',totalLbl:'Total to Pay:',checkoutBtn:'Proceed to Payment',loadingCj:'Checking real CJ Dropshipping products...',cjApiNeeded:'To display real CJ Dropshipping products, the official CJ API must be activated in Vercel.',cjApiNeededSub:'In CJ get: My CJ → Authorization → API → API Key. Then add CJ_API_KEY in Vercel and redeploy.',cjApiError:'Could not query /api/cj-products endpoint.',footer1:'International Commercial Intermediation Platform',footer3:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice',terms:'Terms and Conditions',privacy:'Privacy',cookies:'Cookies',refunds:'Refunds'},
-    pt:{logoSubtitle:'Loja',title:'Loja nexo™',subtitle:'20 produtos multi-fornecedor • Envios internacionais',instruction:'Informe o produto que deseja comprar e defina o orçamento máximo que deseja investir. A nexo™ buscará primeiro produtos reais na CJ Dropshipping, mostrará preço, imagem e custos do fornecedor, e manterá a Amazon apenas como respaldo final.',backBtn:'← Voltar',cartTitle:'Ver Carrinho',searchLabel:'🔍 Buscar',searchPlaceholder:'Nome do produto...',categoryLabel:'📁 Categoria',allCategories:'Todas as categorias',catElectronics:'Eletrônicos',catAccessories:'Acessórios',catFashion:'Moda',catOffice:'Escritório',catBeauty:'Beleza',catHome:'Casa',maxPriceLabel:'💲 Preço Máximo',maxPricePlaceholder:'Sem limite se ficar vazio',hint:'Se não colocar preço máximo, serão mostrados produtos sugeridos para a busca.',empty:'Busque o produto que deseja comprar e informe o orçamento máximo. A nexo™ priorizará opções reais da CJ Dropshipping dentro desse valor e manterá a Amazon apenas como respaldo final.',noResults:'Nenhum produto real foi encontrado para essa busca e orçamento. Tente outro nome de produto ou aumente o orçamento máximo.',provider:'Ver opções do fornecedor',reviews:'avaliações',stock:'Estoque',featuresTitle:'Características',suggested:'Produto sugerido conforme a busca',originalProvider:'Fornecedor original',priceFilter:'Preço máximo respeitado pelo filtro nexo™',verify:'Verifique disponibilidade, tamanho/cor e envio no fornecedor original',addCart:'+ Carrinho',cartHeader:'🛒 Seu Carrinho',cartEmpty:'Seu carrinho está vazio',subtotalLbl:'Subtotal do produto:',shippingLbl:'Custos de envio CJ/Marketplace:',vendorLbl:'Custos do fornecedor/marketplace CJ:',commissionLbl:'Comissão nexo™:',totalLbl:'Total a Pagar:',checkoutBtn:'Prosseguir para Pagamento',loadingCj:'Consultando productos reales en CJ Dropshipping...',cjApiNeeded:'Para mostrar productos reales de CJ Dropshipping falta activar la API oficial de CJ en Vercel.',cjApiNeededSub:'En CJ debe obtener: My CJ → Authorization → API → API Key. Luego agregar CJ_API_KEY en Vercel y redeploy.',cjApiError:'No se pudo consultar el endpoint /api/cj-products.',loadingCj:'Consultando produtos reais na CJ Dropshipping...',cjApiNeeded:'Para mostrar produtos reais da CJ Dropshipping, falta ativar a API oficial da CJ na Vercel.',cjApiNeededSub:'Na CJ obtenha: My CJ → Authorization → API → API Key. Depois adicione CJ_API_KEY na Vercel e faça redeploy.',cjApiError:'Não foi possível consultar o endpoint /api/cj-products.',footer1:'Plataforma de Intermediação Comercial Internacional',footer3:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal',terms:'Termos e Condições',privacy:'Privacidade',cookies:'Cookies',refunds:'Reembolsos'},
-    it:{logoSubtitle:'Negozio',title:'Negozio nexo™',subtitle:'20 prodotti multi-fornitore • Spedizioni internazionali',instruction:'Inserisci il prodotto che desideri acquistare e definisci il budget massimo che vuoi investire. nexo™ cercherà prima prodotti reali su CJ Dropshipping, mostrando prezzo, immagine e costi del fornitore, mantenendo Amazon solo come supporto finale.',backBtn:'← Indietro',cartTitle:'Vedi Carrello',searchLabel:'🔍 Cerca',searchPlaceholder:'Nome del prodotto...',categoryLabel:'📁 Categoria',allCategories:'Tutte le categorie',catElectronics:'Elettronica',catAccessories:'Accessori',catFashion:'Moda',catOffice:'Ufficio',catBeauty:'Bellezza',catHome:'Casa',maxPriceLabel:'💲 Prezzo Massimo',maxPricePlaceholder:'Nessun limite se vuoto',hint:'Se non inserisci un prezzo massimo, vengono mostrati prodotti suggeriti per la ricerca.',empty:'Cerca il prodotto che desideri acquistare e inserisci il budget massimo. nexo™ darà priorità alle opzioni reali di CJ Dropshipping entro tale importo e manterrà Amazon solo come supporto finale.',noResults:'Non sono stati trovati prodotti reali per questa ricerca e questo budget. Prova un altro nome prodotto o aumenta il budget massimo.',provider:'Vedi opzioni del fornitore',reviews:'recensioni',stock:'Disponibilità',featuresTitle:'Caratteristiche',suggested:'Prodotto suggerito in base alla ricerca',originalProvider:'Fornitore originale',priceFilter:'Prezzo massimo rispettato dal filtro nexo™',verify:'Verifica disponibilità, taglia/colore e spedizione presso il fornitore originale',addCart:'+ Carrello',cartHeader:'🛒 Il tuo Carrello',cartEmpty:'Il carrello è vuoto',subtotalLbl:'Subtotale prodotto:',shippingLbl:'Costi di spedizione CJ/Marketplace:',vendorLbl:'Costi fornitore/marketplace CJ:',commissionLbl:'Commissione nexo™:',totalLbl:'Totale da Pagare:',checkoutBtn:'Procedi al Pagamento',loadingCj:'Consultazione prodotti reali su CJ Dropshipping...',cjApiNeeded:'Per mostrare prodotti reali di CJ Dropshipping manca l’attivazione dell’API ufficiale CJ su Vercel.',cjApiNeededSub:'In CJ ottieni: My CJ → Authorization → API → API Key. Poi aggiungi CJ_API_KEY in Vercel e ridistribuisci.',cjApiError:'Impossibile interrogare l’endpoint /api/cj-products.',footer1:'Piattaforma di Intermediazione Commerciale Internazionale',footer3:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale',terms:'Termini e Condizioni',privacy:'Privacy',cookies:'Cookie',refunds:'Rimborsi'},
-    fr:{logoSubtitle:'Boutique',title:'Boutique nexo™',subtitle:'20 produits multi-fournisseurs • Expéditions internationales',instruction:'Saisissez le produit que vous souhaitez acheter et, si vous avez un budget défini, indiquez le montant maximum à rechercher. nexo™ cherchera d’abord des options réelles sur CJ Dropshipping, affichera le prix et l’image du fournisseur et gardera Amazon comme solution finale de secours.',backBtn:'← Retour',cartTitle:'Voir Panier',searchLabel:'🔍 Rechercher',searchPlaceholder:'Nom du produit...',categoryLabel:'📁 Catégorie',allCategories:'Toutes les catégories',catElectronics:'Électronique',catAccessories:'Accessoires',catFashion:'Mode',catOffice:'Bureau',catBeauty:'Beauté',catHome:'Maison',maxPriceLabel:'💲 Prix Maximum',maxPricePlaceholder:'Sans limite si vide',hint:'Si aucun prix maximum n’est indiqué, des produits suggérés pour la recherche sont affichés.',empty:'Recherchez le produit que vous souhaitez acheter et indiquez votre budget maximum. nexo™ priorisera les options réelles de CJ Dropshipping dans ce montant et gardera Amazon uniquement comme solution de secours finale.',noResults:'Aucun produit réel n’a été trouvé pour cette recherche et ce budget. Essayez un autre nom de produit ou augmentez le budget maximum.',provider:'Voir fournisseur original',reviews:'avis',stock:'Stock',featuresTitle:'Caractéristiques',suggested:'Produit suggéré selon la recherche',originalProvider:'Fournisseur original',priceFilter:'Prix maximum respecté par le filtre nexo™',verify:'Vérifiez la disponibilité, taille/couleur et livraison auprès du fournisseur original',addCart:'+ Panier',cartHeader:'🛒 Votre Panier',cartEmpty:'Votre panier est vide',subtotalLbl:'Sous-total produit :',shippingLbl:'Frais de livraison CJ/Marketplace :',vendorLbl:'Frais fournisseur/marketplace CJ :',commissionLbl:'Commission nexo™ :',totalLbl:'Total à Payer :',checkoutBtn:'Procéder au Paiement',loadingCj:'Consultation des produits réels sur CJ Dropshipping...',cjApiNeeded:'Pour afficher les produits réels de CJ Dropshipping, il faut activer l’API officielle CJ dans Vercel.',cjApiNeededSub:'Dans CJ, obtenez : My CJ → Authorization → API → API Key. Ajoutez ensuite CJ_API_KEY dans Vercel et redéployez.',cjApiError:'Impossible de consulter l’endpoint /api/cj-products.',footer1:'Plateforme d’Intermédiation Commerciale Internationale',footer3:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions Légales',terms:'Conditions Générales',privacy:'Confidentialité',cookies:'Cookies',refunds:'Remboursements'}
-  };
-  function lang(){return localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||'es'}
-  window.nexoStoreT=function(k){const d=dict[lang()]||dict.es; return d[k]||dict.es[k]||k};
-  window.applyNexoStoreI18n=function(){const d=dict[lang()]||dict.es; document.documentElement.lang=lang(); document.querySelectorAll('[data-i18n-store]').forEach(el=>{const k=el.getAttribute('data-i18n-store'); if(d[k]) el.textContent=d[k];}); document.querySelectorAll('[data-i18n-placeholder-store]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder-store'); if(d[k]) el.placeholder=d[k];}); document.querySelectorAll('[data-i18n-title-store]').forEach(el=>{const k=el.getAttribute('data-i18n-title-store'); if(d[k]) el.title=d[k];}); const inst=document.getElementById('storeInstruction'); if(inst) inst.innerHTML=d.instruction; const foot=document.querySelector('footer'); if(foot) foot.innerHTML='<strong>nexo™</strong> – '+d.footer1+'<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>'+d.footer3+'<br>© 2026 nexo™ – '+d.rights+'<br><span class="nexo-footer-links"><a href="aviso-legal.html">'+d.legal+'</a> | <a href="terminos-condiciones.html">'+(d.terms||'Términos y Condiciones')+'</a> | <a href="politica-privacidad.html">'+(d.privacy||'Privacidad')+'</a> | <a href="politica-cookies.html">'+(d.cookies||'Cookies')+'</a> | <a href="reembolsos.html">'+(d.refunds||'Reembolsos')+'</a></span>'; };
-  window.addEventListener('DOMContentLoaded',()=>{window.applyNexoStoreI18n(); setTimeout(window.applyNexoStoreI18n,200);});
-})();
-</script>
-
-
-<script id="nexo-footer-force">
-(function(){
-  function forceFooter(){
-    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
-    const T = {
-      es:['Plataforma de Intermediación Comercial Internacional','nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.','Todos los derechos reservados','Aviso Legal','Términos y Condiciones','Privacidad','Cookies','Reembolsos'],
-      en:['International Commercial Intermediation Platform','nexo™ acts exclusively as an intermediary between the customer and international providers.','All rights reserved','Legal Notice','Terms and Conditions','Privacy','Cookies','Refunds'],
-      pt:['Plataforma de Intermediação Comercial Internacional','nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.','Todos os direitos reservados','Aviso Legal','Termos e Condições','Privacidade','Cookies','Reembolsos'],
-      it:['Piattaforma di Intermediazione Commerciale Internazionale','nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.','Tutti i diritti riservati','Avviso Legale','Termini e Condizioni','Privacy','Cookie','Rimborsi'],
-      fr:['Plateforme d’Intermédiation Commerciale Internationale','nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.','Tous droits réservés','Mentions Légales','Conditions Générales','Confidentialité','Cookies','Remboursements']
-    };
-    const d=T[lang]||T.es; const foot=document.getElementById('nexoFooter')||document.querySelector('footer'); if(!foot) return;
-    foot.innerHTML='<strong>nexo™</strong> – '+d[0]+'<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>'+d[1]+'<br>© 2026 nexo™ – '+d[2]+'<br><span class="nexo-footer-links"><a href="aviso-legal.html">'+d[3]+'</a> | <a href="terminos-condiciones.html">'+d[4]+'</a> | <a href="politica-privacidad.html">'+d[5]+'</a> | <a href="politica-cookies.html">'+d[6]+'</a> | <a href="reembolsos.html">'+d[7]+'</a></span>';
+function closeRecoveryModal(){
+  const modal = document.getElementById('recoveryModal');
+  if(modal){
+    modal.classList.remove('show');
+    modal.style.display = 'none';
   }
-  window.forceNexoFooter = forceFooter;
-  window.addEventListener('DOMContentLoaded',()=>{forceFooter(); setTimeout(forceFooter,200); setTimeout(forceFooter,900);});
-})();
-</script>
+}
+async function submitRecovery(){
+  const lang = getRecoveryLang();
+  const t = recoveryTexts[lang] || recoveryTexts.es;
 
-<script src="nexo-legal-i18n.js"></script>
+  if(currentRecoveryMode === 'mail'){
+    const pass = (document.getElementById('recoveryField1').value || '').trim();
+    if(!pass){
+      setRecoveryStatus(t.emptyFields, 'err');
+      return false;
+    }
 
-
-
-
-<script id="nexo-anti-demo-final">
-(function(){
-  const demoWords = [
-    'Apple'+' '+'iPhone',
-    'i'+'Phone 15',
-    'i'+'Phone 14',
-    'i'+'Phone 13',
-    'Max '+'desbloqueado',
-    'Max '+'renovado'
-  ];
-  function cleanDemo(){
+    let profile = null;
     try{
-      const grid = document.getElementById('productsGrid');
-      if(grid && demoWords.some(w => grid.innerText.includes(w))){
-        grid.innerHTML = '<div class="empty-note">'+nexoStoreT('empty')+'</div>';
-      }
-      document.querySelectorAll('.product-card').forEach(card=>{
-        if(demoWords.some(w => card.innerText.includes(w))) card.remove();
-      });
-    }catch(e){}
+      profile = await nexoFindClientByPassword(pass);
+    }catch(err){
+      console.warn('No se pudo consultar Supabase para recuperar E-Mail:', err);
+    }
+
+    if(!profile || !profile.email){
+      const localProfile = getSavedClientProfile();
+      if(localProfile && (localProfile.password || '') === pass) profile = localProfile;
+    }
+
+    if(!profile || !profile.email){
+      setRecoveryStatus(t.wrongMailPass || 'La contraseña no coincide con la cuenta registrada.', 'err');
+      return false;
+    }
+
+    setSavedClientProfile(profile);
+    setRecoveryStatus((t.mailOk || 'Tu E-Mail registrado es: ') + profile.email, 'ok');
+    const loginEmail = document.getElementById('loginEmail');
+    if(loginEmail) loginEmail.value = profile.email;
+    return false;
   }
-  window.addEventListener('DOMContentLoaded', cleanDemo);
-  setTimeout(cleanDemo, 100);
-  setTimeout(cleanDemo, 500);
-  setTimeout(cleanDemo, 1200);
+
+  const profile = getSavedClientProfile();
+  if(!profile || !profile.email){
+    setRecoveryStatus(t.noProfile, 'err');
+    return false;
+  }
+
+  const email = (document.getElementById('recoveryField1').value || '').trim().toLowerCase();
+  const newPass = (document.getElementById('recoveryField2').value || '').trim();
+  const repeatPass = (document.getElementById('recoveryField3').value || '').trim();
+
+  if(!email || !newPass || !repeatPass){
+    setRecoveryStatus(t.emptyFields, 'err');
+    return false;
+  }
+  if((profile.email || '').toLowerCase() !== email){
+    setRecoveryStatus(t.wrongUser, 'err');
+    return false;
+  }
+  if(newPass !== repeatPass){
+    setRecoveryStatus(t.mismatchPass, 'err');
+    return false;
+  }
+  if(newPass.length < 8){
+    setRecoveryStatus(t.shortPass, 'err');
+    return false;
+  }
+
+  profile.password = newPass;
+  setSavedClientProfile(profile);
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  if(loginEmail) loginEmail.value = profile.email;
+  if(loginPassword) loginPassword.value = profile.password;
+  setRecoveryStatus(t.passOk, 'ok');
+
+  setTimeout(function(){
+    closeRecoveryModal();
+    const loginForm = document.getElementById('loginForm');
+    if(loginForm && loginForm.classList.contains('hide')) toggleForms();
+  }, 900);
+
+  return false;
+}
+function renderLivePasswordRules(inputId, boxId){
+  const input = document.getElementById(inputId);
+  const box = document.getElementById(boxId);
+  if(!input || !box) return;
+
+  const val = input.value || '';
+  const hasUpper = /[A-ZÁÉÍÓÚÑ]/.test(val);
+  const hasLower = /[a-záéíóúñ]/.test(val);
+  const hasNumber = /[0-9]/.test(val);
+  const hasSymbol = /[^A-Za-zÁÉÍÓÚáéíóúÑñ0-9]/.test(val);
+  const hasLength = val.length >= 8;
+
+  let score = 0;
+  [hasUpper, hasLower, hasNumber, hasSymbol, hasLength].forEach(v => { if(v) score += 1; });
+
+  const title = score <= 1 ? 'Muy débil' : score <= 3 ? 'Media' : score === 4 ? 'Fuerte' : 'Muy fuerte';
+  const titleColor = score <= 1 ? '#a94442' : score <= 3 ? '#b37a00' : '#2f7d32';
+
+  box.innerHTML = `
+    <div class="password-rules-title" style="color:${titleColor}">${title}</div>
+    <div class="password-rules-grid">
+      <div class="password-rule ${hasUpper ? 'ok' : 'no'}">${hasUpper ? '✔' : '✖'} Mayús</div>
+      <div class="password-rule ${hasLower ? 'ok' : 'no'}">${hasLower ? '✔' : '✖'} minús</div>
+      <div class="password-rule ${hasNumber ? 'ok' : 'no'}">${hasNumber ? '✔' : '✖'} Número</div>
+      <div class="password-rule ${hasSymbol ? 'ok' : 'no'}">${hasSymbol ? '✔' : '✖'} Símbolo</div>
+      <div class="password-rule ${hasLength ? 'ok' : 'no'}">${hasLength ? '✔' : '✖'} 8 carac</div>
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const loginPass = document.getElementById('loginPassword');
+  if(loginPass){
+    loginPass.addEventListener('input', function(){
+      renderLivePasswordRules('loginPassword', 'passwordRulesLive');
+    });
+    renderLivePasswordRules('loginPassword', 'passwordRulesLive');
+  }
+
+  const regPass = document.getElementById('regPassword');
+  if(regPass){
+    regPass.addEventListener('input', function(){
+      renderLivePasswordRules('regPassword', 'registerPasswordRules');
+    });
+    renderLivePasswordRules('regPassword', 'registerPasswordRules');
+  }
+
+  const modal = document.getElementById('recoveryModal');
+  if(modal){
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+});
+</script>
+<script src="nexo-legal-i18n.js"></script>
+<script>
+window.NEXO_COUNTRY_DIAL_CODES = {"Afganistán": "+93", "Albania": "+355", "Alemania": "+49", "Andorra": "+376", "Angola": "+244", "Anguila": "+1", "Antigua y Barbuda": "+1", "Antártida": "+672", "Arabia Saudí": "+966", "Argelia": "+213", "Argentina": "+54", "Armenia": "+374", "Aruba": "+297", "Australia": "+61", "Austria": "+43", "Azerbaiyán": "+994", "Bahamas": "+1", "Bangladés": "+880", "Barbados": "+1", "Baréin": "+973", "Belice": "+501", "Benín": "+229", "Bermudas": "+1", "Bielorrusia": "+375", "Bolivia": "+591", "Bosnia y Herzegovina": "+387", "Botsuana": "+267", "Brasil": "+55", "Brunéi": "+673", "Bulgaria": "+359", "Burkina Faso": "+226", "Burundi": "+257", "Bután": "+975", "Bélgica": "+32", "Cabo Verde": "+238", "Camboya": "+855", "Camerún": "+237", "Canadá": "+1", "Caribe neerlandés": "+599", "Catar": "+974", "Chad": "+235", "Chequia": "+420", "Chile": "+56", "China": "+86", "Chipre": "+357", "Ciudad del Vaticano": "+379", "Colombia": "+57", "Comoras": "+269", "Congo": "+242", "Corea del Norte": "+850", "Corea del Sur": "+82", "Costa Rica": "+506", "Croacia": "+385", "Cuba": "+53", "Curazao": "+599", "Côte d’Ivoire": "+225", "Dinamarca": "+45", "Dominica": "+1", "Ecuador": "+593", "Egipto": "+20", "El Salvador": "+503", "Emiratos Árabes Unidos": "+971", "Eritrea": "+291", "Eslovaquia": "+421", "Eslovenia": "+386", "España": "+34", "Estados Unidos": "+1", "Estonia": "+372", "Esuatini": "+268", "Etiopía": "+251", "Filipinas": "+63", "Finlandia": "+358", "Fiyi": "+679", "Francia": "+33", "Gabón": "+241", "Gambia": "+220", "Georgia": "+995", "Ghana": "+233", "Gibraltar": "+350", "Granada": "+1", "Grecia": "+30", "Groenlandia": "+299", "Guadalupe": "+590", "Guam": "+1", "Guatemala": "+502", "Guayana Francesa": "+594", "Guernesey": "+44", "Guinea": "+224", "Guinea Ecuatorial": "+240", "Guinea-Bisáu": "+245", "Guyana": "+592", "Haití": "+509", "Honduras": "+504", "Hungría": "+36", "India": "+91", "Indonesia": "+62", "Irak": "+964", "Irán": "+98", "Irlanda": "+353", "Isla de Man": "+44", "Isla de Navidad": "+61", "Islandia": "+354", "Islas Caimán": "+1", "Islas Cook": "+682", "Islas Feroe": "+298", "Islas Malvinas": "+500", "Islas Marianas del Norte": "+1", "Islas Marshall": "+692", "Islas Salomón": "+677", "Islas Turcas y Caicos": "+1", "Islas Vírgenes Británicas": "+1", "Islas Vírgenes de EE. UU.": "+1", "Israel": "+972", "Italia": "+39", "Jamaica": "+1", "Japón": "+81", "Jersey": "+44", "Jordania": "+962", "Kazajistán": "+7", "Kenia": "+254", "Kirguistán": "+996", "Kiribati": "+686", "Kuwait": "+965", "Laos": "+856", "Lesoto": "+266", "Letonia": "+371", "Liberia": "+231", "Libia": "+218", "Liechtenstein": "+423", "Lituania": "+370", "Luxemburgo": "+352", "Líbano": "+961", "Macedonia del Norte": "+389", "Madagascar": "+261", "Malasia": "+60", "Malaui": "+265", "Maldivas": "+960", "Mali": "+223", "Malta": "+356", "Marruecos": "+212", "Martinica": "+596", "Mauricio": "+230", "Mauritania": "+222", "Mayotte": "+262", "Micronesia": "+691", "Moldavia": "+373", "Mongolia": "+976", "Montenegro": "+382", "Montserrat": "+1", "Mozambique": "+258", "Myanmar (Birmania)": "+95", "México": "+52", "Mónaco": "+377", "Namibia": "+264", "Nauru": "+674", "Nepal": "+977", "Nicaragua": "+505", "Nigeria": "+234", "Niue": "+683", "Noruega": "+47", "Nueva Caledonia": "+687", "Nueva Zelanda": "+64", "Níger": "+227", "Omán": "+968", "Pakistán": "+92", "Palaos": "+680", "Panamá": "+507", "Papúa Nueva Guinea": "+675", "Paraguay": "+595", "Países Bajos": "+31", "Perú": "+51", "Polinesia Francesa": "+689", "Polonia": "+48", "Portugal": "+351", "Puerto Rico": "+1", "RAE de Hong Kong (China)": "+852", "RAE de Macao (China)": "+853", "Reino Unido": "+44", "República Centroafricana": "+236", "República Democrática del Congo": "+243", "República Dominicana": "+1", "Reunión": "+262", "Ruanda": "+250", "Rumanía": "+40", "Rusia": "+7", "Samoa": "+685", "Samoa Americana": "+1", "San Bartolomé": "+590", "San Cristóbal y Nieves": "+1", "San Marino": "+378", "San Martín": "+590", "San Pedro y Miquelón": "+508", "San Vicente y las Granadinas": "+1", "Santa Elena": "+290", "Santa Lucía": "+1", "Santo Tomé y Príncipe": "+239", "Senegal": "+221", "Serbia": "+381", "Seychelles": "+248", "Sierra Leona": "+232", "Singapur": "+65", "Sint Maarten": "+1", "Siria": "+963", "Somalia": "+252", "Sri Lanka": "+94", "Sudáfrica": "+27", "Sudán": "+249", "Sudán del Sur": "+211", "Suecia": "+46", "Suiza": "+41", "Surinam": "+597", "Svalbard y Jan Mayen": "+47", "Sáhara Occidental": "+212", "Tailandia": "+66", "Taiwán": "+886", "Tanzania": "+255", "Tayikistán": "+992", "Territorio Británico del Océano Índico": "+246", "Territorios Australes Franceses": "+262", "Territorios Palestinos": "+970", "Timor-Leste": "+670", "Togo": "+228", "Tokelau": "+690", "Tonga": "+676", "Trinidad y Tobago": "+1", "Turkmenistán": "+993", "Turquía": "+90", "Tuvalu": "+688", "Túnez": "+216", "Ucrania": "+380", "Uganda": "+256", "Uruguay": "+598", "Uzbekistán": "+998", "Vanuatu": "+678", "Venezuela": "+58", "Vietnam": "+84", "Wallis y Futuna": "+681", "Yemen": "+967", "Yibuti": "+253", "Zambia": "+260", "Zimbabue": "+263"};
+(function(){
+  const oldSync = window.syncAreaCode;
+  window.syncAreaCode = function(){
+    const sel=document.getElementById("regCountry"); const area=document.getElementById("regAreaCode");
+    if(!sel||!area) return;
+    const opt=sel.options[sel.selectedIndex];
+    const v=(opt&&opt.getAttribute("data-code")) || (window.NEXO_COUNTRY_DIAL_CODES && window.NEXO_COUNTRY_DIAL_CODES[sel.value]) || "";
+    area.value=v;
+  };
+  document.addEventListener("DOMContentLoaded", function(){
+    const sel=document.getElementById("regCountry"); if(sel){ Array.from(sel.options).forEach(function(o){ const c=window.NEXO_COUNTRY_DIAL_CODES[o.value]; if(c){ o.setAttribute("data-code",c); if(!o.textContent.includes("("+c+")")) o.textContent=o.value+" ("+c+")"; } }); }
+  });
 })();
 </script>
 
+<script>
+async function nexoDirectSaveClientToSupabase(profile){
+  const URL='https://ujqbbniptflzytdankwp.supabase.co';
+  const KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+  const row={nombre:profile.name||'',apellido:profile.lastName||'',email:profile.email||'',telefono:profile.phone||'',pais:profile.country||'',direccion:profile.address||'',documento:profile.documentId||'',codigo_area:profile.areaCode||'',codigo_postal:profile.postalCode||'',region:profile.region||'',ciudad:profile.city||'',password:profile.password||null};
+  const r=await fetch(URL+'/rest/v1/clientes',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify([row])});
+  if(!r.ok){ const t=await r.text(); throw new Error(t||'No se pudo guardar cliente en Supabase'); }
+  return await r.json();
+}
+</script>
 
 <script id="nexo-legal-footer-i18n-final">
 (function(){

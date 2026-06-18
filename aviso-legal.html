@@ -1,81 +1,30 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>nexo™</title>
-<style>
-:root{--primary:#4A6B6D;--secondary:#5A7C7E;--light:#E8F0F0;--white:#fff;--dark:#2D3E3F;--accent:#7AC742;}
-*{box-sizing:border-box}
-body{margin:0;font-family:'Segoe UI',Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--dark);padding:36px 18px;}
-.page{max-width:1120px;margin:0 auto;background:var(--white);border-radius:28px;padding:42px;box-shadow:0 25px 70px rgba(0,0,0,.22);}
-.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:28px;}
-.back{background:var(--dark);color:#fff;text-decoration:none;border-radius:10px;padding:14px 22px;font-weight:900;}
-.brand{font-weight:900;font-size:18px}
-.langs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 28px}
-.langs button{border:2px solid var(--primary);background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer}
-.langs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
-h1{font-size:38px;color:var(--primary);margin:0 0 24px}
-h2{font-size:25px;color:var(--primary);margin:28px 0 12px}
-p,li{font-size:18px;line-height:1.75}
-ul{padding-left:24px}
-.footer{margin-top:36px;padding-top:18px;border-top:1px solid #dbe7e5;text-align:center;font-size:13px;color:#607476}
-@media(max-width:720px){.page{padding:26px}.top{flex-direction:column;align-items:flex-start}h1{font-size:30px}p,li{font-size:16px}}
-</style>
-</head>
-<body>
-<main class="page">
-  <div class="top">
-    <a class="back" id="backBtn" href="index.html">← Volver al portal</a>
-    <div class="brand">nexo Servicios Generales y Empresariales</div>
-  </div>
-  <div class="langs">
-    <button data-lang="es">Español</button>
-    <button data-lang="en">English</button>
-    <button data-lang="pt">Português</button>
-    <button data-lang="it">Italiano</button>
-    <button data-lang="fr">Français</button>
-  </div>
-  <h1 id="pageTitle"></h1>
-  <div id="pageBody"></div>
-  <div class="footer" id="pageFooter"></div>
-</main>
-<script>
-const PAGE_DATA = {"es": ["Aviso legal", [["Identificación", ["Este sitio es operado por nexo Servicios Generales y Empresariales, NIT 774651015, con base operativa en Bolivia.", "Marca comercial: nexo.", "Nombre operativo: nexo – Plataforma de Intermediación Comercial Internacional.", "Actividad: servicios de intermediación comercial internacional entre clientes y proveedores internacionales.", "Titular/representante: EDUARDO RODRIGUEZ MARTINEZ.", "Correo oficial de contacto y reclamos: ermcba@hotmail.com."]], ["Rol de nexo", ["nexo actúa exclusivamente como intermediario comercial internacional entre el cliente y proveedores o marketplaces externos. Los productos, precios, disponibilidad, costos logísticos, tiempos de entrega, garantías del fabricante y condiciones propias del proveedor pueden depender de terceros."]], ["Uso del sitio", ["El usuario se compromete a utilizar este sitio de forma lícita, sin acceder indebidamente a áreas restringidas, alterar contenidos, afectar la disponibilidad del servicio o introducir software malicioso."]]]], "en": ["Legal notice", [["Identification", ["This site is operated by nexo General and Business Services, TAX ID 774651015, with operational base in Bolivia.", "Commercial brand: nexo.", "Operating name: nexo – International Commercial Intermediation Platform.", "Activity: international commercial intermediation services between customers and international providers.", "Owner/representative: EDUARDO RODRIGUEZ MARTINEZ.", "Official contact and claims email: ermcba@hotmail.com."]], ["Role of nexo", ["nexo acts exclusively as an international commercial intermediary between the customer and external providers or marketplaces. Products, prices, availability, logistics costs, delivery times, manufacturer warranties and supplier conditions may depend on third parties."]], ["Use of the site", ["The user agrees to use this site lawfully, without improperly accessing restricted areas, altering content, affecting service availability or introducing malicious software."]]]], "pt": ["Aviso legal", [["Identificação", ["Este site é operado pela nexo Serviços Gerais e Empresariais, NIT 774651015, com base operacional na Bolívia.", "Marca comercial: nexo.", "Nome operacional: nexo – Plataforma de Intermediação Comercial Internacional.", "Atividade: serviços de intermediação comercial internacional entre clientes e fornecedores internacionais.", "Titular/representante: EDUARDO RODRIGUEZ MARTINEZ.", "E-mail oficial de contato e reclamações: ermcba@hotmail.com."]], ["Papel da nexo", ["A nexo atua exclusivamente como intermediária comercial internacional entre o cliente e fornecedores ou marketplaces externos. Produtos, preços, disponibilidade, custos logísticos, prazos de entrega, garantias do fabricante e condições do fornecedor podem depender de terceiros."]], ["Uso do site", ["O usuário compromete-se a utilizar este site de forma lícita, sem acessar indevidamente áreas restritas, alterar conteúdos, afetar a disponibilidade do serviço ou introduzir software malicioso."]]]], "it": ["Avviso legale", [["Identificazione", ["Questo sito è gestito da nexo Servizi Generali e Aziendali, NIT 774651015, con base operativa in Bolivia.", "Marchio commerciale: nexo.", "Nome operativo: nexo – Piattaforma di Intermediazione Commerciale Internazionale.", "Attività: servizi di intermediazione commerciale internazionale tra clienti e fornitori internazionali.", "Titolare/rappresentante: EDUARDO RODRIGUEZ MARTINEZ.", "E-mail ufficiale per contatti e reclami: ermcba@hotmail.com."]], ["Ruolo di nexo", ["nexo agisce esclusivamente come intermediario commerciale internazionale tra il cliente e fornitori o marketplace esterni. Prodotti, prezzi, disponibilità, costi logistici, tempi di consegna, garanzie del produttore e condizioni del fornitore possono dipendere da terzi."]], ["Uso del sito", ["L’utente si impegna a utilizzare questo sito in modo lecito, senza accedere indebitamente ad aree riservate, alterare contenuti, compromettere la disponibilità del servizio o introdurre software dannoso."]]]], "fr": ["Mentions légales", [["Identification", ["Ce site est exploité par nexo Services Généraux et Entreprises, NIT 774651015, avec base opérationnelle en Bolivie.", "Marque commerciale : nexo.", "Nom opérationnel : nexo – Plateforme d’Intermédiation Commerciale Internationale.", "Activité : services d’intermédiation commerciale internationale entre clients et fournisseurs internationaux.", "Titulaire/représentant : EDUARDO RODRIGUEZ MARTINEZ.", "E-mail officiel de contact et réclamations : ermcba@hotmail.com."]], ["Rôle de nexo", ["nexo agit exclusivement comme intermédiaire commercial international entre le client et des fournisseurs ou marketplaces externes. Les produits, prix, disponibilités, coûts logistiques, délais de livraison, garanties du fabricant et conditions du fournisseur peuvent dépendre de tiers."]], ["Utilisation du site", ["L’utilisateur s’engage à utiliser ce site de manière licite, sans accéder indûment aux zones restreintes, modifier des contenus, affecter la disponibilité du service ou introduire des logiciels malveillants."]]]]};
-function getLang(){
-  const p = new URLSearchParams(location.search).get('lang');
-  return (p || localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es').slice(0,2).toLowerCase();
+async function enviarTicket() {
+  const data = {
+    nombre: document.querySelector("#fullName")?.value,
+    correo: document.querySelector("#email")?.value,
+    telefono: (document.querySelector("#phoneCode")?.value || "") + " " + (document.querySelector("#phone")?.value || ""),
+    pais: document.querySelector("#country")?.value,
+    pedido: document.querySelector("#orderNumber")?.value,
+    producto: document.querySelector("#product")?.value,
+    tipo: document.querySelector("#requestType")?.value,
+    prioridad: document.querySelector("#priority")?.value,
+    canal: document.querySelector("#preferredChannel")?.value,
+    descripcion: document.querySelector("#details")?.value,
+  };
+
+  const res = await fetch("/api/ticket", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    alert("Ticket creado: " + result.ticketId);
+  } else {
+    alert(result.error || "Error al crear ticket");
+  }
 }
-function setLang(lang){
-  localStorage.setItem('nexoLang', lang);
-  localStorage.setItem('nexo_language', lang);
-  history.replaceState(null,'', location.pathname + '?lang=' + encodeURIComponent(lang));
-  applyLang();
-}
-function applyLang(){
-  const lang = getLang();
-  const d = PAGE_DATA[lang] || PAGE_DATA.es;
-  document.documentElement.lang = lang;
-  document.querySelectorAll('.langs button').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
-  document.getElementById('backBtn').textContent = {
-    es:'← Volver al portal', en:'← Back to portal', pt:'← Voltar ao portal', it:'← Torna al portale', fr:'← Retour au portail'
-  }[lang] || '← Volver al portal';
-  document.getElementById('pageTitle').textContent = d[0];
-  document.getElementById('pageBody').innerHTML = d[1].map(section => {
-    const title = section[0];
-    const lines = section[1];
-    return '<section><h2>'+title+'</h2>' + lines.map(x=>'<p>'+x+'</p>').join('') + '</section>';
-  }).join('');
-  document.getElementById('pageFooter').innerHTML = {
-    es:'nexo™ – Plataforma de Intermediación Comercial Internacional<br>© 2026 nexo™ – Todos los derechos reservados',
-    en:'nexo™ – International Commercial Intermediation Platform<br>© 2026 nexo™ – All rights reserved',
-    pt:'nexo™ – Plataforma de Intermediação Comercial Internacional<br>© 2026 nexo™ – Todos os direitos reservados',
-    it:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale<br>© 2026 nexo™ – Tutti i diritti riservati',
-    fr:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale<br>© 2026 nexo™ – Tous droits réservés'
-  }[lang] || '';
-}
-document.querySelectorAll('.langs button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
-applyLang();
-</script>
-</body>
-</html>

@@ -1,1418 +1,571 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>nexo™ - Atención al Cliente</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#4A6B6D;--secondary:#6C948E;--dark:#0B1730;--white:#FFFFFF;--light:#F6F8F8;--border:#C7D5D1;--accent:#7AC742}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#4a6b6d 0%,#6c948e 100%);min-height:100vh;padding:14px;color:#102038}.wrap{max-width:1500px;margin:0 auto}.hero{background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;display:grid;grid-template-columns:1.35fr .85fr;gap:18px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.14)}.brand-top{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:800;text-transform:uppercase}.back-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:15px}.brand-pill{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 10px}.hero h1{font-size:64px;line-height:.92;letter-spacing:-2px;margin:14px 0 8px;font-weight:900}.hero p{font-size:15px;max-width:760px;line-height:1.5;font-weight:600}.nav-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}.nav-links a{text-decoration:none;background:#fff;color:var(--dark);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800}.nav-links a.active{background:#09152e;color:#fff}.hero-side{display:grid;gap:12px;align-content:start}.side-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}.side-label{font-size:10px;text-transform:uppercase;opacity:.95;margin-bottom:6px;font-weight:800}.ticket-value,.email-value{font-size:18px;font-weight:900;line-height:1.2;word-break:break-word}.main-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:14px;margin-top:12px;align-items:start}.card{background:rgba(255,255,255,.97);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.09)}.card h2{font-size:18px;margin-bottom:8px;color:#07162f}.helper{font-size:12px;color:#5f7283;margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1 / -1}label{font-size:12px;font-weight:800;color:#07162f}input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;font-size:12px;font-family:inherit;color:#102038;background:#fff}input:focus,select:focus,textarea:focus{outline:none;border-color:#7ac742;box-shadow:0 0 0 3px rgba(122,199,66,.14)}textarea{min-height:102px;resize:vertical}.phone-box{display:grid;grid-template-columns:110px 1fr;gap:8px}.submit-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:12px;padding:13px 16px;margin-top:6px;font-size:13px;font-weight:900;cursor:pointer}.info-card{background:rgba(255,255,255,.96);border-radius:18px;padding:18px;margin-bottom:12px}.info-card.dark{background:#08152f;color:#fff}.info-card h3{font-size:16px;margin-bottom:10px}.info-card ul{padding-left:18px;line-height:1.8;font-size:13px}.virtual-box textarea{min-height:78px;margin:10px 0}.mini-btn{width:100%;background:#09152e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}@media (max-width:980px){.hero,.main-grid,.form-grid{grid-template-columns:1fr}.hero h1{font-size:48px}.phone-box{grid-template-columns:100px 1fr}}.ai-answer{margin-top:10px;background:#fff;border-left:5px solid #7AC742;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;color:#102038;white-space:pre-wrap}.ai-note{font-size:11px;color:#5f7283;font-weight:700;margin-top:7px}.ticket-result{margin-top:14px;background:#eefdee;border:1px solid #7AC742;border-left:5px solid #7AC742;border-radius:12px;padding:18px}.ticket-result h3{font-size:22px;margin:6px 0;color:#07162f}.ticket-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.ticket-action-btn{background:#09152e;color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:900;cursor:pointer}.official-mail-button{background:transparent;border:0;color:#fff;font-weight:900;font-size:15px;cursor:pointer;padding:0;text-align:left}.official-mail-button:hover{text-decoration:underline}.nexo-hidden-mail-link{display:none!important}</style></head><body><div class="wrap"><section class="hero"><div><div class="brand-top"><button class="back-btn" onclick="goBackSupport()">←</button><span class="brand-pill">nexo™</span></div><h1 id="title">Atención al Cliente</h1><p id="desc">Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.</p><div class="nav-links"><a class="active" href="index.html" id="homeLink">Inicio</a><a href="nexo-cliente-login.html" id="storeLink">Tienda</a></div></div><div class="hero-side"><div class="side-card"><div class="side-label" id="ticketLbl">Número de ticket</div><div class="ticket-value" id="ticketCode"></div></div><div class="side-card"><div class="side-label" id="destLbl">Su reclamo será enviado al Área de Atención al Cliente de nexo Servicios Generales y Empresariales</div><div class="email-value"></div></div></div></section><section class="main-grid"><div class="card"><h2 id="formTitle">Formulario de soporte</h2><div class="helper" id="helper">Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.</div><form id="supportForm" class="form-grid"><div class="field"><label id="fullNameLbl">Nombre completo</label><input type="text" id="fullName" required></div><div class="field"><label id="emailLbl">Correo electrónico</label><input type="email" id="email" required></div><div class="field"><label id="phoneLbl">Teléfono / WhatsApp</label><div class="phone-box"><input type="text" id="phoneCode" placeholder="" readonly><input type="tel" id="phone" inputmode="numeric" required></div></div><div class="field"><label id="countryLbl">País</label><select id="country" required onchange="updatePhoneCode()"></select></div><div class="field"><label id="orderLbl">Número de pedido</label><input type="text" id="orderNumber"></div><div class="field"><label id="productLbl">Producto</label><input type="text" id="product"></div><div class="field"><label id="requestLbl">Tipo de solicitud</label><select id="requestType" required></select></div><div class="field"><label id="priorityLbl">Prioridad</label><select id="priority" required></select></div><div class="field full"><label id="channelLbl">Canal de contacto preferido</label><select id="preferredChannel" required></select></div><div class="field full"><label id="detailsLbl">Descripción detallada</label><textarea id="details" required></textarea></div><div class="field full"><button type="submit" class="submit-btn" id="sendBtn">Enviar reclamo</button></div></form><div id="ticketResult" class="ticket-result" style="display:none;"></div></div><div><div class="info-card"><h3 id="levelsTitle">Niveles de atención</h3><ul><li id="lvl1">Recepción y clasificación automática del caso</li><li id="lvl2">Validación de pedido, producto y canal de pago</li><li id="lvl3">Asignación de prioridad para seguimiento</li><li id="lvl4">Respuesta inicial por el canal elegido</li></ul></div><div class="info-card dark"><h3 id="officialTitle">Correo oficial de reclamos</h3>
-<div style="font-size:13px; line-height:1.7; font-weight:700;">
-  <button type="button" class="official-mail-button" onclick="openOfficialClaimMail()">ermcba@hotmail.com</button>
-</div>
-<div style="font-size:13px; line-height:1.7; margin-top:8px;">
-  <span id="officialDesc"></span>
-</div></div><div class="info-card virtual-box"><h3 id="virtualTitle">🤖 🤖 Agente virtual NEXO</h3><div style="font-size:13px; color:#5f7283; line-height:1.6;" id="virtualDesc"></div><textarea id="virtualQuestion"></textarea><button type="button" class="mini-btn" id="consultBtn" onclick="consultarNexoAI('soporte')"></button><div class="ai-note">Respuesta automática con IA real de soporte nexo. Si OpenAI no responde, se mostrará una orientación segura de respaldo.</div><div id="virtualAnswer" class="ai-answer" style="display:none;"></div></div></div></section></div><script>
-const countriesPhoneData=[
-            {
-                        "code": "AF",
-                        "name": "Afganistán",
-                        "area": "+93"
-            },
-            {
-                        "code": "AL",
-                        "name": "Albania",
-                        "area": "+355"
-            },
-            {
-                        "code": "DE",
-                        "name": "Alemania",
-                        "area": "+49"
-            },
-            {
-                        "code": "AD",
-                        "name": "Andorra",
-                        "area": "+376"
-            },
-            {
-                        "code": "AO",
-                        "name": "Angola",
-                        "area": "+244"
-            },
-            {
-                        "code": "AI",
-                        "name": "Anguila",
-                        "area": "+1"
-            },
-            {
-                        "code": "AG",
-                        "name": "Antigua y Barbuda",
-                        "area": "+1"
-            },
-            {
-                        "code": "SA",
-                        "name": "Arabia Saudita",
-                        "area": "+966"
-            },
-            {
-                        "code": "DZ",
-                        "name": "Argelia",
-                        "area": "+213"
-            },
-            {
-                        "code": "AR",
-                        "name": "Argentina",
-                        "area": "+54"
-            },
-            {
-                        "code": "AM",
-                        "name": "Armenia",
-                        "area": "+374"
-            },
-            {
-                        "code": "AW",
-                        "name": "Aruba",
-                        "area": "+297"
-            },
-            {
-                        "code": "AU",
-                        "name": "Australia",
-                        "area": "+61"
-            },
-            {
-                        "code": "AT",
-                        "name": "Austria",
-                        "area": "+43"
-            },
-            {
-                        "code": "AZ",
-                        "name": "Azerbaiyán",
-                        "area": "+994"
-            },
-            {
-                        "code": "BS",
-                        "name": "Bahamas",
-                        "area": "+1"
-            },
-            {
-                        "code": "BD",
-                        "name": "Bangladesh",
-                        "area": "+880"
-            },
-            {
-                        "code": "BB",
-                        "name": "Barbados",
-                        "area": "+1"
-            },
-            {
-                        "code": "BH",
-                        "name": "Baréin",
-                        "area": "+973"
-            },
-            {
-                        "code": "BZ",
-                        "name": "Belice",
-                        "area": "+501"
-            },
-            {
-                        "code": "BJ",
-                        "name": "Benín",
-                        "area": "+229"
-            },
-            {
-                        "code": "BM",
-                        "name": "Bermudas",
-                        "area": "+1"
-            },
-            {
-                        "code": "BY",
-                        "name": "Bielorrusia",
-                        "area": "+375"
-            },
-            {
-                        "code": "BO",
-                        "name": "Bolivia",
-                        "area": "+591"
-            },
-            {
-                        "code": "BA",
-                        "name": "Bosnia y Herzegovina",
-                        "area": "+387"
-            },
-            {
-                        "code": "BW",
-                        "name": "Botsuana",
-                        "area": "+267"
-            },
-            {
-                        "code": "BR",
-                        "name": "Brasil",
-                        "area": "+55"
-            },
-            {
-                        "code": "BN",
-                        "name": "Brunéi",
-                        "area": "+673"
-            },
-            {
-                        "code": "BG",
-                        "name": "Bulgaria",
-                        "area": "+359"
-            },
-            {
-                        "code": "BF",
-                        "name": "Burkina Faso",
-                        "area": "+226"
-            },
-            {
-                        "code": "BI",
-                        "name": "Burundi",
-                        "area": "+257"
-            },
-            {
-                        "code": "BE",
-                        "name": "Bélgica",
-                        "area": "+32"
-            },
-            {
-                        "code": "CV",
-                        "name": "Cabo Verde",
-                        "area": "+238"
-            },
-            {
-                        "code": "KH",
-                        "name": "Camboya",
-                        "area": "+855"
-            },
-            {
-                        "code": "CM",
-                        "name": "Camerún",
-                        "area": "+237"
-            },
-            {
-                        "code": "CA",
-                        "name": "Canadá",
-                        "area": "+1"
-            },
-            {
-                        "code": "CL",
-                        "name": "Chile",
-                        "area": "+56"
-            },
-            {
-                        "code": "CN",
-                        "name": "China",
-                        "area": "+86"
-            },
-            {
-                        "code": "CY",
-                        "name": "Chipre",
-                        "area": "+357"
-            },
-            {
-                        "code": "VA",
-                        "name": "Ciudad del Vaticano",
-                        "area": "+39"
-            },
-            {
-                        "code": "CO",
-                        "name": "Colombia",
-                        "area": "+57"
-            },
-            {
-                        "code": "KP",
-                        "name": "Corea del Norte",
-                        "area": "+850"
-            },
-            {
-                        "code": "KR",
-                        "name": "Corea del Sur",
-                        "area": "+82"
-            },
-            {
-                        "code": "CI",
-                        "name": "Costa de Marfil",
-                        "area": "+225"
-            },
-            {
-                        "code": "CR",
-                        "name": "Costa Rica",
-                        "area": "+506"
-            },
-            {
-                        "code": "HR",
-                        "name": "Croacia",
-                        "area": "+385"
-            },
-            {
-                        "code": "CU",
-                        "name": "Cuba",
-                        "area": "+53"
-            },
-            {
-                        "code": "CW",
-                        "name": "Curazao",
-                        "area": "+599"
-            },
-            {
-                        "code": "DK",
-                        "name": "Dinamarca",
-                        "area": "+45"
-            },
-            {
-                        "code": "DM",
-                        "name": "Dominica",
-                        "area": "+1"
-            },
-            {
-                        "code": "EC",
-                        "name": "Ecuador",
-                        "area": "+593"
-            },
-            {
-                        "code": "EG",
-                        "name": "Egipto",
-                        "area": "+20"
-            },
-            {
-                        "code": "SV",
-                        "name": "El Salvador",
-                        "area": "+503"
-            },
-            {
-                        "code": "AE",
-                        "name": "Emiratos Árabes",
-                        "area": "+971"
-            },
-            {
-                        "code": "ER",
-                        "name": "Eritrea",
-                        "area": "+291"
-            },
-            {
-                        "code": "SK",
-                        "name": "Eslovaquia",
-                        "area": "+421"
-            },
-            {
-                        "code": "SI",
-                        "name": "Eslovenia",
-                        "area": "+386"
-            },
-            {
-                        "code": "ES",
-                        "name": "España",
-                        "area": "+34"
-            },
-            {
-                        "code": "US",
-                        "name": "Estados Unidos",
-                        "area": "+1"
-            },
-            {
-                        "code": "EE",
-                        "name": "Estonia",
-                        "area": "+372"
-            },
-            {
-                        "code": "ET",
-                        "name": "Etiopía",
-                        "area": "+251"
-            },
-            {
-                        "code": "PH",
-                        "name": "Filipinas",
-                        "area": "+63"
-            },
-            {
-                        "code": "FI",
-                        "name": "Finlandia",
-                        "area": "+358"
-            },
-            {
-                        "code": "FJ",
-                        "name": "Fiyi",
-                        "area": "+679"
-            },
-            {
-                        "code": "FR",
-                        "name": "Francia",
-                        "area": "+33"
-            },
-            {
-                        "code": "GA",
-                        "name": "Gabón",
-                        "area": "+241"
-            },
-            {
-                        "code": "GM",
-                        "name": "Gambia",
-                        "area": "+220"
-            },
-            {
-                        "code": "GE",
-                        "name": "Georgia",
-                        "area": "+995"
-            },
-            {
-                        "code": "GH",
-                        "name": "Ghana",
-                        "area": "+233"
-            },
-            {
-                        "code": "GD",
-                        "name": "Granada",
-                        "area": "+1"
-            },
-            {
-                        "code": "GR",
-                        "name": "Grecia",
-                        "area": "+30"
-            },
-            {
-                        "code": "GU",
-                        "name": "Guam",
-                        "area": "+1"
-            },
-            {
-                        "code": "GT",
-                        "name": "Guatemala",
-                        "area": "+502"
-            },
-            {
-                        "code": "GF",
-                        "name": "Guayana Francesa",
-                        "area": "+594"
-            },
-            {
-                        "code": "GN",
-                        "name": "Guinea",
-                        "area": "+224"
-            },
-            {
-                        "code": "GQ",
-                        "name": "Guinea Ecuatorial",
-                        "area": "+240"
-            },
-            {
-                        "code": "GW",
-                        "name": "Guinea-Bisáu",
-                        "area": "+245"
-            },
-            {
-                        "code": "GY",
-                        "name": "Guyana",
-                        "area": "+592"
-            },
-            {
-                        "code": "HT",
-                        "name": "Haití",
-                        "area": "+509"
-            },
-            {
-                        "code": "HN",
-                        "name": "Honduras",
-                        "area": "+504"
-            },
-            {
-                        "code": "HK",
-                        "name": "Hong Kong",
-                        "area": "+852"
-            },
-            {
-                        "code": "HU",
-                        "name": "Hungría",
-                        "area": "+36"
-            },
-            {
-                        "code": "IN",
-                        "name": "India",
-                        "area": "+91"
-            },
-            {
-                        "code": "ID",
-                        "name": "Indonesia",
-                        "area": "+62"
-            },
-            {
-                        "code": "IQ",
-                        "name": "Irak",
-                        "area": "+964"
-            },
-            {
-                        "code": "IE",
-                        "name": "Irlanda",
-                        "area": "+353"
-            },
-            {
-                        "code": "IR",
-                        "name": "Irán",
-                        "area": "+98"
-            },
-            {
-                        "code": "IS",
-                        "name": "Islandia",
-                        "area": "+354"
-            },
-            {
-                        "code": "KY",
-                        "name": "Islas Caimán",
-                        "area": "+1"
-            },
-            {
-                        "code": "MP",
-                        "name": "Islas Marianas del Norte",
-                        "area": "+1"
-            },
-            {
-                        "code": "MH",
-                        "name": "Islas Marshall",
-                        "area": "+692"
-            },
-            {
-                        "code": "SB",
-                        "name": "Islas Salomón",
-                        "area": "+677"
-            },
-            {
-                        "code": "TC",
-                        "name": "Islas Turcas y Caicos",
-                        "area": "+1"
-            },
-            {
-                        "code": "VG",
-                        "name": "Islas Vírgenes Británicas",
-                        "area": "+1"
-            },
-            {
-                        "code": "VI",
-                        "name": "Islas Vírgenes Estadounidenses",
-                        "area": "+1"
-            },
-            {
-                        "code": "IL",
-                        "name": "Israel",
-                        "area": "+972"
-            },
-            {
-                        "code": "IT",
-                        "name": "Italia",
-                        "area": "+39"
-            },
-            {
-                        "code": "JM",
-                        "name": "Jamaica",
-                        "area": "+1"
-            },
-            {
-                        "code": "JP",
-                        "name": "Japón",
-                        "area": "+81"
-            },
-            {
-                        "code": "JO",
-                        "name": "Jordania",
-                        "area": "+962"
-            },
-            {
-                        "code": "KZ",
-                        "name": "Kazajistán",
-                        "area": "+7"
-            },
-            {
-                        "code": "KE",
-                        "name": "Kenia",
-                        "area": "+254"
-            },
-            {
-                        "code": "KG",
-                        "name": "Kirguistán",
-                        "area": "+996"
-            },
-            {
-                        "code": "KI",
-                        "name": "Kiribati",
-                        "area": "+686"
-            },
-            {
-                        "code": "XK",
-                        "name": "Kosovo",
-                        "area": "+383"
-            },
-            {
-                        "code": "KW",
-                        "name": "Kuwait",
-                        "area": "+965"
-            },
-            {
-                        "code": "LA",
-                        "name": "Laos",
-                        "area": "+856"
-            },
-            {
-                        "code": "LV",
-                        "name": "Letonia",
-                        "area": "+371"
-            },
-            {
-                        "code": "LR",
-                        "name": "Liberia",
-                        "area": "+231"
-            },
-            {
-                        "code": "LY",
-                        "name": "Libia",
-                        "area": "+218"
-            },
-            {
-                        "code": "LI",
-                        "name": "Liechtenstein",
-                        "area": "+423"
-            },
-            {
-                        "code": "LT",
-                        "name": "Lituania",
-                        "area": "+370"
-            },
-            {
-                        "code": "LU",
-                        "name": "Luxemburgo",
-                        "area": "+352"
-            },
-            {
-                        "code": "LB",
-                        "name": "Líbano",
-                        "area": "+961"
-            },
-            {
-                        "code": "MO",
-                        "name": "Macao",
-                        "area": "+853"
-            },
-            {
-                        "code": "MK",
-                        "name": "Macedonia del Norte",
-                        "area": "+389"
-            },
-            {
-                        "code": "MG",
-                        "name": "Madagascar",
-                        "area": "+261"
-            },
-            {
-                        "code": "MY",
-                        "name": "Malasia",
-                        "area": "+60"
-            },
-            {
-                        "code": "MW",
-                        "name": "Malaui",
-                        "area": "+265"
-            },
-            {
-                        "code": "ML",
-                        "name": "Mali",
-                        "area": "+223"
-            },
-            {
-                        "code": "MT",
-                        "name": "Malta",
-                        "area": "+356"
-            },
-            {
-                        "code": "MA",
-                        "name": "Marruecos",
-                        "area": "+212"
-            },
-            {
-                        "code": "MU",
-                        "name": "Mauricio",
-                        "area": "+230"
-            },
-            {
-                        "code": "MR",
-                        "name": "Mauritania",
-                        "area": "+222"
-            },
-            {
-                        "code": "FM",
-                        "name": "Micronesia",
-                        "area": "+691"
-            },
-            {
-                        "code": "MD",
-                        "name": "Moldavia",
-                        "area": "+373"
-            },
-            {
-                        "code": "ME",
-                        "name": "Montenegro",
-                        "area": "+382"
-            },
-            {
-                        "code": "MS",
-                        "name": "Montserrat",
-                        "area": "+1"
-            },
-            {
-                        "code": "MM",
-                        "name": "Myanmar",
-                        "area": "+95"
-            },
-            {
-                        "code": "MX",
-                        "name": "México",
-                        "area": "+52"
-            },
-            {
-                        "code": "MC",
-                        "name": "Mónaco",
-                        "area": "+377"
-            },
-            {
-                        "code": "NA",
-                        "name": "Namibia",
-                        "area": "+264"
-            },
-            {
-                        "code": "NR",
-                        "name": "Nauru",
-                        "area": "+674"
-            },
-            {
-                        "code": "NP",
-                        "name": "Nepal",
-                        "area": "+977"
-            },
-            {
-                        "code": "NI",
-                        "name": "Nicaragua",
-                        "area": "+505"
-            },
-            {
-                        "code": "NG",
-                        "name": "Nigeria",
-                        "area": "+234"
-            },
-            {
-                        "code": "NO",
-                        "name": "Noruega",
-                        "area": "+47"
-            },
-            {
-                        "code": "NZ",
-                        "name": "Nueva Zelanda",
-                        "area": "+64"
-            },
-            {
-                        "code": "NE",
-                        "name": "Níger",
-                        "area": "+227"
-            },
-            {
-                        "code": "OM",
-                        "name": "Omán",
-                        "area": "+968"
-            },
-            {
-                        "code": "PK",
-                        "name": "Pakistán",
-                        "area": "+92"
-            },
-            {
-                        "code": "PW",
-                        "name": "Palaos",
-                        "area": "+680"
-            },
-            {
-                        "code": "PA",
-                        "name": "Panamá",
-                        "area": "+507"
-            },
-            {
-                        "code": "PG",
-                        "name": "Papúa Nueva Guinea",
-                        "area": "+675"
-            },
-            {
-                        "code": "PY",
-                        "name": "Paraguay",
-                        "area": "+595"
-            },
-            {
-                        "code": "NL",
-                        "name": "Países Bajos",
-                        "area": "+31"
-            },
-            {
-                        "code": "PE",
-                        "name": "Perú",
-                        "area": "+51"
-            },
-            {
-                        "code": "PL",
-                        "name": "Polonia",
-                        "area": "+48"
-            },
-            {
-                        "code": "PT",
-                        "name": "Portugal",
-                        "area": "+351"
-            },
-            {
-                        "code": "PR",
-                        "name": "Puerto Rico",
-                        "area": "+1"
-            },
-            {
-                        "code": "QA",
-                        "name": "Qatar",
-                        "area": "+974"
-            },
-            {
-                        "code": "GB",
-                        "name": "Reino Unido",
-                        "area": "+44"
-            },
-            {
-                        "code": "CF",
-                        "name": "República Centroafricana",
-                        "area": "+236"
-            },
-            {
-                        "code": "CZ",
-                        "name": "República Checa",
-                        "area": "+420"
-            },
-            {
-                        "code": "CG",
-                        "name": "República del Congo",
-                        "area": "+242"
-            },
-            {
-                        "code": "CD",
-                        "name": "República Democrática del Congo",
-                        "area": "+243"
-            },
-            {
-                        "code": "DO",
-                        "name": "República Dominicana",
-                        "area": "+1"
-            },
-            {
-                        "code": "RW",
-                        "name": "Ruanda",
-                        "area": "+250"
-            },
-            {
-                        "code": "RO",
-                        "name": "Rumania",
-                        "area": "+40"
-            },
-            {
-                        "code": "RU",
-                        "name": "Rusia",
-                        "area": "+7"
-            },
-            {
-                        "code": "MF",
-                        "name": "Saint Martín",
-                        "area": "+590"
-            },
-            {
-                        "code": "WS",
-                        "name": "Samoa",
-                        "area": "+685"
-            },
-            {
-                        "code": "AS",
-                        "name": "Samoa Americana",
-                        "area": "+1"
-            },
-            {
-                        "code": "BL",
-                        "name": "San Bartolomé",
-                        "area": "+590"
-            },
-            {
-                        "code": "KN",
-                        "name": "San Cristóbal y Nieves",
-                        "area": "+1"
-            },
-            {
-                        "code": "SM",
-                        "name": "San Marino",
-                        "area": "+378"
-            },
-            {
-                        "code": "VC",
-                        "name": "San Vicente y las Granadinas",
-                        "area": "+1"
-            },
-            {
-                        "code": "LC",
-                        "name": "Santa Lucía",
-                        "area": "+1"
-            },
-            {
-                        "code": "ST",
-                        "name": "Santo Tomé y Príncipe",
-                        "area": "+239"
-            },
-            {
-                        "code": "SN",
-                        "name": "Senegal",
-                        "area": "+221"
-            },
-            {
-                        "code": "RS",
-                        "name": "Serbia",
-                        "area": "+381"
-            },
-            {
-                        "code": "SC",
-                        "name": "Seychelles",
-                        "area": "+248"
-            },
-            {
-                        "code": "SL",
-                        "name": "Sierra Leona",
-                        "area": "+232"
-            },
-            {
-                        "code": "SG",
-                        "name": "Singapur",
-                        "area": "+65"
-            },
-            {
-                        "code": "SX",
-                        "name": "Sint Maarten",
-                        "area": "+1"
-            },
-            {
-                        "code": "SY",
-                        "name": "Siria",
-                        "area": "+963"
-            },
-            {
-                        "code": "SO",
-                        "name": "Somalia",
-                        "area": "+252"
-            },
-            {
-                        "code": "LK",
-                        "name": "Sri Lanka",
-                        "area": "+94"
-            },
-            {
-                        "code": "ZA",
-                        "name": "Sudáfrica",
-                        "area": "+27"
-            },
-            {
-                        "code": "SE",
-                        "name": "Suecia",
-                        "area": "+46"
-            },
-            {
-                        "code": "CH",
-                        "name": "Suiza",
-                        "area": "+41"
-            },
-            {
-                        "code": "SR",
-                        "name": "Surinam",
-                        "area": "+597"
-            },
-            {
-                        "code": "TH",
-                        "name": "Tailandia",
-                        "area": "+66"
-            },
-            {
-                        "code": "TW",
-                        "name": "Taiwán",
-                        "area": "+886"
-            },
-            {
-                        "code": "TZ",
-                        "name": "Tanzania",
-                        "area": "+255"
-            },
-            {
-                        "code": "TJ",
-                        "name": "Tayikistán",
-                        "area": "+992"
-            },
-            {
-                        "code": "TL",
-                        "name": "Timor Oriental",
-                        "area": "+670"
-            },
-            {
-                        "code": "TG",
-                        "name": "Togo",
-                        "area": "+228"
-            },
-            {
-                        "code": "TO",
-                        "name": "Tonga",
-                        "area": "+676"
-            },
-            {
-                        "code": "TT",
-                        "name": "Trinidad y Tobago",
-                        "area": "+1"
-            },
-            {
-                        "code": "TM",
-                        "name": "Turkmenistán",
-                        "area": "+993"
-            },
-            {
-                        "code": "TR",
-                        "name": "Turquía",
-                        "area": "+90"
-            },
-            {
-                        "code": "TN",
-                        "name": "Túnez",
-                        "area": "+216"
-            },
-            {
-                        "code": "UA",
-                        "name": "Ucrania",
-                        "area": "+380"
-            },
-            {
-                        "code": "UG",
-                        "name": "Uganda",
-                        "area": "+256"
-            },
-            {
-                        "code": "UY",
-                        "name": "Uruguay",
-                        "area": "+598"
-            },
-            {
-                        "code": "UZ",
-                        "name": "Uzbekistán",
-                        "area": "+998"
-            },
-            {
-                        "code": "VU",
-                        "name": "Vanuatu",
-                        "area": "+678"
-            },
-            {
-                        "code": "VE",
-                        "name": "Venezuela",
-                        "area": "+58"
-            },
-            {
-                        "code": "VN",
-                        "name": "Vietnam",
-                        "area": "+84"
-            },
-            {
-                        "code": "YE",
-                        "name": "Yemen",
-                        "area": "+967"
-            },
-            {
-                        "code": "DJ",
-                        "name": "Yibuti",
-                        "area": "+253"
-            },
-            {
-                        "code": "ZM",
-                        "name": "Zambia",
-                        "area": "+260"
-            },
-            {
-                        "code": "ZW",
-                        "name": "Zimbabue",
-                        "area": "+263"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexo™ - Portal Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4A6B6D;
+            --secondary: #5A7C7E;
+            --tertiary: #6A8C8D;
+            --light: #E8F0F0;
+            --white: #FFFFFF;
+            --dark: #2D3E3F;
+            --accent: #7AC742;
+            --accent-light: #A8D965;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --success: #27AE60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            gap: 30px;
+        }
+
+        .portal-container {
+            width: 100%;
+            max-width: 1300px;
+            background-color: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: row;
+            min-height: 650px;
+        }
+
+        /* ============ HEADER IZQUIERDO ============ */
+        .portal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            padding: 60px 50px;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .portal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        /* ========== LOGO COMPLETO BLANCO ========== */
+        .logo-container {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-box {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 14px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            gap: 6px;
+            width: 130px;
+        }
+
+        .logo-text-nexo {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .logo-ne {
+            color: var(--primary);
+        }
+
+        .logo-x {
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .logo-o {
+            color: var(--primary);
+        }
+
+        .logo-subtitle {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .portal-title {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 15px 0 10px 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .portal-description {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+            max-width: 95%;
+            margin: 0 auto;
+        }
+
+        /* ============ CONTENT DERECHO ============ */
+        .portal-content {
+            padding: 45px 45px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 30px;
+        }
+
+        .access-section {
+            margin-bottom: 0;
+        }
+
+        .access-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .access-card {
+            background-color: var(--light);
+            border-radius: 18px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .access-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(122, 199, 66, 0.08) 0%, rgba(74, 107, 109, 0.05) 100%);
+        }
+
+        .access-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .access-content {
+            flex: 1;
+        }
+
+        .access-card h3 {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .access-card p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .access-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 107, 109, 0.2);
+        }
+
+        .access-btn:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 109, 0.3);
+        }
+
+        /* ============ LANGUAGE SELECTOR ============ */
+        .language-footer {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(232, 240, 240, 0.8) 100%);
+            padding: 24px 32px;
+            border-radius: 16px;
+            border: 2px solid rgba(74, 107, 109, 0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .language-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .language-title {
+            font-size: 16px;
+            color: var(--dark);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            background-color: var(--white);
+            color: var(--dark);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+        }
+
+        .lang-btn:hover,
+        .lang-btn.active {
+            background-color: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 1024px) {
+            .portal-container {
+                flex-direction: column;
+                min-height: auto;
             }
-];
-const i18n={"es": {"title": "Atención al Cliente", "desc": "Gestione reclamos, consultas, cambios, devoluciones y seguimiento de pedidos en un solo panel corporativo.", "home": "Inicio", "store": "Tienda", "ticket": "Número de ticket", "destMail": "Correo de destino", "formTitle": "Formulario de soporte", "helper": "Complete los datos para que el equipo revise su caso con prioridad, trazabilidad y registro formal del ticket.", "fullName": "Nombre completo", "fullNamePh": "Escriba su nombre completo", "email": "Correo electrónico", "emailPh": "", "phone": "Teléfono / WhatsApp", "phonePh": "Escriba su número", "country": "País", "countryPh": "Seleccione país", "order": "Número de pedido", "orderPh": "Ej. ", "product": "Producto", "productPh": "Ej. Auriculares inalámbricos Pro", "request": "Tipo de solicitud", "requestPh": "Seleccione una opción", "priority": "Prioridad", "priorityPh": "Seleccione prioridad", "channel": "Canal de contacto preferido", "channelPh": "Seleccione canal", "details": "Descripción detallada", "detailsPh": "Describa el problema, fechas, qué ocurrió y qué solución espera.", "send": "Enviar reclamo", "levels": "Niveles de atención", "lvl1": "Recepción y clasificación automática del caso", "lvl2": "Validación de pedido, producto y canal de pago", "lvl3": "Asignación de prioridad para seguimiento", "lvl4": "Respuesta inicial por el canal elegido", "official": "Correo oficial de reclamos", "officialDesc": "Todos los reclamos enviados desde este formulario deben dirigirse al correo oficial.", "virtual": "🤖 Agente virtual NEXO", "virtualDesc": "Asistente inicial para orientar consultas frecuentes antes de escalar el caso al equipo humano.", "virtualPh": "Escriba aquí su consulta rápida...", "consult": "Consultar", "reqOptions": ["Seleccione una opción", "Reclamo", "Consulta", "Cambio", "Devolución"], "priorityOptions": ["Seleccione prioridad", "Baja", "Media", "Alta", "Urgente"], "channelOptions": ["Seleccione canal", "Correo electrónico", "WhatsApp", "Llamada telefónica", "Chat web"]}, "en": {"title": "Customer Care", "desc": "Manage claims, inquiries, exchanges, returns and order tracking in one corporate panel.", "home": "Home", "store": "Store", "ticket": "Ticket number", "destMail": "Destination email", "formTitle": "Support form", "helper": "Complete the information so the team can review your case with priority, traceability and a formal ticket record.", "fullName": "Full name", "fullNamePh": "Enter your full name", "email": "Email", "emailPh": "customer@email.com", "phone": "Phone / WhatsApp", "phonePh": "Enter your number", "country": "Country", "countryPh": "Select country", "order": "Order number", "orderPh": "E.g. ", "product": "Product", "productPh": "E.g. Wireless earbuds Pro", "request": "Request type", "requestPh": "Select an option", "priority": "Priority", "priorityPh": "Select priority", "channel": "Preferred contact channel", "channelPh": "Select channel", "details": "Detailed description", "detailsPh": "Describe the issue, dates, what happened and the solution you expect.", "send": "Send request", "levels": "Service levels", "lvl1": "Automatic intake and case classification", "lvl2": "Order, product and payment-channel validation", "lvl3": "Priority assignment for follow-up", "lvl4": "Initial response through the selected channel", "official": "Official claims email", "officialDesc": "All claims sent from this form must be directed to the official email.", "virtual": "🤖 NEXO virtual agent", "virtualDesc": "Initial assistant to guide frequent questions before escalating the case to the human team.", "virtualPh": "Type your quick question here...", "consult": "Consult", "reqOptions": ["Select an option", "Claim", "Inquiry", "Exchange", "Return"], "priorityOptions": ["Select priority", "Low", "Medium", "High", "Urgent"], "channelOptions": ["Select channel", "Email", "WhatsApp", "Phone call", "Web chat"]}, "pt": {"title": "Atendimento ao Cliente", "desc": "Gerencie reclamações, consultas, trocas, devoluções e acompanhamento de pedidos em um único painel corporativo.", "home": "Início", "store": "Loja", "ticket": "Número do ticket", "destMail": "E-mail de destino", "formTitle": "Formulário de suporte", "helper": "Preencha os dados para que a equipe revise o seu caso com prioridade, rastreabilidade e registro formal do ticket.", "fullName": "Nome completo", "fullNamePh": "Digite seu nome completo", "email": "E-mail", "emailPh": "", "phone": "Telefone / WhatsApp", "phonePh": "Digite seu número", "country": "País", "countryPh": "Selecione o país", "order": "Número do pedido", "orderPh": "Ex.: ", "product": "Produto", "productPh": "Ex.: Fones de ouvido sem fio Pro", "request": "Tipo de solicitação", "requestPh": "Selecione uma opção", "priority": "Prioridade", "priorityPh": "Selecione a prioridade", "channel": "Canal de contato preferido", "channelPh": "Selecione o canal", "details": "Descrição detalhada", "detailsPh": "Descreva o problema, datas, o que aconteceu e a solução esperada.", "send": "Enviar solicitação", "levels": "Níveis de atendimento", "lvl1": "Recepção e classificação automática do caso", "lvl2": "Validação de pedido, produto e canal de pagamento", "lvl3": "Atribuição de prioridade para acompanhamento", "lvl4": "Resposta inicial pelo canal selecionado", "official": "E-mail oficial de reclamações", "officialDesc": "Todas as reclamações enviadas deste formulário devem ser encaminhadas ao e-mail oficial.", "virtual": "🤖 Agente virtual NEXO", "virtualDesc": "Assistente inicial para orientar perguntas frequentes antes de escalar o caso para a equipe humana.", "virtualPh": "Escreva aqui sua consulta rápida...", "consult": "Consultar", "reqOptions": ["Selecione uma opção", "Reclamação", "Consulta", "Troca", "Devolução"], "priorityOptions": ["Selecione a prioridade", "Baixa", "Média", "Alta", "Urgente"], "channelOptions": ["Selecione o canal", "E-mail", "WhatsApp", "Ligação telefônica", "Chat web"]}, "it": {"title": "Assistenza Clienti", "desc": "Gestisci reclami, richieste, cambi, resi e monitoraggio ordini in un unico pannello aziendale.", "home": "Home", "store": "Negozio", "ticket": "Numero ticket", "destMail": "Email di destinazione", "formTitle": "Modulo di supporto", "helper": "Compila i dati affinché il team possa esaminare il tuo caso con priorità, tracciabilità e registrazione formale del ticket.", "fullName": "Nome completo", "fullNamePh": "Inserisci il tuo nome completo", "email": "Email", "emailPh": "cliente@email.com", "phone": "Telefono / WhatsApp", "phonePh": "Inserisci il tuo numero", "country": "Paese", "countryPh": "Seleziona il paese", "order": "Numero ordine", "orderPh": "Es. ", "product": "Prodotto", "productPh": "Es. Auricolari wireless Pro", "request": "Tipo di richiesta", "requestPh": "Seleziona un’opzione", "priority": "Priorità", "priorityPh": "Seleziona priorità", "channel": "Canale di contatto preferito", "channelPh": "Seleziona canale", "details": "Descrizione dettagliata", "detailsPh": "Descrivi il problema, le date, cosa è successo e la soluzione attesa.", "send": "Invia richiesta", "levels": "Livelli di assistenza", "lvl1": "Ricezione e classificazione automatica del caso", "lvl2": "Validazione di ordine, prodotto e canale di pagamento", "lvl3": "Assegnazione della priorità per il follow-up", "lvl4": "Risposta iniziale tramite il canale selezionato", "official": "Email ufficiale reclami", "officialDesc": "Tutti i reclami inviati da questo modulo devono essere diretti all’email ufficiale.", "virtual": "Agente virtuale NEXO", "virtualDesc": "Assistente iniziale per orientare le domande frequenti prima di inoltrare il caso al team umano.", "virtualPh": "Scrivi qui la tua domanda rapida...", "consult": "Consulta", "reqOptions": ["Seleziona un’opzione", "Reclamo", "Richiesta", "Cambio", "Reso"], "priorityOptions": ["Seleziona priorità", "Bassa", "Media", "Alta", "Urgente"], "channelOptions": ["Seleziona canale", "Email", "WhatsApp", "Telefonata", "Chat web"]}, "fr": {"title": "Service Client", "desc": "Gérez réclamations, demandes, échanges, retours et suivi des commandes dans un seul panneau professionnel.", "home": "Accueil", "store": "Boutique", "ticket": "Numéro de ticket", "destMail": "E-mail de destination", "formTitle": "Formulaire de support", "helper": "Complétez les informations afin que l’équipe examine votre dossier avec priorité, traçabilité et enregistrement formel du ticket.", "fullName": "Nom complet", "fullNamePh": "Saisissez votre nom complet", "email": "E-mail", "emailPh": "client@email.com", "phone": "Téléphone / WhatsApp", "phonePh": "Saisissez votre numéro", "country": "Pays", "countryPh": "Sélectionnez le pays", "order": "Numéro de commande", "orderPh": "Ex. ", "product": "Produit", "productPh": "Ex. Écouteurs sans fil Pro", "request": "Type de demande", "requestPh": "Sélectionnez une option", "priority": "Priorité", "priorityPh": "Sélectionnez la priorité", "channel": "Canal de contact préféré", "channelPh": "Sélectionnez le canal", "details": "Description détaillée", "detailsPh": "Décrivez le problème, les dates, ce qui s’est passé et la solution attendue.", "send": "Envoyer la demande", "levels": "Niveaux de service", "lvl1": "Réception et classification automatique du dossier", "lvl2": "Validation de la commande, du produit et du canal de paiement", "lvl3": "Attribution de la priorité pour le suivi", "lvl4": "Réponse initiale via le canal choisi", "official": "E-mail officiel des réclamations", "officialDesc": "Toutes les réclamations envoyées depuis ce formulaire doivent être adressées à l’e-mail officiel.", "virtual": "Agent virtuel NEXO", "virtualDesc": "Assistant initial pour orienter les questions fréquentes avant d’escalader le dossier à l’équipe humaine.", "virtualPh": "Écrivez ici votre question rapide...", "consult": "Consulter", "reqOptions": ["Sélectionnez une option", "Réclamation", "Question", "Échange", "Retour"], "priorityOptions": ["Sélectionnez la priorité", "Faible", "Moyenne", "Haute", "Urgente"], "channelOptions": ["Sélectionnez le canal", "E-mail", "WhatsApp", "Appel téléphonique", "Chat web"]}};
 
-let currentLang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es');
-function populateCountryOptions(){ const sel=document.getElementById('country'); if(!sel) return; sel.innerHTML=''; const t=i18n[currentLang]||i18n.es; const first=document.createElement('option'); first.value=''; first.textContent=t.countryPh || 'Seleccione país'; sel.appendChild(first); countriesPhoneData.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.code; opt.textContent=`${c.name} (${c.area})`; opt.dataset.area=c.area; sel.appendChild(opt); }); }
-function goBackSupport(){ window.location.href='index.html'; }
-function updatePhoneCode(){ const select=document.getElementById('country'); if(!select) return; const opt=select.options[select.selectedIndex]; const phoneCode=document.getElementById('phoneCode'); if(phoneCode) phoneCode.value=opt?.dataset?.area || ''; }
-function fillOptions(id, values){ const sel=document.getElementById(id); if(!sel) return; sel.innerHTML=''; values.forEach((txt,i)=>{ const o=document.createElement('option'); o.value=i===0?'':txt; o.textContent=txt; sel.appendChild(o); }); }
-function applyLanguage(){
-  currentLang = (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es');
-  const t=i18n[currentLang] || i18n.es;
-  document.documentElement.lang=currentLang;
-  const map={title:'title',desc:'desc',homeLink:'home',storeLink:'store',ticketLbl:'ticket',formTitle:'formTitle',helper:'helper',fullNameLbl:'fullName',emailLbl:'email',phoneLbl:'phone',countryLbl:'country',orderLbl:'order',productLbl:'product',requestLbl:'request',priorityLbl:'priority',channelLbl:'channel',detailsLbl:'details',sendBtn:'send',levelsTitle:'levels',lvl1:'lvl1',lvl2:'lvl2',lvl3:'lvl3',lvl4:'lvl4',officialTitle:'official',officialDesc:'officialDesc',virtualTitle:'virtual',virtualDesc:'virtualDesc',consultBtn:'consult'};
-  Object.entries(map).forEach(([id,key])=>{ const el=document.getElementById(id); if(el && t[key]) el.textContent=t[key]; });
-  if(document.getElementById('fullName')) document.getElementById('fullName').placeholder=t.fullNamePh||'Escriba su nombre completo';
-  if(document.getElementById('email')) document.getElementById('email').placeholder=t.emailPh||'';
-  if(document.getElementById('phone')) document.getElementById('phone').placeholder=t.phonePh||'Escriba su número';
-  if(document.getElementById('orderNumber')) document.getElementById('orderNumber').placeholder=t.orderPh||'Ej. ';
-  if(document.getElementById('product')) document.getElementById('product').placeholder=t.productPh||'Ej. Producto';
-  if(document.getElementById('details')) document.getElementById('details').placeholder=t.detailsPh||'Describa el caso';
-  if(document.getElementById('virtualQuestion')) document.getElementById('virtualQuestion').placeholder=t.virtualPh||'Escriba aquí su consulta rápida';
-  fillOptions('requestType', t.reqOptions || ['Seleccione una opción','Reclamo','Consulta','Cambio','Devolución']);
-  fillOptions('priority', t.priorityOptions || ['Seleccione prioridad','Baja','Media','Alta','Urgente']);
-  fillOptions('preferredChannel', t.channelOptions || ['Seleccione canal','Correo electrónico','WhatsApp','Llamada telefónica','Chat web']);
-  const currentCountry=document.getElementById('country')?.value;
-  populateCountryOptions();
-  if(currentCountry && document.getElementById('country')) document.getElementById('country').value=currentCountry;
-  updatePhoneCode();
-}
-function nextSupportTicket(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  const h = String(d.getHours()).padStart(2,'0');
-  const min = String(d.getMinutes()).padStart(2,'0');
-  const s = String(d.getSeconds()).padStart(2,'0');
-  const r = Math.floor(100 + Math.random()*900);
-  return `NEXO-R-${y}${m}${day}-${h}${min}${s}-${r}`;
-}
+            .portal-header {
+                width: 100%;
+                padding: 45px 40px;
+                min-height: 280px;
+            }
 
-const NEXO_SUPABASE_URL='https://ujqbbniptflzytdankwp.supabase.co';
-const NEXO_SUPABASE_KEY='sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+            .portal-content {
+                padding: 40px;
+            }
 
-async function nexoSupabaseRequest(path, options={}){
-  const res = await fetch(NEXO_SUPABASE_URL + path, {
-    ...options,
-    headers: {
-      'apikey': NEXO_SUPABASE_KEY,
-      'Authorization': 'Bearer ' + NEXO_SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-      ...(options.headers || {})
-    }
-  });
-  const text = await res.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
-  if(!res.ok){
-    const msg = (data && (data.message || data.details || data.error)) || text || ('HTTP ' + res.status);
-    throw new Error(msg);
-  }
-  return data;
-}
+            .language-footer {
+                margin-top: 20px;
+            }
+        }
 
-async function guardarTicketSupabaseDirecto(ticket){
-  const nombre = document.getElementById('fullName').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const telefono = (document.getElementById('phoneCode').value+' '+document.getElementById('phone').value).trim();
-  const pais = document.getElementById('country').selectedOptions?.[0]?.textContent || '';
-  const pedido = document.getElementById('orderNumber').value.trim();
-  const producto = document.getElementById('product').value.trim();
-  const tipo = document.getElementById('requestType').value || 'Soporte';
-  const prioridad = document.getElementById('priority').value || 'Media';
-  const canal = document.getElementById('preferredChannel').value || 'No informado';
-  const detalles = document.getElementById('details').value.trim();
+        @media (max-width: 768px) {
+            .portal-header {
+                padding: 35px 30px;
+                gap: 20px;
+            }
 
-  const mensaje = [
-    'Ticket: '+ticket,
-    'Nombre: '+nombre,
-    'Correo: '+email,
-    'Teléfono / WhatsApp: '+telefono,
-    'País: '+pais,
-    'Pedido: '+(pedido || 'No informado'),
-    'Producto: '+(producto || 'No informado'),
-    'Canal preferido: '+canal,
-    '',
-    'Descripción:',
-    detalles
-  ].join('\n');
+            .logo-box {
+                padding: 12px 18px;
+            }
 
-  const asunto = ticket + ' - ' + tipo + (pedido ? ' - Pedido '+pedido : '');
+            .logo-text-nexo {
+                font-size: 42px;
+            }
 
-  return await nexoSupabaseRequest('/rest/v1/tickets', {
-    method: 'POST',
-    body: JSON.stringify({
-      nombre_cliente: nombre,
-      email: email,
-      asunto: asunto,
-      tipo_reclamo: tipo,
-      mensaje: mensaje,
-      estado: 'Nuevo',
-      prioridad: prioridad,
-      fecha_creacion: new Date().toISOString(),
-      fecha_actualizacion: new Date().toISOString()
-    })
-  });
-}
+            .portal-title {
+                font-size: 26px;
+            }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  populateCountryOptions(); applyLanguage(); updatePhoneCode();
-  const tEl=document.getElementById('ticketCode'); if(tEl){ tEl.textContent = nextSupportTicket(); }
-  const form=document.getElementById('supportForm');
-  if(form) form.addEventListener('submit', async e=>{
-    e.preventDefault();
-    const ticket = tEl?.textContent || nextSupportTicket();
-    const btn=document.getElementById('sendBtn');
-    const originalText=btn?.textContent || 'Enviar reclamo';
-    try{
-      if(btn){ btn.disabled=true; btn.textContent='Guardando en Supabase...'; }
-      await guardarTicketSupabaseDirecto(ticket);
-      renderSupportTicketResult(ticket);
-      if(tEl) tEl.textContent=nextSupportTicket();
-    }catch(error){
-      console.error('Error Supabase nexo:', error);
-      alert('ERROR: No se pudo guardar en Supabase.\n\nDetalle: '+(error.message || error));
-    }finally{
-      if(btn){ btn.disabled=false; btn.textContent=originalText; }
-    }
-  });
-});
-</script>
-<script>
-function nexoPublicCleanup(){
-  try{
-    const keep = {
-      nexoLang: localStorage.getItem('nexoLang'),
-      nexo_language: localStorage.getItem('nexo_language')
-    };
-    const removeKeys = [
-      'nexoClientProfile','nexoLastPurchase','nexoLastOrder','lastPurchase','clientEmail','clientName',
-      'nexoSupportTickets','nexoSupportTicketCounter','nexoAdminAccess','nexoAdminEmail'
-    ];
-    removeKeys.forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
-    if(keep.nexoLang) localStorage.setItem('nexoLang', keep.nexoLang);
-    if(keep.nexo_language) localStorage.setItem('nexo_language', keep.nexo_language);
-  }catch(e){}
-}
-document.addEventListener('DOMContentLoaded', nexoPublicCleanup);
-</script>
+            .portal-content {
+                padding: 35px;
+            }
 
+            .access-card {
+                padding: 20px;
+            }
+
+            .access-card h3 {
+                font-size: 18px;
+            }
+
+            .language-footer {
+                padding: 20px 25px;
+                gap: 16px;
+            }
+
+            .language-title {
+                font-size: 14px;
+            }
+        }
+    
+.nexo-left-legal-card{margin:22px auto 0;max-width:390px;background:rgba(45,62,63,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;color:#fff;text-align:center;font-size:11px;line-height:1.55;padding:12px 14px;box-shadow:0 10px 25px rgba(0,0,0,.12)}.nexo-left-legal-card a{color:#fff;font-weight:800;text-decoration:underline}
+body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
+</style>
 
 <script>
 (function(){
-  function findOption(selectEl, mode){
-    if(!selectEl) return;
-    var matchValue = '';
-    Array.from(selectEl.options).forEach(function(opt){
-      var t = (opt.textContent || '').toLowerCase();
-      if(mode === 'user' && (t.indexOf('usuario') !== -1 || t.indexOf('user') !== -1)){
-        matchValue = opt.value;
-      }
-      if(mode !== 'user' && (t.indexOf('contrase') !== -1 || t.indexOf('password') !== -1)){
-        matchValue = opt.value;
-      }
-    });
-    if(matchValue) selectEl.value = matchValue;
+  function syncNexoLanguage(){
+    var lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang); localStorage.setItem('nexoLang', lang);
+    document.documentElement.lang = lang;
+    window.nexoLangCurrent = lang;
   }
-
-  function applyRecoveryPrefill(){
-    try{
-      var params = new URLSearchParams(window.location.search);
-      var mode = params.get('recovery') || localStorage.getItem('nexoRecoveryType') || '';
-      if(!mode) return;
-
-      var selectSolicitud = document.querySelector('select[name="tipoSolicitud"], #tipoSolicitud, #requestType');
-      var textarea = document.querySelector('textarea, #descripcion, #detailMessage');
-
-      findOption(selectSolicitud, mode);
-
-      if(textarea && !textarea.value){
-        textarea.value = mode === 'user'
-          ? 'Necesito recuperar mi usuario de acceso a la tienda.'
-          : 'Necesito recuperar mi contraseña de acceso a la tienda.';
-      }
-
-      localStorage.removeItem('nexoRecoveryType');
-      localStorage.removeItem('nexoRecoveryFrom');
-    }catch(e){}
-  }
-
-  document.addEventListener('DOMContentLoaded', applyRecoveryPrefill);
+  syncNexoLanguage();
 })();
 </script>
 
 
+<style>
+#nexo-legal-footer{max-width:1300px;width:100%;text-align:center;color:rgba(255,255,255,.88);font-size:12px;padding:8px 0 18px;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+#nexo-legal-footer a{color:inherit;text-decoration:none;font-weight:700}
+#nexo-legal-footer a:hover{text-decoration:underline}
+.nexo-policy-modal{position:fixed;inset:0;background:rgba(24,35,36,.62);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.nexo-policy-modal.open{display:flex}
+.nexo-policy-card{width:min(980px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:24px;box-shadow:0 20px 50px rgba(0,0,0,.24);padding:28px}
+.nexo-policy-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.nexo-policy-top h2{margin:0;color:#4A6B6D;font-size:28px}
+.nexo-close-btn{border:none;background:#eef4f4;color:#2D3E3F;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800}
+.nexo-policy-body h3{color:#4A6B6D;margin:20px 0 8px;font-size:19px}
+.nexo-policy-body p,.nexo-policy-body li{color:#44595c;line-height:1.65;font-size:15px}
+.nexo-policy-body ul{padding-left:20px}
+
+.nexo-left-legal-card{margin:22px auto 0;max-width:390px;background:rgba(45,62,63,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;color:#fff;text-align:center;font-size:11px;line-height:1.55;padding:12px 14px;box-shadow:0 10px 25px rgba(0,0,0,.12)}.nexo-left-legal-card a{color:#fff;font-weight:800;text-decoration:underline}
+body>footer.nexo-legal-footer, body>#nexo-legal-footer{display:none!important}
+</style>
+
+</head>
+<body>
+    <div class="portal-container">
+        <!-- HEADER IZQUIERDO -->
+        <div class="portal-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-box">
+                        <div class="logo-text-nexo">
+                            <span class="logo-ne">ne</span><span class="logo-x">x</span><span class="logo-o">o</span>
+                        </div>
+                        <div class="logo-subtitle">Servicios Generales y Empresariales</div>
+                    </div>
+                </div>
+
+                <h2 class="portal-title">nexo<br>Plataforma de Intermediación<br>Comercial Internacional</h2>
+
+                <p class="portal-description">
+                    Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics
+                </p>
+                <div class="nexo-left-legal-card" data-nexo-left-legal="1">
+                    <strong id="leftLegalTitle">nexo™ – Plataforma de Intermediación Comercial Internacional</strong><br>
+                    <span id="leftLegalCompany">nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia</span><br>
+                    <span id="leftLegalDesc">nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.</span><br>
+                    <span id="leftLegalCopy">© 2026 nexo™ – Todos los derechos reservados</span><br>
+                    <a id="leftLegalNotice" href="aviso-legal.html">Aviso Legal</a> |
+                    <a id="leftLegalTerms" href="terminos-condiciones.html">Términos y Condiciones</a> |
+                    <a id="leftLegalPrivacy" href="politica-privacidad.html">Privacidad</a> |
+                    <a id="leftLegalCookies" href="politica-cookies.html">Cookies</a> |
+                    <a id="leftLegalRefunds" href="reembolsos.html">Reembolsos</a>
+                </div>
+
+</div>
+        </div>
+
+        <!-- CONTENT DERECHO -->
+        <div class="portal-content">
+            <!-- ACCESO CLIENTE -->
+            <div class="access-section">
+                <div class="access-title">👥 Acceso Cliente</div>
+                <div class="access-card" onclick="goToPublicStore()">
+                    <div class="access-icon">🛒</div>
+                    <div class="access-content">
+                        <h3>Tienda Pública</h3>
+                        <p>Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.</p>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                            <button class="access-btn" onclick="event.stopPropagation(); goToPublicStore()">Ir a la Tienda</button>
+                            <button class="access-btn" onclick="event.stopPropagation(); goToCustomerSupport()">Ir a Atención al Cliente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANGUAGE SELECTOR -->
+            <div style="display: flex; justify-content: center; width: 100%;">
+                <div class="language-footer">
+                    <div class="language-section">
+                        <div class="language-title">🌍 Idioma</div>
+                        <div class="language-buttons">
+                            <button class="lang-btn active" data-lang="es" onclick="setLanguage('es', event)">Español</button>
+                            <button class="lang-btn" data-lang="en" onclick="setLanguage('en', event)">English</button>
+                            <button class="lang-btn" data-lang="pt" onclick="setLanguage('pt', event)">Português</button>
+                            <button class="lang-btn" data-lang="it" onclick="setLanguage('it', event)">Italiano</button>
+                            <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr', event)">Français</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCESO ADMINISTRATIVO -->
+            <div class="access-section">
+                <div class="access-title">🔐 Acceso Administrativo</div>
+                <div class="access-card" onclick="goToAdminLogin()">
+                    <div class="access-icon">⚙️</div>
+                    <div class="access-content">
+                        <h3 >Panel Administrativo</h3>
+                        <p>Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.</p>
+                        <button class="access-btn">Ingresar Panel Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER COPYRIGHT -->
+    <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600;">
+        nexo – Plataforma de Intermediación Comercial Internacional | © 2026 | NIT: 774651015 | 3 Agentes IA Integrados
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('nexo_language', lang); localStorage.setItem('nexoLang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function goToPublicStore() {
+            window.location.href = 'nexo-cliente-login.html';
+        }
+
+        function goToAdminLogin() {
+            window.location.href = 'nexo-admin-login.html';
+        }
+
+        function goToCustomerSupport() {
+            window.location.href = 'nexo-agent2-soporte.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('nexo_language') || 'es';
+            const langs = ['es', 'en', 'pt', 'it', 'fr'];
+            document.querySelectorAll('.lang-btn').forEach((btn, idx) => {
+                if (langs[idx] === savedLang) btn.classList.add('active');
+            });
+        });
+    </script>
+
 <script>
-function nexoLocalSoporte(question){
-  const q=(question||'').toLowerCase();
-  const ticket='NEXO-SOP-'+new Date().toISOString().slice(0,10).replaceAll('-','')+'-'+Math.floor(1000+Math.random()*9000);
-  if(q.includes('ticket') || q.includes('pedido') || q.includes('order')){
-    return `He revisado tu consulta como Agente 2 de Soporte nexo.\n\nPara ubicar tu ticket o pedido necesito que completes o confirmes:\n1. Correo usado en la compra.\n2. Número de pedido o comprobante, si lo tienes.\n3. Producto y fecha aproximada.\n\nCódigo preliminar de atención: ${ticket}\n\nTambién puedes llenar el formulario de la izquierda para dejar registro formal.`;
-  }
-  if(q.includes('pago') || q.includes('paypal') || q.includes('payoneer')){
-    return `Como Agente 2 de Soporte nexo, para revisar pagos necesito método de pago, fecha, monto y correo usado.\n\nCódigo preliminar de atención: ${ticket}`;
-  }
-  if(q.includes('devol') || q.includes('cambio') || q.includes('reclamo')){
-    return `Como Agente 2 de Soporte nexo, clasificaré tu caso como reclamo/cambio/devolución.\n\nIndica producto, motivo, evidencia y solución esperada.\n\nCódigo preliminar de atención: ${ticket}`;
-  }
-  return `Soy el Agente 2 de Soporte nexo. Puedo ayudarte con tickets, pedidos, reclamos, pagos, cambios y devoluciones.\n\nCódigo preliminar de atención: ${ticket}`;
-}
-
-async function consultarNexoAI(agent){
-  const input=document.getElementById('virtualQuestion');
-  const answer=document.getElementById('virtualAnswer');
-  const button=document.getElementById('consultBtn');
-  const question=(input?.value||'').trim();
-  if(!question){
-    if(answer){ answer.textContent='Por favor escribe tu consulta para que el Agente 2 de Soporte pueda responder.'; answer.style.display='block'; }
-    return;
-  }
-  if(answer){ answer.textContent='Analizando con Agente 2 de Soporte IA nexo...'; answer.style.display='block'; }
-  if(button) button.disabled=true;
-  try{
-    const res=await fetch('/api/nexo-ai',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({agent:'soporte',question,page:location.pathname})
-    });
-    if(!res.ok) throw new Error('API no disponible');
-    const data=await res.json();
-    const text=data.answer || data.message || nexoLocalSoporte(question);
-    if(answer) answer.textContent=text;
-    try{
-      const arr=JSON.parse(localStorage.getItem('nexoAIHistory_soporte')||'[]');
-      arr.unshift({question,answer:text,createdAt:new Date().toISOString()});
-      localStorage.setItem('nexoAIHistory_soporte',JSON.stringify(arr.slice(0,50)));
-    }catch(e){}
-  }catch(e){
-    if(answer) answer.textContent=nexoLocalSoporte(question);
-  }finally{
-    if(button) button.disabled=false;
-  }
-}
-
-// Blindaje: elimina cualquier alerta antigua del botón Consultar.
-document.addEventListener('DOMContentLoaded',function(){
-  const oldBtn=document.getElementById('consultBtn');
-  if(!oldBtn) return;
-  const btn=oldBtn.cloneNode(true);
-  oldBtn.parentNode.replaceChild(btn,oldBtn);
-  btn.onclick=function(){ consultarNexoAI('soporte'); };
-});
-</script>
-
-
-
-<script>
-// HOTFIX nexo soporte: no tocar diseño; restaura países, ticket inferior, botones y correo sin preview mailto.
 (function(){
-  const OFFICIAL_EMAIL='ermcba@hotmail.com';
-  const fallbackCountries=[
-    {code:'BO',name:'Bolivia',area:'+591'},{code:'US',name:'Estados Unidos',area:'+1'},
-    {code:'ES',name:'España',area:'+34'},{code:'BR',name:'Brasil',area:'+55'},
-    {code:'AR',name:'Argentina',area:'+54'},{code:'CL',name:'Chile',area:'+56'},
-    {code:'PE',name:'Perú',area:'+51'},{code:'CO',name:'Colombia',area:'+57'},
-    {code:'MX',name:'México',area:'+52'},{code:'PY',name:'Paraguay',area:'+595'},
-    {code:'UY',name:'Uruguay',area:'+598'},{code:'EC',name:'Ecuador',area:'+593'},
-    {code:'IT',name:'Italia',area:'+39'},{code:'FR',name:'Francia',area:'+33'},
-    {code:'PT',name:'Portugal',area:'+351'},{code:'GB',name:'Reino Unido',area:'+44'}
-  ];
-  function enc(v){ return encodeURIComponent(v||''); }
-  function currentTicket(){
-    const result=document.getElementById('ticketResult');
-    const t=result?.dataset?.ticket || document.getElementById('ticketCode')?.textContent || 'NEXO-R';
-    return t.trim();
-  }
-  window.openOfficialClaimMail=function(ticketArg){
-    const ticket=ticketArg || currentTicket();
-    const nombre=document.getElementById('fullName')?.value || '';
-    const email=document.getElementById('email')?.value || '';
-    const pedido=document.getElementById('orderNumber')?.value || '';
-    const producto=document.getElementById('product')?.value || '';
-    const detalle=document.getElementById('details')?.value || '';
-    const subject='RECLAMO NEXO '+ticket;
-    const body=['Ticket: '+ticket,'Cliente: '+nombre,'Correo: '+email,'Pedido: '+pedido,'Producto: '+producto,'Detalle: '+detalle].join('\n');
-    const outlook='https://outlook.live.com/mail/0/deeplink/compose?to='+enc(OFFICIAL_EMAIL)+'&subject='+enc(subject)+'&body='+enc(body);
-    const opened=window.open(outlook,'_blank','noopener,noreferrer');
-    if(!opened){
-      navigator.clipboard?.writeText(OFFICIAL_EMAIL+' | '+subject+'\n'+body);
-      alert('Se copió el correo y el detalle del reclamo. Si el navegador bloqueó la ventana, habilita pop-ups para nexo.');
+  const portalTexts = {
+    es:{client:'👥 Acceso Cliente', storeTitle:'Tienda Pública', storeDesc:'Explora nuestro catálogo de productos, agrega al carrito y completa tu compra de manera segura.', storeBtn:'Ir a la Tienda', admin:'🔐 Acceso Administrativo', adminTitle:'Panel Administrativo', adminDesc:'Acceso exclusivo con 3 Agentes IA, métricas, control de usuarios y análisis ROI.', adminBtn:'Ir a Atencion al Cliente', lang:'🌍 Idioma', header:'nexo<br>Plataforma de Intermediación<br>Comercial Internacional', desc:'Tienda Pública • Pagos Internacionales • Compra Automática • Soporte IA • Marketing Analytics'},
+    en:{client:'👥 Client Access', storeTitle:'Public Store', storeDesc:'Explore our product catalog, add items to cart and complete your purchase securely.', storeBtn:'Go to Store', admin:'🔐 Administrative Access', adminTitle:'Admin Panel', adminDesc:'Exclusive access with 3 AI Agents, metrics, user control and ROI analysis.', adminBtn:'Enter Customer Service', lang:'🌍 Language', header:'nexo<br>International Commercial<br>Intermediation System', desc:'Public Store • International Payments • Automatic Purchasing • AI Support • Marketing Analytics'},
+    pt:{client:'👥 Acesso do Cliente', storeTitle:'Loja Pública', storeDesc:'Explore nosso catálogo de produtos, adicione ao carrinho e conclua sua compra com segurança.', storeBtn:'Ir para a Loja', admin:'🔐 Acesso Administrativo', adminTitle:'Painel Administrativo', adminDesc:'Acesso exclusivo com 3 agentes IA, métricas, controle de usuários e análise ROI.', adminBtn:'Entrar no Painel Admin', lang:'🌍 Idioma', header:'nexo<br>Sistema de Intermediação<br>Comercial Internacional', desc:'Loja Pública • Pagamentos Internacionais • Compra Automática • Suporte IA • Marketing Analytics'},
+    it:{client:'👥 Accesso Cliente', storeTitle:'Negozio Pubblico', storeDesc:'Esplora il nostro catalogo prodotti, aggiungi al carrello e completa il tuo acquisto in sicurezza.', storeBtn:'Vai al Negozio', admin:'🔐 Accesso Amministrativo', adminTitle:'Pannello Amministrativo', adminDesc:'Accesso esclusivo con 3 Agenti IA, metriche, controllo utenti e analisi ROI.', adminBtn:'Entra nel Pannello Admin', lang:'🌍 Lingua', header:'nexo<br>Sistema di Intermediazione<br>Commerciale Internazionale', desc:'Negozio Pubblico • Pagamenti Internazionali • Acquisto Automatico • Supporto IA • Marketing Analytics'},
+    fr:{client:'👥 Accès Client', storeTitle:'Boutique Publique', storeDesc:'Explorez notre catalogue, ajoutez au panier et finalisez votre achat en toute sécurité.', storeBtn:'Aller à la Boutique', admin:'🔐 Accès Administratif', adminTitle:'Panneau Administratif', adminDesc:'Accès exclusif avec 3 agents IA, métriques, contrôle des utilisateurs et analyse ROI.', adminBtn:'Entrer dans le Panneau Admin', lang:'🌍 Langue', header:'nexo<br>Système d’Intermédiation<br>Commerciale Internationale', desc:'Boutique Publique • Paiements Internationaux • Achat Automatique • Support IA • Marketing Analytics'}
+  };
+  window.setLanguage = function(lang, ev){
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang);
+    if(ev && ev.target){
+      document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+      ev.target.classList.add('active');
     }
-  };
-  window.copySupportTicket=function(ticket){
-    const t=ticket||currentTicket();
-    navigator.clipboard?.writeText(t);
-    alert('Ticket copiado: '+t);
-  };
-  
-  window.printSupportTicket=function(ticket){
-    const t=ticket||currentTicket();
-    const nombre=document.getElementById('fullName')?.value || '';
-    const email=document.getElementById('email')?.value || '';
-    const telefono=((document.getElementById('phoneCode')?.value||'')+' '+(document.getElementById('phone')?.value||'')).trim();
-    const pais=document.getElementById('country')?.selectedOptions?.[0]?.textContent || '';
-    const pedido=document.getElementById('orderNumber')?.value || '';
-    const producto=document.getElementById('product')?.value || '';
-    const tipo=document.getElementById('requestType')?.value || '';
-    const prioridad=document.getElementById('priority')?.value || '';
-    const canal=document.getElementById('preferredChannel')?.value || '';
-    const detalle=document.getElementById('details')?.value || '';
-
-    const contenido = `
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Ticket ${t}</title>
-      <style>
-        body{font-family:Arial,sans-serif;padding:25px;color:#102038}
-        .box{border:2px solid #7AC742;border-left:8px solid #7AC742;padding:20px;border-radius:12px}
-        h1{font-size:28px;margin-bottom:20px}
-        .row{margin:10px 0;padding-bottom:8px;border-bottom:1px solid #ddd}
-        .label{font-weight:bold}
-      </style>
-    </head>
-    <body>
-      <div class="box">
-        <h1>Ticket: ${t}</h1>
-        <div class="row"><span class="label">Cliente:</span> ${nombre}</div>
-        <div class="row"><span class="label">Correo:</span> ${email}</div>
-        <div class="row"><span class="label">Teléfono:</span> ${telefono}</div>
-        <div class="row"><span class="label">País:</span> ${pais}</div>
-        <div class="row"><span class="label">Pedido:</span> ${pedido}</div>
-        <div class="row"><span class="label">Producto:</span> ${producto}</div>
-        <div class="row"><span class="label">Tipo:</span> ${tipo}</div>
-        <div class="row"><span class="label">Prioridad:</span> ${prioridad}</div>
-        <div class="row"><span class="label">Canal:</span> ${canal}</div>
-        <div class="row"><span class="label">Detalle:</span> ${detalle}</div>
-      </div>
-    </body>
-    </html>`;
-
-    const frame = document.createElement('iframe');
-    frame.style.position='fixed';
-    frame.style.right='0';
-    frame.style.bottom='0';
-    frame.style.width='0';
-    frame.style.height='0';
-    frame.style.border='0';
-    document.body.appendChild(frame);
-
-    const doc = frame.contentWindow.document;
-    doc.open();
-    doc.write(contenido);
-    doc.close();
-
-    setTimeout(function(){
-      frame.contentWindow.focus();
-      frame.contentWindow.print();
-    },500);
-  };
-
-  window.pdfSupportTicket=function(ticket){ printSupportTicket(ticket); };
-  window.renderSupportTicketResult=function(ticket){
-    const box=document.getElementById('ticketResult'); if(!box) return;
-    box.dataset.ticket=ticket;
-    box.innerHTML='<div>✅ Reclamo registrado correctamente.</div><h3>Ticket: '+ticket+'</h3><p>Guarda este número como respaldo para seguimiento.</p><div class="ticket-actions"><button type="button" class="ticket-action-btn" onclick="copySupportTicket(\''+ticket+'\')">Copiar ticket</button><button type="button" class="ticket-action-btn" onclick="printSupportTicket(\''+ticket+'\')">Imprimir ticket</button><button type="button" class="ticket-action-btn" onclick="pdfSupportTicket(\''+ticket+'\')">Ver / guardar PDF</button><button type="button" class="ticket-action-btn" onclick="openOfficialClaimMail(\''+ticket+'\')">Enviar correo oficial</button></div>';
-    box.style.display='block';
-  };
-  function restoreCountries(){
-    const sel=document.getElementById('country'); if(!sel) return;
-    if(sel.options.length>1) return;
-    sel.innerHTML='<option value="">Seleccione país</option>';
-    const source=(Array.isArray(window.countriesPhoneData)&&window.countriesPhoneData.length>3)?window.countriesPhoneData:fallbackCountries;
-    source.forEach(c=>{const o=document.createElement('option'); o.value=c.code; o.textContent=(c.name||c.code)+' ('+(c.area||'')+')'; o.dataset.area=c.area||''; sel.appendChild(o);});
+    applyPortalLanguage();
   }
-  function hardenSupportPanel(){
-    restoreCountries();
-    const consult=document.getElementById('consultBtn');
-    if(consult && !consult.textContent.trim()) consult.textContent='Consultar';
-    const official=document.querySelector('.official-mail-button');
-    if(official){ official.onclick=function(e){e.preventDefault(); openOfficialClaimMail();}; }
+  window.goToPublicStore = function(){ window.location.href='nexo-cliente-login.html'; }
+  window.goToAdminLogin = function(){ window.location.href='nexo-admin-login.html'; }
+  function applyPortalLanguage(){
+    var lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    var t = portalTexts[lang] || portalTexts.es;
+    document.documentElement.lang = lang;
+    var access = document.querySelectorAll('.access-title');
+    if(access[0]) access[0].textContent = t.client;
+    if(access[1]) access[1].textContent = t.admin;
+    var titles = document.querySelectorAll('.access-card h3');
+    if(titles[0]) titles[0].textContent = t.storeTitle;
+    if(titles[1]) titles[1].textContent = t.adminTitle;
+    var ps = document.querySelectorAll('.access-card p');
+    if(ps[0]) ps[0].textContent = t.storeDesc;
+    if(ps[1]) ps[1].textContent = t.adminDesc;
+    var btns = document.querySelectorAll('.access-btn');
+    if(btns[0]) btns[0].textContent = t.storeBtn;
+    if(btns[1]) btns[1].textContent = t.adminBtn;
+    var lt = document.querySelector('.language-title'); if(lt) lt.textContent = t.lang;
+    var ht = document.querySelector('.portal-title'); if(ht) ht.innerHTML = t.header;
+    var hd = document.querySelector('.portal-description'); if(hd) hd.textContent = t.desc;
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang===lang));
   }
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(hardenSupportPanel,150); setTimeout(hardenSupportPanel,800); });
+  document.addEventListener('DOMContentLoaded', applyPortalLanguage);
 })();
 </script>
+
+
+
+
 
 <footer class="nexo-legal-footer" data-nexo-legal-footer="1" style="margin-top:36px;padding:22px 16px;text-align:center;font-size:12px;line-height:1.65;color:#eef7f2;background:rgba(45,62,63,.88);border-top:1px solid rgba(255,255,255,.18);">
   <strong>nexo™</strong> – Plataforma de Intermediación Comercial Internacional<br>
@@ -1427,6 +580,323 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="reembolsos.html">Reembolsos</a>
   </div>
 </footer>
+<div class="nexo-policy-modal" id="nexoPolicyModal">
+  <div class="nexo-policy-card">
+    <div class="nexo-policy-top">
+      <h2 id="nexoPolicyTitle">Aviso legal</h2>
+      <button class="nexo-close-btn" type="button" onclick="closePolicyModal()">Cerrar</button>
+    </div>
+    <div class="nexo-policy-body" id="nexoPolicyBody"></div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const portalTextsExtra = {
+    es:{
+      legalFooter:{legal:'Aviso legal',privacy:'Privacidad',terms:'Términos',cookies:'Cookies',security:'Seguridad',refunds:'Reembolsos',close:'Cerrar'},
+      policies:{
+        legal:{title:'Aviso legal',body:`<p>Este portal es operado por Nexo Servicios Generales y Empresariales como plataforma digital de acceso a tienda, soporte y panel administrativo. El contenido tiene finalidad informativa y operativa.</p><h3>Uso del sitio</h3><p>El usuario debe utilizar el portal de forma lícita, sin intentar alterar su funcionamiento, vulnerar accesos o introducir software malicioso.</p><h3>Propiedad intelectual</h3><p>Los textos, diseños, logotipos, estructura visual y componentes del portal pertenecen a NEXO o se usan con autorización.</p>`},
+        privacy:{title:'Política de privacidad',body:`<p>NEXO tratará los datos que el usuario envíe en formularios de acceso, soporte o compra únicamente para la gestión del servicio, autenticación, soporte y mejora operativa.</p><h3>Datos tratados</h3><ul><li>Datos de contacto</li><li>Datos operativos de pedidos o solicitudes</li><li>Información técnica básica del navegador cuando sea necesaria para el funcionamiento</li></ul><h3>Derechos</h3><p>El usuario podrá solicitar corrección, actualización o eliminación de sus datos por los canales habilitados por NEXO.</p>`},
+        terms:{title:'Términos y condiciones',body:`<p>Al usar este portal, el usuario acepta las condiciones de uso de la plataforma. Si no está de acuerdo, debe abstenerse de utilizarla.</p><h3>Responsabilidades del usuario</h3><ul><li>Proporcionar información veraz</li><li>Proteger sus credenciales</li><li>No usar el sistema con fines ilícitos o fraudulentos</li></ul><h3>Disponibilidad</h3><p>NEXO podrá actualizar, suspender o modificar funcionalidades por motivos operativos, de mantenimiento o seguridad.</p>`},
+        cookies:{title:'Política de cookies',body:`<p>Este portal puede utilizar almacenamiento local del navegador y tecnologías equivalentes para recordar idioma, mantener sesión y soportar funciones necesarias del sistema.</p><h3>Control</h3><p>El usuario puede borrar cookies o almacenamiento local desde su navegador. Esto podría afectar ciertas funciones del portal.</p>`},
+        security:{title:'Seguridad de la plataforma',body:`<p>NEXO aplica medidas técnicas y operativas razonables para proteger la integridad del portal y la información gestionada.</p><h3>Medidas generales</h3><ul><li>Separación de accesos de cliente y administración</li><li>Controles de autenticación</li><li>Buenas prácticas para sesiones y almacenamiento local</li><li>Revisión operativa y mantenimiento del sistema</li></ul><h3>Recomendaciones al usuario</h3><ul><li>No compartir claves</li><li>Usar contraseñas seguras</li><li>Cerrar sesión en equipos compartidos</li><li>Verificar que el dominio publicado sea el oficial</li></ul>`},
+        refunds:{title:'Política de reembolsos',body:`<p>Las solicitudes de reembolso estarán sujetas a validación del caso, estado del pedido, proveedor involucrado y condiciones de operación aplicables.</p><h3>Criterios generales</h3><ul><li>Error confirmado en el cobro o duplicidad</li><li>Pedido no procesado cuando corresponda</li><li>Incidencias verificadas de entrega o producto conforme a la revisión del caso</li></ul><h3>Proceso</h3><p>El cliente deberá presentar su solicitud por los canales de atención habilitados, indicando datos del pedido y descripción clara del incidente. NEXO revisará el caso y comunicará la resolución correspondiente.</p>`}
+      }
+    },
+    en:{
+      legalFooter:{legal:'Legal notice',privacy:'Privacy',terms:'Terms',cookies:'Cookies',security:'Security',refunds:'Refunds',close:'Close'},
+      policies:{
+        legal:{title:'Legal notice',body:`<p>This portal is operated by Nexo Servicios Generales y Empresariales as a digital platform for store access, support and administrative access. The content is provided for operational and informational purposes.</p><h3>Use of the site</h3><p>Users must use the portal lawfully and must not attempt to alter its operation, bypass access controls or introduce malicious software.</p><h3>Intellectual property</h3><p>The texts, design, logos, visual structure and portal components belong to NEXO or are used with authorization.</p>`},
+        privacy:{title:'Privacy policy',body:`<p>NEXO will process the data submitted by users through access, support or purchase forms only for service management, authentication, support and operational improvement.</p><h3>Data processed</h3><ul><li>Contact data</li><li>Operational order or request data</li><li>Basic browser technical information when required for operation</li></ul><h3>Rights</h3><p>Users may request correction, update or deletion of their data through NEXO’s enabled channels.</p>`},
+        terms:{title:'Terms and conditions',body:`<p>By using this portal, the user accepts the platform terms of use. If the user disagrees, they should refrain from using it.</p><h3>User responsibilities</h3><ul><li>Provide truthful information</li><li>Protect their credentials</li><li>Not use the system for unlawful or fraudulent purposes</li></ul><h3>Availability</h3><p>NEXO may update, suspend or modify functionalities for operational, maintenance or security reasons.</p>`},
+        cookies:{title:'Cookie policy',body:`<p>This portal may use local browser storage and equivalent technologies to remember language, keep sessions and support necessary system functions.</p><h3>Control</h3><p>Users may clear cookies or local storage from their browser. This may affect certain portal functions.</p>`},
+        security:{title:'Platform security',body:`<p>NEXO applies reasonable technical and operational measures to protect portal integrity and managed information.</p><h3>General measures</h3><ul><li>Separated client and administrative access</li><li>Authentication controls</li><li>Good practices for sessions and local storage</li><li>Operational review and maintenance</li></ul><h3>User recommendations</h3><ul><li>Do not share passwords</li><li>Use strong credentials</li><li>Sign out on shared devices</li><li>Verify the published domain is the official one</li></ul>`},
+        refunds:{title:'Refund policy',body:`<p>Refund requests are subject to validation according to the case, order status, involved provider and applicable operating conditions.</p><h3>General criteria</h3><ul><li>Confirmed billing error or duplicate charge</li><li>Order not processed when applicable</li><li>Verified delivery or product incident subject to case review</li></ul><h3>Process</h3><p>The customer must submit the request through the enabled support channels, including order details and a clear description of the incident. NEXO will review the case and communicate the corresponding resolution.</p>`}
+      }
+    },
+    pt:{
+      legalFooter:{legal:'Aviso legal',privacy:'Privacidade',terms:'Termos',cookies:'Cookies',security:'Segurança',refunds:'Reembolsos',close:'Fechar'},
+      policies:{
+        legal:{title:'Aviso legal',body:`<p>Este portal é operado pela Nexo Servicios Generales y Empresariales como plataforma digital de acesso à loja, suporte e área administrativa. O conteúdo tem finalidade informativa e operacional.</p>`},
+        privacy:{title:'Política de privacidade',body:`<p>A NEXO tratará os dados enviados pelo usuário apenas para gestão do serviço, autenticação, suporte e melhoria operacional.</p>`},
+        terms:{title:'Termos e condições',body:`<p>Ao usar este portal, o usuário aceita os termos de uso da plataforma.</p>`},
+        cookies:{title:'Política de cookies',body:`<p>Este portal pode usar armazenamento local do navegador e tecnologias equivalentes para lembrar idioma, sessão e funções necessárias.</p>`},
+        security:{title:'Segurança da plataforma',body:`<p>A NEXO aplica medidas técnicas e operacionais razoáveis para proteger a integridade do portal.</p>`},
+        refunds:{title:'Política de reembolsos',body:`<p>Pedidos de reembolso estarão sujeitos à validação do caso, status do pedido, fornecedor envolvido e condições aplicáveis.</p>`}
+      }
+    },
+    it:{
+      legalFooter:{legal:'Avviso legale',privacy:'Privacy',terms:'Termini',cookies:'Cookie',security:'Sicurezza',refunds:'Rimborsi',close:'Chiudi'},
+      policies:{
+        legal:{title:'Avviso legale',body:`<p>Questo portale è gestito da Nexo Servicios Generales y Empresariales come piattaforma digitale per negozio, supporto e accesso amministrativo.</p>`},
+        privacy:{title:'Informativa sulla privacy',body:`<p>NEXO tratterà i dati inviati dall’utente solo per gestione del servizio, autenticazione, supporto e miglioramento operativo.</p>`},
+        terms:{title:'Termini e condizioni',body:`<p>Usando questo portale, l’utente accetta i termini di utilizzo della piattaforma.</p>`},
+        cookies:{title:'Politica sui cookie',body:`<p>Questo portale può usare archiviazione locale del browser e tecnologie equivalenti per lingua, sessione e funzioni necessarie.</p>`},
+        security:{title:'Sicurezza della piattaforma',body:`<p>NEXO applica misure tecniche e operative ragionevoli per proteggere l’integrità del portale.</p>`},
+        refunds:{title:'Politica di rimborso',body:`<p>Le richieste di rimborso sono soggette a verifica del caso, stato dell’ordine, fornitore coinvolto e condizioni applicabili.</p>`}
+      }
+    },
+    fr:{
+      legalFooter:{legal:'Mentions légales',privacy:'Confidentialité',terms:'Conditions',cookies:'Cookies',security:'Sécurité',refunds:'Remboursements',close:'Fermer'},
+      policies:{
+        legal:{title:'Mentions légales',body:`<p>Ce portail est exploité par Nexo Servicios Generales y Empresariales comme plateforme numérique d’accès boutique, support et zone administrative.</p>`},
+        privacy:{title:'Politique de confidentialité',body:`<p>NEXO traitera les données envoyées par l’utilisateur uniquement pour la gestion du service, l’authentification, le support et l’amélioration opérationnelle.</p>`},
+        terms:{title:'Conditions générales',body:`<p>En utilisant ce portail, l’utilisateur accepte les conditions d’utilisation de la plateforme.</p>`},
+        cookies:{title:'Politique de cookies',body:`<p>Ce portail peut utiliser le stockage local du navigateur et des technologies équivalentes pour la langue, la session et les fonctions nécessaires.</p>`},
+        security:{title:'Sécurité de la plateforme',body:`<p>NEXO applique des mesures techniques et opérationnelles raisonnables pour protéger l’intégrité du portail.</p>`},
+        refunds:{title:'Politique de remboursement',body:`<p>Les demandes de remboursement sont soumises à la validation du cas, du statut de la commande, du fournisseur concerné et des conditions applicables.</p>`}
+      }
+    }
+  };
+
+  window.openPolicyModal = function(key){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const dict = portalTextsExtra[lang] || portalTextsExtra.es;
+    const entry = dict.policies[key];
+    if(!entry) return;
+    document.getElementById('nexoPolicyTitle').textContent = entry.title;
+    document.getElementById('nexoPolicyBody').innerHTML = entry.body;
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal) modal.classList.add('open');
+  };
+  window.closePolicyModal = function(){
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal) modal.classList.remove('open');
+  };
+
+  const oldApply = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof oldApply === 'function') oldApply();
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const dict = portalTextsExtra[lang] || portalTextsExtra.es;
+    document.querySelectorAll('[data-policy-link]').forEach(a=>{
+      const key = a.getAttribute('data-policy-link');
+      if(dict.legalFooter[key]) a.textContent = dict.legalFooter[key];
+      a.onclick = function(e){ e.preventDefault(); openPolicyModal(key); };
+    });
+    const btn = document.querySelector('.nexo-close-btn');
+    if(btn) btn.textContent = dict.legalFooter.close;
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof window.applyPortalLanguage === 'function') window.applyPortalLanguage();
+    const modal = document.getElementById('nexoPolicyModal');
+    if(modal){
+      modal.addEventListener('click', function(e){
+        if(e.target === modal) closePolicyModal();
+      });
+    }
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const nexoFooterLabels = {
+    es:{legal:'Aviso legal',privacy:'Privacidad',terms:'Términos',cookies:'Cookies',security:'Seguridad',refunds:'Reembolsos'},
+    en:{legal:'Legal Notice',privacy:'Privacy',terms:'Terms',cookies:'Cookies',security:'Security',refunds:'Refunds'},
+    pt:{legal:'Aviso legal',privacy:'Privacidade',terms:'Termos',cookies:'Cookies',security:'Segurança',refunds:'Reembolsos'},
+    it:{legal:'Avviso legale',privacy:'Privacy',terms:'Termini',cookies:'Cookie',security:'Sicurezza',refunds:'Rimborsi'},
+    fr:{legal:'Mentions légales',privacy:'Confidentialité',terms:'Conditions',cookies:'Cookies',security:'Sécurité',refunds:'Remboursements'}
+  };
+  function applyFooterLegalTitles(){
+    const lang = localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es';
+    const t = nexoFooterLabels[lang] || nexoFooterLabels.es;
+    document.querySelectorAll('[data-policy-link]').forEach(a=>{
+      const key = a.getAttribute('data-policy-link');
+      if(t[key]) a.textContent = t[key];
+    });
+  }
+  const oldApplyPortalLanguage = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof oldApplyPortalLanguage === 'function') oldApplyPortalLanguage();
+    applyFooterLegalTitles();
+  };
+  document.addEventListener('DOMContentLoaded', applyFooterLegalTitles);
+})();
+</script>
 
 <script src="nexo-legal-i18n.js"></script>
-</body></html>
+
+<script id="nexo-legal-footer-i18n-final">
+(function(){
+  const LEGAL={
+    es:{title:'Plataforma de Intermediación Comercial Internacional',company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',rights:'Todos los derechos reservados',legal:'Aviso Legal',terms:'Términos y Condiciones',privacy:'Privacidad',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condiciones legales de compra nexo™',buyDesc:'nexo™ actúa como intermediario comercial internacional. El cliente acepta que el pago cubre producto, logística, costos del proveedor y comisión nexo™. Garantías, cambios, devoluciones y tiempos de entrega dependen del proveedor y de la logística internacional.',accept:'Acepto los términos legales, privacidad, pagos, reembolsos y condición de intermediación comercial internacional de nexo™.'},
+    en:{title:'International Commercial Intermediation Platform',company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',rights:'All rights reserved',legal:'Legal Notice',terms:'Terms and Conditions',privacy:'Privacy',cookies:'Cookies',refunds:'Refunds',buyTitle:'nexo™ legal purchase conditions',buyDesc:'nexo™ acts as an international commercial intermediary. The customer accepts that the payment covers the product, logistics, supplier costs and nexo™ commission. Warranties, exchanges, returns and delivery times depend on the supplier and international logistics.',accept:'I accept the legal terms, privacy policy, payments, refunds and the international commercial intermediation condition of nexo™.'},
+    pt:{title:'Plataforma de Intermediação Comercial Internacional',company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',rights:'Todos os direitos reservados',legal:'Aviso Legal',terms:'Termos e Condições',privacy:'Privacidade',cookies:'Cookies',refunds:'Reembolsos',buyTitle:'Condições legais de compra nexo™',buyDesc:'A nexo™ atua como intermediária comercial internacional. O cliente aceita que o pagamento cobre produto, logística, custos do fornecedor e comissão nexo™. Garantias, trocas, devoluções e prazos de entrega dependem do fornecedor e da logística internacional.',accept:'Aceito os termos legais, privacidade, pagamentos, reembolsos e a condição de intermediação comercial internacional da nexo™.'},
+    it:{title:'Piattaforma di Intermediazione Commerciale Internazionale',company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',rights:'Tutti i diritti riservati',legal:'Avviso Legale',terms:'Termini e Condizioni',privacy:'Privacy',cookies:'Cookie',refunds:'Rimborsi',buyTitle:'Condizioni legali di acquisto nexo™',buyDesc:'nexo™ agisce come intermediario commerciale internazionale. Il cliente accetta che il pagamento copre prodotto, logistica, costi del fornitore e commissione nexo™. Garanzie, cambi, resi e tempi di consegna dipendono dal fornitore e dalla logistica internazionale.',accept:'Accetto i termini legali, la privacy, i pagamenti, i rimborsi e la condizione di intermediazione commerciale internazionale di nexo™.'},
+    fr:{title:'Plateforme d’Intermédiation Commerciale Internationale',company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',rights:'Tous droits réservés',legal:'Mentions légales',terms:'Conditions générales',privacy:'Confidentialité',cookies:'Cookies',refunds:'Remboursements',buyTitle:'Conditions légales d’achat nexo™',buyDesc:'nexo™ agit comme intermédiaire commercial international. Le client accepte que le paiement couvre le produit, la logistique, les coûts du fournisseur et la commission nexo™. Les garanties, échanges, retours et délais de livraison dépendent du fournisseur et de la logistique internationale.',accept:'J’accepte les conditions légales, la confidentialité, les paiements, les remboursements et la condition d’intermédiation commerciale internationale de nexo™.'}
+  };
+  function lang(){return (localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||document.documentElement.lang||'es').slice(0,2).toLowerCase();}
+  function a(href,txt){return `<a href="${href}">${txt}</a>`;}
+  function legalHTML(t){return `<strong>nexo™</strong> – ${t.title}<br>${t.company}<br>${t.desc}<br>© 2026 nexo™ – ${t.rights}<br><span class="nexo-footer-links">${a('aviso-legal.html',t.legal)} | ${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('politica-cookies.html',t.cookies)} | ${a('reembolsos.html',t.refunds)}</span>`;}
+  window.nexoApplyLegalI18n=function(){
+    const t=LEGAL[lang()]||LEGAL.es;
+    document.querySelectorAll('[data-nexo-legal-footer], .nexo-left-legal-card, .nexo-left-legal, footer#nexoFooter, footer.nexo-footer, footer.nexo-legal-footer').forEach(el=>{el.innerHTML=legalHTML(t);});
+    document.querySelectorAll('.page-legal-block').forEach(el=>{
+      const checked = el.querySelector('input')?.checked ? 'checked' : '';
+      el.innerHTML = `<p style="margin:0 0 8px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 12px 0;">${t.buyDesc}</p><p style="margin:0 0 12px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:900;cursor:pointer;"><input type="checkbox" id="nexoLegalAcceptPage" ${checked} style="margin-top:3px;min-width:20px;min-height:20px;" onchange="const m=document.getElementById('nexoLegalAccept'); if(m)m.checked=this.checked;"><span>${t.accept}</span></label>`;
+    });
+    const modalLegal=document.querySelector('#confirmationModal .nexo-checkout-legal');
+    if(modalLegal){
+      const chk = document.getElementById('nexoLegalAccept')?.checked ? 'checked' : '';
+      modalLegal.innerHTML = `<p style="margin:0 0 10px 0;"><strong>${t.buyTitle}</strong></p><p style="margin:0 0 10px 0;">${t.buyDesc}</p><p style="margin:0 0 10px 0;">${a('terminos-condiciones.html',t.terms)} | ${a('politica-privacidad.html',t.privacy)} | ${a('reembolsos.html',t.refunds)}</p><label style="display:flex;gap:10px;align-items:flex-start;font-weight:800;cursor:pointer;"><input type="checkbox" id="nexoLegalAccept" ${chk} required style="margin-top:3px;min-width:18px;min-height:18px;"><span>${t.accept}</span></label><div id="nexoLegalWarning" style="display:none;margin-top:10px;color:#c62828;font-weight:800;">${lang()==='en'?'You must accept the legal conditions to continue.':lang()==='fr'?'Vous devez accepter les conditions légales pour continuer.':lang()==='pt'?'Você deve aceitar as condições legais para continuar.':lang()==='it'?'Devi accettare le condizioni legali per continuare.':'Para continuar debes aceptar las condiciones legales de la compra.'}</div>`;
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>{nexoApplyLegalI18n(); setTimeout(nexoApplyLegalI18n,200); setTimeout(nexoApplyLegalI18n,700);});
+  document.addEventListener('click',e=>{ if(e.target.closest('button,a')) setTimeout(nexoApplyLegalI18n,60);},true);
+  window.addEventListener('storage',nexoApplyLegalI18n);
+})();
+</script>
+
+
+<script id="nexo-index-legal-left-final-fix">
+(function(){
+  const LEGAL_INDEX = {
+    es:{
+      title:'nexo™ – Plataforma de Intermediación Comercial Internacional',
+      company:'nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia',
+      desc:'nexo™ actúa exclusivamente como intermediario entre el cliente y proveedores internacionales.',
+      copy:'© 2026 nexo™ – Todos los derechos reservados',
+      legal:'Aviso Legal', terms:'Términos y Condiciones', privacy:'Privacidad', cookies:'Cookies', refunds:'Reembolsos'
+    },
+    en:{
+      title:'nexo™ – International Commercial Intermediation Platform',
+      company:'nexo General and Business Services – TAX ID: 774651015 – Bolivia',
+      desc:'nexo™ acts exclusively as an intermediary between the customer and international providers.',
+      copy:'© 2026 nexo™ – All rights reserved',
+      legal:'Legal Notice', terms:'Terms and Conditions', privacy:'Privacy', cookies:'Cookies', refunds:'Refunds'
+    },
+    pt:{
+      title:'nexo™ – Plataforma de Intermediação Comercial Internacional',
+      company:'nexo Serviços Gerais e Empresariais – NIT: 774651015 – Bolívia',
+      desc:'nexo™ atua exclusivamente como intermediário entre o cliente e fornecedores internacionais.',
+      copy:'© 2026 nexo™ – Todos os direitos reservados',
+      legal:'Aviso Legal', terms:'Termos e Condições', privacy:'Privacidade', cookies:'Cookies', refunds:'Reembolsos'
+    },
+    it:{
+      title:'nexo™ – Piattaforma di Intermediazione Commerciale Internazionale',
+      company:'nexo Servizi Generali e Aziendali – NIT: 774651015 – Bolivia',
+      desc:'nexo™ agisce esclusivamente come intermediario tra il cliente e fornitori internazionali.',
+      copy:'© 2026 nexo™ – Tutti i diritti riservati',
+      legal:'Avviso Legale', terms:'Termini e Condizioni', privacy:'Privacy', cookies:'Cookie', refunds:'Rimborsi'
+    },
+    fr:{
+      title:'nexo™ – Plateforme d’Intermédiation Commerciale Internationale',
+      company:'nexo Services Généraux et Entreprises – NIT : 774651015 – Bolivie',
+      desc:'nexo™ agit exclusivement comme intermédiaire entre le client et les fournisseurs internationaux.',
+      copy:'© 2026 nexo™ – Tous droits réservés',
+      legal:'Mentions légales', terms:'Conditions générales', privacy:'Confidentialité', cookies:'Cookies', refunds:'Remboursements'
+    }
+  };
+
+  function currentLang(){
+    return (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es').slice(0,2).toLowerCase();
+  }
+
+  function setText(id, value){
+    const el = document.getElementById(id);
+    if(el) el.textContent = value;
+  }
+
+  function applyIndexLegal(){
+    const t = LEGAL_INDEX[currentLang()] || LEGAL_INDEX.es;
+
+    setText('leftLegalTitle', t.title);
+    setText('leftLegalCompany', t.company);
+    setText('leftLegalDesc', t.desc);
+    setText('leftLegalCopy', t.copy);
+    setText('leftLegalNotice', t.legal);
+    setText('leftLegalTerms', t.terms);
+    setText('leftLegalPrivacy', t.privacy);
+    setText('leftLegalCookies', t.cookies);
+    setText('leftLegalRefunds', t.refunds);
+
+    // Si existe otro footer legal visible en index, también queda sincronizado.
+    document.querySelectorAll('footer.nexo-legal-footer[data-nexo-legal-footer="1"]').forEach(footer=>{
+      footer.innerHTML = `<strong>nexo™</strong> – ${t.title.replace('nexo™ – ','')}<br>
+        ${t.company}<br>
+        ${t.desc}<br>
+        ${t.copy}<br>
+        <div class="nexo-legal-links" style="margin-top:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;align-items:center;">
+          <a href="aviso-legal.html">${t.legal}</a><span>&nbsp;|&nbsp;</span>
+          <a href="terminos-condiciones.html">${t.terms}</a><span>&nbsp;|&nbsp;</span>
+          <a href="politica-privacidad.html">${t.privacy}</a><span>&nbsp;|&nbsp;</span>
+          <a href="politica-cookies.html">${t.cookies}</a><span>&nbsp;|&nbsp;</span>
+          <a href="reembolsos.html">${t.refunds}</a>
+        </div>`;
+    });
+  }
+
+  const previousSetLanguage = window.setLanguage;
+  window.setLanguage = function(lang, ev){
+    localStorage.setItem('nexoLang', lang);
+    localStorage.setItem('nexo_language', lang);
+    if(typeof previousSetLanguage === 'function'){
+      try { previousSetLanguage(lang, ev); } catch(e) {}
+    }
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.lang === lang));
+    setTimeout(applyIndexLegal, 0);
+    setTimeout(applyIndexLegal, 80);
+    return false;
+  };
+
+  const previousApplyPortalLanguage = window.applyPortalLanguage;
+  window.applyPortalLanguage = function(){
+    if(typeof previousApplyPortalLanguage === 'function'){
+      try { previousApplyPortalLanguage(); } catch(e) {}
+    }
+    applyIndexLegal();
+  };
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    applyIndexLegal();
+    setTimeout(applyIndexLegal, 100);
+    setTimeout(applyIndexLegal, 500);
+  });
+  window.addEventListener('storage', applyIndexLegal);
+})();
+</script>
+
+
+<script id="nexo-legal-links-carry-lang-final">
+(function(){
+  function currentLang(){
+    return (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || document.documentElement.lang || 'es').slice(0,2).toLowerCase();
+  }
+  function patchLegalLinks(){
+    const files = ['aviso-legal.html','terminos-condiciones.html','politica-privacidad.html','politica-cookies.html','reembolsos.html'];
+    const lang = currentLang();
+    document.querySelectorAll('a[href]').forEach(a=>{
+      const href = a.getAttribute('href') || '';
+      const clean = href.split('?')[0].split('#')[0];
+      if(files.includes(clean)){
+        a.setAttribute('href', clean + '?lang=' + encodeURIComponent(lang));
+      }
+    });
+  }
+  const oldSetLanguage = window.setLanguage;
+  window.setLanguage = function(lang, ev){
+    if(typeof oldSetLanguage === 'function'){
+      try { oldSetLanguage(lang, ev); } catch(e) {}
+    } else {
+      localStorage.setItem('nexoLang', lang);
+      localStorage.setItem('nexo_language', lang);
+    }
+    setTimeout(patchLegalLinks, 0);
+    setTimeout(patchLegalLinks, 80);
+    return false;
+  };
+  document.addEventListener('DOMContentLoaded', ()=>{
+    patchLegalLinks();
+    setTimeout(patchLegalLinks, 200);
+    setTimeout(patchLegalLinks, 700);
+  });
+})();
+</script>
+
+</body>
+</html>

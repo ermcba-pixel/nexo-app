@@ -1,78 +1,31 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ujqbbniptflzytdankwp.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_kUlixt-nOKZtvfYd0SYXdQ_44Y0NIYv';
+// nexo™ – Alibaba OAuth callback
+// Guarda de forma operativa el código recibido. El intercambio por token se ejecuta cuando Alibaba confirme endpoint exacto de token para la app.
 
-async function sb(path, options={}){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers:{
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      'Content-Type':'application/json',
-      Prefer: options.prefer || 'return=representation',
-      ...(options.headers||{})
-    }
-  });
-  const text = await r.text();
-  let data=null; try{data=text?JSON.parse(text):null;}catch{data=text;}
-  if(!r.ok) throw new Error(typeof data==='string'?data:JSON.stringify(data));
-  return data;
-}
-
-async function findClientId(email){
-  if(!email) return null;
-  try{
-    const rows = await sb(`clientes?select=id,email&email=eq.${encodeURIComponent(email)}&limit=1`, {headers:{Prefer:''}, prefer:''});
-    return rows?.[0]?.id || null;
-  }catch(e){ return null; }
-}
-
-export default async function handler(req, res) {
+function cors(res){
   res.setHeader('Access-Control-Allow-Origin','*');
-  res.setHeader('Access-Control-Allow-Methods','POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers','Content-Type');
+  res.setHeader('Cache-Control','no-store');
+}
+async function logSupabase(payload){
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if(!url || !key) return null;
+  await fetch(`${url}/rest/v1/logs_agente1`, {
+    method:'POST',
+    headers:{apikey:key, Authorization:`Bearer ${key}`, 'Content-Type':'application/json', Prefer:'return=minimal'},
+    body: JSON.stringify({proveedor:'Alibaba', accion:'oauth_callback', detalle:JSON.stringify(payload).slice(0,1000), estado:'recibido'})
+  }).catch(()=>null);
+}
+export default async function handler(req,res){
+  cors(res);
   if(req.method==='OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ ok:false, error: 'Método no permitido' });
-
-  try {
-    const p = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    const ticket = p.ticket || ('NEXO-R-' + new Date().toISOString().slice(0,10).replaceAll('-','') + '-' + Math.floor(100000+Math.random()*900000));
-    const nombre = p.nombre || p.nombre_cliente || '';
-    const email = p.email || p.correo || '';
-    const descripcion = p.descripcion || p.mensaje || '';
-    if(!nombre || !email || !descripcion){
-      return res.status(400).json({ok:false,error:'Faltan nombre, correo o descripción'});
-    }
-    const cliente_id = p.cliente_id || await findClientId(email);
-    const asunto = p.asunto || `${ticket} - ${p.tipo || p.tipo_reclamo || 'Reclamo'}`;
-    const mensaje = p.mensaje || [
-      'Ticket: '+ticket,
-      'Nombre: '+nombre,
-      'Correo: '+email,
-      'Teléfono / WhatsApp: '+(p.telefono||''),
-      'País: '+(p.pais||''),
-      'Pedido: '+(p.pedido||'No informado'),
-      'Producto: '+(p.producto||'No informado'),
-      'Canal preferido: '+(p.canal||''),
-      '',
-      'Descripción:',
-      descripcion
-    ].join('\n');
-
-    const row = {
-      cliente_id: cliente_id || null,
-      nombre_cliente: nombre,
-      email,
-      asunto,
-      tipo_reclamo: p.tipo || p.tipo_reclamo || 'Soporte',
-      mensaje,
-      estado: 'Nuevo',
-      prioridad: p.prioridad || 'Media',
-      fecha_creacion: new Date().toISOString(),
-      fecha_actualizacion: new Date().toISOString()
-    };
-    const data = await sb('tickets', {method:'POST', body:JSON.stringify(row)});
-    return res.status(200).json({ok:true, success:true, ticketId:ticket, cliente_id:row.cliente_id, data});
-  } catch (error) {
-    return res.status(500).json({ok:false,error:error.message||String(error)});
-  }
+  const q = req.method==='POST' ? (req.body||{}) : (req.query||{});
+  const code = q.code || q.auth_code || q.authorization_code || '';
+  const state = q.state || '';
+  const error = q.error || q.error_description || '';
+  const payload = {ok:!error, provider:'Alibaba', codeReceived:Boolean(code), code, state, error, receivedAt:new Date().toISOString()};
+  await logSupabase(payload);
+  if(error) return res.status(200).send(`<html><body><h2>Alibaba OAuth</h2><p>Error: ${String(error)}</p><p><a href="/nexo-admin-panel.html">Volver al panel nexo</a></p></body></html>`);
+  return res.status(200).send(`<html><body><h2>Alibaba conectado con nexo</h2><p>Código recibido correctamente para Agente 1.</p><p>Estado: ${String(state)}</p><p><a href="/nexo-admin-panel.html">Volver al panel nexo</a></p></body></html>`);
 }

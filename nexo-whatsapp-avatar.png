@@ -1,0 +1,1 @@
+console.log('nexo™ v15 FULL REAL');
