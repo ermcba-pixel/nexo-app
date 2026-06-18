@@ -1491,6 +1491,28 @@ const t = ctt();
             window.location.href = paypalLiveUrl;
         }
 
+        
+function nexoIsAmazonItem(item){
+  const txt = String([item?.provider,item?.proveedor,item?.vendor,item?.source,item?.url,item?.sourceUrl].join(' ')).toLowerCase();
+  return txt.includes('amazon');
+}
+function nexoAmazonUrlFromOrder(order){
+  const tag='nexo08-20';
+  const items=Array.isArray(order?.items)?order.items:[];
+  const first=items.find(nexoIsAmazonItem) || items[0] || {};
+  let raw = first.sourceUrl || first.url || first.originalProviderUrl || '';
+  try{
+    let u = raw && String(raw).startsWith('http') ? new URL(raw) : new URL('https://www.amazon.com/s?k='+encodeURIComponent(first.name||first.title||'producto'));
+    u.searchParams.set('tag', tag);
+    return u.toString();
+  }catch(e){
+    return 'https://www.amazon.com/s?k='+encodeURIComponent(first.name||first.title||'producto')+'&tag='+encodeURIComponent(tag);
+  }
+}
+async function nexoRegisterAmazonAffiliateClick(order){
+  try{ await fetch('/api/amazon-affiliate-click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order, amazon_tag:'nexo08-20', product_url:nexoAmazonUrlFromOrder(order)})}); }catch(e){}
+}
+
         async function submitPurchase(){
             if(!orderData) return;
             const btnText = document.getElementById('confirmBuyText');
@@ -1655,6 +1677,20 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim()
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
+
+            if((orderData.items || []).some(nexoIsAmazonItem)){
+                orderData.estado_pago = 'amazon_afiliado_redireccionado';
+                orderData.estado_compra = 'compra_directa_en_amazon_con_tag_nexo08_20';
+                orderData.estado_agente = 'agente1_registro_y_seguimiento_amazon_afiliado';
+                orderData.amazon_tag = 'nexo08-20';
+                orderData.redireccion_externa = true;
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                await nexoRegisterAmazonAffiliateClick(orderData);
+                if(btnText) btnText.textContent = 'Abriendo Amazon...';
+                window.location.href = nexoAmazonUrlFromOrder(orderData);
+                return;
+            }
+
             orderData.providerFlow = {
                 active:true,
                 agent:'AGENTE 1',
@@ -1662,7 +1698,7 @@ const t = ctt();
                 cliente_cobra_en: orderData.paymentMethod === 'card' ? 'Tarjeta directa en nexo / Agente 1' : 'PayPal Checkout real nexo™',
                 proveedor_pago_con:'CJ Dropshipping API / Wallet CJ después de confirmación de pago',
                 margen_empresa:'Comisión nexo™ calculada sobre precio proveedor y registrada en el pedido',
-                providers:['CJ Dropshipping','AliExpress','Amazon Business','Temu','SHEIN']
+                providers:['CJ Dropshipping','Alibaba','Amazon']
             };
             try {
                 const queue = JSON.parse(localStorage.getItem('nexoProviderPaymentQueue') || '[]');

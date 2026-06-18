@@ -1396,56 +1396,6 @@ function selectPayment(methodId, btnEl=null) {
             refreshDeliveryEstimate();
         }
 
-
-        function nexoIsAmazonItem(item){
-            const src = String(item?.provider || item?.proveedor || item?.vendor || item?.source || item?.sourceUrl || item?.url || '').toLowerCase();
-            return src.includes('amazon') || src.includes('amzn.to') || src.includes('amazon.com');
-        }
-        function nexoAmazonUrlWithTag(item){
-            const base = item?.sourceUrl || item?.url || ('https://www.amazon.com/s?k=' + encodeURIComponent(item?.name || 'producto'));
-            try{
-                const u = new URL(base, window.location.origin);
-                if(!String(u.hostname).includes('amazon.')) return base;
-                u.searchParams.set('tag','nexo08-20');
-                return u.toString();
-            }catch(e){
-                return 'https://www.amazon.com/s?k=' + encodeURIComponent(item?.name || 'producto') + '&tag=nexo08-20';
-            }
-        }
-        function nexoAmazonItems(order){
-            return (order?.items || []).filter(nexoIsAmazonItem);
-        }
-        async function nexoRedirectAmazonAffiliate(orderData){
-            const items = nexoAmazonItems(orderData);
-            if(!items.length) return false;
-            const first = items[0];
-            const url = nexoAmazonUrlWithTag(first);
-            orderData.amazonAffiliateFlow = true;
-            orderData.amazonAffiliateUrl = url;
-            orderData.amazon_tag = 'nexo08-20';
-            orderData.estado_pago = 'amazon_afiliado_redireccionado';
-            orderData.estado_compra = 'cliente_compra_en_amazon_con_tag_nexo';
-            orderData.estado_agente = 'agente_1_monitorea_comision_amazon_associates';
-            orderData.confirmationNote = 'Producto Amazon: el cliente será derivado a Amazon con tag nexo08-20. La comisión se registra en Amazon Associates y Agente 1 monitorea el resultado.';
-            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            try{
-                await fetch('/api/amazon-affiliate-click', {
-                    method:'POST', headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({
-                        pedido_id: orderData.supabase_id || orderData.id,
-                        cliente_email: orderData.email,
-                        amazon_url: url,
-                        amazon_tag: 'nexo08-20',
-                        evento: 'checkout_redirect_amazon',
-                        orderData
-                    })
-                });
-            }catch(e){ console.warn('No se pudo registrar click Amazon; continúa redirección afiliada.', e); }
-            alert('Este producto es de Amazon. Agente 1 registró el pedido y ahora se abrirá Amazon con el código afiliado nexo08-20 para completar la compra.');
-            window.location.href = url;
-            return true;
-        }
-
         // ABRIR MODAL DE CONFIRMACIÓN
         
 function openConfirmationModal() {
@@ -1541,6 +1491,28 @@ const t = ctt();
             window.location.href = paypalLiveUrl;
         }
 
+        
+function nexoIsAmazonItem(item){
+  const txt = String([item?.provider,item?.proveedor,item?.vendor,item?.source,item?.url,item?.sourceUrl].join(' ')).toLowerCase();
+  return txt.includes('amazon');
+}
+function nexoAmazonUrlFromOrder(order){
+  const tag='nexo08-20';
+  const items=Array.isArray(order?.items)?order.items:[];
+  const first=items.find(nexoIsAmazonItem) || items[0] || {};
+  let raw = first.sourceUrl || first.url || first.originalProviderUrl || '';
+  try{
+    let u = raw && String(raw).startsWith('http') ? new URL(raw) : new URL('https://www.amazon.com/s?k='+encodeURIComponent(first.name||first.title||'producto'));
+    u.searchParams.set('tag', tag);
+    return u.toString();
+  }catch(e){
+    return 'https://www.amazon.com/s?k='+encodeURIComponent(first.name||first.title||'producto')+'&tag='+encodeURIComponent(tag);
+  }
+}
+async function nexoRegisterAmazonAffiliateClick(order){
+  try{ await fetch('/api/amazon-affiliate-click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order, amazon_tag:'nexo08-20', product_url:nexoAmazonUrlFromOrder(order)})}); }catch(e){}
+}
+
         async function submitPurchase(){
             if(!orderData) return;
             const btnText = document.getElementById('confirmBuyText');
@@ -1620,12 +1592,6 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim(),
                 documentId: (JSON.parse(sessionStorage.getItem('nexoActiveClient') || localStorage.getItem('nexoClientProfile') || '{}').documentId || '')
             };
-            orderData.agente_responsable = 'agente1';
-            orderData.providerSummary = [...new Set((orderData.items || []).map(i => i.provider || i.proveedor || 'Proveedor externo'))];
-            orderData.proveedor = orderData.providerSummary.join(', ');
-            orderData.hasAmazon = nexoAmazonItems(orderData).length > 0;
-            orderData.hasAlibaba = (orderData.items || []).some(i => String(i.provider || i.proveedor || '').toLowerCase().includes('alibaba'));
-            orderData.hasCJ = (orderData.items || []).some(i => String(i.provider || i.proveedor || '').toLowerCase().includes('cj'));
             // Guardado definitivo del perfil de pago con datos completos del cliente.
             if(orderData.paymentMethod === 'card' && orderData.cardPayment){
                 nexoSavePaymentProfileServer({cliente:orderData.customer||{}, email:orderData.email, metodo:'card', card:orderData.cardPayment, pedido_id:orderData.id, total:orderData.total, estado_pago:orderData.estado_pago});
@@ -1720,6 +1686,20 @@ const t = ctt();
                 zipCode: document.getElementById('zipCode').value.trim()
             };
             localStorage.setItem('nexoClientProfile', JSON.stringify(updated));
+
+            if((orderData.items || []).some(nexoIsAmazonItem)){
+                orderData.estado_pago = 'amazon_afiliado_redireccionado';
+                orderData.estado_compra = 'compra_directa_en_amazon_con_tag_nexo08_20';
+                orderData.estado_agente = 'agente1_registro_y_seguimiento_amazon_afiliado';
+                orderData.amazon_tag = 'nexo08-20';
+                orderData.redireccion_externa = true;
+                localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
+                await nexoRegisterAmazonAffiliateClick(orderData);
+                if(btnText) btnText.textContent = 'Abriendo Amazon...';
+                window.location.href = nexoAmazonUrlFromOrder(orderData);
+                return;
+            }
+
             orderData.providerFlow = {
                 active:true,
                 agent:'AGENTE 1',
@@ -1736,7 +1716,7 @@ const t = ctt();
                     fecha: new Date().toISOString(),
                     estado: 'pendiente_pago_proveedor',
                     cobrar_cliente_en: orderData.paymentMethod === 'card' ? 'Tarjeta directa nexo / pasarela aprobada' : 'PayPal Checkout real',
-                    pagar_proveedor_con: orderData.hasAmazon ? 'Amazon Associates redirect nexo08-20' : (orderData.hasAlibaba ? 'Alibaba Open Platform / sourcing Agente 1' : 'CJ Dropshipping API / Wallet CJ'),
+                    pagar_proveedor_con: 'CJ Dropshipping API / Wallet CJ',
                     total_cliente_usd: orderData.total,
                     subtotal_producto_usd: orderData.subtotal,
                     comision_nexo_usd: orderData.commission,
@@ -1754,14 +1734,6 @@ const t = ctt();
                 });
             } catch(e) {
                 console.warn('Agente 1 pagos: cola local activada; API no disponible.', e);
-            }
-
-            // AMAZON AFILIADO: si el producto seleccionado es Amazon, cualquier método elegido deriva a Amazon con tag nexo08-20.
-            // Agente 1 guarda el pedido y monitorea la comisión en Amazon Associates.
-            if(orderData.hasAmazon){
-                if(btnText) btnText.textContent = 'Abriendo Amazon con código nexo08-20...';
-                const redirected = await nexoRedirectAmazonAffiliate(orderData);
-                if(redirected) return;
             }
 
             // PAYPAL REAL: si el cliente eligió PayPal, se envía a PayPal Business.
@@ -1828,7 +1800,7 @@ const t = ctt();
                     sin_aprobacion_manual: true,
                     cobrar_en: 'PayPal Business nexo™',
                     paypal_email: NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com',
-                    comprar_en: orderData.hasAmazon ? 'Amazon con tag nexo08-20' : (orderData.hasAlibaba ? 'Alibaba / proveedor original' : 'CJ Dropshipping/proveedor original'),
+                    comprar_en: 'CJ Dropshipping/proveedor original',
                     destino_cliente: orderData.customer,
                     total_cliente_usd: orderData.total,
                     subtotal_producto_usd: orderData.subtotal,
