@@ -48,6 +48,10 @@ async function searchSupabaseProductos(q, maxPrice){
     let path = `proveedor_productos?select=*&or=(nombre_original.ilike.${term},descripcion_original.ilike.${term},sku_original.ilike.${term})&limit=20`;
     const rows = await sb(path, {method:'GET', prefer:'return=representation'});
     let products = Array.isArray(rows) ? rows.map(normalizeFromTable) : [];
+    products = products.filter(p=>{
+      const prov = String(p.provider || p.proveedor || '').toLowerCase();
+      return prov.includes('cj') || prov.includes('alibaba') || prov.includes('amazon');
+    });
     if(Number(maxPrice)>0) products = products.filter(p=>p.price<=Number(maxPrice));
     return products;
   }catch(e){ return []; }
@@ -96,7 +100,7 @@ export default async function handler(req,res){
     provider:'Multi-proveedor',
     providers:[...new Set(providers)],
     count:out.length,
-    mode:'cj_alibaba_amazon_supabase',
+    mode:'cj_alibaba_amazon_only',
     notices,
     products:out
   });

@@ -94,6 +94,9 @@ const catalog = {
   shoelaces: [
     ['Flat Shoelaces 6 Pairs',7.99,'shoelaces'],['Elastic No Tie Shoelaces',8.99,'shoelaces'],['Round Boot Laces 3 Pairs',9.99,'shoelaces'],['Reflective Shoelaces 4 Pairs',6.99,'shoelaces'],['Sneaker Replacement Laces',5.99,'shoelaces']
   ],
+  shoes: [
+    ['Running Sneakers Men',24.99,'shoes'],['Women Walking Sneakers',22.99,'shoes'],['Kids Athletic Shoes',19.99,'shoes'],['Casual Canvas Sneakers',18.99,'shoes'],['Training Shoes Lightweight',27.99,'shoes'],['Sports Shoes Breathable',21.99,'shoes'],['Slip On Sneakers',20.99,'shoes'],['Outdoor Walking Shoes',29.99,'shoes']
+  ],
   iphone: [
     ['Apple USB-C Power Adapter',19.99,'phone'],['iPhone 15 Silicone Case',24.00,'phone'],['MagSafe Compatible Charger',23.99,'phone'],['USB-C Cable 2 Pack',12.99,'phone'],['Phone Stand Aluminum',15.00,'phone'],['Screen Protector 3 Pack',9.99,'phone']
   ],
@@ -107,6 +110,7 @@ const catalog = {
 function catalogKey(q){
   if(/calcetin|calcetines|media|medias|sock/i.test(q)) return 'socks';
   if(/cordon|cordones|shoelace|lace/i.test(q)) return 'shoelaces';
+  if(/zapatilla|zapatillas|zapato|zapatos|sneaker|sneakers|shoe|shoes|tenis/i.test(q)) return 'shoes';
   if(/iphone|ios|apple phone|celular|telefono|phone/i.test(q)) return 'iphone';
   if(/laptop|notebook|macbook|comput/i.test(q)) return 'laptop';
   return 'default';
@@ -116,6 +120,14 @@ function temporaryCatalog(q, maxPrice){
   let rows = (catalog[key] || catalog.default).slice();
   if(key === 'default') rows = rows.concat(catalog.socks.slice(0,4), catalog.shoelaces.slice(0,3));
   const limit = Number(maxPrice || 0);
+  const imageByType = {
+    socks:'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80',
+    shoelaces:'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80',
+    shoes:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+    phone:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
+    laptop:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
+    product:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'
+  };
   let products = rows.map((r,idx)=>{
     const [name, price, imageType] = r;
     const query = encodeURIComponent(name);
@@ -123,9 +135,10 @@ function temporaryCatalog(q, maxPrice){
     return {
       id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🇺🇸',
       price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:key,
-      image:'', imageType, url, sourceUrl:url, originalProviderUrl:url,
-      stock:'Verificar disponibilidad y precio final en Amazon', source:'amazon-affiliate-temporal', rating:4.6, reviews:0,
-      sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true, amazonAffiliate:true, amazon_tag:NEXO_AMAZON_TAG
+      image:imageByType[imageType] || imageByType.product, imageType, url, sourceUrl:url, originalProviderUrl:url,
+      stock:'Verificar disponibilidad y precio final en Amazon', source:'amazon-affiliate-link', rating:4.6, reviews:0,
+      sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true, amazonAffiliate:true, amazon_tag:NEXO_AMAZON_TAG,
+      features:'Opción de Amazon con enlace afiliado nexo20-8. Verificar precio final, disponibilidad y envío en Amazon antes de comprar.'
     };
   });
   if(limit > 0) products = products.filter(p=>Number(p.price||0) <= limit);
@@ -151,7 +164,7 @@ export default async function handler(req,res){
       mode:'temporary_catalog_until_creators_api',
       originalImages:false,
       sort:'price_asc',
-      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. Los enlaces abren Amazon con el tag afiliado nexo20-8.',
+      notice:'Amazon PA-API no devolvió catálogo real. Se muestran opciones con enlace afiliado nexo20-8, sin imágenes de reloj genéricas.',
       paapiStatus:real,
       products:temporaryCatalog(q, maxPrice)
     });
@@ -162,7 +175,7 @@ export default async function handler(req,res){
       mode:'temporary_catalog_until_creators_api',
       originalImages:false,
       sort:'price_asc',
-      notice:'Catálogo temporal activo mientras Amazon habilita Creators API.',
+      notice:'Amazon PA-API no devolvió catálogo real; se mantiene enlace afiliado nexo20-8.',
       error:String(e.message||e),
       products:temporaryCatalog(q, maxPrice)
     });

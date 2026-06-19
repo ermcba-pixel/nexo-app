@@ -1,0 +1,41 @@
+CAMBIOS APLICADOS - nexo corregido para prueba
+
+1) Tienda cliente
+- Selector de proveedores limitado únicamente a:
+  * Todos los proveedores
+  * CJ Dropshipping
+  * Alibaba
+  * Amazon
+- Se eliminaron del selector: AliExpress, Temu, eBay, Mercado Libre, Walmart, Etsy, Shopify y Lazada.
+- La búsqueda ahora consulta CJ, Alibaba y Amazon.
+- Se eliminó el relleno automático de Alibaba en la tienda para no inventar productos.
+- Amazon ya no usa imágenes genéricas de reloj para búsquedas como zapatillas/calcetines/cordones.
+
+2) Amazon
+- La tienda ahora llama al endpoint /api/amazon-products.
+- Se conserva el tag afiliado nexo20-8 en todos los enlaces de Amazon.
+- Si PA-API devuelve productos reales, se muestran productos reales con imágenes de Amazon.
+- Si PA-API aún no está habilitada por Amazon, se muestran opciones de enlace afiliado relevantes, sin fotos de reloj genéricas.
+
+3) Alibaba
+- Se mantiene sin simuladores.
+- /api/alibaba-products usa Alibaba Open Platform /icbu/product/get cuando existan ALIBABA_ACCESS_TOKEN y ALIBABA_PRODUCT_IDS.
+- Si faltan token/productIds, devuelve aviso técnico y no inventa productos.
+
+4) Multi-proveedor
+- Se mantiene orden por precio de menor a mayor.
+- Se limita el flujo a CJ, Alibaba y Amazon.
+
+IMPORTANTE PARA PRUEBA EN VERCEL
+Para Alibaba real faltan variables si aún no están cargadas:
+ALIBABA_APP_KEY
+ALIBABA_APP_SECRET
+ALIBABA_ACCESS_TOKEN
+ALIBABA_PRODUCT_IDS
+
+Para Amazon real faltan variables si Amazon PA-API ya autorizó catálogo:
+AMAZON_ACCESS_KEY
+AMAZON_SECRET_KEY
+AMAZON_ASSOCIATE_TAG=nexo20-8
+AMAZON_REGION=us-east-1
+AMAZON_MARKETPLACE=www.amazon.com
