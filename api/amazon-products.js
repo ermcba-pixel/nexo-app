@@ -87,68 +87,9 @@ async function searchAmazonPaapi(q, maxPrice){
   return {ok:true, products};
 }
 
-const catalog = {
-  socks: [
-    ['Men Athletic Socks 6 Pack',14.99,'socks'],['Cotton Crew Socks 10 Pack',12.99,'socks'],['Compression Socks 3 Pack',18.99,'socks'],['Dress Socks for Men 6 Pairs',16.99,'socks'],['Women Ankle Socks 8 Pack',11.99,'socks'],['Kids Colorful Socks 12 Pack',13.49,'socks'],['Sports Cushioned Socks 6 Pack',15.99,'socks'],['No Show Socks 10 Pack',10.99,'socks'],['Thermal Winter Socks 4 Pack',19.99,'socks'],['Bamboo Socks 6 Pairs',17.50,'socks'],['Running Socks 5 Pack',13.75,'socks'],['Novelty Socks Gift Set',9.99,'socks'],['Crew Socks Bulk Pack',12.49,'socks'],['Outdoor Work Socks',18.49,'socks'],['Ankle Socks Multipack',8.99,'socks']
-  ],
-  shirts: [
-    ['Men Casual Button Down Shirt',16.99,'shirts'],['Cotton Dress Shirt',18.99,'shirts'],['Polo Shirt 2 Pack',19.99,'shirts'],['Women Blouse Shirt',17.99,'shirts'],['Oxford Long Sleeve Shirt',21.99,'shirts'],['Linen Casual Shirt',22.99,'shirts'],['Work Shirts 2 Pack',24.99,'shirts'],['Kids Cotton Shirts',14.99,'shirts'],['Printed T Shirt Pack',15.99,'shirts'],['Short Sleeve Shirt',13.99,'shirts'],['Denim Shirt',23.99,'shirts'],['Uniform Shirts',20.99,'shirts'],['Slim Fit Shirt',18.49,'shirts'],['Flannel Shirt',19.49,'shirts'],['Business Shirt',25.99,'shirts']
-  ],
-  shoes: [
-    ['Casual Sneakers',18.99,'shoes'],['Running Shoes Men',24.99,'shoes'],['Walking Shoes Women',22.99,'shoes'],['Kids Athletic Shoes',19.99,'shoes'],['Sports Shoes Breathable',21.99,'shoes'],['Canvas Sneakers',17.99,'shoes'],['Slip On Sneakers',20.99,'shoes'],['Outdoor Walking Shoes',29.99,'shoes'],['Training Shoes Lightweight',27.99,'shoes'],['Casual Shoes Brown',25.99,'shoes'],['Low Top Sneakers',23.49,'shoes'],['Comfort Shoes',26.49,'shoes'],['Gym Shoes',28.99,'shoes'],['School Shoes',19.49,'shoes'],['Fashion Sneakers',24.49,'shoes']
-  ],
-  shoelaces: [
-    ['Flat Shoelaces 6 Pairs',7.99,'shoelaces'],['Elastic No Tie Shoelaces',8.99,'shoelaces'],['Round Boot Laces 3 Pairs',9.99,'shoelaces'],['Reflective Shoelaces 4 Pairs',6.99,'shoelaces'],['Sneaker Replacement Laces',5.99,'shoelaces'],['Cotton Shoe Laces Pack',7.49,'shoelaces'],['Waxed Dress Shoe Laces',8.49,'shoelaces'],['Athletic Shoe Laces',6.49,'shoelaces'],['Heavy Duty Boot Laces',10.99,'shoelaces'],['Colorful Shoelaces Set',9.49,'shoelaces'],['No Tie Laces Kids',8.29,'shoelaces'],['Round Hiking Laces',7.79,'shoelaces'],['Flat Sneaker Laces',5.99,'shoelaces'],['Elastic Lock Laces',11.99,'shoelaces'],['Replacement Laces 12 Pack',12.99,'shoelaces']
-  ],
-  iphone: [
-    ['Apple USB-C Power Adapter',19.99,'phone'],['iPhone 15 Silicone Case',24.00,'phone'],['MagSafe Compatible Charger',23.99,'phone'],['USB-C Cable 2 Pack',12.99,'phone'],['Phone Stand Aluminum',15.00,'phone'],['Screen Protector 3 Pack',9.99,'phone'],['Wireless Charger Pad',16.99,'phone'],['Phone Ring Holder',7.99,'phone'],['Car Phone Mount',13.99,'phone'],['Fast Charging Cable',10.99,'phone'],['Phone Wallet Case',18.49,'phone'],['Portable Power Bank',22.49,'phone'],['Bluetooth Earbuds',24.99,'phone'],['Phone Tripod Stand',15.49,'phone'],['Privacy Screen Protector',11.49,'phone']
-  ],
-  laptop: [
-    ['USB-C Hub 6 in 1',22.99,'laptop'],['Laptop Stand Aluminum',24.99,'laptop'],['Wireless Mouse',14.99,'laptop'],['HDMI Cable 2 Pack',11.99,'laptop'],['Keyboard Cover',9.99,'laptop'],['Laptop Sleeve Case',18.99,'laptop'],['Webcam Cover Pack',5.99,'laptop'],['Laptop Cooling Pad',21.99,'laptop'],['USB Flash Drive',9.49,'laptop'],['Computer Speakers',19.99,'laptop'],['Desk Mouse Pad',8.99,'laptop'],['Ethernet Adapter',13.49,'laptop'],['Portable SSD Case',10.99,'laptop'],['Laptop Privacy Screen',28.99,'laptop'],['Monitor Stand Riser',23.99,'laptop']
-  ],
-  default: []
-};
-function catalogKey(q){
-  if(/calcetin|calcetines|media|medias|sock/i.test(q)) return 'socks';
-  if(/camisa|camisas|shirt|shirts|polera|blusa/i.test(q)) return 'shirts';
-  if(/zapato|zapatos|zapatilla|zapatillas|shoe|shoes|sneaker/i.test(q)) return 'shoes';
-  if(/cordon|cordones|shoelace|lace/i.test(q)) return 'shoelaces';
-  if(/iphone|ios|apple phone|celular|telefono|phone/i.test(q)) return 'iphone';
-  if(/laptop|notebook|macbook|comput/i.test(q)) return 'laptop';
-  return 'default';
-}
-function amazonFallbackImage(imageType, idx){
-  const sets={
-    socks:['https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=800&q=80'],
-    shoelaces:['https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80'],
-    shoes:['https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=800&q=80'],
-    shirts:['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80'],
-    phone:['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1603898037225-1bea09c550c3?auto=format&fit=crop&w=800&q=80'],
-    laptop:['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80'],
-    product:['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80']
-  };
-  const arr=sets[imageType]||sets.product; return arr[idx%arr.length];
-}
-function temporaryCatalog(q, maxPrice){
-  const key = catalogKey(q || '');
-  let rows = (catalog[key] || []).slice();
-  if(key === 'default') rows = Array.from({length:15},(_,i)=>[`${q || 'Product'} Amazon Option ${i+1}`, 8.99 + i*1.5, 'product']);
-  const limit = Number(maxPrice || 0);
-  let products = rows.map((r,idx)=>{
-    const [name, price, imageType] = r;
-    const query = encodeURIComponent(name);
-    const url = withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${query}`);
-    return {
-      id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🇺🇸',
-      price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:key,
-      image:amazonFallbackImage(imageType,idx), imageType, url, sourceUrl:url, originalProviderUrl:url,
-      stock:'Verificar disponibilidad y precio final en Amazon', source:'amazon-affiliate-temporal', rating:4.6, reviews:0,
-      sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true, amazonAffiliate:true, amazon_tag:NEXO_AMAZON_TAG
-    };
-  });
-  if(limit > 0 && products.length){ products = products.map((p,idx)=>({...p, price:Number(Math.max(0.20, limit*(0.62+idx*0.025)).toFixed(2))})); }
-  return products.sort((a,b)=>Number(a.price)-Number(b.price)).slice(0,15);
-}
+
+// No usar catálogos falsos ni imágenes de prueba.
+// Amazon solo devuelve productos cuando PA-API responde con datos reales.
 
 export default async function handler(req,res){
   res.setHeader('Access-Control-Allow-Origin','*');
@@ -164,25 +105,27 @@ export default async function handler(req,res){
       return res.status(200).json({ok:true, provider:'Amazon', mode:'production_paapi', originalImages:true, sort:'price_asc', products:real.products});
     }
     return res.status(200).json({
-      ok:true,
+      ok:false,
       provider:'Amazon',
-      mode:'temporary_catalog_until_creators_api',
+      mode:'paapi_sin_resultados_reales',
       originalImages:false,
       sort:'price_asc',
-      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. Los enlaces abren Amazon con el tag afiliado nexo20-8.',
+      message:'Amazon no devolvió productos reales por PA-API. No se muestran productos falsos ni fotos de prueba.',
+      amazonSearchUrl:withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${encodeURIComponent(q || 'producto')}`),
       paapiStatus:real,
-      products:temporaryCatalog(q, maxPrice)
+      products:[]
     });
   }catch(e){
     return res.status(200).json({
-      ok:true,
+      ok:false,
       provider:'Amazon',
-      mode:'temporary_catalog_until_creators_api',
+      mode:'paapi_error',
       originalImages:false,
       sort:'price_asc',
-      notice:'Catálogo temporal activo mientras Amazon habilita Creators API.',
+      message:'Amazon no devolvió productos reales por PA-API. No se muestran productos falsos ni fotos de prueba.',
+      amazonSearchUrl:withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${encodeURIComponent(q || 'producto')}`),
       error:String(e.message||e),
-      products:temporaryCatalog(q, maxPrice)
+      products:[]
     });
   }
 }
