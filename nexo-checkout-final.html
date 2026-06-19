@@ -1312,11 +1312,11 @@ function selectPayment(methodId, btnEl=null) {
                     </div>
                     <div class="cart-item-actions">
                         <div class="cart-item-controls">
-                            <button class="cart-item-btn" onclick="updateQuantityByIndex(${idx}, -1)">−</button>
+                            <button class="cart-item-btn" type="button" onclick="updateQuantityByIndex(${idx}, -1)">−</button>
                             <div class="cart-item-qty">${item.quantity}</div>
-                            <button class="cart-item-btn" onclick="updateQuantityByIndex(${idx}, 1)">+</button>
+                            <button class="cart-item-btn" type="button" onclick="updateQuantityByIndex(${idx}, 1)">+</button>
                         </div>
-                        <button class="cart-item-delete" onclick="removeFromCartByIndex(${idx})">🗑️ Eliminar</button>
+                        <button class="cart-item-delete" type="button" onclick="removeFromCartByIndex(${idx})">🗑️ Eliminar</button>
                     </div>
                 </div>
             `;

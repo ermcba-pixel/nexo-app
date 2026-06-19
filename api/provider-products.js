@@ -97,7 +97,7 @@ export default async function handler(req,res){
       });
     }
     if(maxPrice > 0) products = products.filter(p => p.price <= maxPrice);
-    products = products.sort((a,b)=>Number(b.price||0)-Number(a.price||0)).slice(0,size);
+    products = products.filter(p => /cj|alibaba|amazon/i.test(String(p.provider||p.proveedor||''))).sort((a,b)=>Number(a.price||0)-Number(b.price||0)).slice(0,size);
     return res.status(200).json({ok:true, source:'supabase-proveedor-productos', count:products.length, products});
   }catch(e){
     return res.status(500).json({ok:false, source:'supabase-proveedor-productos', error:e.message || String(e), products:[]});

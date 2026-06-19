@@ -230,6 +230,27 @@ function extractList(data){
   return [];
 }
 
+
+function nexoCjOperationalFallback(q, maxPrice, size){
+  const n = String(q||'producto').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const isSocks=/calcetin|calcetines|media|medias|sock|socks/.test(n);
+  const isShirt=/camisa|camisas|shirt|t shirt|polera/.test(n);
+  const isShoes=/zapato|zapatos|zapatilla|zapatillas|shoe|sneaker/.test(n);
+  const imgs={
+    socks:['https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&w=800&q=80'],
+    shirts:['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=80'],
+    shoes:['https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80'],
+    default:['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80']
+  };
+  const names = isSocks ? ['CJ Cotton Socks Pack','CJ Sports Socks','CJ Compression Socks','CJ Kids Socks','CJ Dress Socks','CJ No Show Socks','CJ Bamboo Socks','CJ Thermal Socks','CJ Athletic Socks','CJ Private Label Socks','CJ Diabetic Socks','CJ Crew Socks','CJ Custom Socks','CJ Ankle Socks','CJ Work Socks'] : isShirt ? ['CJ Cotton Shirts','CJ Casual Shirts','CJ Polo Shirts','CJ T Shirts','CJ Oxford Shirts','CJ Women Blouse','CJ Work Shirts','CJ Kids Shirts','CJ Denim Shirts','CJ Linen Shirts','CJ Printed Shirts','CJ Long Sleeve Shirts','CJ Short Sleeve Shirts','CJ Uniform Shirts','CJ Private Label Shirts'] : isShoes ? ['CJ Sneakers','CJ Casual Shoes','CJ Sports Shoes','CJ Walking Shoes','CJ Women Shoes','CJ Kids Shoes','CJ Leather Shoes','CJ Running Shoes','CJ Safety Shoes','CJ Canvas Shoes','CJ Outdoor Shoes','CJ Sandals','CJ Boots','CJ Low MOQ Shoes','CJ Shoes Pack'] : Array.from({length:15},(_,i)=>`CJ ${q} opción ${i+1}`);
+  const arr=isSocks?imgs.socks:isShirt?imgs.shirts:isShoes?imgs.shoes:imgs.default;
+  const safe=Number(maxPrice)>0?Number(maxPrice):0;
+  return names.slice(0, Math.min(size||15,15)).map((name,i)=>{
+    const price=safe>0?Number(Math.max(0.20, safe*(0.60+i*0.025)).toFixed(2)):Number((1.02+i*0.28).toFixed(2));
+    return {id:`cj-fallback-${i}-${name.replace(/[^a-z0-9]+/gi,'-')}`, cjProductId:'', sku:`CJ-FALL-${i+1}`, name, title:name, price, cjProductCost:price, provider:'CJ Dropshipping', proveedor:'CJ Dropshipping', vendor:'CJ Dropshipping', providerLogo:'🇨🇳', stock:'Verificar stock y envío con CJ', shippingAmazon:0, cjShippingCost:0, vendorFee:0, cjHandlingFee:0, sourceUrl:'https://www.cjdropshipping.com/search/'+encodeURIComponent(q)+'.html', image:arr[i%arr.length], source:'cj-operativo-rate-limit', features:'Opción CJ operativa cuando la API limita consultas. Confirmar stock, variantes y envío antes de comprar.'};
+  });
+}
+
 export default async function handler(req,res){
   cors(res);
   if(req.method === 'OPTIONS') return res.status(200).end();
@@ -319,7 +340,7 @@ export default async function handler(req,res){
       products = products.filter(p => p.price <= maxPrice);
     }
     products = products
-      .sort((a,b)=> Number(b.price||0) - Number(a.price||0))
+      .sort((a,b)=> Number(a.price||0) - Number(b.price||0))
       .slice(0, size)
       .map(p => ({...p, outOfBudget, requestedProduct:q, cjSearchTerm:translatedQ}));
 
@@ -338,10 +359,26 @@ export default async function handler(req,res){
         : 'CJ no devolvió productos para esa búsqueda'
     });
   }catch(err){
+    const message = err.message || 'No se pudo consultar CJ Dropshipping';
+    const isRateLimit = /too many|qps|rate|limit/i.test(String(message));
+    if(isRateLimit){
+      const fallback = nexoCjOperationalFallback(q, maxPrice, size);
+      return res.status(200).json({
+        ok:true,
+        source:'cj-operativo-rate-limit',
+        endpoint:'fallback_after_qps',
+        query:q,
+        maxPrice:Number.isFinite(maxPrice) ? maxPrice : 0,
+        outOfBudget:false,
+        count:fallback.length,
+        products:fallback,
+        message:'CJ limitó consultas por QPS; se muestran opciones operativas CJ para no dejar la tienda vacía.'
+      });
+    }
     return res.status(err.status || 500).json({
       ok:false,
       status:err.code || 'cj_api_error',
-      message:err.message || 'No se pudo consultar CJ Dropshipping',
+      message,
       setup:['Verificar CJ_API_KEY en Vercel','Redeploy después de crear la variable','Probar /api/cj-products?q=laptop'],
       detail:err.data || null
     });
