@@ -21,7 +21,7 @@ set nombre = excluded.nombre,
     estado_integracion = excluded.estado_integracion;
 
 update proveedores
-set afiliado_tag = 'nexo08-20'
+set afiliado_tag = 'nexo20-8'
 where codigo = 'AMAZON';
 
 alter table productos
@@ -80,7 +80,7 @@ add column if not exists proveedor text,
 add column if not exists agente_responsable text default 'agente1',
 add column if not exists metodo_pago_cliente text,
 add column if not exists redireccion_externa boolean default false,
-add column if not exists amazon_tag text default 'nexo08-20';
+add column if not exists amazon_tag text default 'nexo20-8';
 
 create table if not exists logs_agente1 (
   id uuid primary key default gen_random_uuid(),

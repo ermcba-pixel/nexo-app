@@ -11,7 +11,7 @@ function money(n){ const x=Number(n||0); return Number.isFinite(x) ? Number(x.to
 function sortProducts(products){
   return products
     .filter(p=>p && money(p.price)>0)
-    .sort((a,b)=>money(b.price)-money(a.price));
+    .sort((a,b)=>money(a.price)-money(b.price));
 }
 async function callLocal(req, path){
   const proto = req.headers['x-forwarded-proto'] || 'https';

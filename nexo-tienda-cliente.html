@@ -95,7 +95,7 @@
   </footer>
 
 <script>
-const NEXO_AMAZON_TAG='nexo08-20';
+const NEXO_AMAZON_TAG='nexo20-8';
 let products=[];
 let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
 function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
@@ -333,7 +333,7 @@ async function filterProducts(){
       const tasks=[];
       if(!providerSel || providerSel==='cj') tasks.push(['cj', fetchCjProducts(search,max,cat)]);
       if(!providerSel || providerSel==='alibaba') tasks.push(['alibaba', fetchAlibabaProducts(search,max,cat)]);
-      if(!providerSel || providerSel==='amazon') tasks.push(['amazon', Promise.resolve({ok:true, products:makeAmazonFallbackProducts(search,max,cat), message:'Amazon afiliado nexo08-20'} )]);
+      if(!providerSel || providerSel==='amazon') tasks.push(['amazon', Promise.resolve({ok:true, products:makeAmazonFallbackProducts(search,max,cat), message:'Amazon afiliado nexo20-8'} )]);
       tasks.push(['supa', fetchProviderProducts(search,max,cat)]);
       const settled = await Promise.allSettled(tasks.map(t=>t[1]));
       const results = {};

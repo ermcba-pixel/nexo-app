@@ -7,7 +7,7 @@ import crypto from 'crypto';
 const REGION = process.env.AMAZON_REGION || 'us-east-1';
 const HOST = process.env.AMAZON_HOST || 'webservices.amazon.com';
 const MARKETPLACE = process.env.AMAZON_MARKETPLACE || 'www.amazon.com';
-const NEXO_AMAZON_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
+const NEXO_AMAZON_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'nexo20-8';
 function withNexoAmazonTag(url){
   try{
     const u = new URL(String(url || '').startsWith('http') ? String(url) : `https://${MARKETPLACE}/s?k=producto`);
@@ -83,7 +83,7 @@ async function searchAmazonPaapi(q, maxPrice){
   const data=JSON.parse(text);
   let products=(data?.SearchResult?.Items || []).map(normalizePaapiItem).filter(p=>p.price>0);
   if(maxPrice) products=products.filter(p=>p.price<=maxPrice);
-  products=products.sort((a,b)=>Number(b.price)-Number(a.price));
+  products=products.sort((a,b)=>Number(a.price)-Number(b.price));
   return {ok:true, products};
 }
 
@@ -129,7 +129,7 @@ function temporaryCatalog(q, maxPrice){
     };
   });
   if(limit > 0) products = products.filter(p=>Number(p.price||0) <= limit);
-  return products.sort((a,b)=>Number(b.price)-Number(a.price)).slice(0,50);
+  return products.sort((a,b)=>Number(a.price)-Number(b.price)).slice(0,50);
 }
 
 export default async function handler(req,res){
@@ -143,15 +143,15 @@ export default async function handler(req,res){
   try{
     const real=await searchAmazonPaapi(q, maxPrice);
     if(real.ok && real.products?.length){
-      return res.status(200).json({ok:true, provider:'Amazon', mode:'production_paapi', originalImages:true, sort:'price_desc', products:real.products});
+      return res.status(200).json({ok:true, provider:'Amazon', mode:'production_paapi', originalImages:true, sort:'price_asc', products:real.products});
     }
     return res.status(200).json({
       ok:true,
       provider:'Amazon',
       mode:'temporary_catalog_until_creators_api',
       originalImages:false,
-      sort:'price_desc',
-      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. Los enlaces abren Amazon con el tag afiliado nexo08-20.',
+      sort:'price_asc',
+      notice:'Catálogo temporal activo: Amazon Associates/Creators API aún no habilitó credenciales de catálogo. Los enlaces abren Amazon con el tag afiliado nexo20-8.',
       paapiStatus:real,
       products:temporaryCatalog(q, maxPrice)
     });
@@ -161,7 +161,7 @@ export default async function handler(req,res){
       provider:'Amazon',
       mode:'temporary_catalog_until_creators_api',
       originalImages:false,
-      sort:'price_desc',
+      sort:'price_asc',
       notice:'Catálogo temporal activo mientras Amazon habilita Creators API.',
       error:String(e.message||e),
       products:temporaryCatalog(q, maxPrice)

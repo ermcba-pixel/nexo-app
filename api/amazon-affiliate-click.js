@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       cliente_id,
       amazon_url: url,
       amazon_asin: body.amazon_asin || body.asin || extractAsin(url),
-      amazon_tag: body.amazon_tag || 'nexo08-20',
+      amazon_tag: body.amazon_tag || 'nexo20-8',
       evento: body.evento || 'click'
     };
     const detail = await rest('afiliados_amazon', {method:'POST', body: JSON.stringify([row])});

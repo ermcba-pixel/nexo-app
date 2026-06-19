@@ -1497,7 +1497,7 @@ function nexoIsAmazonItem(item){
   return txt.includes('amazon');
 }
 function nexoAmazonUrlFromOrder(order){
-  const tag='nexo08-20';
+  const tag='nexo20-8';
   const items=Array.isArray(order?.items)?order.items:[];
   const first=items.find(nexoIsAmazonItem) || items[0] || {};
   let raw = first.sourceUrl || first.url || first.originalProviderUrl || '';
@@ -1510,7 +1510,7 @@ function nexoAmazonUrlFromOrder(order){
   }
 }
 async function nexoRegisterAmazonAffiliateClick(order){
-  try{ await fetch('/api/amazon-affiliate-click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order, amazon_tag:'nexo08-20', product_url:nexoAmazonUrlFromOrder(order)})}); }catch(e){}
+  try{ await fetch('/api/amazon-affiliate-click',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order, amazon_tag:'nexo20-8', product_url:nexoAmazonUrlFromOrder(order)})}); }catch(e){}
 }
 
         async function submitPurchase(){
@@ -1691,7 +1691,7 @@ async function nexoRegisterAmazonAffiliateClick(order){
                 orderData.estado_pago = 'amazon_afiliado_redireccionado';
                 orderData.estado_compra = 'compra_directa_en_amazon_con_tag_nexo08_20';
                 orderData.estado_agente = 'agente1_registro_y_seguimiento_amazon_afiliado';
-                orderData.amazon_tag = 'nexo08-20';
+                orderData.amazon_tag = 'nexo20-8';
                 orderData.redireccion_externa = true;
                 localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
                 await nexoRegisterAmazonAffiliateClick(orderData);
