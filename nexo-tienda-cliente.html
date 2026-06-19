@@ -151,7 +151,7 @@ async function fetchCjProducts(search,maxPrice,catSel){
   params.set('q', search || '');
   if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
   if(catSel) params.set('category', catSel);
-  params.set('size','50');
+  params.set('size','15');
   params.set('lang', (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es').slice(0,2));
   const ctrl = new AbortController();
   const timeout = setTimeout(()=>ctrl.abort(), 15000);
@@ -182,7 +182,7 @@ async function fetchAlibabaProducts(search,maxPrice,catSel){
   params.set('q', search || '');
   if(Number.isFinite(maxPrice)) params.set('maxPrice', String(maxPrice));
   if(catSel) params.set('category', catSel);
-  params.set('size','50');
+  params.set('size','15');
   const ctrl = new AbortController();
   const timeout = setTimeout(()=>ctrl.abort(), 10000);
   const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260610', {cache:'no-store', signal: ctrl.signal});
@@ -211,7 +211,7 @@ function uniqueNexoProducts(list){
   const seen = new Set();
   const out=[];
   for(const p of list){
-    const key = String(p.sourceUrl || p.url || p.sku || p.id || p.name).toLowerCase();
+    const key = String(p.id || p.sku || p.sourceUrl || p.url || p.name).toLowerCase();
     if(seen.has(key)) continue;
     seen.add(key); out.push(p);
   }
@@ -364,9 +364,9 @@ async function filterProducts(){
       products = uniqueNexoProducts([...(cj.products||[]), ...(alibaba.products||[]), ...(amazon.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
         .filter(p => !Number.isFinite(max) || Number(p.price||0) <= max);
-      products = nexoLimitByProvider(products, providerSel ? {cj:50,alibaba:50,amazon:50,otro:50} : {cj:15,alibaba:15,amazon:15,otro:0})
+      products = nexoLimitByProvider(products, providerSel ? {cj:15,alibaba:15,amazon:15,otro:0} : {cj:15,alibaba:15,amazon:15,otro:0})
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0))
-        .slice(0,50);
+        .slice(0,45);
       renderProducts(products);
       if(!products.length && (!cj.ok || !supa.ok)){
         grid.innerHTML='<div class="api-note">No se encontraron productos. Detalle técnico:<br><small>CJ: '+String(cj.message||'sin respuesta')+'</small><br><small>Alibaba: '+String((typeof alibaba!=='undefined' && alibaba.message)||'sin respuesta')+'</small><br><small>Pruebas: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/alibaba-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/amazon-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>';
