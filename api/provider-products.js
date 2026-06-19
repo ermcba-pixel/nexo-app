@@ -11,7 +11,6 @@ function cors(res){
   res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
 }
 function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,' ').replace(/\s+/g,' ').trim();}
-function allowedNexoProvider(name){ const n=norm(name); return n.includes('cj') || n.includes('alibaba') || n.includes('amazon'); }
 function parseMoneyParam(v, mode='max'){
   const raw = String(v ?? '').trim();
   if(!raw) return 0;
@@ -88,7 +87,7 @@ export default async function handler(req,res){
       sb('proveedores?select=*&order=nombre.asc&limit=100').catch(()=>[])
     ]);
     const qn = norm(q);
-    let products = rows.map(r => normalizeRow(r, proveedores)).filter(p => p.price > 0).filter(p => allowedNexoProvider(p.provider));
+    let products = rows.map(r => normalizeRow(r, proveedores)).filter(p => p.price > 0);
     if(provider) products = products.filter(p => norm(p.provider).includes(provider));
     if(qn){
       const terms = qn.split(' ').filter(Boolean);
@@ -98,7 +97,7 @@ export default async function handler(req,res){
       });
     }
     if(maxPrice > 0) products = products.filter(p => p.price <= maxPrice);
-    products = products.sort((a,b)=>Number(a.price||0)-Number(b.price||0)).slice(0,size);
+    products = products.sort((a,b)=>Number(b.price||0)-Number(a.price||0)).slice(0,size);
     return res.status(200).json({ok:true, source:'supabase-proveedor-productos', count:products.length, products});
   }catch(e){
     return res.status(500).json({ok:false, source:'supabase-proveedor-productos', error:e.message || String(e), products:[]});

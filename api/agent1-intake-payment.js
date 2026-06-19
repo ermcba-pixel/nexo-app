@@ -57,7 +57,7 @@ export default async function handler(req,res){
         'capturar pago del cliente solo cuando exista pasarela directa habilitada',
         'para ACH/Wire: esperar pasarela bancaria autorizada o confirmación real de abono',
         'confirmar webhook de pago aprobado',
-        'crear orden o redirección según proveedor: CJ API, Alibaba sourcing o Amazon afiliado nexo20-8',
+        'crear orden o redirección según proveedor: CJ API, Alibaba sourcing o Amazon afiliado nexo08-20',
         'registrar tracking y comisión neta'
       ],
       createdAt:new Date().toISOString()
