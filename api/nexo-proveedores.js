@@ -17,7 +17,12 @@ export default async function handler(req,res){
       const estado = req.query?.estado || 'activo';
       const path = `proveedores?select=*&estado=eq.${safe(estado)}&order=nombre.asc`;
       const rows = await sb(path, {headers:{Prefer:''}});
-      return res.status(200).json({ok:true, service:'nexo-proveedores', serviceRole:hasServiceRole(), proveedores:rows || []});
+      const allowed = new Set(['cj','cjdropshipping','alibaba','amazon']);
+      const filtered = (rows || []).filter(p => {
+        const key = String(p.codigo || p.nombre || '').toLowerCase().replace(/[^a-z0-9]/g,'');
+        return allowed.has(key) || key.includes('cj') || key.includes('alibaba') || key.includes('amazon');
+      });
+      return res.status(200).json({ok:true, service:'nexo-proveedores', serviceRole:hasServiceRole(), proveedores:filtered});
     }
 
     if(req.method === 'POST'){

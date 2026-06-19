@@ -87,68 +87,11 @@ async function searchAmazonPaapi(q, maxPrice){
   return {ok:true, products};
 }
 
-const catalog = {
-  socks: [
-    ['Men Athletic Socks 6 Pack',14.99,'socks'],['Cotton Crew Socks 10 Pack',12.99,'socks'],['Compression Socks 3 Pack',18.99,'socks'],['Dress Socks for Men 6 Pairs',16.99,'socks'],['Women Ankle Socks 8 Pack',11.99,'socks'],['Kids Colorful Socks 12 Pack',13.49,'socks'],['Sports Cushioned Socks 6 Pack',15.99,'socks'],['No Show Socks 10 Pack',10.99,'socks'],['Thermal Winter Socks 4 Pack',19.99,'socks'],['Bamboo Socks 6 Pairs',17.50,'socks'],['Running Socks 5 Pack',13.75,'socks'],['Novelty Socks Gift Set',9.99,'socks']
-  ],
-  shoelaces: [
-    ['Flat Shoelaces 6 Pairs',7.99,'shoelaces'],['Elastic No Tie Shoelaces',8.99,'shoelaces'],['Round Boot Laces 3 Pairs',9.99,'shoelaces'],['Reflective Shoelaces 4 Pairs',6.99,'shoelaces'],['Sneaker Replacement Laces',5.99,'shoelaces']
-  ],
-  shoes: [
-    ['Running Sneakers Men',24.99,'shoes'],['Women Walking Sneakers',22.99,'shoes'],['Kids Athletic Shoes',19.99,'shoes'],['Casual Canvas Sneakers',18.99,'shoes'],['Training Shoes Lightweight',27.99,'shoes'],['Sports Shoes Breathable',21.99,'shoes'],['Slip On Sneakers',20.99,'shoes'],['Outdoor Walking Shoes',29.99,'shoes']
-  ],
-  iphone: [
-    ['Apple USB-C Power Adapter',19.99,'phone'],['iPhone 15 Silicone Case',24.00,'phone'],['MagSafe Compatible Charger',23.99,'phone'],['USB-C Cable 2 Pack',12.99,'phone'],['Phone Stand Aluminum',15.00,'phone'],['Screen Protector 3 Pack',9.99,'phone']
-  ],
-  laptop: [
-    ['USB-C Hub 6 in 1',22.99,'laptop'],['Laptop Stand Aluminum',24.99,'laptop'],['Wireless Mouse',14.99,'laptop'],['HDMI Cable 2 Pack',11.99,'laptop'],['Keyboard Cover',9.99,'laptop']
-  ],
-  default: [
-    ['USB-C Cable 2 Pack',12.99,'product'],['Phone Stand Aluminum',15.00,'product'],['Logitech Wireless Mouse',24.99,'product'],['Anker USB-C Hub',23.99,'product'],['Travel Organizer Bag',18.99,'product'],['Desk Accessories Set',19.99,'product']
-  ]
-};
-function catalogKey(q){
-  if(/calcetin|calcetines|media|medias|sock/i.test(q)) return 'socks';
-  if(/cordon|cordones|shoelace|lace/i.test(q)) return 'shoelaces';
-  if(/zapatilla|zapatillas|zapato|zapatos|sneaker|sneakers|shoe|shoes|tenis/i.test(q)) return 'shoes';
-  if(/iphone|ios|apple phone|celular|telefono|phone/i.test(q)) return 'iphone';
-  if(/laptop|notebook|macbook|comput/i.test(q)) return 'laptop';
-  return 'default';
-}
-function temporaryCatalog(q, maxPrice){
-  const key = catalogKey(q || '');
-  let rows = (catalog[key] || catalog.default).slice();
-  if(key === 'default') rows = rows.concat(catalog.socks.slice(0,4), catalog.shoelaces.slice(0,3));
-  const limit = Number(maxPrice || 0);
-  const imageByType = {
-    socks:'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80',
-    shoelaces:'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80',
-    shoes:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
-    phone:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
-    laptop:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
-    product:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'
-  };
-  let products = rows.map((r,idx)=>{
-    const [name, price, imageType] = r;
-    const query = encodeURIComponent(name);
-    const url = withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${query}`);
-    return {
-      id:`amazon-temp-${key}-${idx+1}`, asin:null, name, title:name, provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🇺🇸',
-      price:Number(price), shippingAmazon:0, vendorFee:0, shippingQuoteStatus:'pending_amazon_checkout', category:key,
-      image:imageByType[imageType] || imageByType.product, imageType, url, sourceUrl:url, originalProviderUrl:url,
-      stock:'Verificar disponibilidad y precio final en Amazon', source:'amazon-affiliate-link', rating:4.6, reviews:0,
-      sandbox:false, originalAmazon:false, temporalUntilCreatorsApi:true, amazonAffiliate:true, amazon_tag:NEXO_AMAZON_TAG,
-      features:'Opción de Amazon con enlace afiliado nexo20-8. Verificar precio final, disponibilidad y envío en Amazon antes de comprar.'
-    };
-  });
-  if(limit > 0) products = products.filter(p=>Number(p.price||0) <= limit);
-  return products.sort((a,b)=>Number(a.price)-Number(b.price)).slice(0,50);
-}
-
 export default async function handler(req,res){
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Access-Control-Allow-Methods','GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers','Content-Type');
+  res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
   if(req.method==='OPTIONS') return res.status(200).end();
   if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
   const q=String(req.query.q || req.query.search || '').trim();
@@ -161,23 +104,25 @@ export default async function handler(req,res){
     return res.status(200).json({
       ok:true,
       provider:'Amazon',
-      mode:'temporary_catalog_until_creators_api',
+      mode:'amazon_affiliate_only_no_catalog',
       originalImages:false,
       sort:'price_asc',
-      notice:'Amazon PA-API no devolvió catálogo real. Se muestran opciones con enlace afiliado nexo20-8, sin imágenes de reloj genéricas.',
+      products:[],
+      affiliateUrl:withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${encodeURIComponent(q || 'producto')}`),
       paapiStatus:real,
-      products:temporaryCatalog(q, maxPrice)
+      notice:'Amazon no devolvió catálogo real por API. No se generan productos simulados; se mantiene enlace afiliado nexo20-8.'
     });
   }catch(e){
     return res.status(200).json({
       ok:true,
       provider:'Amazon',
-      mode:'temporary_catalog_until_creators_api',
+      mode:'amazon_affiliate_only_no_catalog',
       originalImages:false,
       sort:'price_asc',
-      notice:'Amazon PA-API no devolvió catálogo real; se mantiene enlace afiliado nexo20-8.',
+      products:[],
+      affiliateUrl:withNexoAmazonTag(`https://${MARKETPLACE}/s?k=${encodeURIComponent(q || 'producto')}`),
       error:String(e.message||e),
-      products:temporaryCatalog(q, maxPrice)
+      notice:'Amazon PA-API no devolvió catálogo real; no se muestran productos simulados. Se mantiene enlace afiliado nexo20-8.'
     });
   }
 }

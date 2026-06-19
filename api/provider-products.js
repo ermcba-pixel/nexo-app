@@ -11,6 +11,7 @@ function cors(res){
   res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
 }
 function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,' ').replace(/\s+/g,' ').trim();}
+function allowedNexoProvider(name){ const n=norm(name); return n.includes('cj') || n.includes('alibaba') || n.includes('amazon'); }
 function parseMoneyParam(v, mode='max'){
   const raw = String(v ?? '').trim();
   if(!raw) return 0;
@@ -87,7 +88,7 @@ export default async function handler(req,res){
       sb('proveedores?select=*&order=nombre.asc&limit=100').catch(()=>[])
     ]);
     const qn = norm(q);
-    let products = rows.map(r => normalizeRow(r, proveedores)).filter(p => p.price > 0);
+    let products = rows.map(r => normalizeRow(r, proveedores)).filter(p => p.price > 0).filter(p => allowedNexoProvider(p.provider));
     if(provider) products = products.filter(p => norm(p.provider).includes(provider));
     if(qn){
       const terms = qn.split(' ').filter(Boolean);

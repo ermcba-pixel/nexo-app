@@ -1,8 +1,9 @@
-// nexo – Alibaba Product API
-// Usa Alibaba Open Platform real cuando existen token y product IDs.
-// No genera productos simulados. Si falta búsqueda/listado en Alibaba, devuelve aviso claro y enlace de sourcing.
+// nexo – Alibaba Product API REAL
+// Usa Alibaba Open Platform con /alibaba/icbu/product/list para buscar por nombre.
+// No usa ALIBABA_PRODUCT_IDS y no genera productos simulados.
 
 const ALIBABA_API_BASE = process.env.ALIBABA_API_BASE || 'https://openapi.alibaba.com';
+const ALIBABA_PRODUCT_LIST_PATH = process.env.ALIBABA_PRODUCT_LIST_PATH || '/alibaba/icbu/product/list';
 const ALIBABA_PRODUCT_GET_PATH = process.env.ALIBABA_PRODUCT_GET_PATH || '/icbu/product/get';
 
 function cors(res){
@@ -12,7 +13,12 @@ function cors(res){
   res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
 }
 function clean(v){ return String(v || '').trim(); }
+function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function money(v){
+  if(v && typeof v === 'object'){
+    const candidates=[v.amount,v.value,v.price,v.min_price,v.max_price,v.cent,v.dollar,v.usd];
+    for(const c of candidates){ const n=money(c); if(n>0) return n; }
+  }
   const n = Number(String(v ?? '').replace(/[^0-9.\-]/g,''));
   return Number.isFinite(n) ? Number(n.toFixed(2)) : 0;
 }
@@ -24,7 +30,7 @@ function parseMax(v){
   return money(raw);
 }
 function translate(q){
-  const key = String(q || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const key = norm(q);
   const map = {
     'calcetin':'socks','calcetines':'socks','medias':'socks','media':'socks',
     'cordon':'shoelaces','cordones':'shoelaces','cordones zapatos':'shoelaces','cordones para zapatos':'shoelaces',
@@ -36,48 +42,52 @@ function translate(q){
   };
   return map[key] || q || 'product';
 }
-function productIdsFromRequest(req){
-  const direct = clean(req.query.productId || req.query.productIds || req.query.alibabaProductIds);
-  const env = clean(process.env.ALIBABA_PRODUCT_IDS || '');
-  return [...new Set(`${direct},${env}`.split(',').map(x=>x.trim()).filter(Boolean))];
-}
 function alibabaSearchUrl(q){
   return 'https://www.alibaba.com/trade/search?SearchText=' + encodeURIComponent(translate(q));
 }
+function safeJsonParse(v){
+  if(typeof v !== 'string') return v;
+  try{ return JSON.parse(v); }catch{ return v; }
+}
 function pickImage(product){
-  const main = product?.main_image || product?.mainImage || product?.main_image_url;
+  const main = product?.main_image || product?.mainImage || product?.main_image_url || product?.mainImageUrl;
   if(typeof main === 'string') return main;
   if(Array.isArray(main?.images) && main.images.length) return main.images[0];
   if(Array.isArray(product?.images) && product.images.length) return product.images[0];
   if(Array.isArray(product?.image_urls) && product.image_urls.length) return product.image_urls[0];
+  if(Array.isArray(product?.imageUrls) && product.imageUrls.length) return product.imageUrls[0];
   return '';
 }
 function pickPrice(product){
   const wholesale = product?.wholesale_trade || product?.wholesaleTrade || {};
+  const priceInfo = product?.price_info || product?.priceInfo || {};
   const candidates = [
-    wholesale.price,
-    wholesale.min_price,
-    wholesale.max_price,
-    product?.price,
-    product?.min_price,
-    product?.product_price
+    wholesale.price, wholesale.min_price, wholesale.max_price, wholesale.minPrice, wholesale.maxPrice,
+    priceInfo.price, priceInfo.min_price, priceInfo.max_price, priceInfo.minPrice, priceInfo.maxPrice,
+    product?.price, product?.min_price, product?.max_price, product?.product_price, product?.productPrice
   ];
-  for(const c of candidates){
-    const n = money(c);
-    if(n > 0) return n;
-  }
+  for(const c of candidates){ const n = money(c); if(n > 0) return n; }
   return 0;
 }
+function unwrapProduct(raw){
+  let x = safeJsonParse(raw);
+  if(x?.product) x = safeJsonParse(x.product);
+  if(x?.result?.product) x = safeJsonParse(x.result.product);
+  if(x?.result && !x.subject && !x.id && !x.product_id) x = x.result;
+  return x || {};
+}
 function normalizeAlibabaProduct(raw, idx, fallbackQuery){
-  const product = typeof raw?.product === 'string' ? JSON.parse(raw.product || '{}') : (raw?.product || raw || {});
-  const id = product.product_id || product.productId || product.id || product.encrypt_product_id || product.encryptedProductId || `alibaba-${idx+1}`;
+  const product = unwrapProduct(raw);
+  const id = product.product_id || product.productId || product.id || product.encrypt_product_id || product.encryptedProductId || product.offer_id || `alibaba-${idx+1}`;
   const name = product.subject || product.title || product.name || product.product_name || `Alibaba ${translate(fallbackQuery)}`;
   const price = pickPrice(product);
-  const url = product.detail_url || product.pc_detail_url || product.product_url || alibabaSearchUrl(name || fallbackQuery);
+  const url = product.detail_url || product.pc_detail_url || product.product_url || product.detailUrl || product.pcDetailUrl || product.productUrl || alibabaSearchUrl(name || fallbackQuery);
   const moq = product?.wholesale_trade?.batch_number || product?.wholesaleTrade?.batchNumber || product?.moq || product?.min_order_quantity || '';
   const weight = product?.wholesale_trade?.weight || product?.weight || '';
+  const owner = product.owner_member_display_name || product.ownerMemberDisplayName || product.supplier_name || product.supplierName || '';
   return {
-    id:`alibaba-${id}`,
+    id:`alibaba-${String(id).replace(/[^a-zA-Z0-9_-]/g,'_')}`,
+    alibabaProductId:String(id),
     sku:`ALI-${String(id).replace(/[^a-z0-9]/gi,'').slice(0,24)}`,
     name, title:name,
     price,
@@ -87,32 +97,75 @@ function normalizeAlibabaProduct(raw, idx, fallbackQuery){
     shippingAmazon:0, cjShippingCost:0, vendorFee:0, cjHandlingFee:0,
     sourceUrl:url, url, originalProviderUrl:url,
     image:pickImage(product),
-    features:`Producto obtenido por Alibaba Open Platform. ${moq ? `MOQ: ${moq}. ` : ''}${weight ? `Peso: ${weight}. ` : ''}Verificar flete internacional antes de comprar.`,
-    source:'alibaba-open-platform',
+    features:`Producto real de Alibaba Open Platform. ${owner ? `Proveedor: ${owner}. ` : ''}${moq ? `MOQ: ${moq}. ` : ''}${weight ? `Peso: ${weight}. ` : ''}Verificar flete internacional antes de comprar.`,
+    source:'alibaba-open-platform-list',
     moneda:'USD',
     moq,
     sandbox:false,
     originalAlibaba:true
   };
 }
-async function callAlibabaProductGet(productId, accessToken){
-  const url = new URL(ALIBABA_PRODUCT_GET_PATH, ALIBABA_API_BASE);
+function extractListProducts(data){
+  const d = safeJsonParse(data);
+  const r = d?.result || d?.data || d;
+  const candidates = [
+    r?.products,
+    r?.product_list,
+    r?.productList,
+    r?.items,
+    r?.list,
+    d?.products,
+    d?.product_list,
+    d?.productList
+  ];
+  for(const c of candidates){ if(Array.isArray(c)) return c; }
+  if(r?.product && Array.isArray(r.product)) return r.product;
+  return [];
+}
+function apiError(data){
+  const d = safeJsonParse(data) || {};
+  return d.error || d.error_msg || d.error_message || d.errorMsg || d.error_code || d.code || d?.result?.error_msg || d?.result?.error_code || null;
+}
+async function callAlibaba(path, params, accessToken){
+  const url = new URL(path, ALIBABA_API_BASE);
+  const common = {
+    app_key: process.env.ALIBABA_APP_KEY || '',
+    access_token: accessToken || '',
+    ...params
+  };
   const body = new URLSearchParams();
-  body.set('app_key', process.env.ALIBABA_APP_KEY || '');
-  body.set('access_token', accessToken || '');
-  body.set('product_get_request', JSON.stringify({productId:String(productId)}));
-  const r = await fetch(url.toString(), {
-    method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body
-  });
-  const text = await r.text();
-  let data;
-  try{ data = JSON.parse(text); }catch{ data = {raw:text}; }
-  if(!r.ok || data?.code || data?.error_code || data?.error){
-    return {ok:false, status:r.status, productId, data};
+  Object.entries(common).forEach(([k,v])=>{ if(v !== undefined && v !== null && String(v) !== '') body.set(k, String(v)); });
+
+  const attempts = [];
+  // Intento principal: POST form al path de la documentación.
+  attempts.push(fetch(url.toString(), {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body}));
+  // Respaldo: GET con querystring, útil en el API testing tool.
+  const getUrl = new URL(path, ALIBABA_API_BASE);
+  for(const [k,v] of body.entries()) getUrl.searchParams.set(k,v);
+  attempts.push(fetch(getUrl.toString(), {method:'GET'}));
+
+  let last = null;
+  for(const p of attempts){
+    const r = await p.catch(e=>({ok:false,status:0,text:async()=>String(e.message||e)}));
+    const text = await r.text();
+    let data; try{ data = JSON.parse(text); }catch{ data = {raw:text}; }
+    last = {ok:r.ok, status:r.status, data};
+    if(r.ok && !apiError(data)) return last;
   }
-  return {ok:true, status:r.status, productId, data};
+  return last || {ok:false,status:0,data:{error:'no_response'}};
+}
+async function callAlibabaProductList({q, size, accessToken}){
+  const subject = translate(q);
+  return callAlibaba(ALIBABA_PRODUCT_LIST_PATH, {
+    current_page: '1',
+    page_size: String(Math.min(Math.max(Number(size || 20),1),30)),
+    subject
+  }, accessToken);
+}
+async function callAlibabaProductGet(productId, accessToken){
+  return callAlibaba(ALIBABA_PRODUCT_GET_PATH, {
+    product_get_request: JSON.stringify({productId:String(productId)})
+  }, accessToken);
 }
 
 export default async function handler(req,res){
@@ -122,9 +175,8 @@ export default async function handler(req,res){
 
   const q = clean(req.query.q || req.query.keyword || req.query.search || '');
   const maxPrice = parseMax(req.query.maxPrice || req.query.max || 0);
-  const size = Math.min(Math.max(Number(req.query.size || 20),1),50);
+  const size = Math.min(Math.max(Number(req.query.size || 20),1),30);
   const accessToken = clean(req.query.accessToken || process.env.ALIBABA_ACCESS_TOKEN || process.env.ALIBABA_TOKEN || '');
-  const productIds = productIdsFromRequest(req).slice(0,size);
 
   if(!process.env.ALIBABA_APP_KEY || !process.env.ALIBABA_APP_SECRET){
     return res.status(200).json({
@@ -136,31 +188,38 @@ export default async function handler(req,res){
       message:'Faltan ALIBABA_APP_KEY y/o ALIBABA_APP_SECRET en Vercel. No se generan productos simulados.'
     });
   }
-
-  if(!accessToken || productIds.length === 0){
+  if(!accessToken){
     return res.status(200).json({
-      ok:true,
+      ok:false,
       provider:'Alibaba',
-      mode:'open_platform_ready_waiting_product_ids',
+      mode:'missing_access_token',
       products:[],
-      count:0,
       searchUrl:alibabaSearchUrl(q),
-      appKeyConfigured:true,
-      appSecretConfigured:true,
-      needs:['ALIBABA_ACCESS_TOKEN', 'ALIBABA_PRODUCT_IDS o productIds en la URL'],
-      message:'Alibaba está listo, pero /icbu/product/get requiere access token y productId cifrado. No se muestran rellenos ni simuladores.'
+      message:'Falta ALIBABA_ACCESS_TOKEN en Vercel. No se generan productos simulados.'
     });
   }
 
-  const calls = await Promise.allSettled(productIds.map(id=>callAlibabaProductGet(id, accessToken)));
-  const errors=[];
-  let products=[];
-  for(const c of calls){
-    if(c.status !== 'fulfilled'){ errors.push(String(c.reason)); continue; }
-    if(!c.value.ok){ errors.push(c.value); continue; }
-    try{ products.push(normalizeAlibabaProduct(c.value.data, products.length, q)); }
-    catch(e){ errors.push({productId:c.value.productId, error:String(e.message||e)}); }
+  const listCall = await callAlibabaProductList({q, size, accessToken});
+  const rawList = extractListProducts(listCall.data);
+  const listProducts = rawList.map((p,i)=>normalizeAlibabaProduct(p,i,q));
+
+  // Si el listado no trae precio, intenta ampliar detalle con /icbu/product/get para los primeros productos.
+  let products = listProducts;
+  const needsDetail = products.some(p=>!p.price) && rawList.length;
+  const detailErrors = [];
+  if(needsDetail){
+    const ids = products.map(p=>p.alibabaProductId).filter(Boolean).slice(0, Math.min(size, 12));
+    const detailCalls = await Promise.allSettled(ids.map(id=>callAlibabaProductGet(id, accessToken)));
+    const detailed = [];
+    for(const c of detailCalls){
+      if(c.status !== 'fulfilled'){ detailErrors.push(String(c.reason)); continue; }
+      if(!c.value.ok || apiError(c.value.data)){ detailErrors.push(c.value.data); continue; }
+      try{ detailed.push(normalizeAlibabaProduct(c.value.data, detailed.length, q)); }
+      catch(e){ detailErrors.push(String(e.message||e)); }
+    }
+    if(detailed.length) products = detailed;
   }
+
   products = products.filter(p=>p.price>0);
   if(maxPrice>0) products = products.filter(p=>p.price<=maxPrice);
   products = products.sort((a,b)=>money(a.price)-money(b.price)).slice(0,size);
@@ -168,13 +227,14 @@ export default async function handler(req,res){
   return res.status(200).json({
     ok:true,
     provider:'Alibaba',
-    mode:'open_platform_product_get',
-    endpoint:ALIBABA_PRODUCT_GET_PATH,
+    mode:'open_platform_product_list',
+    endpoint:ALIBABA_PRODUCT_LIST_PATH,
+    detailEndpoint:ALIBABA_PRODUCT_GET_PATH,
     count:products.length,
     sort:'price_asc',
     products,
-    errors:errors.slice(0,5),
     searchUrl:alibabaSearchUrl(q),
-    message: products.length ? 'Alibaba devuelve productos reales desde Open Platform.' : 'Alibaba respondió, pero no devolvió productos con precio válido. Revisar token, productId cifrado y permiso del endpoint.'
+    debug: req.query.debug ? {listStatus:listCall.status, listError:apiError(listCall.data), rawCount:rawList.length, detailErrors:detailErrors.slice(0,3), sample:listCall.data} : undefined,
+    message: products.length ? 'Alibaba devuelve productos reales desde /alibaba/icbu/product/list.' : 'Alibaba respondió sin productos con precio válido. Probar /api/alibaba-products?q=zapatos&debug=1 y revisar listError/rawCount.'
   });
 }
