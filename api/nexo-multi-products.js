@@ -90,7 +90,10 @@ export default async function handler(req,res){
     if(data.ok !== false && Array.isArray(data.products)) products.push(...data.products);
   }
 
-  const out = sortProducts(products).slice(0,size);
+  const amazon = products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon')).slice(0,1);
+  const cj = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
+  const alibaba = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
+  const out = [...amazon, ...sortProducts([...cj, ...alibaba])].slice(0,size);
   return res.status(200).json({
     ok:true,
     provider:'Multi-proveedor',
