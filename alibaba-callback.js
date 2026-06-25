@@ -1,57 +1,31 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ujqbbniptflzytdankwp.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY_NEW || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// nexo™ – Alibaba OAuth callback
+// Guarda de forma operativa el código recibido. El intercambio por token se ejecuta cuando Alibaba confirme endpoint exacto de token para la app.
 
-export function hasServiceRole(){
-  const k = SUPABASE_KEY || '';
-  return k.startsWith('sb_secret_') || k.split('.').length === 3;
+function cors(res){
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers','Content-Type');
+  res.setHeader('Cache-Control','no-store');
 }
-
-export async function sb(path, options={}){
-  if(!SUPABASE_URL || !SUPABASE_KEY){
-    const err = new Error('missing_supabase_env');
-    err.statusCode = 500;
-    throw err;
-  }
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers:{
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      'Content-Type':'application/json',
-      Prefer: options.prefer || 'return=representation',
-      ...(options.headers || {})
-    }
-  });
-  const text = await r.text();
-  let data = null;
-  try{ data = text ? JSON.parse(text) : null; }catch{ data = text; }
-  if(!r.ok){
-    const err = new Error(typeof data === 'string' ? data : JSON.stringify(data));
-    err.statusCode = r.status;
-    err.detail = data;
-    throw err;
-  }
-  return data;
+async function logSupabase(payload){
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if(!url || !key) return null;
+  await fetch(`${url}/rest/v1/logs_agente1`, {
+    method:'POST',
+    headers:{apikey:key, Authorization:`Bearer ${key}`, 'Content-Type':'application/json', Prefer:'return=minimal'},
+    body: JSON.stringify({proveedor:'Alibaba', accion:'oauth_callback', detalle:JSON.stringify(payload).slice(0,1000), estado:'recibido'})
+  }).catch(()=>null);
 }
-
-export async function logAgent(pedido_id, accion, estado='ok', detalle=''){
-  try{
-    await sb('logs_agente1', {method:'POST', body:JSON.stringify([{pedido_id, accion, estado, detalle}])});
-  }catch(e){ /* no rompe el flujo */ }
-}
-
-export function getPedidoIdFromPayPalCapture(capture){
-  const pu = capture?.purchase_units || [];
-  return pu?.[0]?.reference_id || pu?.[0]?.custom_id || pu?.[0]?.invoice_id || '';
-}
-
-export function getCaptureInfo(capture){
-  const pu = capture?.purchase_units || [];
-  const cap = pu?.[0]?.payments?.captures?.[0] || null;
-  return {
-    captureId: cap?.id || '',
-    status: capture?.status || cap?.status || '',
-    amount: Number(cap?.amount?.value || pu?.[0]?.amount?.value || 0),
-    currency: cap?.amount?.currency_code || pu?.[0]?.amount?.currency_code || 'USD'
-  };
+export default async function handler(req,res){
+  cors(res);
+  if(req.method==='OPTIONS') return res.status(200).end();
+  const q = req.method==='POST' ? (req.body||{}) : (req.query||{});
+  const code = q.code || q.auth_code || q.authorization_code || '';
+  const state = q.state || '';
+  const error = q.error || q.error_description || '';
+  const payload = {ok:!error, provider:'Alibaba', codeReceived:Boolean(code), code, state, error, receivedAt:new Date().toISOString()};
+  await logSupabase(payload);
+  if(error) return res.status(200).send(`<html><body><h2>Alibaba OAuth</h2><p>Error: ${String(error)}</p><p><a href="/nexo-admin-panel.html">Volver al panel nexo</a></p></body></html>`);
+  return res.status(200).send(`<html><body><h2>Alibaba conectado con nexo</h2><p>Código recibido correctamente para Agente 1.</p><p>Estado: ${String(state)}</p><p><a href="/nexo-admin-panel.html">Volver al panel nexo</a></p></body></html>`);
 }
