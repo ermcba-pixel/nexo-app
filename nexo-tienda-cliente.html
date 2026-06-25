@@ -100,6 +100,44 @@ let products=[];
 let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
 function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function nexoAmazonAffiliateUrl(search){return 'https://www.amazon.com/s?k='+encodeURIComponent(search||'producto')+'&tag='+NEXO_AMAZON_TAG;}
+function nexoNormalizeImageUrl(v){
+  if(v === null || v === undefined) return '';
+  if(Array.isArray(v)) return nexoNormalizeImageUrl(v.find(Boolean));
+  if(typeof v === 'object') return nexoNormalizeImageUrl(v.url || v.image || v.imageUrl || v.src || v.bigImage || v.productImage);
+  let out = String(v).trim();
+  if(!out) return '';
+  if((out.startsWith('[') || out.startsWith('{'))){ try{return nexoNormalizeImageUrl(JSON.parse(out));}catch(e){} }
+  out = out.replace(/\/g,'').replace(/^['"]|['"]$/g,'').trim();
+  if(out.startsWith('//')) out = 'https:' + out;
+  if(out.startsWith('http://')) out = 'https://' + out.slice(7);
+  if(!/^https:\/\//i.test(out)) return '';
+  return out;
+}
+function nexoFirstImageFromRaw(raw){
+  const direct=[raw.image, raw.imageUrl, raw.bigImage, raw.productImage, raw.productImageUrl, raw.thumbnail, raw.thumb_url, raw.photo, raw.mainImage, raw.main_image, raw.picture_url, raw.pictureUrl];
+  for(const v of direct){ const u=nexoNormalizeImageUrl(v); if(u) return u; }
+  const lists=[raw.productImageSet, raw.productImages, raw.images, raw.imageList, raw.productImageList, raw.imgs, raw.picList];
+  for(const list of lists){ const u=nexoNormalizeImageUrl(list); if(u) return u; }
+  return '';
+}
+function nexoSaveStoreReturnState(){
+  try{
+    localStorage.setItem('nexoStoreReturnState', JSON.stringify({
+      search:document.getElementById('searchInput')?.value||'',
+      maxRaw:document.getElementById('priceFilter')?.value||'',
+      cat:document.getElementById('categoryFilter')?.value||'',
+      provider:document.getElementById('providerFilter')?.value||'',
+      scrollY:window.scrollY||0,
+      products:products||[],
+      savedAt:Date.now()
+    }));
+  }catch(e){}
+}
+function nexoOpenAmazonExternal(url){
+  nexoSaveStoreReturnState();
+  window.location.href = url || nexoAmazonAffiliateUrl(document.getElementById('searchInput')?.value||'producto');
+  return false;
+}
 function detectCategory(q, selected){
   if(selected) return selected;
   if(/iphone|celular|phone|laptop|usb|cargador|mouse|teclado|auricular|monitor|tablet/.test(q)) return 'electronica';
@@ -131,7 +169,7 @@ function normalizeCjProduct(raw, idx){
     vendorFee: Number((Number.isFinite(fee) ? fee : 0).toFixed(2)),
     cjHandlingFee: Number((Number.isFinite(fee) ? fee : 0).toFixed(2)),
     sourceUrl: raw.sourceUrl || raw.url || raw.productUrl || ('https://www.cjdropshipping.com/search/'+encodeURIComponent(raw.name || raw.productNameEn || '')+'.html'),
-    image: raw.image || raw.bigImage || raw.productImage || raw.imageUrl || raw.productImageSet?.[0] || '',
+    image: nexoFirstImageFromRaw(raw),
     features: raw.features || '',
     amazonDirect: !!raw.amazonDirect,
     externalOnly: !!raw.externalOnly,
@@ -190,7 +228,7 @@ async function fetchAlibabaProducts(search,maxPrice,catSel){
   params.set('size','50');
   const ctrl = new AbortController();
   const timeout = setTimeout(()=>ctrl.abort(), 10000);
-  const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260610', {cache:'no-store', signal: ctrl.signal});
+  const res = await fetch('/api/alibaba/products?'+params.toString()+'&v=ALI20260625', {cache:'no-store', signal: ctrl.signal});
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Alibaba no disponible', products:[]};
@@ -301,7 +339,7 @@ const nexoStoreImages = {
   default:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
 };
 function nexoStoreImageFor(item){
-  return item.image || item.imageUrl || item.photo || '';
+  return nexoNormalizeImageUrl(item.image || item.imageUrl || item.photo || item.productImage || item.thumbnail || '');
 }
 function nexoProductFeatures(item){
   const cat = item.category || 'general';
@@ -321,7 +359,7 @@ function renderProducts(list){
     const isAmazonDirect=!!p.amazonDirect || !!p.externalOnly;
     const providerBtn=isAmazonDirect ? 'Ver en Amazon' : nexoStoreT('provider');
     const priceHtml=isAmazonDirect ? `<div class="product-price">${nexoHtmlEscape(p.displayPrice||'Ver precio en Amazon')}</div>` : `<div class="product-price">$${Number(p.price||0).toFixed(2)}</div>`;
-    const actionHtml=isAmazonDirect ? `<button class="add-to-cart-btn" onclick="nexoOpenExternal('${nexoHtmlEscape(p.sourceUrl||p.url||'')}')">Ver en Amazon</button>` : `<button class="add-to-cart-btn" onclick="addToCartByIndex(${idx})">${nexoStoreT('addCart')}</button>`;
+    const actionHtml=isAmazonDirect ? `<button class="add-to-cart-btn" onclick="nexoOpenAmazonExternal((products[${idx}]&& (products[${idx}].sourceUrl||products[${idx}].url)) || '')">Ver en Amazon</button>` : `<button class="add-to-cart-btn" onclick="addToCartByIndex(${idx})">${nexoStoreT('addCart')}</button>`;
     return `
     <div class="product-card ${isAmazonDirect?'amazon-direct-card':''}">
       <div class="product-image">${im ? `<img src="${nexoHtmlEscape(im)}" alt="${nexoHtmlEscape(p.name)}" loading="lazy" onerror="this.closest('.product-image').innerHTML='<div style=\'font-size:12px;color:#6b7c7d;padding:16px;text-align:center\'>Imagen no disponible por API</div>'">` : `<div style="font-size:12px;color:#6b7c7d;padding:16px;text-align:center">Imagen no disponible por API</div>`}</div>
@@ -376,7 +414,7 @@ async function filterProducts(){
       products = [...amazonDirect, ...limitedRest].slice(0,31);
       renderProducts(products);
       if(!products.length && (!cj.ok || !alibaba.ok || !amazon.ok)){
-        grid.innerHTML='<div class="api-note">No se encontraron productos. Detalle técnico:<br><small>CJ: '+String(cj.message||'sin respuesta')+'</small><br><small>Alibaba: '+String((typeof alibaba!=='undefined' && alibaba.message)||'sin respuesta')+'</small><br><small>Amazon: '+String((typeof amazon!=='undefined' && amazon.message)||'sin respuesta')+'</small><br><small>Pruebas: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/alibaba-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/amazon-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>';
+        grid.innerHTML='<div class="api-note">No se encontraron productos. Detalle técnico:<br><small>CJ: '+String(cj.message||'sin respuesta')+'</small><br><small>Alibaba: '+String((typeof alibaba!=='undefined' && alibaba.message)||'sin respuesta')+'</small><br><small>Amazon: '+String((typeof amazon!=='undefined' && amazon.message)||'sin respuesta')+'</small><br><small>Pruebas: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/alibaba/products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/amazon-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>';
       }
       if(cj.outOfBudget && products.length){
         const grid=document.getElementById('productsGrid');
@@ -394,7 +432,7 @@ function addToCartByIndex(idx){ const p=products[idx]; if(!p)return; addProductT
 function nexoOpenVariantSafe(idx){
   const p = Array.isArray(products) ? products[idx] : null;
   if(!p){ alert('Producto no cargado. Vuelva a buscar el producto.'); return false; }
-  if(p.amazonDirect || p.externalOnly){ window.location.href = p.sourceUrl || p.url || nexoAmazonAffiliateUrl(document.getElementById('searchInput')?.value||'producto'); return false; }
+  if(p.amazonDirect || p.externalOnly){ return nexoOpenAmazonExternal(p.sourceUrl || p.url || nexoAmazonAffiliateUrl(document.getElementById('searchInput')?.value||'producto')); }
   try{
     localStorage.setItem('nexoSelectedProviderProduct', JSON.stringify(p));
     localStorage.setItem('nexoProviderOptions', JSON.stringify(products || []));

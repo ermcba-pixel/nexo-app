@@ -85,14 +85,24 @@ function firstString(...vals){
   return '';
 }
 
+function cleanImageUrl(v){
+  if(v === null || v === undefined) return '';
+  if(Array.isArray(v)) return cleanImageUrl(v.find(Boolean));
+  if(typeof v === 'object') return cleanImageUrl(v.url || v.image || v.imageUrl || v.src || v.bigImage || v.productImage);
+  let out = String(v).trim();
+  if(!out) return '';
+  if(out.startsWith('[') || out.startsWith('{')){ try{return cleanImageUrl(JSON.parse(out));}catch(e){} }
+  out = out.replace(/\\/g,'').replace(/^['"]|['"]$/g,'').trim();
+  if(out.startsWith('//')) out = 'https:' + out;
+  if(out.startsWith('http://')) out = 'https://' + out.slice(7);
+  if(!/^https:\/\//i.test(out)) return '';
+  return out;
+}
 function firstImage(raw){
-  const img = firstString(raw.productImage, raw.productImageUrl, raw.bigImage, raw.image, raw.imageUrl, raw.thumbnail, raw.productImageSet?.[0]);
-  if(img) return img;
-  const imgs = raw.productImages || raw.images || raw.productImageList || raw.imageList;
-  if(Array.isArray(imgs) && imgs.length){
-    const v = imgs[0];
-    return typeof v === 'string' ? v : firstString(v.url, v.image, v.imageUrl);
-  }
+  const direct=[raw.productImage, raw.productImageUrl, raw.bigImage, raw.image, raw.imageUrl, raw.thumbnail, raw.thumb_url, raw.photo, raw.mainImage, raw.main_image, raw.picture_url, raw.pictureUrl];
+  for(const v of direct){ const u=cleanImageUrl(v); if(u) return u; }
+  const lists=[raw.productImageSet, raw.productImages, raw.images, raw.productImageList, raw.imageList, raw.imgs, raw.picList];
+  for(const list of lists){ const u=cleanImageUrl(list); if(u) return u; }
   return '';
 }
 
