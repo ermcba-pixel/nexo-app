@@ -36,6 +36,20 @@ function inRange(p, range){
   if(range.max > 0 && price > range.max) return false;
   return true;
 }
+function parsePriceRange(v){
+  const raw=String(v ?? '').trim();
+  const nums=raw.match(/[0-9]+(?:\.[0-9]+)?/g)||[];
+  const arr=nums.map(Number).filter(Number.isFinite).filter(n=>n>=0);
+  if(!arr.length) return {min:0,max:0};
+  if(arr.length===1) return {min:0,max:arr[0]};
+  return {min:Math.min(...arr),max:Math.max(...arr)};
+}
+function apiSearchTerm(q){
+  const key=String(q||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  const map={zapato:'shoes',zapatos:'shoes',zapatilla:'sneakers',zapatillas:'sneakers',camisa:'shirt',camisas:'shirts',calcetin:'socks',calcetines:'socks',media:'socks',medias:'socks'};
+  return map[key] || q;
+}
+
 function sortProducts(products){
   return products
     .filter(p=>p && money(p.price)>0)

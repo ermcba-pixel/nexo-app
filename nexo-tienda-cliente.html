@@ -198,9 +198,36 @@ function nexoAppendPriceRangeParams(params, range){
   if(range && Number.isFinite(range.min) && range.min > 0) params.set('minPrice', String(range.min));
   if(range && Number.isFinite(range.max)) params.set('maxPrice', String(range.max));
 }
+
+function nexoApiSearchTerm(search){
+  const q=normalizeText(search);
+  const map={
+    'zapato':'shoes','zapatos':'shoes','zapatilla':'sneakers','zapatillas':'sneakers','tenis':'sneakers',
+    'camisa':'shirt','camisas':'shirts','polera':'t shirt','poleras':'t shirts','blusa':'blouse','blusas':'blouses',
+    'calcetin':'socks','calcetines':'socks','media':'socks','medias':'socks',
+    'mochila':'backpack','mochilas':'backpacks','reloj':'watch','relojes':'watches',
+    'celular':'phone','telefono':'phone','audifonos':'earbuds','auriculares':'earbuds'
+  };
+  return map[q] || search || '';
+}
+function nexoSearchWords(search){
+  const q=normalizeText(search);
+  if(/zapato|zapatos|zapatilla|zapatillas|tenis|shoe|shoes|sneaker|sneakers/.test(q)) return ['shoe','shoes','sneaker','sneakers','boot','boots','sandals','footwear','walking','running','zapato','zapatilla','tenis'];
+  if(/camisa|camisas|shirt|shirts|polera|poleras|blusa|blouse/.test(q)) return ['shirt','shirts','t shirt','t-shirt','polo','blouse','camisa','polera','blusa','top'];
+  if(/calcetin|calcetines|media|medias|sock|socks/.test(q)) return ['sock','socks','calcetin','calcetines','media','medias'];
+  if(/mochila|mochilas|backpack|bag/.test(q)) return ['backpack','bag','mochila','mochilas'];
+  return q.split(/\s+/).filter(w=>w.length>2);
+}
+function nexoRelevantToSearch(p, search){
+  const words=nexoSearchWords(search);
+  if(!words.length) return true;
+  const hay=normalizeText([p?.name,p?.title,p?.category,p?.features,p?.sku].filter(Boolean).join(' '));
+  return words.some(w=>hay.includes(normalizeText(w)));
+}
 async function fetchCjProducts(search,priceRange,catSel){
   const params = new URLSearchParams();
-  params.set('q', search || '');
+  params.set('q', nexoApiSearchTerm(search));
+  params.set('originalQ', search || '');
   nexoAppendPriceRangeParams(params, priceRange);
   if(catSel) params.set('category', catSel);
   params.set('size','50');
@@ -215,7 +242,8 @@ async function fetchCjProducts(search,priceRange,catSel){
 }
 async function fetchProviderProducts(search,priceRange,catSel){
   const params = new URLSearchParams();
-  params.set('q', search || '');
+  params.set('q', nexoApiSearchTerm(search));
+  params.set('originalQ', search || '');
   nexoAppendPriceRangeParams(params, priceRange);
   if(catSel) params.set('category', catSel);
   params.set('size','50');
@@ -231,7 +259,8 @@ async function fetchProviderProducts(search,priceRange,catSel){
 }
 async function fetchAlibabaProducts(search,priceRange,catSel){
   const params = new URLSearchParams();
-  params.set('q', search || '');
+  params.set('q', nexoApiSearchTerm(search));
+  params.set('originalQ', search || '');
   nexoAppendPriceRangeParams(params, priceRange);
   if(catSel) params.set('category', catSel);
   params.set('size','50');
@@ -246,7 +275,8 @@ async function fetchAlibabaProducts(search,priceRange,catSel){
 
 async function fetchAmazonProducts(search,priceRange,catSel){
   const params = new URLSearchParams();
-  params.set('q', search || '');
+  params.set('q', nexoApiSearchTerm(search));
+  params.set('originalQ', search || '');
   nexoAppendPriceRangeParams(params, priceRange);
   if(catSel) params.set('category', catSel);
   params.set('size','15');
@@ -255,8 +285,26 @@ async function fetchAmazonProducts(search,priceRange,catSel){
   const res = await fetch('/api/amazon-products?'+params.toString()+'&v=AMZREAL20260625R3', {cache:'no-store', signal: ctrl.signal});
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Amazon no disponible', products:[]};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), message:data.notice||data.message||''};
+  if(!res.ok || data.ok === false){
+    const fallback={id:'amazon-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),name:'Ver '+(search||'producto')+' en Amazon',title:'Ver '+(search||'producto')+' en Amazon',provider:'Amazon',proveedor:'Amazon',vendor:'Amazon',providerLogo:'🇺🇸',amazonDirect:true,externalOnly:true,displayPrice:'Ver precio en Amazon',sourceUrl:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),url:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),image:nexoCatalogImage(search,'Amazon',0),stock:'Verificar disponibilidad y precio final en Amazon',features:'Amazon abre resultados reales con afiliado nexo20-8. La compra se completa directamente en Amazon.'};
+    return {ok:true, products:[fallback], message:data.message || data.error || 'Amazon afiliado disponible'};
+  }
+  const mapped=(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0);
+  const base=mapped.find(p=>nexoRelevantToSearch(p, search)) || mapped[0] || {};
+  const amazonCard={
+    ...base,
+    id:'amazon-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),
+    name:'Ver '+(search||'producto')+' en Amazon',
+    title:'Ver '+(search||'producto')+' en Amazon',
+    provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🇺🇸',
+    amazonDirect:true, externalOnly:true,
+    displayPrice:'Ver precio en Amazon',
+    sourceUrl:nexoAmazonAffiliateUrl(search || nexoApiSearchTerm(search)),
+    url:nexoAmazonAffiliateUrl(search || nexoApiSearchTerm(search)),
+    image:nexoStoreImageFor(base) || nexoCatalogImage(search,'Amazon',0),
+    features:'Amazon temporalmente abre resultados reales de '+nexoHtmlEscape(search||'producto')+' con afiliado nexo20-8. La compra se completa directamente en Amazon.'
+  };
+  return {ok:true, products:[amazonCard], message:data.notice||data.message||''};
 }
 
 function uniqueNexoProducts(list){
@@ -415,6 +463,7 @@ async function filterProducts(){
       // Solo se muestran productos reales devueltos por CJ, Alibaba o Amazon.
       const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
+        .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))
         // Amazon afiliado se conserva al inicio aunque no traiga precio numérico, porque va directo a Amazon con nexo20-8.
         // CJ/Alibaba sí respetan estrictamente el rango variable que escriba el cliente.
         .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoProductWithinRange(p, priceRange))
