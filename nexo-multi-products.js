@@ -1,127 +1,122 @@
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS, GET");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// nexo – Multi-provider Product Search API
+// Combina CJ real + Alibaba preparado + Amazon respaldo para que la tienda no dependa de un solo proveedor.
 
-  if (req.method === "OPTIONS") return res.status(200).end();
-
-  const apiKey = (process.env.OPENAI_API_KEY || "").trim();
-
-  if (req.method === "GET") {
-    return res.status(200).json({
-      ok: true,
-      service: "nexo-ai",
-      hasOpenAIKey: Boolean(apiKey),
-      keyPrefix: apiKey ? apiKey.slice(0, 10) + "..." : null,
-      environment: process.env.VERCEL_ENV || "unknown"
-    });
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  try {
-    const { agent = "soporte", question = "", page = "" } = req.body || {};
-
-    if (!question || typeof question !== "string") {
-      return res.status(400).json({ error: "Consulta vacía" });
-    }
-
-    if (!apiKey) {
-      return res.status(200).json({
-        answer: respuestaLocal(agent, question),
-        mode: "fallback_without_openai_key",
-        hasOpenAIKey: false
-      });
-    }
-
-    const systemPrompt = construirPrompt(agent, page);
-
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        input: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: question }
-        ],
-        temperature: 0.35,
-        max_output_tokens: 500
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(200).json({
-        answer:
-          "Agente IA Soporte nexo™\n\n" +
-          "Recibí tu consulta, pero OpenAI devolvió un error técnico.\n\n" +
-          "Esto suele pasar por falta de créditos, facturación no activada o permisos de la API.\n\n" +
-          `Detalle técnico: ${data?.error?.message || "Error no especificado"}`,
-        mode: "openai_error",
-        hasOpenAIKey: true,
-        openaiStatus: response.status
-      });
-    }
-
-    const text =
-      data.output_text ||
-      data.output?.[0]?.content?.[0]?.text ||
-      data.choices?.[0]?.message?.content ||
-      respuestaLocal(agent, question);
-
-    return res.status(200).json({
-      answer: text,
-      mode: "openai",
-      hasOpenAIKey: true
-    });
-
-  } catch (error) {
-    return res.status(200).json({
-      answer:
-        "Agente IA Soporte nexo™\n\n" +
-        "No pude conectar con OpenAI en este momento. Puedes registrar el caso usando el formulario de soporte.",
-      mode: "server_error",
-      error: error?.message || String(error)
-    });
-  }
+function cors(res){
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Methods','GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers','Content-Type');
+}
+function clean(s){ return String(s||'').trim(); }
+function money(n){ const x=Number(n||0); return Number.isFinite(x) ? Number(x.toFixed(2)) : 0; }
+function parseRange(req){
+  const nums = String(req.query.priceRange || req.query.rango || req.query.maxPrice || req.query.max || '').match(/[0-9]+(?:\.[0-9]+)?/g) || [];
+  const arr = nums.map(Number).filter(Number.isFinite).filter(n=>n>=0);
+  if(arr.length === 0) return {min:0,max:0};
+  if(arr.length === 1) return {min:Number(req.query.minPrice || req.query.min || 0) || 0, max:arr[0]};
+  return {min:Math.min(...arr), max:Math.max(...arr)};
+}
+function inRange(p, range){
+  const price = money(p?.price || p?.cjProductCost || 0);
+  if(price <= 0) return false;
+  if(range.min > 0 && price < range.min) return false;
+  if(range.max > 0 && price > range.max) return false;
+  return true;
+}
+function sortProducts(products){
+  return products
+    .filter(p=>p && money(p.price)>0)
+    .sort((a,b)=>money(a.price)-money(b.price));
+}
+async function callLocal(req, path){
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers.host;
+  const url = `${proto}://${host}${path}`;
+  const r = await fetch(url, {cache:'no-store'});
+  const data = await r.json().catch(()=>({ok:false,error:'invalid_json'}));
+  return {status:r.status, data};
+}
+function normalizeFromTable(row){
+  return {
+    id:`supabase-${row.id}`,
+    sku: row.sku_original || row.sku || '',
+    name: row.nombre_original || row.nombre || 'Producto proveedor',
+    title: row.nombre_original || row.nombre || 'Producto proveedor',
+    provider: row.marketplace || row.proveedor_nombre || row.proveedor || 'Proveedor',
+    proveedor: row.marketplace || row.proveedor_nombre || row.proveedor || 'Proveedor',
+    vendor: row.marketplace || row.proveedor_nombre || row.proveedor || 'Proveedor',
+    providerLogo: row.marketplace === 'Alibaba' ? '🟧' : '🌐',
+    price: money(row.precio_original || row.precio || 0),
+    category: row.categoria || 'general',
+    image: row.imagen_principal || '',
+    sourceUrl: row.url_original || '',
+    url: row.url_original || '',
+    stock: row.stock || 'Verificar stock',
+    source:'supabase-proveedor_productos',
+    features:'Producto registrado en proveedor_productos de Supabase.'
+  };
+}
+async function searchSupabaseProductos(q, priceRange){
+  try{
+    const { sb } = await import('./_nexo-supabase.js');
+    const term = encodeURIComponent(`%${q}%`);
+    let path = `proveedor_productos?select=*&or=(nombre_original.ilike.${term},descripcion_original.ilike.${term},sku_original.ilike.${term})&limit=20`;
+    const rows = await sb(path, {method:'GET', prefer:'return=representation'});
+    let products = Array.isArray(rows) ? rows.map(normalizeFromTable) : [];
+    products = products.filter(p=>inRange(p, priceRange));
+    return products;
+  }catch(e){ return []; }
 }
 
-function construirPrompt(agent, page) {
-  if (agent === "compras") {
-    return "Eres el Agente 1 de Compras IA de nexo™. Ayudas con productos, proveedores, precios, disponibilidad, presupuesto, tiempos de entrega y riesgos de compra internacional. Responde en español, claro, profesional y breve.";
+export default async function handler(req,res){
+  cors(res);
+  if(req.method==='OPTIONS') return res.status(200).end();
+  if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
+
+  const q = clean(req.query.q || req.query.search || '');
+  const priceRange = parseRange(req);
+  const maxPrice = priceRange.max;
+  const category = clean(req.query.category || '');
+  const size = Math.min(Math.max(Number(req.query.size || 20),1),60);
+  if(!q) return res.status(200).json({ok:true, products:[], providers:[], message:'Ingrese un producto para buscar'});
+
+  const qs = new URLSearchParams({q, size:String(size), lang:clean(req.query.lang||'es')});
+  if(Number(priceRange.min)>0) qs.set('minPrice', String(priceRange.min));
+  if(Number(priceRange.max)>0) qs.set('maxPrice', String(priceRange.max));
+  if(category) qs.set('category', category);
+
+  const results = await Promise.allSettled([
+    searchSupabaseProductos(q,priceRange),
+    callLocal(req, `/api/cj-products?${qs.toString()}`),
+    callLocal(req, `/api/alibaba-products?${qs.toString()}&size=15`),
+    callLocal(req, `/api/amazon-products?${qs.toString()}`)
+  ]);
+
+  const products=[];
+  const providers=[];
+  const notices=[];
+
+  const supa = results[0];
+  if(supa.status==='fulfilled' && Array.isArray(supa.value) && supa.value.length){ products.push(...supa.value); providers.push('Supabase'); }
+
+  for(const r of results.slice(1)){
+    if(r.status !== 'fulfilled') continue;
+    const data = r.value?.data || {};
+    if(data.provider) providers.push(data.provider);
+    if(data.notice) notices.push(data.notice);
+    if(data.ok !== false && Array.isArray(data.products)) products.push(...data.products);
   }
 
-  if (agent === "marketing") {
-    return "Eres el Agente 3 de Marketing IA de nexo™. Ayudas con campañas digitales, ventas, posicionamiento, ROI, segmentación y recomendaciones comerciales. Responde en español, claro y accionable.";
-  }
-
-  return [
-    "Eres el Agente 2 de Soporte IA de nexo™.",
-    "Tu función es atender consultas de clientes sobre tickets, pedidos, pagos, devoluciones, cambios, reclamos y seguimiento.",
-    "Responde en español con tono profesional, humano y directo.",
-    "No inventes datos del pedido. Si faltan datos, solicita número de pedido, correo registrado, producto, país, método de pago y fecha aproximada.",
-    "Sugiere completar el formulario de soporte para crear registro formal del ticket.",
-    "Mantén la respuesta breve y ordenada."
-  ].join(" ");
-}
-
-function respuestaLocal(agent, question) {
-  const ref = "NEXO-SOP-" + new Date().toISOString().slice(0, 10).replaceAll("-", "") + "-" + Math.floor(1000 + Math.random() * 9000);
-
-  if (agent === "compras") {
-    return `Agente IA Compras nexo™\n\nRecibí tu consulta: "${question}".\n\nPara avanzar necesito producto, país de destino, cantidad y presupuesto máximo.\n\nReferencia: ${ref}`;
-  }
-
-  if (agent === "marketing") {
-    return `Agente IA Marketing nexo™\n\nRecibí tu consulta: "${question}".\n\nPara ayudarte necesito objetivo comercial, canal, público objetivo y presupuesto.\n\nReferencia: ${ref}`;
-  }
-
-  return `Agente IA Soporte nexo™\n\nRecibí tu consulta: "${question}".\n\nPara ubicar tu caso necesito:\n1. Número de pedido o ticket.\n2. Correo usado en la compra.\n3. Producto y fecha aproximada.\n4. Descripción del problema.\n\nReferencia: ${ref}`;
+  const amazon = products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon')).slice(0,1);
+  const cj = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
+  const alibaba = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
+  const out = [...amazon, ...sortProducts([...cj, ...alibaba])].filter(p=>inRange(p, priceRange)).slice(0,size);
+  return res.status(200).json({
+    ok:true,
+    provider:'Multi-proveedor',
+    providers:[...new Set(providers)],
+    count:out.length,
+    mode:'cj_alibaba_amazon_supabase',
+    notices,
+    products:out
+  });
 }
