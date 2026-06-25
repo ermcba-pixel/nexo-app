@@ -96,10 +96,20 @@
 
 <script>
 const NEXO_AMAZON_TAG='nexo20-8';
+const NEXO_STORE_VERSION='20260625_STEP5_AMAZON_CJ_ALIBABA';
 let products=[];
 let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
 function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
-function nexoAmazonAffiliateUrl(search){return 'https://www.amazon.com/s?k='+encodeURIComponent(search||'producto')+'&tag='+NEXO_AMAZON_TAG;}
+function nexoAmazonSearchTerm(search){
+  const raw=String(search||'').trim();
+  const q=normalizeText(raw);
+  if(/zapato|zapatos/.test(q) && !/zapatilla|zapatillas|tenis|sneaker|sneakers/.test(q)) return 'zapatos';
+  if(/zapatilla|zapatillas|tenis|sneaker|sneakers/.test(q)) return 'zapatillas';
+  if(/camisa|camisas|shirt|shirts/.test(q)) return 'camisas';
+  if(/calcetin|calcetines|media|medias|sock|socks/.test(q)) return 'calcetines';
+  return raw || 'producto';
+}
+function nexoAmazonAffiliateUrl(search){return 'https://www.amazon.com/s?k='+encodeURIComponent(nexoAmazonSearchTerm(search))+'&tag='+NEXO_AMAZON_TAG;}
 function nexoNormalizeImageUrl(v){
   if(v === null || v === undefined) return '';
   if(Array.isArray(v)) return nexoNormalizeImageUrl(v.find(Boolean));
@@ -129,13 +139,19 @@ function nexoSaveStoreReturnState(){
       provider:document.getElementById('providerFilter')?.value||'',
       scrollY:window.scrollY||0,
       products:products||[],
-      savedAt:Date.now()
+      savedAt:Date.now(),
+      version:NEXO_STORE_VERSION
     }));
   }catch(e){}
 }
 function nexoOpenAmazonExternal(url){
   nexoSaveStoreReturnState();
-  window.location.href = url || nexoAmazonAffiliateUrl(document.getElementById('searchInput')?.value||'producto');
+  const current=(document.getElementById('searchInput')?.value||'').trim();
+  let term=current;
+  if(!term && url){
+    try{ term=new URL(url).searchParams.get('k') || ''; }catch(e){}
+  }
+  window.location.href = nexoAmazonAffiliateUrl(term || 'producto');
   return false;
 }
 function detectCategory(q, selected){
@@ -286,7 +302,7 @@ async function fetchAmazonProducts(search,priceRange,catSel){
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false){
-    const fallback={id:'amazon-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),name:'Ver '+(search||'producto')+' en Amazon',title:'Ver '+(search||'producto')+' en Amazon',provider:'Amazon',proveedor:'Amazon',vendor:'Amazon',providerLogo:'🇺🇸',amazonDirect:true,externalOnly:true,displayPrice:'Ver precio en Amazon',sourceUrl:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),url:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),image:nexoCatalogImage(search,'Amazon',0),stock:'Verificar disponibilidad y precio final en Amazon',features:'Amazon abre resultados reales con afiliado nexo20-8. La compra se completa directamente en Amazon.'};
+    const fallback={id:'amazon-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),name:'Ver '+(search||'producto')+' en Amazon',title:'Ver '+(search||'producto')+' en Amazon',provider:'Amazon',proveedor:'Amazon',vendor:'Amazon',providerLogo:'🇺🇸',amazonDirect:true,externalOnly:true,displayPrice:'Ver precio en Amazon',sourceUrl:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),url:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),image:nexoCatalogImage(search,'Amazon',0),stock:'Verificar disponibilidad y precio final en Amazon',features:''};
     return {ok:true, products:[fallback], message:data.message || data.error || 'Amazon afiliado disponible'};
   }
   const mapped=(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0);
@@ -302,7 +318,7 @@ async function fetchAmazonProducts(search,priceRange,catSel){
     sourceUrl:nexoAmazonAffiliateUrl(search || nexoApiSearchTerm(search)),
     url:nexoAmazonAffiliateUrl(search || nexoApiSearchTerm(search)),
     image:nexoStoreImageFor(base) || nexoCatalogImage(search,'Amazon',0),
-    features:'Amazon temporalmente abre resultados reales de '+nexoHtmlEscape(search||'producto')+' con afiliado nexo20-8. La compra se completa directamente en Amazon.'
+    features:''
   };
   return {ok:true, products:[amazonCard], message:data.notice||data.message||''};
 }
@@ -336,7 +352,7 @@ function nexoCatalogImage(search, provider, idx){
   const sets={
     socks:['https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80'],
     shirts:['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80'],
-    shoes:['https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=800&q=80'],
+    shoes:['https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=800&q=80'],
     bags:['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&w=800&q=80'],
     default:['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80']
   };
@@ -424,7 +440,7 @@ function renderProducts(list){
         <div class="provider">${nexoHtmlEscape(p.providerLogo||'')} ${nexoHtmlEscape(p.provider||'')}</div>
         <button type="button" class="provider-link variant-link-btn" data-variant-index="${idx}" onclick="nexoOpenVariantSafe(${idx}); return false;">${providerBtn}</button>
         <div class="product-name">${nexoHtmlEscape(p.name)}</div>
-        ${isAmazonDirect ? '<div class="product-rating">Compra directa en Amazon con enlace afiliado nexo20-8</div>' : `<div class="product-rating">★★★★★ (128 ${nexoStoreT('reviews')})</div>`}
+        ${isAmazonDirect ? '' : `<div class="product-rating">★★★★★ (128 ${nexoStoreT('reviews')})</div>`}
         ${priceHtml}
         <div class="product-stock">${nexoStoreT('stock')}: ${nexoHtmlEscape(p.stock)}</div>
         <div class="product-features">${p.features || nexoProductFeatures(p)}</div>
@@ -470,6 +486,15 @@ async function filterProducts(){
         .filter(p => normalizeText(p.provider||p.proveedor||'').includes('amazon') || normalizeText(p.provider||p.proveedor||'').includes('cj') || !!nexoStoreImageFor(p));
       const amazonDirect = combined.filter(p=>p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')).slice(0, providerSel && providerSel!=='amazon' ? 0 : 1);
       const rest = combined.filter(p=>!(p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')));
+      if(amazonDirect[0]){
+        amazonDirect[0].sourceUrl = nexoAmazonAffiliateUrl(search);
+        amazonDirect[0].url = amazonDirect[0].sourceUrl;
+        amazonDirect[0].name = 'Ver '+(search||'producto')+' en Amazon';
+        amazonDirect[0].title = amazonDirect[0].name;
+        amazonDirect[0].features = '';
+        const firstRealImage = rest.find(x=>nexoStoreImageFor(x))?.image || '';
+        if(firstRealImage) amazonDirect[0].image = firstRealImage;
+      }
       const limitedRest = nexoLimitByProvider(rest, providerSel ? {cj:50,alibaba:50,amazon:0,otro:0} : {cj:15,alibaba:15,amazon:0,otro:0})
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0));
       products = [...amazonDirect, ...limitedRest].slice(0,31);
@@ -497,7 +522,7 @@ function nexoOpenVariantSafe(idx){
   try{
     localStorage.setItem('nexoSelectedProviderProduct', JSON.stringify(p));
     localStorage.setItem('nexoProviderOptions', JSON.stringify(products || []));
-    localStorage.setItem('nexoStoreReturnState', JSON.stringify({search:document.getElementById('searchInput')?.value||'', maxRaw:document.getElementById('priceFilter')?.value||'', cat:document.getElementById('categoryFilter')?.value||'', provider:document.getElementById('providerFilter')?.value||'', scrollY:window.scrollY||0, products:products||[]}));
+    localStorage.setItem('nexoStoreReturnState', JSON.stringify({search:document.getElementById('searchInput')?.value||'', maxRaw:document.getElementById('priceFilter')?.value||'', cat:document.getElementById('categoryFilter')?.value||'', provider:document.getElementById('providerFilter')?.value||'', scrollY:window.scrollY||0, products:products||[], version:NEXO_STORE_VERSION}));
   }catch(e){}
   window.location.href='nexo-opciones-proveedor.html';
   return false;
@@ -544,12 +569,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   let restored=false;
   try{
     const st=JSON.parse(localStorage.getItem('nexoStoreReturnState')||'null');
-    if(st && st.search){
+    if(st && st.search && st.version===NEXO_STORE_VERSION){
       document.getElementById('searchInput').value=st.search||'';
       document.getElementById('priceFilter').value=st.maxRaw||'';
       document.getElementById('categoryFilter').value=st.cat||'';
       document.getElementById('providerFilter').value=st.provider||'';
       if(Array.isArray(st.products) && st.products.length){ products=st.products; renderProducts(products); restored=true; setTimeout(()=>window.scrollTo(0, Number(st.scrollY||0)),120); }
+    } else if(st && st.version!==NEXO_STORE_VERSION){
+      localStorage.removeItem('nexoStoreReturnState');
     }
   }catch(e){}
   if(!restored){products=[];document.getElementById('productsGrid').innerHTML='<div class="empty-note">'+nexoStoreT('empty')+'</div>';}
