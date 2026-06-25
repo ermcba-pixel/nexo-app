@@ -8,6 +8,20 @@ function cors(res){
 }
 function clean(s){ return String(s||'').trim(); }
 function money(n){ const x=Number(n||0); return Number.isFinite(x) ? Number(x.toFixed(2)) : 0; }
+function parseMinMax(req){
+  const min = Number(req.query.minPrice || req.query.min || 0);
+  const max = Number(req.query.maxPrice || req.query.max || 0);
+  return {min:Number.isFinite(min)&&min>0?min:0, max:Number.isFinite(max)&&max>0?max:0};
+}
+function withinRange(p,range){
+  const provider = String(p.provider||p.proveedor||'').toLowerCase();
+  if(provider.includes('amazon') || p.amazonDirect || p.externalOnly) return true;
+  const price = money(p.price);
+  if(price<=0) return false;
+  if(range.min && price<range.min) return false;
+  if(range.max && price>range.max) return false;
+  return true;
+}
 function parseRange(req){
   const nums = String(req.query.priceRange || req.query.rango || req.query.maxPrice || req.query.max || '').match(/[0-9]+(?:\.[0-9]+)?/g) || [];
   const arr = nums.map(Number).filter(Number.isFinite).filter(n=>n>=0);
@@ -106,9 +120,10 @@ export default async function handler(req,res){
     if(data.ok !== false && Array.isArray(data.products)) products.push(...data.products);
   }
 
-  const amazon = products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon')).slice(0,1);
-  const cj = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
-  const alibaba = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
+  const rangedProducts = products.filter(p=>withinRange(p, range));
+  const amazon = rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon') || p.amazonDirect || p.externalOnly).slice(0,1);
+  const cj = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
+  const alibaba = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
   const out = [...amazon, ...sortProducts([...cj, ...alibaba])].filter(p=>inRange(p, priceRange)).slice(0,size);
   return res.status(200).json({
     ok:true,

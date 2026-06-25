@@ -237,7 +237,7 @@ async function fetchAlibabaProducts(search,priceRange,catSel){
   params.set('size','50');
   const ctrl = new AbortController();
   const timeout = setTimeout(()=>ctrl.abort(), 10000);
-  const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260625R2', {cache:'no-store', signal: ctrl.signal});
+  const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260625R3', {cache:'no-store', signal: ctrl.signal});
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Alibaba no disponible', products:[]};
@@ -252,7 +252,7 @@ async function fetchAmazonProducts(search,priceRange,catSel){
   params.set('size','15');
   const ctrl = new AbortController();
   const timeout = setTimeout(()=>ctrl.abort(), 12000);
-  const res = await fetch('/api/amazon-products?'+params.toString()+'&v=AMZREAL20260619', {cache:'no-store', signal: ctrl.signal});
+  const res = await fetch('/api/amazon-products?'+params.toString()+'&v=AMZREAL20260625R3', {cache:'no-store', signal: ctrl.signal});
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Amazon no disponible', products:[]};
@@ -415,10 +415,12 @@ async function filterProducts(){
       // Solo se muestran productos reales devueltos por CJ, Alibaba o Amazon.
       const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
-        .filter(p => nexoProductWithinRange(p, priceRange))
+        // Amazon afiliado se conserva al inicio aunque no traiga precio numérico, porque va directo a Amazon con nexo20-8.
+        // CJ/Alibaba sí respetan estrictamente el rango variable que escriba el cliente.
+        .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoProductWithinRange(p, priceRange))
         .filter(p => normalizeText(p.provider||p.proveedor||'').includes('amazon') || normalizeText(p.provider||p.proveedor||'').includes('cj') || !!nexoStoreImageFor(p));
-      const amazonDirect = combined.filter(p=>p.amazonDirect || normalizeText(p.provider||p.proveedor||'').includes('amazon')).slice(0, providerSel && providerSel!=='amazon' ? 0 : 1);
-      const rest = combined.filter(p=>!(p.amazonDirect || normalizeText(p.provider||p.proveedor||'').includes('amazon')));
+      const amazonDirect = combined.filter(p=>p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')).slice(0, providerSel && providerSel!=='amazon' ? 0 : 1);
+      const rest = combined.filter(p=>!(p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')));
       const limitedRest = nexoLimitByProvider(rest, providerSel ? {cj:50,alibaba:50,amazon:0,otro:0} : {cj:15,alibaba:15,amazon:0,otro:0})
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0));
       products = [...amazonDirect, ...limitedRest].slice(0,31);
