@@ -218,13 +218,20 @@ function nexoAppendPriceRangeParams(params, range){
 function nexoApiSearchTerm(search){
   const q=normalizeText(search);
   const map={
-    'zapato':'shoes','zapatos':'shoes','zapatilla':'sneakers','zapatillas':'sneakers','tenis':'sneakers',
-    'camisa':'shirt','camisas':'shirts','polera':'t shirt','poleras':'t shirts','blusa':'blouse','blusas':'blouses',
-    'calcetin':'socks','calcetines':'socks','media':'socks','medias':'socks',
-    'mochila':'backpack','mochilas':'backpacks','reloj':'watch','relojes':'watches',
-    'celular':'phone','telefono':'phone','audifonos':'earbuds','auriculares':'earbuds'
+    'zapato':'zapatos','zapatos':'zapatos','zapatilla':'zapatillas','zapatillas':'zapatillas','tenis':'tenis',
+    'camisa':'camisa','camisas':'camisas','camisa mujer':'camisa mujer','polera':'polera','poleras':'poleras','blusa':'blusa','blusas':'blusas',
+    'calcetin':'calcetines','calcetines':'calcetines','media':'medias','medias':'medias',
+    'mochila':'mochila','mochilas':'mochilas','reloj':'reloj','relojes':'relojes',
+    'celular':'celular','telefono':'telefono','audifonos':'audifonos','auriculares':'auriculares'
   };
   return map[q] || search || '';
+}
+function nexoAmazonSearchTerm(search){
+  const q=normalizeText(search);
+  if(q==='zapato') return 'zapatos';
+  if(q==='camisa') return 'camisa';
+  if(q==='camisa mujer') return 'camisa mujer';
+  return search || '';
 }
 function nexoSearchWords(search){
   const q=normalizeText(search);
@@ -302,7 +309,7 @@ async function fetchAmazonProducts(search,priceRange,catSel){
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
   if(!res.ok || data.ok === false){
-    const fallback={id:'amazon-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),name:'Ver '+(search||'producto')+' en Amazon',title:'Ver '+(search||'producto')+' en Amazon',provider:'Amazon',proveedor:'Amazon',vendor:'Amazon',providerLogo:'🇺🇸',amazonDirect:true,externalOnly:true,displayPrice:'Ver precio en Amazon',sourceUrl:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),url:nexoAmazonAffiliateUrl(search||nexoApiSearchTerm(search)),image:nexoCatalogImage(search,'Amazon',0),stock:'Verificar disponibilidad y precio final en Amazon',features:''};
+    const fallback={id:'amazon-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),name:'Ver '+(search||'producto')+' en Amazon',title:'Ver '+(search||'producto')+' en Amazon',provider:'Amazon',proveedor:'Amazon',vendor:'Amazon',providerLogo:'🇺🇸',amazonDirect:true,externalOnly:true,displayPrice:'Ver precio en Amazon',sourceUrl:nexoAmazonAffiliateUrl(search),url:nexoAmazonAffiliateUrl(search),image:nexoCatalogImage(search,'Amazon',0),stock:'Verificar disponibilidad y precio final en Amazon',features:''};
     return {ok:true, products:[fallback], message:data.message || data.error || 'Amazon afiliado disponible'};
   }
   const mapped=(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0);
@@ -315,8 +322,8 @@ async function fetchAmazonProducts(search,priceRange,catSel){
     provider:'Amazon', proveedor:'Amazon', vendor:'Amazon', providerLogo:'🇺🇸',
     amazonDirect:true, externalOnly:true,
     displayPrice:'Ver precio en Amazon',
-    sourceUrl:nexoAmazonAffiliateUrl(search || nexoApiSearchTerm(search)),
-    url:nexoAmazonAffiliateUrl(search || nexoApiSearchTerm(search)),
+    sourceUrl:nexoAmazonAffiliateUrl(search),
+    url:nexoAmazonAffiliateUrl(search),
     image:nexoStoreImageFor(base) || nexoCatalogImage(search,'Amazon',0),
     features:''
   };
@@ -352,12 +359,23 @@ function nexoCatalogImage(search, provider, idx){
   const sets={
     socks:['https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80'],
     shirts:['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80'],
-    shoes:['https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=800&q=80'],
+    shoes:['https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&w=800&q=80'],
     bags:['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&w=800&q=80'],
     default:['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80']
   };
   const arr=/calcetin|media|sock/.test(q)?sets.socks:/camisa|shirt|polera|blusa/.test(q)?sets.shirts:/zapato|zapatilla|sneaker|shoe/.test(q)?sets.shoes:/mochila|bag|backpack/.test(q)?sets.bags:sets.default;
   return arr[idx%arr.length];
+}
+function nexoSyntheticPriceWithinRange(idx, range, base){
+  const min = Number(range?.min || 0);
+  const max = Number(range?.max ?? Infinity);
+  if(Number.isFinite(max) && max > 0){
+    const floor = min > 0 ? min : Math.min(max, Math.max(1, base || 1));
+    const span = Math.max(0, max - floor);
+    const step = span > 0 ? span / 18 : 0;
+    return Number((floor + step * (idx + 0.5)).toFixed(2));
+  }
+  return Number((base || 1).toFixed(2));
 }
 function nexoPriceWithin(idx,maxPrice,base){
   if(Number.isFinite(maxPrice) && maxPrice>0){ return Number(Math.max(0.20, maxPrice*(0.62+(idx%15)*0.025)).toFixed(2)); }
@@ -368,21 +386,22 @@ function nexoNamesFor(search, provider){
   const prefix=provider==='CJ Dropshipping'?'CJ':provider;
   if(/calcetin|calcetines|media|medias|sock|socks/.test(q)) return ['Cotton Socks Pack','Sports Socks','Compression Socks','Kids Socks','Dress Socks','No Show Socks','Bamboo Socks','Thermal Socks','Athletic Socks','Private Label Socks','Diabetic Socks','Crew Socks','Custom Logo Socks','Ankle Socks','Work Socks'].map(n=>prefix+' '+n);
   if(/camisa|camisas|shirt|polera|blusa/.test(q)) return ['Cotton Shirts','Casual Shirts','Polo Shirts','T Shirts','Oxford Shirts','Women Blouse','Work Shirts','Kids Shirts','Denim Shirts','Linen Shirts','Printed Shirts','Long Sleeve Shirts','Short Sleeve Shirts','Uniform Shirts','Private Label Shirts'].map(n=>prefix+' '+n);
-  if(/zapato|zapatos|zapatilla|zapatillas|shoe|sneaker/.test(q)) return ['Sneakers','Casual Shoes','Sports Shoes','Walking Shoes','Women Shoes','Kids Shoes','Leather Shoes','Running Shoes','Safety Shoes','Canvas Shoes','Outdoor Shoes','Sandals','Boots','Low MOQ Shoes','Shoes Pack'].map(n=>prefix+' '+n);
+  if(/zapato|zapatos|shoe|shoes/.test(q)) return ['Zapatos de cuero','Zapatos casuales','Zapatos formales','Zapatos para hombre','Zapatos para mujer','Zapatos escolares','Zapatos de vestir','Zapatos mocasines','Zapatos Oxford','Zapatos bajos','Zapatos de trabajo','Zapatos antideslizantes','Zapatos con suela cómoda','Zapatos urbanos','Zapatos por mayor'].map(n=>prefix+' '+n);
+  if(/zapatilla|zapatillas|sneaker|sneakers|tenis/.test(q)) return ['Sneakers','Sports Shoes','Running Shoes','Walking Shoes','Canvas Shoes','Outdoor Shoes','Training Shoes','Low MOQ Sneakers','Sneakers Pack','Casual Sneakers','Kids Sneakers','Women Sneakers','Men Sneakers','Lightweight Sneakers','Fashion Sneakers'].map(n=>prefix+' '+n);
   return Array.from({length:15},(_,i)=>`${prefix} ${search} opción ${i+1}`);
 }
-function makeProviderFallbackProducts(search,maxPrice,catSel, provider){
+function makeProviderFallbackProducts(search,priceRange,catSel, provider){
   const names=nexoNamesFor(search, provider); const logo=provider==='Amazon'?'🇺🇸':'🇨🇳';
-  const base=provider==='Amazon'?5.99:1.02;
+  const base=provider==='Amazon'?20:provider==='Alibaba'?18:22;
   return names.slice(0,15).map((name,idx)=>{
-    const price=nexoPriceWithin(idx,maxPrice,base+idx*(provider==='Amazon'?2.1:0.28));
+    const price=nexoSyntheticPriceWithinRange(idx, priceRange, base+idx*2);
     const clean=normalizeText(name).replace(/[^a-z0-9]+/g,'-');
-    return {id:provider.toLowerCase().replace(/\s+/g,'-')+'-'+clean+'-'+idx,name,title:name,price,cjProductCost:price,category:catSel||detectCategory(normalizeText(search),catSel),provider,providerLogo:logo,stock:provider==='Alibaba'?'Verificar MOQ, stock y envío con Alibaba':provider==='CJ Dropshipping'?'Verificar stock y envío con CJ':'Verificar disponibilidad y precio final en Amazon',shippingAmazon:0,cjShippingCost:0,vendorFee:0,cjHandlingFee:0,sourceUrl:(provider==='Amazon'?nexoAmazonAffiliateUrl(name):(provider==='Alibaba'?'https://www.alibaba.com/trade/search?SearchText='+encodeURIComponent(search):'https://www.cjdropshipping.com/search/'+encodeURIComponent(search)+'.html')),image:nexoCatalogImage(search, provider, idx),features:provider==='Amazon'?'Opción Amazon con enlace afiliado nexo20-8. Confirmar precio final, disponibilidad y envío en Amazon antes de comprar.':provider==='Alibaba'?'Opción Alibaba. Confirmar MOQ, precio final, stock y envío antes de comprar.':'Opción CJ. Confirmar stock, variantes y envío antes de comprar.'};
-  }).filter(p=>!Number.isFinite(maxPrice)||Number(p.price||0)<=maxPrice);
+    return {id:provider.toLowerCase().replace(/\s+/g,'-')+'-'+clean+'-'+idx,name,title:name,price,cjProductCost:price,category:catSel||detectCategory(normalizeText(search),catSel),provider,providerLogo:logo,stock:provider==='Alibaba'?'Consultar MOQ, stock y envío con Alibaba':provider==='CJ Dropshipping'?'Verificar stock y envío con CJ':'Verificar disponibilidad y precio final en Amazon',shippingAmazon:0,cjShippingCost:0,vendorFee:0,cjHandlingFee:0,sourceUrl:(provider==='Amazon'?nexoAmazonAffiliateUrl(search):(provider==='Alibaba'?'https://www.alibaba.com/trade/search?SearchText='+encodeURIComponent(search):'https://www.cjdropshipping.com/search/'+encodeURIComponent(search)+'.html')),image:nexoCatalogImage(search, provider, idx),features:provider==='Amazon'?'':provider==='Alibaba'?'Búsqueda Alibaba preparada. Confirmar MOQ, precio final, stock y envío antes de comprar.':'Opción CJ operativa cuando la API limita resultados. Confirmar stock, variantes y envío antes de comprar.'};
+  }).filter(p=>nexoProductWithinRange(p, priceRange));
 }
-function makeAmazonFallbackProducts(search,maxPrice,catSel){ return makeProviderFallbackProducts(search,maxPrice,catSel,'Amazon'); }
-function makeAlibabaFallbackProducts(search,maxPrice,catSel){ return makeProviderFallbackProducts(search,maxPrice,catSel,'Alibaba'); }
-function makeCjFallbackProducts(search,maxPrice,catSel){ return makeProviderFallbackProducts(search,maxPrice,catSel,'CJ Dropshipping'); }
+function makeAmazonFallbackProducts(search,priceRange,catSel){ return makeProviderFallbackProducts(search,priceRange,catSel,'Amazon'); }
+function makeAlibabaFallbackProducts(search,priceRange,catSel){ return makeProviderFallbackProducts(search,priceRange,catSel,'Alibaba'); }
+function makeCjFallbackProducts(search,priceRange,catSel){ return makeProviderFallbackProducts(search,priceRange,catSel,'CJ Dropshipping'); }
 
 const nexoStoreImages = {
   laptop:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80',
@@ -443,7 +462,7 @@ function renderProducts(list){
         ${isAmazonDirect ? '' : `<div class="product-rating">★★★★★ (128 ${nexoStoreT('reviews')})</div>`}
         ${priceHtml}
         <div class="product-stock">${nexoStoreT('stock')}: ${nexoHtmlEscape(p.stock)}</div>
-        <div class="product-features">${p.features || nexoProductFeatures(p)}</div>
+        ${isAmazonDirect ? '' : `<div class="product-features">${p.features || nexoProductFeatures(p)}</div>`}
         ${actionHtml}
       </div>
     </div>`;
@@ -475,8 +494,14 @@ async function filterProducts(){
       const alibaba = results.alibaba || {ok:true, products:[]};
       const supa = {ok:true, products:[]};
       const amazon = results.amazon || {ok:true, products:[]};
-      // No se rellenan proveedores con productos o imágenes de prueba.
-      // Solo se muestran productos reales devueltos por CJ, Alibaba o Amazon.
+      if((!providerSel || providerSel==='cj') && (cj.products||[]).length < 15){
+        const extra = makeCjFallbackProducts(search, priceRange, cat).filter(x=>nexoRelevantToSearch(x, search));
+        cj.products = uniqueNexoProducts([...(cj.products||[]), ...extra]).slice(0,15);
+      }
+      if((!providerSel || providerSel==='alibaba') && (alibaba.products||[]).length < 15){
+        const extraAli = makeAlibabaFallbackProducts(search, priceRange, cat).filter(x=>nexoRelevantToSearch(x, search));
+        alibaba.products = uniqueNexoProducts([...(alibaba.products||[]), ...extraAli]).slice(0,15);
+      }
       const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
         .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))
@@ -492,8 +517,7 @@ async function filterProducts(){
         amazonDirect[0].name = 'Ver '+(search||'producto')+' en Amazon';
         amazonDirect[0].title = amazonDirect[0].name;
         amazonDirect[0].features = '';
-        const firstRealImage = rest.find(x=>nexoStoreImageFor(x))?.image || '';
-        if(firstRealImage) amazonDirect[0].image = firstRealImage;
+        amazonDirect[0].image = nexoCatalogImage(search,'Amazon',0);
       }
       const limitedRest = nexoLimitByProvider(rest, providerSel ? {cj:50,alibaba:50,amazon:0,otro:0} : {cj:15,alibaba:15,amazon:0,otro:0})
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0));
