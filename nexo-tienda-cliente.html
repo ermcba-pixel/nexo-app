@@ -107,7 +107,7 @@ function nexoNormalizeImageUrl(v){
   let out = String(v).trim();
   if(!out) return '';
   if((out.startsWith('[') || out.startsWith('{'))){ try{return nexoNormalizeImageUrl(JSON.parse(out));}catch(e){} }
-  out = out.replace(/\/g,'').replace(/^['"]|['"]$/g,'').trim();
+  out = out.replace(/\\/g,'').replace(/^['"]|['"]$/g,'').trim();
   if(out.startsWith('//')) out = 'https:' + out;
   if(out.startsWith('http://')) out = 'https://' + out.slice(7);
   if(!/^https:\/\//i.test(out)) return '';
