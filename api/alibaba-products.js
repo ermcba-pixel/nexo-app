@@ -202,14 +202,17 @@ export default async function handler(req,res){
   let products=enriched;
   if(maxPrice>0) products=products.filter(p=>p.price<=maxPrice);
   products=products.sort((a,b)=>a.price-b.price).slice(0,15);
+  const debug = String(req.query.debug||'') === '1';
   return res.status(200).json({
     ok:products.length>0,
     provider:'Alibaba',
     mode:'alibaba_real_list_then_get',
     endpoint:'/alibaba/icbu/product/list + /icbu/product/get',
+    query:q,
+    translated:translate(q),
     count:products.length,
     products,
     message:products.length?'Productos reales Alibaba devueltos.':'Alibaba no devolvió productos reales con precio. No se muestran productos ni fotos de prueba.',
-    diagnostic:products.length?undefined:{reason:listed.ok?'list_without_price':'list_empty_or_unreachable', attempts:(listed.attempts||[]).slice(-20)}
+    diagnostic:(debug || !products.length)?{reason:listed.ok?'list_without_price':'list_empty_or_unreachable', attempts:(listed.attempts||[]).slice(-20), env:{app_key:Boolean(ak), app_secret:Boolean(secret), access_token:Boolean(tk)}}:undefined
   });
 }

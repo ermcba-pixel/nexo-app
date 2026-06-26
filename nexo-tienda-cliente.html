@@ -201,10 +201,9 @@ function parseNexoMoneyRange(v){
   const nums = raw.match(/[0-9]+(?:\.[0-9]+)?/g) || [];
   const arr = nums.map(Number).filter(Number.isFinite).filter(n=>n>=0);
   if(!arr.length) return {min:0, max:Infinity, hasRange:false, raw};
-  if(arr.length === 1) return {min:0, max:arr[0], hasRange:false, raw};
-  const min = Math.min(...arr);
+  const min = arr.length > 1 ? Math.min(...arr) : 0;
   const max = Math.max(...arr);
-  return {min, max, hasRange:true, raw};
+  return {min, max, hasRange:arr.length>1, raw};
 }
 function nexoProductWithinRange(p, range){
   const price = Number(p?.price || p?.cjProductCost || 0);
@@ -212,8 +211,9 @@ function nexoProductWithinRange(p, range){
   return price >= Number(range?.min || 0) && price <= Number(range?.max ?? Infinity);
 }
 function nexoAppendPriceRangeParams(params, range){
-  if(range && Number.isFinite(range.min) && range.min > 0) params.set('minPrice', String(range.min));
-  if(range && Number.isFinite(range.max)) params.set('maxPrice', String(range.max));
+  if(!range) return;
+  if(Number.isFinite(range.min) && Number(range.min) > 0) params.set('minPrice', String(range.min));
+  if(Number.isFinite(range.max) && Number(range.max) > 0) params.set('maxPrice', String(range.max));
 }
 
 function nexoApiSearchTerm(search){
@@ -540,10 +540,7 @@ async function filterProducts(){
               : 'No se encontraron productos reales disponibles para esa búsqueda y presupuesto.';
         grid.innerHTML='<div class="api-note">'+nexoHtmlEscape(msg)+'</div>';
       }
-      if(cj.outOfBudget && products.length){
-        const grid=document.getElementById('productsGrid');
-        grid.insertAdjacentHTML('afterbegin','<div class="api-note" style="grid-column:1/-1">'+(cj.message || 'CJ devolvió productos reales, pero algunos superan el presupuesto máximo colocado.')+'</div>');
-      }
+      // No mostrar avisos técnicos de CJ encima de resultados reales; el cliente solo debe ver productos o un mensaje claro.
       if(window.forceNexoFooter) window.forceNexoFooter();
     }catch(e){
       products=[];

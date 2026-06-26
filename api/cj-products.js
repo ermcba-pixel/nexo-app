@@ -308,11 +308,14 @@ export default async function handler(req,res){
 
     // Orden comercial solicitado: dentro del presupuesto elegido, mostrar primero el mayor precio cercano al presupuesto
     // y luego bajar. Ej.: presupuesto 1.00 => 0.99, 0.87, 0.75...
+    if(!outOfBudget && Number.isFinite(minPrice) && minPrice > 0) {
+      products = products.filter(p => p.price >= minPrice);
+    }
     if(!outOfBudget && Number.isFinite(maxPrice) && maxPrice > 0) {
       products = products.filter(p => p.price <= maxPrice);
     }
     products = products
-      .sort((a,b)=> Number(b.price||0) - Number(a.price||0))
+      .sort((a,b)=> Number(a.price||0) - Number(b.price||0))
       .slice(0, size)
       .map(p => ({...p, outOfBudget, requestedProduct:q, cjSearchTerm:translatedQ}));
 
@@ -327,7 +330,7 @@ export default async function handler(req,res){
       count:products.length,
       products,
       message: products.length
-        ? (outOfBudget ? 'CJ tiene productos reales, pero superan el presupuesto indicado' : 'Productos reales CJ obtenidos correctamente')
+        ? (outOfBudget ? 'CJ tiene productos reales, pero están fuera del rango indicado' : 'Productos reales CJ obtenidos correctamente')
         : 'CJ no devolvió productos para esa búsqueda'
     });
   }catch(err){
