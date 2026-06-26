@@ -348,9 +348,9 @@ function nexoLimitByProvider(list, limits){
     (buckets[key] ||= []).push(p);
   }
   return [
+    ...(buckets.amazon||[]).slice(0,limits.amazon||50),
     ...(buckets.cj||[]).slice(0,limits.cj||50),
     ...(buckets.alibaba||[]).slice(0,limits.alibaba||50),
-    ...(buckets.amazon||[]).slice(0,limits.amazon||50),
     ...(buckets.otro||[]).slice(0,limits.otro||10)
   ];
 }
@@ -434,10 +434,8 @@ function nexoStoreImageFor(item){
   return nexoNormalizeImageUrl(item.image || item.imageUrl || item.photo || item.productImage || item.thumbnail || '');
 }
 function nexoProductFeatures(item){
-  const cat = item.category || 'general';
-  const name = item.name || 'Producto';
-  const source = item.provider || 'Amazon';
-  return `<strong>${nexoStoreT('featuresTitle')}:</strong><br>• ${nexoStoreT('suggested')}: ${name}<br>• ${nexoStoreT('originalProvider')}: ${source}<br>• ${nexoStoreT('priceFilter')}<br>• ${nexoStoreT('verify')}`;
+  // Limpio: no mostrar bloque largo de proveedor/precio/filtro en carrito ni checkout.
+  return '';
 }
 
 function nexoHtmlEscape(v){return String(v??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
@@ -495,7 +493,7 @@ async function filterProducts(){
       const supa = {ok:true, products:[]};
       const amazon = results.amazon || {ok:true, products:[]};
       // Productos reales solamente: no se rellenan CJ/Alibaba con catálogos de prueba.
-      const combined = uniqueNexoProducts([...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[]), ...(amazon.products||[])])
+      const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
         .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))
         // Amazon afiliado se conserva al inicio aunque no traiga precio numérico, porque va directo a Amazon con nexo20-8.
@@ -514,7 +512,8 @@ async function filterProducts(){
       }
       const limitedRest = nexoLimitByProvider(rest, providerSel ? {cj:50,alibaba:50,amazon:0,otro:0} : {cj:15,alibaba:15,amazon:0,otro:0})
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0));
-      products = [...limitedRest, ...amazonDirect].slice(0,31);
+      // Amazon debe aparecer primero como tarjeta externa afiliada; luego CJ y Alibaba reales.
+      products = [...amazonDirect, ...limitedRest].slice(0,31);
       renderProducts(products);
       if(!products.length && (!cj.ok || !alibaba.ok || !amazon.ok)){
         const msg = providerSel === 'alibaba'
@@ -562,12 +561,17 @@ function addToCart(id){
   const p=products.find(x=>String(x.id)===String(id)); if(!p)return; addProductToCart(p); }
 function addProductToCart(p){
   const found=cart.find(x=>String(x.id)===String(p.id));
-  if(found) found.quantity++; else cart.push({...p,image:nexoStoreImageFor(p),features:p.features || nexoProductFeatures(p),quantity:1});
+  if(found) found.quantity++; else cart.push({...p,image:nexoStoreImageFor(p),features:'',quantity:1});
   localStorage.setItem('nexoCart',JSON.stringify(cart)); updateCartCount();
 }
 function updateCartCount(){document.getElementById('cartCount').textContent=cart.reduce((s,i)=>s+i.quantity,0);}
 function openCart(){document.getElementById('cartModal').style.display='block';renderCartItems();}
 function closeCart(){document.getElementById('cartModal').style.display='none';}
+function nexoIsCjItem(item){ const src=normalizeText([item?.provider,item?.proveedor,item?.vendor,item?.source,item?.category].join(' ')); return src.includes('cj') || src.includes('dropshipping') || !!(item?.cjProductId || item?.pid || item?.cjSku || item?.variantSku); }
+function nexoEstimateCjShipping(item){ const unit=Number(item?.cjProductCost ?? item?.price ?? 0)||0; const qty=Number(item?.quantity ?? 1)||1; if(!nexoIsCjItem(item)) return 0; return Number(Math.max(3.90, unit*0.45, 2.40*qty).toFixed(2)); }
+function nexoEstimateCjHandling(item){ const unit=Number(item?.cjProductCost ?? item?.price ?? 0)||0; const qty=Number(item?.quantity ?? 1)||1; if(!nexoIsCjItem(item)) return 0; return Number(Math.max(0.75, unit*qty*0.08).toFixed(2)); }
+function nexoUnitShipping(item){ const real=Number(item?.cjShippingCost ?? item?.shippingAmazon ?? item?.shippingCost ?? 0)||0; return real>0 ? real : nexoEstimateCjShipping(item); }
+function nexoUnitVendor(item){ const real=Number(item?.cjHandlingFee ?? item?.vendorFee ?? item?.handlingFee ?? 0)||0; return real>0 ? real : nexoEstimateCjHandling(item); }
 function renderCartItems(){
   const c=document.getElementById('cartItems');
   if(!cart.length){c.innerHTML='<p style="text-align:center;color:#777;padding:18px">'+nexoStoreT('cartEmpty')+'</p>';updateCartSummary();return;}
@@ -578,8 +582,8 @@ function qtyIndex(idx,chg){const i=cart[idx]; if(!i)return; i.quantity+=chg; if(
 function qty(id,chg){const i=cart.find(x=>String(x.id)===String(id)); if(!i)return; i.quantity+=chg; if(i.quantity<=0)cart=cart.filter(x=>String(x.id)!==String(id)); localStorage.setItem('nexoCart',JSON.stringify(cart));updateCartCount();renderCartItems();}
 function updateCartSummary(){
   const subtotal=cart.reduce((s,i)=>s+i.price*i.quantity,0);
-  const shipping=cart.reduce((s,i)=>s+(Number(i.cjShippingCost ?? i.shippingAmazon ?? 0)*i.quantity),0);
-  const vendor=cart.reduce((s,i)=>s+(Number(i.cjHandlingFee ?? i.vendorFee ?? 0)*i.quantity),0);
+  const shipping=cart.reduce((s,i)=>s+(nexoUnitShipping(i)*Number(i.quantity||1)),0);
+  const vendor=cart.reduce((s,i)=>s+(nexoUnitVendor(i)*Number(i.quantity||1)),0);
   const commission=subtotal*.30, total=subtotal+shipping+vendor+commission;
   document.getElementById('subtotal').textContent=subtotal.toFixed(2);
   document.getElementById('amazonShipping').textContent=shipping.toFixed(2);

@@ -17,9 +17,9 @@ function translate(q){
   const map={calcetin:'socks',calcetines:'socks',medias:'socks',media:'socks',zapato:'shoes',zapatos:'shoes',zapatillas:'sneakers',tenis:'sneakers',cordon:'shoelaces',cordones:'shoelaces',camisa:'shirts',camisas:'shirts',polera:'t shirts',poleras:'t shirts',blusa:'blouse',blusas:'blouses',pantalon:'pants',pantalones:'pants',mochila:'backpack',mochilas:'backpack',celular:'phone',telefono:'phone',reloj:'watch',relojes:'watch',audifonos:'earbuds',auriculares:'earbuds',laptop:'laptop'};
   return map[key] || q || 'product';
 }
-function appKey(){return process.env.ALIBABA_APP_KEY || process.env.ALIBABA_APPKEY || '';} 
-function appSecret(){return process.env.ALIBABA_APP_SECRET || process.env.ALIBABA_APPSECRET || '';} 
-function token(){return process.env.ALIBABA_ACCESS_TOKEN || process.env.ALIBABA_TOKEN || '';} 
+function appKey(){return process.env.ALIBABA_APP_KEY || process.env.ALIBABA_APPKEY || process.env.ALIBABA_CLIENT_ID || process.env.ALIBABA_APP_ID || '';} 
+function appSecret(){return process.env.ALIBABA_APP_SECRET || process.env.ALIBABA_APPSECRET || process.env.ALIBABA_CLIENT_SECRET || process.env.ALIBABA_SECRET_KEY || '';} 
+function token(){return process.env.ALIBABA_ACCESS_TOKEN || process.env.ALIBABA_TOKEN || process.env.ALIBABA_SESSION || process.env.ALIBABA_SESSION_KEY || '';} 
 function signTop(params, secret, method='hmac'){
   const keys=Object.keys(params).filter(k=>params[k]!==undefined && params[k]!==null && k!=='sign').sort();
   const base=keys.map(k=>`${k}${params[k]}`).join('');
@@ -196,7 +196,7 @@ export default async function handler(req,res){
   cors(res); if(req.method==='OPTIONS') return res.status(200).end(); if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
   const q=String(req.query.q||req.query.keyword||'').trim(); const maxPrice=parseMax(req.query.maxPrice||req.query.max||0); const size=Math.min(Math.max(Number(req.query.size||15),1),30);
   const ak=appKey(), secret=appSecret(), tk=token();
-  if(!ak || !secret || !tk) return res.status(200).json({ok:false,provider:'Alibaba',products:[],message:'Faltan variables Alibaba en Vercel.',seen:{ALIBABA_APP_KEY:Boolean(ak),ALIBABA_APP_SECRET:Boolean(secret),ALIBABA_ACCESS_TOKEN:Boolean(tk)}});
+  if(!ak || !secret || !tk) return res.status(200).json({ok:false,provider:'Alibaba',products:[],message:'Faltan variables Alibaba en Vercel.',seen:{ALIBABA_APP_KEY:Boolean(ak),ALIBABA_APP_SECRET:Boolean(secret),ALIBABA_ACCESS_TOKEN:Boolean(tk), acceptedNames:['ALIBABA_APP_KEY/ALIBABA_CLIENT_ID','ALIBABA_APP_SECRET/ALIBABA_CLIENT_SECRET','ALIBABA_ACCESS_TOKEN/ALIBABA_TOKEN/ALIBABA_SESSION']}});
   const listed=await listProducts(q,size);
   let rawItems=listed.products || [];
   const enriched=[];

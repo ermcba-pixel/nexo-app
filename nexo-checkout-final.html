@@ -1303,7 +1303,7 @@ function selectPayment(methodId, btnEl=null) {
                     <div class="cart-item-main">
                         <div class="cart-item-provider">${item.providerLogo} ${item.provider}</div>
                         <div class="cart-item-name">${item.name}</div>
-                        ${item.features ? `<div class="cart-item-features">${item.features}</div>` : ''}
+                        
                     </div>
                     <div class="cart-item-costs">
                         <div class="cart-item-price">$${item.price.toFixed(2)}</div>
@@ -1475,17 +1475,10 @@ const t = ctt();
             const amount = Number(orderData.total || 0).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}&paypal=return`;
-            const cancelUrl = `${window.location.origin}/nexo-checkout.html?pedido_id=${encodeURIComponent(pedidoId)}&pago=cancelado&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}`;
+            const cancelUrl = `${window.location.origin}/nexo-tienda-cliente.html?pago=cancelado&pedido_id=${encodeURIComponent(pedidoId)}&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}`;
 
-            // PayPal Standard LIVE directo: restaura el flujo que ya funcionaba.
-            // El cliente entra a PayPal, coloca su cuenta, paga y vuelve a nexo.
-            const fallbackSuccessUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&pago=aprobado&metodo=paypal&fallback=standard`;
-            const paypalLiveUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com')}&item_name=${encodeURIComponent('nexo - Pedido ' + pedidoId)}&invoice=${encodeURIComponent(pedidoId)}&amount=${encodeURIComponent(amount)}&currency_code=USD&no_shipping=0&return=${encodeURIComponent(fallbackSuccessUrl)}&cancel_return=${encodeURIComponent(cancelUrl)}`;
-            orderData.estado_pago = 'paypal_standard_redireccionado_cliente';
-            orderData.paypal_destination = NEXO_PAYPAL_EMAIL || 'ermcba@hotmail.com';
-            localStorage.setItem('nexoLastOrder', JSON.stringify(orderData));
-            window.location.href = paypalLiveUrl;
-            return;
+            // Primero intenta PayPal Orders API LIVE, que abre login PayPal y vuelve a nexo.
+            // PayPal Standard queda solo como respaldo si el endpoint no responde.
 
             try {
                 const r = await fetch('/api/paypal-create-order', {
