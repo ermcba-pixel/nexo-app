@@ -46,40 +46,69 @@ async function fetchText(url, opts={}){
 function pickImage(p){
   const candidates=[
     p?.main_image?.images?.[0], p?.mainImage?.images?.[0], p?.main_image?.url, p?.mainImage?.url,
-    p?.image, p?.image_url, p?.imageUrl, p?.picture_url, p?.pictureUrl, p?.thumbnail, p?.thumb_url,
+    p?.image, p?.image_url, p?.imageUrl, p?.picture_url, p?.pictureUrl, p?.pic_url, p?.picUrl,
+    p?.thumbnail, p?.thumb_url, p?.thumbnail_url, p?.poster,
     Array.isArray(p?.images)?p.images[0]:null, Array.isArray(p?.product_images)?p.product_images[0]:null,
+    Array.isArray(p?.productImages)?p.productImages[0]:null, Array.isArray(p?.productImage)?p.productImage[0]:null,
     p?.product?.main_image?.images?.[0], p?.result?.product?.main_image?.images?.[0]
   ];
-  return String(candidates.find(Boolean)||'').trim();
+  const v=candidates.find(Boolean);
+  if(typeof v==='object') return String(v.url || v.imageUrl || v.image_url || v.picUrl || v.pic_url || '').trim();
+  return String(v||'').trim();
+}
+function numberFrom(v){
+  if(v===null || v===undefined || v==='') return 0;
+  if(typeof v==='number') return Number.isFinite(v)?v:0;
+  const m=String(v).replace(/,/g,'').match(/[0-9]+(?:\.[0-9]+)?/g);
+  if(!m) return 0;
+  const nums=m.map(Number).filter(n=>Number.isFinite(n)&&n>0);
+  return nums.length?Math.min(...nums):0;
 }
 function pickPrice(p){
-  const scalar=[p?.price,p?.min_price,p?.minPrice,p?.fob_price,p?.fobPrice,p?.reference_price,p?.referencePrice,p?.wholesale_trade?.price,p?.wholesaleTrade?.price,p?.priceInfo?.price,p?.price_info?.price,p?.product?.wholesale_trade?.price,p?.result?.product?.wholesale_trade?.price];
-  const nested=[p?.price_range,p?.priceRange,p?.price_ranges,p?.priceRanges,p?.wholesale_trade?.price_ranges,p?.wholesaleTrade?.priceRanges,p?.product?.wholesale_trade?.price_ranges];
+  const scalar=[p?.price,p?.min_price,p?.minPrice,p?.fob_price,p?.fobPrice,p?.reference_price,p?.referencePrice,p?.promotion_price,p?.promotionPrice,p?.wholesale_trade?.price,p?.wholesaleTrade?.price,p?.priceInfo?.price,p?.price_info?.price,p?.product?.wholesale_trade?.price,p?.result?.product?.wholesale_trade?.price];
+  const nested=[p?.price_range,p?.priceRange,p?.price_ranges,p?.priceRanges,p?.wholesale_trade?.price_ranges,p?.wholesaleTrade?.priceRanges,p?.product?.wholesale_trade?.price_ranges,p?.sku_infos,p?.skuInfos,p?.product_sku_infos,p?.productSkuInfos];
   const vals=[];
-  for(const v of scalar){ const n=Number(String(v??'').replace(/[^0-9.]/g,'')); if(Number.isFinite(n)&&n>0) vals.push(n); }
+  for(const v of scalar){ const n=numberFrom(v); if(n>0) vals.push(n); }
   for(const obj of nested){
     const arr=Array.isArray(obj)?obj:[obj];
-    for(const x of arr){ const n=Number(String(x?.price ?? x?.min_price ?? x?.minPrice ?? x).replace(/[^0-9.]/g,'')); if(Number.isFinite(n)&&n>0) vals.push(n); }
+    for(const x of arr){ const n=numberFrom(x?.price ?? x?.min_price ?? x?.minPrice ?? x?.sale_price ?? x?.salePrice ?? x?.fob_price ?? x?.fobPrice ?? x); if(n>0) vals.push(n); }
   }
   return vals.length?Math.min(...vals):0;
 }
 function productArray(data){
-  const roots=[data,data?.result,data?.response,data?.alibaba_icbu_product_list_response?.result,data?.alibaba_icbu_product_list_response,data?.alibaba_icbu_product_get_response?.result,data?.alibaba_icbu_product_get_response,data?.result?.products,data?.result?.product];
-  const keys=['products','product','product_list','productList','items','item_list','data','list','result_list'];
-  for(const root of roots){
-    if(!root) continue;
-    if(Array.isArray(root)) return root;
-    if(typeof root==='object'){
-      for(const k of keys){ if(Array.isArray(root[k])) return root[k]; }
-      for(const v of Object.values(root)){ if(Array.isArray(v)) return v; }
-    }
+  const keys=['products','product','product_list','productList','items','item_list','data','list','result_list','productInfos','product_infos','offerList','offer_list'];
+  const seen=new Set();
+  function scoreItem(x){
+    if(!x || typeof x!=='object') return 0;
+    let s=0;
+    if(pid(x)) s+=3;
+    if(pickImage(x)) s+=2;
+    if(pickPrice(x)>0) s+=2;
+    if(x.subject||x.name||x.title||x.product_name||x.productName) s+=2;
+    return s;
   }
-  return [];
+  function walk(node, depth=0){
+    if(!node || depth>7) return [];
+    if(Array.isArray(node)){
+      const obj=node.filter(x=>x && typeof x==='object');
+      if(obj.length && obj.some(x=>scoreItem(x)>=3)) return obj;
+      for(const x of obj){ const r=walk(x, depth+1); if(r.length) return r; }
+      return [];
+    }
+    if(typeof node==='object'){
+      if(seen.has(node)) return [];
+      seen.add(node);
+      for(const k of keys){ if(Array.isArray(node[k])){ const r=walk(node[k], depth+1); if(r.length) return r; } }
+      for(const v of Object.values(node)){ const r=walk(v, depth+1); if(r.length) return r; }
+    }
+    return [];
+  }
+  return walk(data);
 }
 function productObject(data){
   return data?.result?.product || data?.product || data?.alibaba_icbu_product_get_response?.result?.product || data?.alibaba_icbu_product_get_response?.product || null;
 }
-function pid(p){return p?.id || p?.product_id || p?.productId || p?.offer_id || p?.offerId || p?.encrypted_id || p?.encryptedId || '';}
+function pid(p){return p?.id || p?.product_id || p?.productId || p?.offer_id || p?.offerId || p?.offerIdStr || p?.product_id_str || p?.encrypted_id || p?.encryptedId || '';}
 function normalizeProduct(p,idx,q){
   const id=pid(p) || `ali-${idx}`;
   const name=p?.subject || p?.name || p?.title || p?.product_name || p?.productName || `Alibaba ${translate(q)}`;
@@ -123,11 +152,26 @@ async function callDirect(path, extra){
 }
 async function listProducts(q,size){
   const subject=translate(q);
-  const extra={current_page:'1',page_size:String(Math.min(size,30)),subject};
-  const apiNames=['/alibaba/icbu/product/list','alibaba.icbu.product.list'];
+  const pageSize=String(Math.min(size,30));
+  const requestJson=JSON.stringify({currentPage:1,pageSize:Number(pageSize),keywords:subject,subject,query:subject});
+  const variants=[
+    {current_page:'1',page_size:pageSize,subject},
+    {currentPage:'1',pageSize:pageSize,subject},
+    {current_page:'1',page_size:pageSize,keywords:subject},
+    {currentPage:'1',pageSize:pageSize,keywords:subject},
+    {page:'1',pageSize:pageSize,keyword:subject},
+    {pageNo:'1',pageSize:pageSize,query:subject},
+    {product_list_request:requestJson},
+    {productListRequest:requestJson},
+    {product_search_request:requestJson},
+    {productSearchRequest:requestJson}
+  ];
+  const apiNames=['/alibaba/icbu/product/list','alibaba.icbu.product.list','alibaba.icbu.product.search','/icbu/product/list'];
   const attempts=[];
-  for(const apiName of apiNames){ const r=await callRouter(apiName,extra); attempts.push(...(r.attempts||[])); if(r.ok){ const arr=productArray(r.data); if(arr.length) return {ok:true,products:arr,raw:r.data,attempts}; }}
-  for(const path of ['/alibaba/icbu/product/list','/icbu/product/list','/api/alibaba/icbu/product/list']){ const r=await callDirect(path,extra); attempts.push(...(r.attempts||[])); if(r.ok){ const arr=productArray(r.data); if(arr.length) return {ok:true,products:arr,raw:r.data,attempts}; }}
+  for(const extra of variants){
+    for(const apiName of apiNames){ const r=await callRouter(apiName,extra); attempts.push(...(r.attempts||[])); if(r.ok){ const arr=productArray(r.data); if(arr.length) return {ok:true,products:arr,raw:r.data,attempts}; }}
+    for(const path of ['/alibaba/icbu/product/list','/icbu/product/list','/api/alibaba/icbu/product/list']){ const r=await callDirect(path,extra); attempts.push(...(r.attempts||[])); if(r.ok){ const arr=productArray(r.data); if(arr.length) return {ok:true,products:arr,raw:r.data,attempts}; }}
+  }
   return {ok:false,products:[],attempts};
 }
 async function getProductDetail(id){

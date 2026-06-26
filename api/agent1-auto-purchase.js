@@ -63,7 +63,7 @@ export default async function handler(req,res){
   const hasCreatorsApi = Boolean(process.env.AMAZON_ACCESS_KEY && process.env.AMAZON_SECRET_KEY && process.env.AMAZON_ASSOCIATE_TAG);
   const productionEnabled = String(process.env.AMAZON_PRODUCTION_ENABLED || process.env.AMAZON_AUTO_PURCHASE_ENABLED || '').toLowerCase() === 'true';
 
-  const affiliateTag = process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
+  const affiliateTag = process.env.AMAZON_ASSOCIATE_TAG || 'nexo20-8';
   const amazonLinks = items.map((item, index) => {
     const asin = item.asin || item.ASIN || item.amazonAsin || '';
     const rawUrl = item.url || item.providerUrl || item.amazonUrl || item.link || '';

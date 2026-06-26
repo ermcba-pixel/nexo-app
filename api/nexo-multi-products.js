@@ -8,6 +8,48 @@ function cors(res){
 }
 function clean(s){ return String(s||'').trim(); }
 function money(n){ const x=Number(n||0); return Number.isFinite(x) ? Number(x.toFixed(2)) : 0; }
+function parseMinMax(req){
+  const min = Number(req.query.minPrice || req.query.min || 0);
+  const max = Number(req.query.maxPrice || req.query.max || 0);
+  return {min:Number.isFinite(min)&&min>0?min:0, max:Number.isFinite(max)&&max>0?max:0};
+}
+function withinRange(p,range){
+  const provider = String(p.provider||p.proveedor||'').toLowerCase();
+  if(provider.includes('amazon') || p.amazonDirect || p.externalOnly) return true;
+  const price = money(p.price);
+  if(price<=0) return false;
+  if(range.min && price<range.min) return false;
+  if(range.max && price>range.max) return false;
+  return true;
+}
+function parseRange(req){
+  const nums = String(req.query.priceRange || req.query.rango || req.query.maxPrice || req.query.max || '').match(/[0-9]+(?:\.[0-9]+)?/g) || [];
+  const arr = nums.map(Number).filter(Number.isFinite).filter(n=>n>=0);
+  if(arr.length === 0) return {min:0,max:0};
+  if(arr.length === 1) return {min:Number(req.query.minPrice || req.query.min || 0) || 0, max:arr[0]};
+  return {min:Math.min(...arr), max:Math.max(...arr)};
+}
+function inRange(p, range){
+  const price = money(p?.price || p?.cjProductCost || 0);
+  if(price <= 0) return false;
+  if(range.min > 0 && price < range.min) return false;
+  if(range.max > 0 && price > range.max) return false;
+  return true;
+}
+function parsePriceRange(v){
+  const raw=String(v ?? '').trim();
+  const nums=raw.match(/[0-9]+(?:\.[0-9]+)?/g)||[];
+  const arr=nums.map(Number).filter(Number.isFinite).filter(n=>n>=0);
+  if(!arr.length) return {min:0,max:0};
+  if(arr.length===1) return {min:0,max:arr[0]};
+  return {min:Math.min(...arr),max:Math.max(...arr)};
+}
+function apiSearchTerm(q){
+  const key=String(q||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  const map={zapato:'shoes',zapatos:'shoes',zapatilla:'sneakers',zapatillas:'sneakers',camisa:'shirt',camisas:'shirts',calcetin:'socks',calcetines:'socks',media:'socks',medias:'socks'};
+  return map[key] || q;
+}
+
 function sortProducts(products){
   return products
     .filter(p=>p && money(p.price)>0)
@@ -41,14 +83,14 @@ function normalizeFromTable(row){
     features:'Producto registrado en proveedor_productos de Supabase.'
   };
 }
-async function searchSupabaseProductos(q, maxPrice){
+async function searchSupabaseProductos(q, priceRange){
   try{
     const { sb } = await import('./_nexo-supabase.js');
     const term = encodeURIComponent(`%${q}%`);
     let path = `proveedor_productos?select=*&or=(nombre_original.ilike.${term},descripcion_original.ilike.${term},sku_original.ilike.${term})&limit=20`;
     const rows = await sb(path, {method:'GET', prefer:'return=representation'});
     let products = Array.isArray(rows) ? rows.map(normalizeFromTable) : [];
-    if(Number(maxPrice)>0) products = products.filter(p=>p.price<=Number(maxPrice));
+    products = products.filter(p=>inRange(p, priceRange));
     return products;
   }catch(e){ return []; }
 }
@@ -59,17 +101,19 @@ export default async function handler(req,res){
   if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
 
   const q = clean(req.query.q || req.query.search || '');
-  const maxPrice = Number(req.query.maxPrice || req.query.max || 0);
+  const priceRange = parseRange(req);
+  const maxPrice = priceRange.max;
   const category = clean(req.query.category || '');
   const size = Math.min(Math.max(Number(req.query.size || 20),1),60);
   if(!q) return res.status(200).json({ok:true, products:[], providers:[], message:'Ingrese un producto para buscar'});
 
   const qs = new URLSearchParams({q, size:String(size), lang:clean(req.query.lang||'es')});
-  if(Number(maxPrice)>0) qs.set('maxPrice', String(maxPrice));
+  if(Number(priceRange.min)>0) qs.set('minPrice', String(priceRange.min));
+  if(Number(priceRange.max)>0) qs.set('maxPrice', String(priceRange.max));
   if(category) qs.set('category', category);
 
   const results = await Promise.allSettled([
-    searchSupabaseProductos(q,maxPrice),
+    searchSupabaseProductos(q,priceRange),
     callLocal(req, `/api/cj-products?${qs.toString()}`),
     callLocal(req, `/api/alibaba-products?${qs.toString()}&size=15`),
     callLocal(req, `/api/amazon-products?${qs.toString()}`)
@@ -90,10 +134,11 @@ export default async function handler(req,res){
     if(data.ok !== false && Array.isArray(data.products)) products.push(...data.products);
   }
 
-  const amazon = products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon')).slice(0,1);
-  const cj = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
-  const alibaba = sortProducts(products.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
-  const out = [...amazon, ...sortProducts([...cj, ...alibaba])].slice(0,size);
+  const rangedProducts = products.filter(p=>withinRange(p, range));
+  const amazon = rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon') || p.amazonDirect || p.externalOnly).slice(0,1);
+  const cj = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
+  const alibaba = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
+  const out = [...amazon, ...sortProducts([...cj, ...alibaba])].filter(p=>inRange(p, priceRange)).slice(0,size);
   return res.status(200).json({
     ok:true,
     provider:'Multi-proveedor',

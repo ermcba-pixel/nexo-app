@@ -494,14 +494,7 @@ async function filterProducts(){
       const alibaba = results.alibaba || {ok:true, products:[]};
       const supa = {ok:true, products:[]};
       const amazon = results.amazon || {ok:true, products:[]};
-      if((!providerSel || providerSel==='cj') && (cj.products||[]).length < 15){
-        const extra = makeCjFallbackProducts(search, priceRange, cat).filter(x=>nexoRelevantToSearch(x, search));
-        cj.products = uniqueNexoProducts([...(cj.products||[]), ...extra]).slice(0,15);
-      }
-      if((!providerSel || providerSel==='alibaba') && (alibaba.products||[]).length < 15){
-        const extraAli = makeAlibabaFallbackProducts(search, priceRange, cat).filter(x=>nexoRelevantToSearch(x, search));
-        alibaba.products = uniqueNexoProducts([...(alibaba.products||[]), ...extraAli]).slice(0,15);
-      }
+      // Productos reales solamente: no se rellenan CJ/Alibaba con catálogos de prueba.
       const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
         .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))

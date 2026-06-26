@@ -13,7 +13,7 @@ export default async function handler(req,res){
   if(req.method==='OPTIONS') return res.status(200).end();
   if(req.method!=='GET') return res.status(405).json({ok:false,error:'Método no permitido'});
   const appKey = process.env.ALIBABA_APP_KEY || '';
-  const callback = process.env.ALIBABA_CALLBACK_URL || 'https://nexoservicios.online/api/alibaba/callback';
+  const callback = process.env.ALIBABA_CALLBACK_URL || process.env.ALIBABA_REDIRECT_URI || 'https://nexoservicios.online/api/alibaba-callback';
   if(!appKey) return res.status(500).json({ok:false,error:'Falta ALIBABA_APP_KEY en Vercel'});
   const state = req.query.state || `nexo-${Date.now()}`;
   const authBase = process.env.ALIBABA_AUTH_URL || 'https://openapi-auth.alibaba.com/oauth/authorize';

@@ -8,7 +8,7 @@ function cors(res){
 function num(v){ const n=Number(v||0); return Number.isFinite(n)?Number(n.toFixed(2)):0; }
 function safe(s){ return encodeURIComponent(String(s||'')); }
 function amazonUrl(row){
-  const tag = row.amazon_tag || process.env.AMAZON_ASSOCIATE_TAG || 'nexo08-20';
+  const tag = row.amazon_tag || process.env.AMAZON_ASSOCIATE_TAG || 'nexo20-8';
   const asin = row.amazon_asin && !String(row.amazon_asin).includes('PENDIENTE') ? row.amazon_asin : '';
   if(asin) return `https://www.amazon.com/dp/${safe(asin)}?tag=${safe(tag)}`;
   if(row.producto_url) return String(row.producto_url).includes('tag=') ? row.producto_url : `${row.producto_url}${row.producto_url.includes('?')?'&':'?'}tag=${safe(tag)}`;
