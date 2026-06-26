@@ -16,23 +16,34 @@ function cors(res){
 }
 
 async function fetchJson(url, options={}, timeoutMs=15000){
-  const ctrl = new AbortController();
-  const timer = setTimeout(()=>ctrl.abort(), timeoutMs);
-  try{
-    const r = await fetch(url, {...options, signal: ctrl.signal});
-    const text = await r.text();
-    let data = {};
-    try{ data = text ? JSON.parse(text) : {}; }catch(e){ data = {raw:text}; }
-    if(!r.ok){
-      const err = new Error(data?.message || data?.error || `HTTP ${r.status}`);
-      err.status = r.status;
-      err.data = data;
-      throw err;
+  let lastErr;
+  for(let attempt=0; attempt<3; attempt++){
+    if(attempt>0) await new Promise(r=>setTimeout(r, 1200 * attempt));
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), timeoutMs);
+    try{
+      const r = await fetch(url, {...options, signal: ctrl.signal});
+      const text = await r.text();
+      let data = {};
+      try{ data = text ? JSON.parse(text) : {}; }catch(e){ data = {raw:text}; }
+      const msg=String(data?.message || data?.error || '');
+      if((r.status===429 || /Too Many Requests|QPS/i.test(msg)) && attempt<2){ clearTimeout(timer); continue; }
+      if(!r.ok){
+        const err = new Error(data?.message || data?.error || `HTTP ${r.status}`);
+        err.status = r.status;
+        err.data = data;
+        throw err;
+      }
+      clearTimeout(timer);
+      return data;
+    }catch(e){
+      clearTimeout(timer);
+      lastErr=e;
+      if(attempt<2 && /Too Many Requests|QPS|Abort/i.test(String(e.message||e))) continue;
+      throw e;
     }
-    return data;
-  } finally {
-    clearTimeout(timer);
   }
+  throw lastErr || new Error('CJ sin respuesta');
 }
 
 async function getCjAccessToken(){

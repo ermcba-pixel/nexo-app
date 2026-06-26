@@ -567,7 +567,7 @@
                 <div class="header-subtitle" id="chkSubtitle">Compra Segura • 256-bit SSL • 196 Países</div>
             </div>
         </div>
-        <button class="back-btn" onclick="window.location.href='nexo-tienda-cliente.html'"><span id="backStore">← <span id="confirmBackText">Volver</span> a Tienda</span></button>
+        <button class="back-btn" onclick="nexoReturnToStore()"><span id="backStore">← <span id="confirmBackText">Volver</span> a Tienda</span></button>
     </div>
 
     <!-- CONTENEDOR PRINCIPAL -->
@@ -1469,18 +1469,23 @@ const t = ctt();
         }
         function closeConfirmationModal(){ document.getElementById('confirmationModal').style.display='none'; }
 
+        function nexoReturnToStore(){
+            window.location.href='nexo-tienda-cliente.html?restore=1';
+        }
+
         async function startNexoPagoSeguro(orderData){
             // PAYPAL REAL: el cliente paga a PayPal Business de nexo.
             // El Agente 1 espera confirmación/captura PayPal y luego prepara la compra CJ Dropshipping.
             const amount = Number(orderData.total || 0).toFixed(2);
             const pedidoId = orderData.supabase_id || orderData.id || ('NEXO-' + Date.now());
             const successUrl = `${window.location.origin}/nexo-confirmacion.html?pedido_id=${encodeURIComponent(pedidoId)}&invoice=${encodeURIComponent(orderData.factura_numero || pedidoId)}&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}&paypal=return`;
-            const cancelUrl = `${window.location.origin}/nexo-tienda-cliente.html?pago=cancelado&pedido_id=${encodeURIComponent(pedidoId)}&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}`;
+            const cancelUrl = `${window.location.origin}/nexo-tienda-cliente.html?restore=1&pago=cancelado&pedido_id=${encodeURIComponent(pedidoId)}&metodo=${encodeURIComponent(orderData.paymentMethod || 'paypal')}`;
 
             // Primero intenta PayPal Orders API LIVE, que abre login PayPal y vuelve a nexo.
             // PayPal Standard queda solo como respaldo si el endpoint no responde.
 
-            try {
+            const useOrdersApi = String(localStorage.getItem('nexoUsePaypalOrdersApi') || '').toLowerCase() === 'true';
+            if(useOrdersApi) try {
                 const r = await fetch('/api/paypal-create-order', {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},

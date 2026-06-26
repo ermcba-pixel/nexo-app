@@ -96,13 +96,14 @@
 
 <script>
 const NEXO_AMAZON_TAG='nexo20-8';
-const NEXO_STORE_VERSION='20260625_STEP5_AMAZON_CJ_ALIBABA';
+const NEXO_STORE_VERSION='20260626_ACJALB_STABLE_RETURN_ALIBABA';
 let products=[];
 let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
 function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function nexoAmazonSearchTerm(search){
   const raw=String(search||'').trim();
   const q=normalizeText(raw);
+  if(/cordon|cordones|lace|laces|shoelace|shoelaces/.test(q)) return 'shoelaces';
   if(/zapato|zapatos/.test(q) && !/zapatilla|zapatillas|tenis|sneaker|sneakers/.test(q)) return 'zapatos';
   if(/zapatilla|zapatillas|tenis|sneaker|sneakers/.test(q)) return 'zapatillas';
   if(/camisa|camisas|shirt|shirts/.test(q)) return 'camisas';
@@ -255,13 +256,27 @@ async function fetchCjProducts(search,priceRange,catSel){
   if(catSel) params.set('category', catSel);
   params.set('size','50');
   params.set('lang', (localStorage.getItem('nexoLang') || localStorage.getItem('nexo_language') || 'es').slice(0,2));
-  const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 15000);
-  const res = await fetch('/api/cj-products?'+params.toString()+'&v=CJREAL20260610', {cache:'no-store', signal: ctrl.signal});
-  clearTimeout(timeout);
-  const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, status:data.status || 'error', message:data.message || data.error || 'CJ API no disponible', setup:data.setup || [], products:[]};
-  return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), outOfBudget: !!data.outOfBudget, message:data.message||''};
+  let lastData={};
+  for(let attempt=0; attempt<3; attempt++){
+    if(attempt>0) await new Promise(r=>setTimeout(r, 1200 * attempt));
+    const ctrl = new AbortController();
+    const timeout = setTimeout(()=>ctrl.abort(), 25000);
+    try{
+      const res = await fetch('/api/cj-products?'+params.toString()+'&v=CJREAL20260626QPS', {cache:'no-store', signal: ctrl.signal});
+      clearTimeout(timeout);
+      const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
+      lastData=data;
+      const msg=String(data.message || data.error || '');
+      if((res.status===429 || /Too Many Requests|QPS/i.test(msg)) && attempt<2) continue;
+      if(!res.ok || data.ok === false) return {ok:false, status:data.status || 'error', message:data.message || data.error || 'CJ API no disponible', setup:data.setup || [], products:[]};
+      return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), outOfBudget: !!data.outOfBudget, message:data.message||''};
+    }catch(e){
+      clearTimeout(timeout);
+      if(attempt<2 && String(e.name||e.message||e).includes('Abort')) continue;
+      return {ok:false, message:e.message || String(e), products:[]};
+    }
+  }
+  return {ok:false, message:lastData.message || lastData.error || 'CJ sin respuesta', products:[]};
 }
 async function fetchProviderProducts(search,priceRange,catSel){
   const params = new URLSearchParams();
@@ -288,11 +303,11 @@ async function fetchAlibabaProducts(search,priceRange,catSel){
   if(catSel) params.set('category', catSel);
   params.set('size','50');
   const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 10000);
-  const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260625R3', {cache:'no-store', signal: ctrl.signal});
+  const timeout = setTimeout(()=>ctrl.abort(), 45000);
+  const res = await fetch('/api/alibaba-products?'+params.toString()+'&v=ALI20260626REAL', {cache:'no-store', signal: ctrl.signal});
   clearTimeout(timeout);
   const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
-  if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Alibaba no disponible', products:[]};
+  if(!res.ok || data.ok === false) return {ok:false, message:data.message || data.error || 'Alibaba no devolvió productos reales con ese término/rango. Revisar permisos del endpoint oficial en Vercel.', products:[]};
   return {ok:true, products:(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0), message:data.message||''};
 }
 
@@ -363,7 +378,7 @@ function nexoCatalogImage(search, provider, idx){
     bags:['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&w=800&q=80'],
     default:['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80']
   };
-  const arr=/calcetin|media|sock/.test(q)?sets.socks:/camisa|shirt|polera|blusa/.test(q)?sets.shirts:/zapato|zapatilla|sneaker|shoe/.test(q)?sets.shoes:/mochila|bag|backpack/.test(q)?sets.bags:sets.default;
+  const arr=/calcetin|media|sock/.test(q)?sets.socks:/camisa|shirt|polera|blusa/.test(q)?sets.shirts:/cordon|cordones|lace|laces|shoelace|shoelaces|zapato|zapatilla|sneaker|shoe/.test(q)?sets.shoes:/mochila|bag|backpack/.test(q)?sets.bags:sets.default;
   return arr[idx%arr.length];
 }
 function nexoSyntheticPriceWithinRange(idx, range, base){
@@ -591,7 +606,7 @@ function updateCartSummary(){
   document.getElementById('commission').textContent=commission.toFixed(2);
   document.getElementById('totalPrice').textContent=total.toFixed(2);
 }
-function goToCheckout(){if(cart.length)location.href='nexo-checkout.html';}
+function goToCheckout(){if(cart.length){nexoSaveStoreReturnState(); location.href='nexo-checkout.html';}}
 document.addEventListener('DOMContentLoaded',()=>{
   updateCartCount();
   let restored=false;

@@ -13,7 +13,7 @@ function clean(v){return String(v||'').trim();}
 function norm(v){return clean(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,' ').replace(/\s+/g,' ').trim();}
 function amazonTerm(q){
   const n=norm(q);
-  const map={zapato:'zapatos',zapatos:'zapatos',zapatilla:'zapatillas',zapatillas:'zapatillas',tenis:'sneakers',calcetin:'socks',calcetines:'socks',media:'socks',medias:'socks',camisa:'shirt',camisas:'shirts',polera:'t shirt',poleras:'t shirts',blusa:'blouse',blusas:'blouses',pantalon:'pants',pantalones:'pants',mochila:'backpack',mochilas:'backpack',celular:'phone',telefono:'phone',audifonos:'earbuds',auriculares:'earbuds',reloj:'watch',relojes:'watches'};
+  const map={cordon:'shoelaces',cordones:'shoelaces',zapato:'zapatos',zapatos:'zapatos',zapatilla:'zapatillas',zapatillas:'zapatillas',tenis:'sneakers',calcetin:'socks',calcetines:'socks',media:'socks',medias:'socks',camisa:'shirt',camisas:'shirts',polera:'t shirt',poleras:'t shirts',blusa:'blouse',blusas:'blouses',pantalon:'pants',pantalones:'pants',mochila:'backpack',mochilas:'backpack',celular:'phone',telefono:'phone',audifonos:'earbuds',auriculares:'earbuds',reloj:'watch',relojes:'watches'};
   return map[n] || clean(q) || 'product';
 }
 function amazonUrl(q){
