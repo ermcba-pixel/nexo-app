@@ -462,7 +462,7 @@ function renderProducts(list){
         ${isAmazonDirect ? '' : `<div class="product-rating">★★★★★ (128 ${nexoStoreT('reviews')})</div>`}
         ${priceHtml}
         <div class="product-stock">${nexoStoreT('stock')}: ${nexoHtmlEscape(p.stock)}</div>
-        ${isAmazonDirect ? '' : `<div class="product-features">${p.features || nexoProductFeatures(p)}</div>`}
+        
         ${actionHtml}
       </div>
     </div>`;
@@ -495,13 +495,13 @@ async function filterProducts(){
       const supa = {ok:true, products:[]};
       const amazon = results.amazon || {ok:true, products:[]};
       // Productos reales solamente: no se rellenan CJ/Alibaba con catálogos de prueba.
-      const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
+      const combined = uniqueNexoProducts([...(cj.products||[]), ...(alibaba.products||[]), ...(supa.products||[]), ...(amazon.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
         .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))
         // Amazon afiliado se conserva al inicio aunque no traiga precio numérico, porque va directo a Amazon con nexo20-8.
         // CJ/Alibaba sí respetan estrictamente el rango variable que escriba el cliente.
         .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoProductWithinRange(p, priceRange))
-        .filter(p => normalizeText(p.provider||p.proveedor||'').includes('amazon') || normalizeText(p.provider||p.proveedor||'').includes('cj') || !!nexoStoreImageFor(p));
+        .filter(p => normalizeText(p.provider||p.proveedor||'').includes('amazon') || normalizeText(p.provider||p.proveedor||'').includes('cj') || normalizeText(p.provider||p.proveedor||'').includes('alibaba') || !!nexoStoreImageFor(p));
       const amazonDirect = combined.filter(p=>p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')).slice(0, providerSel && providerSel!=='amazon' ? 0 : 1);
       const rest = combined.filter(p=>!(p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')));
       if(amazonDirect[0]){
@@ -514,10 +514,17 @@ async function filterProducts(){
       }
       const limitedRest = nexoLimitByProvider(rest, providerSel ? {cj:50,alibaba:50,amazon:0,otro:0} : {cj:15,alibaba:15,amazon:0,otro:0})
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0));
-      products = [...amazonDirect, ...limitedRest].slice(0,31);
+      products = [...limitedRest, ...amazonDirect].slice(0,31);
       renderProducts(products);
       if(!products.length && (!cj.ok || !alibaba.ok || !amazon.ok)){
-        grid.innerHTML='<div class="api-note">No se encontraron productos. Detalle técnico:<br><small>CJ: '+String(cj.message||'sin respuesta')+'</small><br><small>Alibaba: '+String((typeof alibaba!=='undefined' && alibaba.message)||'sin respuesta')+'</small><br><small>Amazon: '+String((typeof amazon!=='undefined' && amazon.message)||'sin respuesta')+'</small><br><small>Pruebas: /api/cj-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/alibaba-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+' | /api/amazon-products?q='+encodeURIComponent(search)+'&maxPrice='+encodeURIComponent(maxRaw||'')+'</small></div>';
+        const msg = providerSel === 'alibaba'
+          ? (alibaba.message || 'Alibaba no devolvió productos reales para esta búsqueda. Verifique token/permisos de la API en Vercel y pruebe otro término o rango.')
+          : providerSel === 'cj'
+            ? (cj.message || 'CJ no devolvió productos reales para esta búsqueda.')
+            : providerSel === 'amazon'
+              ? (amazon.message || 'Amazon afiliado no respondió para esta búsqueda.')
+              : 'No se encontraron productos reales disponibles para esa búsqueda y presupuesto.';
+        grid.innerHTML='<div class="api-note">'+nexoHtmlEscape(msg)+'</div>';
       }
       if(cj.outOfBudget && products.length){
         const grid=document.getElementById('productsGrid');

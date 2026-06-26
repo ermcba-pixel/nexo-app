@@ -20,21 +20,24 @@ function translate(q){
 function appKey(){return process.env.ALIBABA_APP_KEY || process.env.ALIBABA_APPKEY || '';} 
 function appSecret(){return process.env.ALIBABA_APP_SECRET || process.env.ALIBABA_APPSECRET || '';} 
 function token(){return process.env.ALIBABA_ACCESS_TOKEN || process.env.ALIBABA_TOKEN || '';} 
-function hmacSha256Hex(secret, text){return crypto.createHmac('sha256', secret).update(text, 'utf8').digest('hex').toUpperCase();}
-function signParams(params, secret){
+function signTop(params, secret, method='hmac'){
   const keys=Object.keys(params).filter(k=>params[k]!==undefined && params[k]!==null && k!=='sign').sort();
   const base=keys.map(k=>`${k}${params[k]}`).join('');
-  return hmacSha256Hex(secret, base);
+  if(method === 'md5') return crypto.createHash('md5').update(secret + base + secret, 'utf8').digest('hex').toUpperCase();
+  if(method === 'sha256') return crypto.createHmac('sha256', secret).update(base, 'utf8').digest('hex').toUpperCase();
+  return crypto.createHmac('md5', secret).update(base, 'utf8').digest('hex').toUpperCase();
 }
-function baseParams(apiName, extra, apiField='method'){
+function baseParams(apiName, extra, apiField='method', signMethod='hmac', includeAccessToken=false){
   const params={
-    app_key:appKey(), session:token(), access_token:token(),
+    app_key:appKey(), session:token(),
     timestamp:new Date().toISOString().slice(0,19).replace('T',' '),
-    format:'json', v:'2.0', sign_method:'sha256',
+    format:'json', v:'2.0', sign_method:signMethod,
+    partner_id:'nexo',
     ...extra
   };
+  if(includeAccessToken) params.access_token = token();
   params[apiField]=apiName;
-  params.sign=signParams(params, appSecret());
+  params.sign=signTop(params, appSecret(), signMethod);
   return params;
 }
 async function fetchText(url, opts={}){
@@ -118,29 +121,34 @@ function normalizeProduct(p,idx,q){
   return {id:`alibaba-${String(id).replace(/[^a-zA-Z0-9_-]/g,'_')}`,alibabaProductId:String(id),sku:`ALI-${String(id).slice(0,24)}`,name,title:name,price:Number(price.toFixed(2)),cjProductCost:Number(price.toFixed(2)),provider:'Alibaba',proveedor:'Alibaba',vendor:'Alibaba',providerLogo:'🇨🇳',category:p?.category_id||p?.categoryId||'Alibaba',stock:'Verificar MOQ, stock y envío con Alibaba',shippingAmazon:0,cjShippingCost:0,vendorFee:0,cjHandlingFee:0,sourceUrl:url,url,originalProviderUrl:url,image,source:'alibaba-open-platform-real',owner:p?.owner_member_display_name||p?.ownerMemberDisplayName||'',features:'Producto real de Alibaba Open Platform. Confirmar MOQ, precio final, stock y envío antes de comprar.'};
 }
 async function callRouter(apiName, extra){
-  const routers=(process.env.ALIBABA_ROUTER_URLS || 'https://openapi.alibaba.com/router/rest,https://api.alibaba.com/router/rest,https://gw.open.alibaba.com/router/rest').split(',').map(s=>s.trim()).filter(Boolean);
+  const routers=(process.env.ALIBABA_ROUTER_URLS || 'https://eco.taobao.com/router/rest,https://gw.api.taobao.com/router/rest,https://openapi.alibaba.com/router/rest,https://api.alibaba.com/router/rest,https://gw.open.alibaba.com/router/rest').split(',').map(s=>s.trim()).filter(Boolean);
   const apiFields=['method','apiName','api_name','api','path'];
+  const signMethods=['hmac','md5','sha256'];
   const attempts=[];
   for(const router of routers){
     for(const field of apiFields){
-      const params=baseParams(apiName,extra,field);
-      const qs=new URLSearchParams(params).toString();
-      try{
-        const getOut=await fetchText(router+'?'+qs);
-        attempts.push({router,field,method:'GET',status:getOut.status,body:(getOut.text||'').slice(0,220)});
-        if(getOut.ok && getOut.data) return {ok:true,data:getOut.data,attempts};
-      }catch(e){attempts.push({router,field,method:'GET',error:String(e.message||e)});}
-      try{
-        const postOut=await fetchText(router,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:qs});
-        attempts.push({router,field,method:'POST',status:postOut.status,body:(postOut.text||'').slice(0,220)});
-        if(postOut.ok && postOut.data) return {ok:true,data:postOut.data,attempts};
-      }catch(e){attempts.push({router,field,method:'POST',error:String(e.message||e)});}
+      for(const signMethod of signMethods){
+        for(const includeAccessToken of [false,true]){
+          const params=baseParams(apiName,extra,field,signMethod,includeAccessToken);
+          const qs=new URLSearchParams(params).toString();
+          try{
+            const postOut=await fetchText(router,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded;charset=utf-8'},body:qs});
+            attempts.push({router,field,signMethod,includeAccessToken,method:'POST',status:postOut.status,body:(postOut.text||'').slice(0,220)});
+            if(postOut.ok && postOut.data && !String(postOut.text||'').includes('Invalid signature')) return {ok:true,data:postOut.data,attempts};
+          }catch(e){attempts.push({router,field,signMethod,includeAccessToken,method:'POST',error:String(e.message||e)});}
+          try{
+            const getOut=await fetchText(router+'?'+qs);
+            attempts.push({router,field,signMethod,includeAccessToken,method:'GET',status:getOut.status,body:(getOut.text||'').slice(0,220)});
+            if(getOut.ok && getOut.data && !String(getOut.text||'').includes('Invalid signature')) return {ok:true,data:getOut.data,attempts};
+          }catch(e){attempts.push({router,field,signMethod,includeAccessToken,method:'GET',error:String(e.message||e)});}
+        }
+      }
     }
   }
   return {ok:false,attempts};
 }
 async function callDirect(path, extra){
-  const bases=(process.env.ALIBABA_API_BASES || 'https://openapi.alibaba.com,https://api.alibaba.com,https://gw.open.alibaba.com').split(',').map(s=>s.trim()).filter(Boolean);
+  const bases=(process.env.ALIBABA_API_BASES || 'https://openapi.alibaba.com,https://api.alibaba.com,https://gw.open.alibaba.com,https://eco.taobao.com,https://gw.api.taobao.com').split(',').map(s=>s.trim()).filter(Boolean);
   const attempts=[];
   for(const base of bases){
     const params={app_key:appKey(),access_token:token(),...extra};
@@ -200,7 +208,7 @@ export default async function handler(req,res){
       if(detail) merged={...item,...detail};
     }
     const n=normalizeProduct(merged,enriched.length,q);
-    if(n.price>0 && n.image) enriched.push(n);
+    if(n.price>0) enriched.push(n);
   }
   let products=enriched;
   if(maxPrice>0) products=products.filter(p=>p.price<=maxPrice);
@@ -212,7 +220,7 @@ export default async function handler(req,res){
     endpoint:'/alibaba/icbu/product/list + /icbu/product/get',
     count:products.length,
     products,
-    message:products.length?'Productos reales Alibaba devueltos.':'Alibaba no devolvió productos reales con imagen y precio. No se muestran productos ni fotos de prueba.',
-    diagnostic:products.length?undefined:{reason:listed.ok?'list_without_price_or_image':'list_empty_or_unreachable', attempts:(listed.attempts||[]).slice(-20)}
+    message:products.length?'Productos reales Alibaba devueltos.':'Alibaba no devolvió productos reales con precio. No se muestran productos ni fotos de prueba.',
+    diagnostic:products.length?undefined:{reason:listed.ok?'list_without_price':'list_empty_or_unreachable', attempts:(listed.attempts||[]).slice(-20)}
   });
 }
