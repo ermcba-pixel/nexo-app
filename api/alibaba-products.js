@@ -30,9 +30,9 @@ function signTop(params, secret, method='hmac'){
 function baseParams(apiName, extra, apiField='method', signMethod='hmac', includeAccessToken=false){
   const params={
     app_key:appKey(), session:token(),
-    timestamp:new Date().toISOString().slice(0,19).replace('T',' '),
+    timestamp:new Date(Date.now()+8*60*60*1000).toISOString().slice(0,19).replace('T',' '),
     format:'json', v:'2.0', sign_method:signMethod,
-    partner_id:'nexo',
+    partner_id:'nexo', simplify:'true',
     ...extra
   };
   if(includeAccessToken) params.access_token = token();
@@ -163,12 +163,12 @@ async function listProducts(q,size){
   const pageSize=String(Math.min(size,30));
   const requestJson=JSON.stringify({currentPage:1,pageSize:Number(pageSize),keywords:subject,subject,query:subject});
   const variants=[
-    {current_page:'1',page_size:pageSize,subject},
-    {currentPage:'1',pageSize:pageSize,subject},
-    {current_page:'1',page_size:pageSize,keywords:subject},
-    {currentPage:'1',pageSize:pageSize,keywords:subject},
-    {page:'1',pageSize:pageSize,keyword:subject},
-    {pageNo:'1',pageSize:pageSize,query:subject},
+    {current_page:'1',page_size:pageSize,subject,language:'ENGLISH'},
+    {currentPage:'1',pageSize:pageSize,subject,language:'ENGLISH'},
+    {current_page:'1',page_size:pageSize,keywords:subject,language:'ENGLISH'},
+    {currentPage:'1',pageSize:pageSize,keywords:subject,language:'ENGLISH'},
+    {page:'1',pageSize:pageSize,keyword:subject,language:'ENGLISH'},
+    {pageNo:'1',pageSize:pageSize,query:subject,language:'ENGLISH'},
     {product_list_request:requestJson},
     {productListRequest:requestJson},
     {product_search_request:requestJson},
@@ -184,8 +184,8 @@ async function listProducts(q,size){
 }
 async function getProductDetail(id){
   if(!id) return null;
-  const req=JSON.stringify({productId:String(id)});
-  const extra={product_get_request:req, productId:String(id), id:String(id)};
+  const req=JSON.stringify({product_id:String(id),productId:String(id),language:'ENGLISH'});
+  const extra={product_get_request:req, product_id:String(id), productId:String(id), id:String(id), language:'ENGLISH'};
   const apiNames=['/icbu/product/get','alibaba.icbu.product.get'];
   for(const apiName of apiNames){ const r=await callRouter(apiName,extra); if(r.ok){ const obj=productObject(r.data); if(obj) return obj; }}
   for(const path of ['/icbu/product/get','/alibaba/icbu/product/get']){ const r=await callDirect(path,extra); if(r.ok){ const obj=productObject(r.data); if(obj) return obj; }}

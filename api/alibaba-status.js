@@ -1,16 +1,20 @@
 // nexo™ – Estado de integración Alibaba
+function pick(...names){ for(const n of names){ if(process.env[n]) return process.env[n]; } return ''; }
 export default async function handler(req,res){
   res.setHeader('Cache-Control','no-store');
+  const appKey=pick('ALIBABA_APP_KEY','ALIBABA_APPKEY','ALIBABA_CLIENT_ID','ALIBABA_APP_ID');
+  const appSecret=pick('ALIBABA_APP_SECRET','ALIBABA_APPSECRET','ALIBABA_CLIENT_SECRET','ALIBABA_SECRET_KEY');
+  const token=pick('ALIBABA_ACCESS_TOKEN','ALIBABA_TOKEN','ALIBABA_SESSION','ALIBABA_SESSION_KEY');
   return res.status(200).json({
-    ok:true,
+    ok:Boolean(appKey&&appSecret&&token),
     provider:'Alibaba',
-    appKeyConfigured:Boolean(process.env.ALIBABA_APP_KEY),
-    appSecretConfigured:Boolean(process.env.ALIBABA_APP_SECRET),
+    appKeyConfigured:Boolean(appKey),
+    appSecretConfigured:Boolean(appSecret),
+    accessTokenConfigured:Boolean(token),
     callbackConfigured:Boolean(process.env.ALIBABA_CALLBACK_URL),
-    appKeySuffix:String(process.env.ALIBABA_APP_KEY||'').slice(-3),
+    appKeySuffix:String(appKey||'').slice(-3),
     oauth:'OAuth 2.0 Server-side',
-    appStatus:'Test / SystemAPI Active',
-    agent:'agente1',
-    readyForNexo:true
+    officialApis:['alibaba.icbu.product.list','alibaba.icbu.product.get'],
+    readyForNexo:Boolean(appKey&&appSecret&&token)
   });
 }
