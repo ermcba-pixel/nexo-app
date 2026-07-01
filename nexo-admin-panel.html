@@ -820,12 +820,7 @@ body{
                         <div class="card-value">0</div>
                         <div class="card-change">Transacciones</div>
                     </div>
-                    <div class="card">
-                        <div class="card-icon">📱</div>
-                        <div class="card-label">PAYONEER</div>
-                        <div class="card-value">0</div>
-                        <div class="card-change">Transacciones</div>
-                    </div>
+
                 </div>
             </div>
 
@@ -1367,10 +1362,10 @@ function getClientProfile() {
             const sec = document.getElementById('payments');
             if(!sec) return;
             const orders = getOrdersData();
-            const by = {card:0, bank:0, paypal:0, payoneer:0};
-            orders.forEach(o=>{ const k=(o.paymentMethod||'').toLowerCase(); if(k.includes('card')||k.includes('tarjeta')) by.card++; else if(k.includes('bank')||k.includes('transfer')) by.bank++; else if(k.includes('payoneer')) by.payoneer++; else by.paypal++; });
+            const by = {card:0, bank:0, paypal:0};
+            orders.forEach(o=>{ const k=(o.paymentMethod||'').toLowerCase(); if(k.includes('card')||k.includes('tarjeta')) by.card++; else if(k.includes('bank')||k.includes('transfer')) by.bank++; else if(k.includes('paypal')) by.paypal++; });
             const cards = sec.querySelectorAll('.card-value');
-            if(cards.length>=4){ cards[0].textContent=String(by.card); cards[1].textContent=String(by.bank); cards[2].textContent=String(by.paypal); cards[3].textContent=String(by.payoneer); }
+            if(cards.length>=3){ cards[0].textContent=String(by.card); cards[1].textContent=String(by.bank); cards[2].textContent=String(by.paypal); }
             let box = document.getElementById('paymentsTableWrap');
             if(!box){ box=document.createElement('div'); box.id='paymentsTableWrap'; box.className='section-box'; sec.appendChild(box); }
             box.innerHTML = `<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Proveedor</th><th>Comisión neta</th></tr></thead><tbody>${orders.length?orders.map(o=>`<tr><td>${o.id||''}</td><td>${o.customer?.fullName || o.fullName || ''}</td><td>${(o.paymentMethod||'').toUpperCase()}</td><td>${toMoney(o.totals?.total ?? o.total ?? 0)}</td><td>${toMoney(o.totals?.providerPayment ?? o.providerPayment ?? 0)}</td><td>${toMoney(o.totals?.netCommissionAfterTaxes ?? o.netCommissionAfterTaxes ?? 0)}</td></tr>`).join(''):`<tr><td colspan="6">Sin pagos registrados</td></tr>`}</tbody></table></div>`;
@@ -2022,7 +2017,7 @@ function moneyAdmin(v){ return 'US$ '+Number(v||0).toFixed(2); }
 async function loadDashboard(){ try{await fetchNexoAdminData();}catch(e){console.warn(e);} const revenue=nexoOrdersCache.reduce((a,o)=>a+Number(o.total_cliente_usd||o.precio_usd||0),0); const pending=nexoOrdersCache.filter(o=>String(o.estado||'').toLowerCase().includes('pend')||String(o.estado_pago||'').toLowerCase().includes('pend')).length; const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;}; set('totalOrders',nexoOrdersCache.length); set('activeClients',nexoCustomersCache.length); set('totalRevenue',moneyAdmin(revenue)); set('pendingOrders',pending); }
 async function loadOrders(){ const table=document.getElementById('ordersTable'); if(!table)return; table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Cargando pedidos reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){table.innerHTML='<tr><td colspan="6">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoOrdersCache.length){table.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);">Sin pedidos reales registrados todavía.</td></tr>'; return;} table.innerHTML=nexoOrdersCache.map(o=>`<tr><td>${String(o.id||'').slice(0,8)}</td><td>${o.cliente_nombre||''} ${o.cliente_apellido||''}</td><td>${o.cliente_email||''}</td><td>${moneyAdmin(o.total_cliente_usd||o.precio_usd)}</td><td>${o.estado_pago||o.estado||'pendiente'}</td><td>${o.creado_en?new Date(o.creado_en).toLocaleDateString('es-BO'):'-'}</td></tr>`).join(''); }
 async function renderCustomers(){ const tbody=document.getElementById('customersTable'); if(!tbody)return; tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--gray);">Cargando clientes reales...</td></tr>'; try{await fetchNexoAdminData();}catch(e){tbody.innerHTML='<tr><td colspan="5">Error cargando Supabase: '+e.message+'</td></tr>'; return;} if(!nexoCustomersCache.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--gray);">No hay clientes registrados</td></tr>'; return;} const counts={}; nexoOrdersCache.forEach(o=>{const em=(o.cliente_email||'').toLowerCase(); if(em)counts[em]=(counts[em]||0)+1;}); tbody.innerHTML=nexoCustomersCache.map(c=>`<tr><td>${c.nombre||''} ${c.apellido||''}</td><td>${c.email||''}</td><td>${c.codigo_area||''} ${c.telefono||''}</td><td>${c.pais||''}</td><td>${counts[(c.email||'').toLowerCase()]||0}</td></tr>`).join(''); }
-async function renderPayments(){ const sec=document.getElementById('payments'); if(!sec)return; try{await fetchNexoAdminData();}catch(e){} const by={card:0,bank:0,paypal:0,payoneer:0}; nexoOrdersCache.forEach(o=>{const k=String(o.metodo_pago||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('transfer'))by.bank++; else if(k.includes('card')||k.includes('tarjeta'))by.card++;}); const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer;} }
+async function renderPayments(){ const sec=document.getElementById('payments'); if(!sec)return; try{await fetchNexoAdminData();}catch(e){} const by={card:0,bank:0,paypal:0}; nexoOrdersCache.forEach(o=>{const k=String(o.metodo_pago||'').toLowerCase(); if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('transfer'))by.bank++; else if(k.includes('card')||k.includes('tarjeta'))by.card++;}); const cards=sec.querySelectorAll('.card-value'); if(cards.length>=3){cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal;} }
 window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboard();}catch(e){}},500);});
 </script>
 
@@ -2074,8 +2069,8 @@ window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{try{loadDashboar
     const pagos = cache.pagos || [];
     const orders = cache.pedidos || [];
     const rows = pagos.length ? pagos : orders.map(o=>({pedido_id:o.id, metodo:o.metodo_pago, monto_usd:o.total_cliente_usd || o.precio_usd, estado:o.estado_pago, cliente_nombre:o.cliente_nombre, factura:o.factura_numero}));
-    const by={card:0, bank:0, paypal:0, payoneer:0}; rows.forEach(p=>{ const k=String(p.metodo||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer'))by.bank++; else by.card++; });
-    const cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){ cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; cards[3].textContent=by.payoneer; }
+    const by={card:0, bank:0, paypal:0}; rows.forEach(p=>{ const k=String(p.metodo||'').toLowerCase(); if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer'))by.bank++; else by.card++; });
+    const cards=sec.querySelectorAll('.card-value'); if(cards.length>=3){ cards[0].textContent=by.card; cards[1].textContent=by.bank; cards[2].textContent=by.paypal; }
     let box=document.getElementById('paymentsTableWrap'); if(!box){ box=document.createElement('div'); box.id='paymentsTableWrap'; box.className='section-box'; sec.appendChild(box); }
     box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th><th>Acción</th></tr></thead><tbody>' + (rows.length ? rows.map(p=>`<tr><td>${esc(p.factura || p.pedido_id || '')}</td><td>${esc(p.cliente_nombre || '')}</td><td>${esc(String(p.metodo||'').toUpperCase())}</td><td>${money(p.monto_usd)}</td><td>${esc(p.estado||'')}</td></tr>`).join('') : '<tr><td colspan="5">Sin pagos registrados</td></tr>') + '</tbody></table></div>';
   };
@@ -2311,8 +2306,8 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
   window.renderPayments=async function(){
     await loadAll(); var sec=document.getElementById('payments'); if(!sec)return;
     var rows=cache.pagos.length?cache.pagos:cache.pedidos.map(function(o){return {factura:o.factura_numero||o.id,cliente_nombre:((o.cliente_nombre||'')+' '+(o.cliente_apellido||'')).trim(),metodo:o.metodo_pago||o.paymentMethod,monto_usd:o.monto_usd||o.total_cliente_usd||o.total,estado:o.estado_pago||o.estado};});
-    var by={card:0,bank:0,paypal:0,payoneer:0}; rows.forEach(function(p){var k=String(p.metodo||'').toLowerCase(); if(k.includes('payoneer'))by.payoneer++; else if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer')||k.includes('ach'))by.bank++; else by.card++;});
-    var cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card;cards[1].textContent=by.bank;cards[2].textContent=by.paypal;cards[3].textContent=by.payoneer;}
+    var by={card:0,bank:0,paypal:0}; rows.forEach(function(p){var k=String(p.metodo||'').toLowerCase(); if(k.includes('paypal'))by.paypal++; else if(k.includes('bank')||k.includes('wire')||k.includes('transfer')||k.includes('ach'))by.bank++; else by.card++;});
+    var cards=sec.querySelectorAll('.card-value'); if(cards.length>=3){cards[0].textContent=by.card;cards[1].textContent=by.bank;cards[2].textContent=by.paypal;}
     var box=document.getElementById('paymentsTableWrap'); if(!box){box=document.createElement('div');box.id='paymentsTableWrap';box.className='section-box';sec.appendChild(box);}
     box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>'+(rows.length?rows.map(function(p){return '<tr>'+cell(p.factura||p.pedido_id||'')+cell(p.cliente_nombre||p.cliente||'')+cell(String(p.metodo||'').toUpperCase())+cell(money(p.monto_usd||p.total_usd||p.monto||0))+cell(p.estado||'')+'</tr>';}).join(''):'<tr><td colspan="5">Sin pagos registrados</td></tr>')+'</tbody></table></div>';
   };
@@ -2425,9 +2420,9 @@ window.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('.sup
   window.renderPayments = async function(){
     await ensureAdminData(); var sec=document.getElementById('payments'); if(!sec)return; var c=getCache();
     var rows=(c.pagos&&c.pagos.length)?c.pagos:(c.pedidos||[]).map(function(o){return {factura:o.factura_numero||o.id,cliente_nombre:fullName(o),metodo:o.metodo_pago||o.paymentMethod,monto_usd:o.monto_usd||o.total_cliente_usd||o.total_usd||o.total,estado:o.estado_pago||o.estado,pedido_id:o.id};});
-    var by={card:0,bank:0,paypal:0,payoneer:0};
-    rows.forEach(function(p){var k=norm(p.metodo||p.metodo_pago||p.payment_method); if(k.indexOf('payoneer')>=0)by.payoneer++; else if(k.indexOf('paypal')>=0)by.paypal++; else if(k.indexOf('bank')>=0||k.indexOf('wire')>=0||k.indexOf('transfer')>=0||k.indexOf('ach')>=0)by.bank++; else by.card++;});
-    var cards=sec.querySelectorAll('.card-value'); if(cards.length>=4){cards[0].textContent=by.card;cards[1].textContent=by.bank;cards[2].textContent=by.paypal;cards[3].textContent=by.payoneer;}
+    var by={card:0,bank:0,paypal:0};
+    rows.forEach(function(p){var k=norm(p.metodo||p.metodo_pago||p.payment_method); if(k.indexOf('paypal')>=0)by.paypal++; else if(k.indexOf('bank')>=0||k.indexOf('wire')>=0||k.indexOf('transfer')>=0||k.indexOf('ach')>=0)by.bank++; else by.card++;});
+    var cards=sec.querySelectorAll('.card-value'); if(cards.length>=3){cards[0].textContent=by.card;cards[1].textContent=by.bank;cards[2].textContent=by.paypal;}
     var box=document.getElementById('paymentsTableWrap'); if(!box){box=document.createElement('div');box.id='paymentsTableWrap';box.className='section-box';sec.appendChild(box);}
     box.innerHTML='<div class="section-box-title">Detalle horizontal de pagos</div><div style="overflow:auto"><table class="table"><thead><tr><th>Factura</th><th>Cliente</th><th>Método</th><th>Total cobrado</th><th>Estado</th></tr></thead><tbody>'+(rows.length?rows.map(function(p){var ref=p.factura||p.factura_numero||p.pedido_id||p.id_pedido||p.order_id||''; return '<tr>'+cell(ref)+cell(clienteDePago(p))+cell(String(p.metodo||p.metodo_pago||p.payment_method||'').toUpperCase())+cell(money(p.monto_usd||p.total_usd||p.monto||p.total_cliente_usd||0))+cell(p.estado||p.estado_pago||'')+'</tr>';}).join(''):'<tr><td colspan="5">Sin pagos registrados</td></tr>')+'</tbody></table></div>';
   };

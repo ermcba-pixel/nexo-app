@@ -1230,7 +1230,7 @@ function nexoLocalSoporte(question){
   if(q.includes('ticket') || q.includes('pedido') || q.includes('order')){
     return `He revisado tu consulta como Agente 2 de Soporte nexo.\n\nPara ubicar tu ticket o pedido necesito que completes o confirmes:\n1. Correo usado en la compra.\n2. Número de pedido o comprobante, si lo tienes.\n3. Producto y fecha aproximada.\n\nCódigo preliminar de atención: ${ticket}\n\nTambién puedes llenar el formulario de la izquierda para dejar registro formal.`;
   }
-  if(q.includes('pago') || q.includes('paypal') || q.includes('payoneer')){
+  if(q.includes('pago') || q.includes('paypal') || q.includes('transferencia')){
     return `Como Agente 2 de Soporte nexo, para revisar pagos necesito método de pago, fecha, monto y correo usado.\n\nCódigo preliminar de atención: ${ticket}`;
   }
   if(q.includes('devol') || q.includes('cambio') || q.includes('reclamo')){

@@ -114,9 +114,10 @@ export default async function handler(req,res){
 
   const results = await Promise.allSettled([
     searchSupabaseProductos(q,priceRange),
+    callLocal(req, `/api/amazon-products?${qs.toString()}`),
     callLocal(req, `/api/cj-products?${qs.toString()}`),
-    callLocal(req, `/api/alibaba-products?${qs.toString()}&size=15`),
-    callLocal(req, `/api/amazon-products?${qs.toString()}`)
+    callLocal(req, `/api/shein-products?${qs.toString()}&size=15`),
+    callLocal(req, `/api/alibaba-products?${qs.toString()}&size=15`)
   ]);
 
   const products=[];
@@ -134,17 +135,19 @@ export default async function handler(req,res){
     if(data.ok !== false && Array.isArray(data.products)) products.push(...data.products);
   }
 
-  const rangedProducts = products.filter(p=>withinRange(p, range));
+  const rangedProducts = products.filter(p=>withinRange(p, priceRange));
   const amazon = rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('amazon') || p.amazonDirect || p.externalOnly).slice(0,1);
   const cj = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('cj'))).slice(0,15);
+  const shein = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('shein'))).slice(0,15);
   const alibaba = sortProducts(rangedProducts.filter(p=>String(p.provider||p.proveedor||'').toLowerCase().includes('alibaba'))).slice(0,15);
-  const out = [...amazon, ...sortProducts([...cj, ...alibaba])].filter(p=>inRange(p, priceRange)).slice(0,size);
+  const priced = sortProducts([...cj, ...shein, ...alibaba]).filter(p=>inRange(p, priceRange));
+  const out = [...priced, ...amazon].slice(0,size);
   return res.status(200).json({
     ok:true,
     provider:'Multi-proveedor',
     providers:[...new Set(providers)],
     count:out.length,
-    mode:'cj_alibaba_amazon_supabase',
+    mode:'amazon_cj_shein_alibaba_supabase',
     notices,
     products:out
   });

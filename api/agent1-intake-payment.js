@@ -34,12 +34,11 @@ export default async function handler(req,res){
     const commission = money(order.commission || order?.totals?.commission);
     const total = money(order.total || order?.totals?.total);
 
-    const payoneerUrl = process.env.PAYONEER_PAYMENT_URL || process.env.PAYONEER_CHECKOUT_URL || '';
     const methodStatus = paymentMethod === 'card'
       ? 'tarjeta_pendiente_pasarela_directa'
       : (paymentMethod === 'bank'
         ? 'transferencia_datos_guardados_pendiente_pasarela_ach'
-        : (paymentMethod === 'payoneer' ? (payoneerUrl ? 'payoneer_redireccionando_checkout' : 'payoneer_url_no_configurada') : 'pendiente_captura_server_side'));
+        : 'pendiente_captura_server_side');
 
     const intake = {
       ok:true,
@@ -52,7 +51,6 @@ export default async function handler(req,res){
       provider:(order.items||[]).some(i=>String(i.provider||i.proveedor||'').toLowerCase().includes('amazon')) ? 'Amazon' : ((order.items||[]).some(i=>String(i.provider||i.proveedor||'').toLowerCase().includes('alibaba')) ? 'Alibaba' : 'CJ Dropshipping'),
       cjReady:Boolean(process.env.CJ_API_KEY),
       paypalAdvancedReady:Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
-      payoneerUrl: paymentMethod === 'payoneer' ? payoneerUrl : '',
       next:[
         'capturar pago del cliente solo cuando exista pasarela directa habilitada',
         'para ACH/Wire: esperar pasarela bancaria autorizada o confirmación real de abono',
@@ -81,9 +79,6 @@ export default async function handler(req,res){
         storesCardData:'solo mascara/ultimos4',
         cvvStored:false
       };
-    }
-    if(paymentMethod === 'payoneer'){
-      intake.payoneer = {mode:'Payoneer Checkout/API', configured:Boolean(payoneerUrl), checkoutUrl:payoneerUrl || null};
     }
 
     // Intento opcional de registrar en Supabase si existen variables del proyecto.
