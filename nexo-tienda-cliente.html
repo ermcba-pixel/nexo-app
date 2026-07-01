@@ -96,7 +96,7 @@
 
 <script>
 const NEXO_AMAZON_TAG='nexo20-8';
-const NEXO_STORE_VERSION='20260626_ACJALB_STABLE_RETURN_ALIBABA';
+const NEXO_STORE_VERSION='20260701_SHEIN_CJ_RESTORE_V5';
 let products=[];
 let cart=JSON.parse(localStorage.getItem('nexoCart')||'[]');
 function normalizeText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
@@ -182,7 +182,7 @@ function nexoOpenAmazonExternal(url){
 function detectCategory(q, selected){
   if(selected) return selected;
   if(/iphone|celular|phone|laptop|usb|cargador|mouse|teclado|auricular|monitor|tablet/.test(q)) return 'electronica';
-  if(/zapato|tenis|camisa|polera|pantalon|cordon|cordones|ropa|moda|shoe|shirt/.test(q)) return 'moda';
+  if(/zapato|tenis|camisa|polera|pantalon|cordon|cordones|calcetin|calcetines|media|medias|ropa|moda|shoe|shirt|sock|socks/.test(q)) return 'moda';
   if(/lapiz|lápiz|boligrafo|bolígrafo|cuaderno|oficina|papel|carpeta|marcador/.test(q)) return 'oficina';
   if(/belleza|crema|maquillaje|shampoo|perfume|beauty|skin/.test(q)) return 'belleza';
   if(/hogar|cocina|casa|home|kitchen/.test(q)) return 'hogar';
@@ -592,9 +592,9 @@ async function filterProducts(){
         const msg = providerSel === 'alibaba'
           ? (alibaba.message || 'Alibaba no devolvió productos reales para esta búsqueda. Verifique token/permisos de la API en Vercel y pruebe otro término o rango.')
           : providerSel === 'shein'
-            ? (shein.message || 'SHEIN no devolvió productos reales todavía. Revise /api/shein-status y complete openKeyId/secretKey o sincronice shein_products_cache.')
+            ? 'SHEIN API está activa en NEXO, pero aún faltan openKeyId/secretKey o productos sincronizados en shein_products_cache para mostrar tarjetas internas como CJ.'
             : providerSel === 'cj'
-              ? (cj.message || 'CJ no devolvió productos reales para esta búsqueda.')
+              ? (cj.message || 'CJ no devolvió productos reales para esta búsqueda. Pruebe otro término, aumente el rango o revise CJ_API_KEY en Vercel.')
               : providerSel === 'amazon'
                 ? (amazon.message || 'Amazon afiliado no respondió para esta búsqueda.')
                 : 'No se encontraron productos reales disponibles para esa búsqueda y presupuesto.';
@@ -683,7 +683,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   };
   function lang(){return localStorage.getItem('nexoLang')||localStorage.getItem('nexo_language')||'es'}
   window.nexoStoreT=function(k){const d=dict[lang()]||dict.es; return d[k]||dict.es[k]||k};
-  window.applyNexoStoreI18n=function(){const d=dict[lang()]||dict.es; document.documentElement.lang=lang(); document.querySelectorAll('[data-i18n-store]').forEach(el=>{const k=el.getAttribute('data-i18n-store'); if(d[k]) el.textContent=d[k];}); document.querySelectorAll('[data-i18n-placeholder-store]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder-store'); if(d[k]) el.placeholder=d[k];}); document.querySelectorAll('[data-i18n-title-store]').forEach(el=>{const k=el.getAttribute('data-i18n-title-store'); if(d[k]) el.title=d[k];}); const inst=document.getElementById('storeInstruction'); if(inst) inst.innerHTML=d.instruction; const foot=document.querySelector('footer'); if(foot) foot.innerHTML='<strong>nexo™</strong> – '+d.footer1+'<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>'+d.footer3+'<br>© 2026 nexo™ – '+d.rights+'<br><span class="nexo-footer-links"><a href="aviso-legal.html">'+d.legal+'</a> | <a href="terminos-condiciones.html">'+(d.terms||'Términos y Condiciones')+'</a> | <a href="politica-privacidad.html">'+(d.privacy||'Privacidad')+'</a> | <a href="politica-cookies.html">'+(d.cookies||'Cookies')+'</a> | <a href="reembolsos.html">'+(d.refunds||'Reembolsos')+'</a></span>'; };
+  window.applyNexoStoreI18n=function(){const d=dict[lang()]||dict.es; document.documentElement.lang=lang(); document.querySelectorAll('[data-i18n-store]').forEach(el=>{const k=el.getAttribute('data-i18n-store'); if(d[k]) el.textContent=d[k];}); document.querySelectorAll('[data-i18n-placeholder-store]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder-store'); if(d[k]) el.placeholder=d[k];}); document.querySelectorAll('[data-i18n-title-store]').forEach(el=>{const k=el.getAttribute('data-i18n-title-store'); if(d[k]) el.title=d[k];}); const pf=document.getElementById('providerFilter'); if(pf){Array.from(pf.options).forEach(o=>{const k=o.getAttribute('data-i18n-store'); if(k&&d[k]) o.textContent=d[k];});} const cf=document.getElementById('categoryFilter'); if(cf){Array.from(cf.options).forEach(o=>{const k=o.getAttribute('data-i18n-store'); if(k&&d[k]) o.textContent=d[k];});} const inst=document.getElementById('storeInstruction'); if(inst) inst.innerHTML=d.instruction; const foot=document.querySelector('footer'); if(foot) foot.innerHTML='<strong>nexo™</strong> – '+d.footer1+'<br>nexo Servicios Generales y Empresariales – NIT: 774651015 – Bolivia<br>'+d.footer3+'<br>© 2026 nexo™ – '+d.rights+'<br><span class="nexo-footer-links"><a href="aviso-legal.html">'+d.legal+'</a> | <a href="terminos-condiciones.html">'+(d.terms||'Términos y Condiciones')+'</a> | <a href="politica-privacidad.html">'+(d.privacy||'Privacidad')+'</a> | <a href="politica-cookies.html">'+(d.cookies||'Cookies')+'</a> | <a href="reembolsos.html">'+(d.refunds||'Reembolsos')+'</a></span>'; };
   window.addEventListener('DOMContentLoaded',()=>{window.applyNexoStoreI18n(); setTimeout(window.applyNexoStoreI18n,200);});
 })();
 </script>
