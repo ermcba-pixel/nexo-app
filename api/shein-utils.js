@@ -17,7 +17,20 @@ export function cors(res){
   res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
   res.setHeader('Cache-Control','no-store');
 }
-export function money(v){ const n=Number(v||0); return Number.isFinite(n) ? Number(n.toFixed(2)) : 0; }
+export function money(...vals){
+  for(const v of vals){
+    if(v===undefined || v===null || v==='') continue;
+    if(typeof v==='object'){
+      const nested = money(v.amount, v.price, v.value, v.usd, v.salePrice, v.retailPrice);
+      if(nested>0) return nested;
+      continue;
+    }
+    const cleaned = String(v).replace(/[^0-9.,-]/g,'').replace(/,/g,'');
+    const n=Number(cleaned);
+    if(Number.isFinite(n) && n>0) return Number(n.toFixed(2));
+  }
+  return 0;
+}
 export function clean(v){ return String(v||'').trim(); }
 export function b64(v){ return Buffer.from(String(v||''), 'utf8').toString('base64'); }
 export function nowMs(){ return String(Date.now()); }
@@ -75,22 +88,44 @@ export function findFirstArray(obj){
 }
 
 function first(...vals){ for(const v of vals){ if(v!==undefined && v!==null && String(v).trim()) return String(v).trim(); } return ''; }
+function pickDeep(obj, names){
+  const seen = new Set();
+  const lower = new Set(names.map(n=>String(n).toLowerCase()));
+  function walk(x){
+    if(!x || typeof x !== 'object' || seen.has(x)) return '';
+    seen.add(x);
+    if(Array.isArray(x)){
+      for(const it of x){ const y=walk(it); if(y) return y; }
+      return '';
+    }
+    for(const [k,v] of Object.entries(x)){
+      if(lower.has(String(k).toLowerCase()) && v!==undefined && v!==null && String(v).trim()) return v;
+    }
+    for(const v of Object.values(x)){ const y=walk(v); if(y) return y; }
+    return '';
+  }
+  return walk(obj);
+}
+function pickPrice(obj){
+  const v = pickDeep(obj, ['price','salePrice','sale_price','retailPrice','retail_price','suggestedRetailPrice','suggested_retail_price','costPrice','cost_price','skuPrice','shopPrice','supplierPrice','amount','value']);
+  return money(v);
+}
 export function normalizeSheinProduct(row, idx=0){
   const raw = row || {};
-  const id = first(raw.spuCode, raw.spu_code, raw.productId, raw.product_id, raw.goodsSn, raw.goodsCode, raw.skuCode, raw.sku_code, raw.id, `shein-${idx}`);
-  const sku = first(raw.skuCode, raw.sku_code, raw.supplierSku, raw.supplier_sku, raw.sku, id);
-  const name = first(raw.title, raw.productName, raw.product_name, raw.goodsName, raw.name, raw.spuName, 'SHEIN product');
-  const price = money(raw.price, raw.salePrice, raw.sale_price, raw.retailPrice, raw.retail_price, raw.suggestedRetailPrice, raw.suggested_retail_price, raw.costPrice, raw.cost_price);
-  const image = first(raw.imageUrl, raw.image_url, raw.mainImage, raw.main_image, raw.goodsImage, raw.pictureUrl, raw.imgUrl, raw.urlImage, raw.image);
-  const url = first(raw.productUrl, raw.product_url, raw.goodsUrl, raw.url, 'https://www.shein.com');
+  const id = first(raw.spuCode, raw.spu_code, raw.productId, raw.product_id, raw.goodsSn, raw.goodsCode, raw.skuCode, raw.sku_code, raw.id, pickDeep(raw, ['spuCode','productId','goodsSn','goodsCode','skuCode','id']), `shein-${idx}`);
+  const sku = first(raw.skuCode, raw.sku_code, raw.supplierSku, raw.supplier_sku, raw.sku, pickDeep(raw, ['skuCode','supplierSku','sku']), id);
+  const name = first(raw.title, raw.productName, raw.product_name, raw.goodsName, raw.name, raw.spuName, pickDeep(raw, ['title','productName','goodsName','name','spuName']), 'SHEIN product');
+  const price = pickPrice(raw);
+  const image = first(raw.imageUrl, raw.image_url, raw.mainImage, raw.main_image, raw.goodsImage, raw.pictureUrl, raw.imgUrl, raw.urlImage, raw.image, pickDeep(raw, ['imageUrl','mainImage','goodsImage','pictureUrl','imgUrl','urlImage','image','thumbnail','coverImage']));
+  const url = first(raw.productUrl, raw.product_url, raw.goodsUrl, raw.url, pickDeep(raw, ['productUrl','goodsUrl','url']), '');
   return {
     id:String(id).replace(/[^a-zA-Z0-9_-]/g,'_'), sheinProductId:id, sku,
     name, title:name, provider:'SHEIN', proveedor:'SHEIN', vendor:'SHEIN', providerLogo:'🛍️',
     price, cjProductCost:price,
-    category:first(raw.categoryName, raw.category_name, raw.category, raw.catName, 'SHEIN'),
-    brand:first(raw.brandName, raw.brand_name, raw.brand, 'SHEIN'),
+    category:first(raw.categoryName, raw.category_name, raw.category, raw.catName, pickDeep(raw, ['categoryName','category','catName']), 'SHEIN'),
+    brand:first(raw.brandName, raw.brand_name, raw.brand, pickDeep(raw, ['brandName','brand']), 'SHEIN'),
     image, sourceUrl:url, url, originalProviderUrl:url,
-    stock:first(raw.stock, raw.inventory, raw.stockQuantity, raw.stock_quantity, 'Verificar stock SHEIN'),
+    stock:first(raw.stock, raw.inventory, raw.stockQuantity, raw.stock_quantity, pickDeep(raw, ['stock','inventory','stockQuantity']), 'Verificar stock SHEIN'),
     shippingAmazon:0, cjShippingCost:0, vendorFee:0, cjHandlingFee:0,
     source:'shein_open_platform_api', raw
   };

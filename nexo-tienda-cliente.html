@@ -319,33 +319,20 @@ async function fetchSheinProducts(search,priceRange,catSel){
   nexoAppendPriceRangeParams(params, priceRange);
   if(catSel) params.set('category', catSel);
   params.set('size','50');
-  const makeSheinDirect=()=>({
-    id:'shein-direct-'+normalizeText(search).replace(/[^a-z0-9]+/g,'-'),
-    name:'Buscar '+(search||'producto')+' en SHEIN',
-    title:'Buscar '+(search||'producto')+' en SHEIN',
-    provider:'SHEIN', proveedor:'SHEIN', vendor:'SHEIN', providerLogo:'🛍️',
-    sheinDirect:true,
-    displayPrice:'Ver precio en SHEIN',
-    sourceUrl:nexoSheinSearchUrl(search),
-    url:nexoSheinSearchUrl(search),
-    image:nexoCatalogImage(search,'SHEIN',0),
-    stock:'Verificar disponibilidad, tallas, colores y precio final en SHEIN',
-    features:''
-  });
   const ctrl = new AbortController();
-  const timeout = setTimeout(()=>ctrl.abort(), 18000);
+  const timeout = setTimeout(()=>ctrl.abort(), 22000);
   try{
-    const res = await fetch('/api/shein-products?'+params.toString()+'&v=SHEIN20260701API2', {cache:'no-store', signal: ctrl.signal});
+    const res = await fetch('/api/shein-products?'+params.toString()+'&v=SHEIN_REAL_INTERNAL_20260701', {cache:'no-store', signal: ctrl.signal});
     clearTimeout(timeout);
     const data = await res.json().catch(()=>({ok:false,error:'invalid_json'}));
     if(!res.ok || data.ok === false){
-      return {ok:true, message:data.message || data.error || 'SHEIN disponible como búsqueda directa mientras se sincroniza la API.', products:[makeSheinDirect()]};
+      return {ok:false, message:data.message || data.error || 'SHEIN no devolvió productos reales todavía. Falta openKeyId/secretKey o cache de productos.', products:[]};
     }
     const real=(data.products||[]).map(normalizeCjProduct).filter(p=>p.price>0);
-    return {ok:true, products: real.length ? real : [makeSheinDirect()], message:data.message||''};
+    return {ok:real.length>0, products: real, message:data.message||''};
   }catch(e){
     clearTimeout(timeout);
-    return {ok:true, message:e.message || String(e), products:[makeSheinDirect()]};
+    return {ok:false, message:e.message || String(e), products:[]};
   }
 }
 
@@ -502,14 +489,13 @@ function renderProducts(list){
   grid.innerHTML=list.map((p,idx)=>{
     const im=nexoStoreImageFor(p);
     const isAmazonDirect=!!p.amazonDirect;
-    const isSheinDirect=!!p.sheinDirect;
-    const isExternalDirect=isAmazonDirect || isSheinDirect;
-    const providerBtn=isAmazonDirect ? 'Ver en Amazon' : (isSheinDirect ? 'Ver en SHEIN' : nexoStoreT('provider'));
+    const isExternalDirect=isAmazonDirect;
+    const providerBtn=isAmazonDirect ? 'Ver en Amazon' : nexoStoreT('provider');
     const priceHtml=isExternalDirect ? `<div class="product-price">${nexoHtmlEscape(p.displayPrice||'Ver precio')}</div>` : `<div class="product-price">$${Number(p.price||0).toFixed(2)}</div>`;
-    const actionLabel=isAmazonDirect ? 'Ver en Amazon' : (isSheinDirect ? 'Ver en SHEIN' : nexoStoreT('addCart'));
+    const actionLabel=isAmazonDirect ? 'Ver en Amazon' : nexoStoreT('addCart');
     const actionHtml=isExternalDirect ? `<button class="add-to-cart-btn" onclick="nexoOpenExternal((products[${idx}]&& (products[${idx}].sourceUrl||products[${idx}].url)) || ''); return false;">${actionLabel}</button>` : `<button class="add-to-cart-btn" onclick="addToCartByIndex(${idx})">${nexoStoreT('addCart')}</button>`;
     return `
-    <div class="product-card ${isAmazonDirect?'amazon-direct-card':(isSheinDirect?'shein-direct-card':'')}">
+    <div class="product-card ${isAmazonDirect?'amazon-direct-card':''}">
       <div class="product-image">${im ? `<img src="${nexoHtmlEscape(im)}" alt="${nexoHtmlEscape(p.name)}" loading="lazy" onerror="this.closest('.product-image').innerHTML='<div style=\'font-size:12px;color:#6b7c7d;padding:16px;text-align:center\'>Imagen no disponible por API</div>'">` : `<div style="font-size:12px;color:#6b7c7d;padding:16px;text-align:center">Imagen no disponible por API</div>`}</div>
       <div class="product-info">
         <div class="provider">${nexoHtmlEscape(p.providerLogo||'')} ${nexoHtmlEscape(p.provider||'')}</div>
@@ -556,14 +542,13 @@ async function filterProducts(){
       // Productos reales solamente: no se rellenan CJ/Alibaba con catálogos de prueba.
       const combined = uniqueNexoProducts([...(amazon.products||[]), ...(cj.products||[]), ...(shein.products||[]), ...(alibaba.products||[]), ...(supa.products||[])])
         .filter(p => !providerSel || normalizeText(p.provider||p.proveedor||'').replace(/\s+/g,'').includes(providerSel.replace(/\s+/g,'')))
-        .filter(p => (p.amazonDirect || p.sheinDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))
+        .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoRelevantToSearch(p, search))
         // Amazon afiliado se conserva al inicio aunque no traiga precio numérico, porque va directo a Amazon con nexo20-8.
         // CJ/Alibaba sí respetan estrictamente el rango variable que escriba el cliente.
-        .filter(p => (p.amazonDirect || p.sheinDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoProductWithinRange(p, priceRange))
+        .filter(p => (p.amazonDirect || p.externalOnly || normalizeText(p.provider||p.proveedor||'').includes('amazon')) || nexoProductWithinRange(p, priceRange))
         .filter(p => normalizeText(p.provider||p.proveedor||'').includes('amazon') || normalizeText(p.provider||p.proveedor||'').includes('cj') || normalizeText(p.provider||p.proveedor||'').includes('shein') || normalizeText(p.provider||p.proveedor||'').includes('alibaba') || !!nexoStoreImageFor(p));
       const amazonDirect = combined.filter(p=>p.amazonDirect || normalizeText(p.provider||p.proveedor||'').includes('amazon')).slice(0, providerSel && providerSel!=='amazon' ? 0 : 1);
-      const sheinDirect = combined.filter(p=>p.sheinDirect).slice(0, providerSel && providerSel!=='shein' ? 0 : 1);
-      const rest = combined.filter(p=>!(p.amazonDirect || p.sheinDirect || normalizeText(p.provider||p.proveedor||'').includes('amazon')));
+      const rest = combined.filter(p=>!(p.amazonDirect || normalizeText(p.provider||p.proveedor||'').includes('amazon')));
       if(amazonDirect[0]){
         amazonDirect[0].sourceUrl = nexoAmazonAffiliateUrl(search);
         amazonDirect[0].url = amazonDirect[0].sourceUrl;
@@ -572,21 +557,13 @@ async function filterProducts(){
         amazonDirect[0].features = '';
         amazonDirect[0].image = nexoCatalogImage(search,'Amazon',0);
       }
-      if(sheinDirect[0]){
-        sheinDirect[0].sourceUrl = nexoSheinSearchUrl(search);
-        sheinDirect[0].url = sheinDirect[0].sourceUrl;
-        sheinDirect[0].name = 'Buscar '+(search||'producto')+' en SHEIN';
-        sheinDirect[0].title = sheinDirect[0].name;
-        sheinDirect[0].features = '';
-        sheinDirect[0].image = nexoCatalogImage(search,'SHEIN',1);
-      }
       const limitedRest = nexoLimitByProvider(rest, providerSel ? {cj:50,shein:50,alibaba:50,amazon:0,otro:0} : {cj:15,shein:15,alibaba:15,amazon:0,otro:0})
         .filter(p=>nexoProductWithinRange(p, priceRange))
         .sort((a,b)=>Number(a.price||0)-Number(b.price||0));
       // Amazon siempre primero; los productos con precio van ordenados de menor a mayor sin importar proveedor.
       if(providerSel === 'amazon') products = amazonDirect;
-      else if(providerSel === 'shein') products = [...limitedRest, ...sheinDirect].slice(0,46);
-      else products = [...amazonDirect, ...limitedRest, ...sheinDirect].slice(0,46);
+      else if(providerSel === 'shein') products = limitedRest.slice(0,46);
+      else products = [...amazonDirect, ...limitedRest].slice(0,46);
       renderProducts(products);
       if(!products.length && (!cj.ok || !shein.ok || !alibaba.ok || !amazon.ok)){
         const msg = providerSel === 'alibaba'

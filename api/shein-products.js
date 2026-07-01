@@ -1,5 +1,5 @@
-// nexo™ – SHEIN Open Platform Product Search Bridge
-// Prioridad: API oficial SHEIN -> cache Supabase -> respuesta clara sin simular producto real.
+// nexo™ – SHEIN Open Platform Product Search API
+// Objetivo: SHEIN debe comportarse como CJ: solo productos reales con precio, imagen y carrito interno.
 import { cors, money, clean, sheinPost, findFirstArray, normalizeSheinProduct, SHEIN_APP_ID, SHEIN_OPEN_KEY_ID, SHEIN_SECRET_KEY } from './shein-utils.js';
 
 function parseRange(req){
@@ -14,16 +14,15 @@ function inRange(p, range){
   if(range.max && price>range.max) return false;
   return true;
 }
-function normalize(v){ return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
 function first(...vals){ for(const v of vals){ if(v!==undefined && v!==null && String(v).trim()) return String(v).trim(); } return ''; }
 function normalizeCacheProduct(row, idx){
   const raw=row.raw_data || row;
   const id=first(row.shein_product_id, raw.spuCode, raw.spu_code, raw.productId, raw.product_id, row.id, 'shein-'+idx);
   const sku=first(row.sku_code, raw.skuCode, raw.sku_code, raw.sku, id);
-  const name=first(row.title, raw.title, raw.productName, raw.product_name, raw.goodsName, 'SHEIN product');
-  const price=money(row.price ?? raw.price ?? raw.salePrice ?? raw.retailPrice ?? raw.suggestedRetailPrice ?? 0);
+  const name=first(row.title, raw.title, raw.productName, raw.product_name, raw.goodsName, raw.name, 'SHEIN product');
+  const price=money(row.price, raw.price, raw.salePrice, raw.retailPrice, raw.suggestedRetailPrice, raw.costPrice);
   const image=first(row.image_url, raw.imageUrl, raw.mainImage, raw.goodsImage, raw.pictureUrl, raw.imgUrl);
-  const url=first(row.product_url, raw.productUrl, raw.url, raw.goodsUrl, 'https://www.shein.com');
+  const url=first(row.product_url, raw.productUrl, raw.url, raw.goodsUrl, '');
   return {
     id:String(id).replace(/[^a-zA-Z0-9_-]/g,'_'), sheinProductId:id, sku,
     name, title:name, provider:'SHEIN', proveedor:'SHEIN', vendor:'SHEIN', providerLogo:'🛍️',
@@ -31,7 +30,7 @@ function normalizeCacheProduct(row, idx){
     brand:first(row.brand, raw.brandName, raw.brand, 'SHEIN'), image, sourceUrl:url, url, originalProviderUrl:url,
     stock:first(row.stock_quantity, raw.stock, raw.inventory, 'Verificar stock SHEIN'),
     shippingAmazon:0, cjShippingCost:0, vendorFee:0, cjHandlingFee:0,
-    source:'shein_open_platform_cache', features:'SHEIN Open Platform aprobado para nexo. Producto real desde cache/API.'
+    source:'shein_open_platform_cache', features:'Producto SHEIN real obtenido desde API/cache NEXO.'
   };
 }
 async function searchCache(q, range, size){
@@ -42,17 +41,33 @@ async function searchCache(q, range, size){
     return Array.isArray(rows) ? rows.map(normalizeCacheProduct).filter(p=>inRange(p, range)).sort((a,b)=>money(a.price)-money(b.price)) : [];
   }catch(e){ return []; }
 }
+async function getStoredCreds(){
+  let openKeyId = SHEIN_OPEN_KEY_ID;
+  let secretKey = SHEIN_SECRET_KEY;
+  try{
+    const { sb } = await import('./_nexo-supabase.js');
+    const rows = await sb(`shein_api_tokens?select=*&app_id=eq.${encodeURIComponent(SHEIN_APP_ID)}&token_status=in.(received,active)&order=created_at.desc&limit=1`, {method:'GET'});
+    if(Array.isArray(rows) && rows[0]){
+      openKeyId = openKeyId || rows[0].open_key_id || '';
+      secretKey = secretKey || rows[0].secret_key_encrypted || '';
+    }
+  }catch(e){}
+  return {openKeyId, secretKey};
+}
 async function logApi(endpoint, status, raw){
   try{
     const { sb } = await import('./_nexo-supabase.js');
-    await sb('shein_api_logs', {method:'POST', body:JSON.stringify({endpoint,method:'POST',request_status:status?'ok':'error',response_code:String(raw?.status||''),response_message:raw?.data?.msg||raw?.data?.message||'',raw_response:raw?.data||raw||null})});
+    await sb('shein_api_logs', {method:'POST', body:JSON.stringify({endpoint,method:'POST',request_status:status?'ok':'error',response_code:String(raw?.status||''),response_message:raw?.data?.msg||raw?.data?.message||raw?.data?.error||'',raw_response:raw?.data||raw||null})});
   }catch(e){}
 }
-
 async function searchOfficialApi(q, range, size, catSel){
-  if(!SHEIN_OPEN_KEY_ID || !SHEIN_SECRET_KEY) return {ok:false, missingCredentials:true, products:[], message:'Faltan SHEIN_OPEN_KEY_ID y SHEIN_SECRET_KEY en Vercel.'};
+  const creds = await getStoredCreds();
+  if(!creds.openKeyId || !creds.secretKey){
+    return {ok:false, missingCredentials:true, products:[], message:'Faltan credenciales SHEIN openKeyId/secretKey. Complete autorización de tienda o configure variables en Vercel.'};
+  }
   const bodies = [
     {keyword:q, pageNum:1, pageSize:size, language:'en'},
+    {keyword:q, page:1, pageSize:size, language:'en'},
     {searchText:q, pageNum:1, pageSize:size, language:'en'},
     {productName:q, pageNum:1, pageSize:size, language:'en'},
     {query:q, page:1, pageSize:size, language:'en'}
@@ -65,7 +80,7 @@ async function searchOfficialApi(q, range, size, catSel){
   for(const path of paths){
     for(const payload of bodies){
       if(catSel) payload.category = catSel;
-      const raw = await sheinPost(path, payload);
+      const raw = await sheinPost(path, payload, {secret:creds.secretKey, openKeyId:creds.openKeyId});
       last = {path, raw};
       await logApi(path, raw.ok, raw);
       const arr = findFirstArray(raw.data);
@@ -73,7 +88,7 @@ async function searchOfficialApi(q, range, size, catSel){
       if(raw.ok && products.length) return {ok:true, source:'api', endpoint:path, products:products.slice(0,size), raw:raw.data};
     }
   }
-  return {ok:false, products:[], message:last?.raw?.data?.msg || last?.raw?.data?.message || 'SHEIN API no devolvió productos para este término/rango.', last};
+  return {ok:false, products:[], message:last?.raw?.data?.msg || last?.raw?.data?.message || last?.raw?.data?.error || 'SHEIN API no devolvió productos reales con precio para este término/rango.', last};
 }
 
 export default async function handler(req,res){
@@ -93,13 +108,12 @@ export default async function handler(req,res){
 
   const cached=await searchCache(q, range, size);
   return res.status(200).json({
-    ok:true,
+    ok:cached.length>0,
     provider:'SHEIN',
-    source: cached.length ? 'shein_open_platform_cache' : 'shein_open_platform_pending_credentials',
+    source: cached.length ? 'shein_open_platform_cache' : 'shein_open_platform_no_real_products',
     products:cached.slice(0,size),
     count:cached.length,
-    apiReady:Boolean(SHEIN_OPEN_KEY_ID && SHEIN_SECRET_KEY),
     appId:SHEIN_APP_ID,
-    message: cached.length ? 'Productos SHEIN obtenidos desde cache/API.' : (official.message || 'SHEIN Open Platform aprobada; falta credencial openKey/secretKey o productos en cache.')
+    message: cached.length ? 'Productos SHEIN obtenidos desde cache.' : (official.message || 'SHEIN no devolvió productos reales todavía.')
   });
 }
