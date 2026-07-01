@@ -5,9 +5,9 @@
 import crypto from 'crypto';
 
 export const SHEIN_APP_ID = process.env.SHEIN_APP_ID || '15C6DD3A848008B5F87E4C28F4E23';
-export const SHEIN_API_HOST = (process.env.SHEIN_API_HOST || 'https://openapi.sheincorp.com').replace(/\/$/, '');
+export const SHEIN_API_HOST = (process.env.SHEIN_API_HOST || 'https://openapi-sem.sheincorp.com').replace(/\/$/, '');
 export const SHEIN_AUTH_HOST = (process.env.SHEIN_AUTH_HOST || 'https://openapi-sem.sheincorp.com').replace(/\/$/, '');
-export const SHEIN_APP_SECRET_KEY = process.env.SHEIN_APP_SECRET_KEY || process.env.SHEIN_APP_SECRET || '';
+export const SHEIN_APP_SECRET_KEY = process.env.SHEIN_APP_SECRET_KEY || process.env.SHEIN_APP_SECRET || process.env.SHEIN_APPSECRET || process.env.SHEIN_APP_SECRETKEY || '';
 export const SHEIN_OPEN_KEY_ID = process.env.SHEIN_OPEN_KEY_ID || process.env.SHEIN_OPENKEYID || '';
 export const SHEIN_SECRET_KEY = process.env.SHEIN_SECRET_KEY || process.env.SHEIN_SECRETKEY || '';
 

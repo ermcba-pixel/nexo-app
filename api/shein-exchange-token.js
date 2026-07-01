@@ -17,7 +17,7 @@ export default async function handler(req,res){
   const tempToken = body.tempToken || body.temp_token || body.token || '';
   if(!SHEIN_APP_SECRET_KEY) return res.status(400).json({ok:false,error:'missing_SHEIN_APP_SECRET_KEY',message:'Falta SHEIN_APP_SECRET_KEY en Vercel. Obtenerlo desde Test Store / credenciales de la aplicación SHEIN.'});
   if(!tempToken) return res.status(400).json({ok:false,error:'missing_tempToken'});
-  const result = await sheinPost('/open-api/auth/get-by-token', {tempToken}, {secret:SHEIN_APP_SECRET_KEY, openKeyId:'', host:process.env.SHEIN_API_HOST || 'https://openapi.sheincorp.com'});
+  const result = await sheinPost('/open-api/auth/get-by-token', {tempToken}, {secret:SHEIN_APP_SECRET_KEY, openKeyId:'', host:process.env.SHEIN_API_HOST || 'https://openapi-sem.sheincorp.com'});
   const info = result.data?.info || result.data?.data || result.data?.result || result.data || {};
   const row = {
     app_id:SHEIN_APP_ID,
